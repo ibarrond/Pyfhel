@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+**/PyCtxt.c
+**/PyHE.cpp
+**/PyPtxt.c
+
