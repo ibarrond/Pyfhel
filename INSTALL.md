@@ -9,23 +9,31 @@
 
         * uncompress and cd into the directory:
 
-	     >  `bzip2 -d gmp-X.Y.Z.tar.bz2`
-         >  `tar xvf gmp-X.Y.Z.tar`
-         >  `cd gmp-6.1.2`
+	     > `bzip2 -d gmp-X.Y.Z.tar.bz2`
+         > `tar xvf gmp-X.Y.Z.tar`
+         > `cd gmp-X.Y.Z`
 
         * Install it by running on the command line in this order:
-         > ./configure
-         > make
-         > sudo make install
-             
-   * NTL: Number Theory Library (needs GMP)
+         
+         > `./configure` -> If you get error '...: No usable m4 in $PATH ...', install m4 by running `sudo apt-get install m4`
+         > `make`
+         > `sudo make install`
 
-        * Download NTL from http://www.shoup.net/ntl/download.html
+   * NTL: Number Theory Library
+
+        * Download NTL from http://www.shoup.net/ntl/download.html. I chose the .tar.gz:
+
+         > `ntl-X.Y.Z.tar.gz`
+
         * uncompress and cd into the directory ntl-XXX/src
+
+         > `tar xvf ntl-X.Y.Z.tar.gz`
+         > `cd ntl-X.Y.Z/src`
+
         * On the command line run, in this order:
-             > ./configure NTL_GMP_LIP=on SHARED=on
-             
-             > make
+
+             > `./configure NTL_GMP_LIP=on SHARED=on`
+             > `make`
              
              > sudo make install
         * We need to create a symbolic link for the shared library. Run:
