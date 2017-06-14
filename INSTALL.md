@@ -1,4 +1,4 @@
-## Instalation of Afhel
+# Instalation of Afhel
 1. **INSTALL HELIB DEPENDENCIES**
 
    In order to build HElib, you need to have GMP and NTL libraries installed.
@@ -73,6 +73,7 @@
 
        > make
 
+# Instalation of Pyfhel
 
 5. **INSTALL CYTHON**
 
