@@ -1,5 +1,5 @@
 #include <cstddef>
-#include <sys/time.h>
+#include "utils/Timer.h"
 #include "FHE.h"
 #include "EncryptedArray.h"
 #include <NTL/ZZX.h>
@@ -8,25 +8,6 @@
 #include <omp.h>
 
 #define VEC_SIZE 1000
-
-// Simple class to measure time for each method
-class Timer
-{
-public:
-    void start() { m_start = my_clock(); }
-    void stop() { m_stop = my_clock(); }
-    double elapsed_time() const {
-        return m_stop - m_start;
-    }
-
-private:
-    double m_start, m_stop;
-    double my_clock() const {
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-        return tv.tv_sec + tv.tv_usec * 1e-6;
-    }
-};
 
 void noPackingSum(long u[], long v[], long result[], FHESecKey sk, FHEPubKey pk)
 {
@@ -125,7 +106,7 @@ void packingSubfieldSum(long u[], long v[], long result[], FHEPubKey pk, FHESecK
     tPackingSubfieldEncryption.start();
     // Creates a helper object based on the context
     EncryptedArray ea(context, context.alMod.getFactorsOverZZ()[0]); 
-
+    std::cout << "ea.size(): "  << ea.size() << endl;
     // The vectors should have the same size as the EncryptedArray (ea.size),
     // so fill the other positions with 0 which won't change the result
     std::vector<long> U(u, u + VEC_SIZE);
@@ -170,8 +151,8 @@ int main(int argc, char **argv)
 {
     /*** INITIALIZATION ***/
     long m = 0;                   // Specific modulus
-    long p = 257;                 // Plaintext base [default=2], should be a prime number
-    long r = 3;                   // Lifting [default=1]
+    long p = 4294967311;                   // Plaintext base [default=2], should be a prime number
+    long r = 1;                   // Lifting [default=1]
     long L = 10;                  // Number of levels in the modulus chain [default=heuristic]
     long c = 2;                   // Number of columns in key-switching matrix [default=2]
     long w = 64;                  // Hamming weight of secret key

@@ -1,7 +1,7 @@
-from PyHE import PyHE
+from Pyfhel import Pyfhel
 from PyPtxt import PyPtxt
 from PyCtxt import PyCtxt
-HE = PyHE()
+HE = Pyfhel()
 KEYGEN_PARAMS={ "p":257,      "r":1,
                 "d":1,        "c":2,
                 "sec":80,     "w":64,

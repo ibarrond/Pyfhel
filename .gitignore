@@ -5,6 +5,7 @@
 *.slo
 *.lo
 *.o
+**.o
 *.obj
 
 # Precompiled Headers
@@ -24,14 +25,16 @@
 *.lai
 *.la
 *.a
+**.a
 *.lib
 
 # Executables
 *.exe
 *.out
 *.app
+*_x
 
 **/PyCtxt.c
-**/PyHE.cpp
+**/Pyfhel.cpp
 **/PyPtxt.c
 

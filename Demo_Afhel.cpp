@@ -5,7 +5,7 @@
 #include "EncryptedArray.h"
 #include <NTL/lzz_pXFactoring.h>
 
-#include "Afhel.h"
+#include "Afhel/Afhel.h"
 
 #include <cassert>
 #include <cstdio>
@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     //   - 257 (Byte)
     //   - 65537 (Word)
     //   - 4294967311 (Long) 
-    long p = 257;
+    long p = 2;
     long r = 1;
     long d = 1;
     long c = 2;

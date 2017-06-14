@@ -7,13 +7,12 @@ os.environ["CC"] = "x86_64-linux-gnu-g++"
 os.environ["CXX"] = "x86_64-linux-gnu-g++"
 
 HELIB_BASE = "../HElib/src"
-SRC_BASE = "./src/"
 
 ext_modules = [
     Extension(
-        name="PyHE",
-        sources=[SRC_BASE + "PyHE.pyx",
-                "../Afhel.cpp",
+        name="Pyfhel",
+        sources=["Pyfhel.pyx",
+                "../Afhel/Afhel.cpp",
                 HELIB_BASE + "/BenesNetwork.cpp",
                 HELIB_BASE + "/blockMatmul1D.cpp",
                 HELIB_BASE + "/blockMatmul.cpp",
@@ -64,7 +63,7 @@ ext_modules = [
     ),
     Extension(
         name="PyPtxt",
-        sources=[SRC_BASE + "PyPtxt.py"],
+        sources=["PyPtxt.py"],
         include_dirs=[],
         libraries=[],
         library_dirs=[],
@@ -72,7 +71,7 @@ ext_modules = [
     ),
     Extension(
         name="PyCtxt",
-        sources=[SRC_BASE + "PyCtxt.py"],
+        sources=["PyCtxt.py"],
         include_dirs=[],
         libraries=[],
         library_dirs=[],
@@ -81,7 +80,7 @@ ext_modules = [
 ]
 
 setup(
-    name = 'PyHE',
+    name = 'Pyfhel',
     cmdclass = {'build_ext': build_ext},
     ext_modules = ext_modules,
 )

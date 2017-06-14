@@ -10,11 +10,11 @@ using namespace std;
 int main(int argc, char **argv)
 {
     /* 
-        TITLE: DEMO OF HELIB USAGE
+     *  TITLE: DEMO OF HELIB USAGE
         Description: This is a DEMO created for the PrivacyForBigData project in EURECOM.
         Authors: Luca BENEDETTO, Alberto IBARRONDO
         Date: 04/05/2017
-        License: MIT free software
+        License: 
     */
     
     cout << "> DEMO OF HELIB USAGE, PrivacyForBigData project in EURECOM" << endl;
@@ -30,8 +30,8 @@ int main(int argc, char **argv)
     long w=64;      // w - Hamming weight of secret key
     
     // Plaintext space parameters
-    long r=1;		// r - lifting in the space
-    long p=65537;   // p - plaintext base -> 2 is binary {0,1}; 257 is a byte
+    long r=32;		// r - lifting in the space
+    long p=2;       // p - plaintext base -> 2 is binary {0,1}; 257 is a byte
                     // 	* Computations will be 'modulo p'. It MUST be prime
     long m=0;		// m - specific modulus, to be calculated below using FindM
     long s=0;       // s - minimum number of slots
@@ -40,7 +40,9 @@ int main(int argc, char **argv)
     FHEcontext context(m, p, r);        // Initialize context
     buildModChain(context, L, c);       // Modify context, adding primes to modulus chain
     ZZX G = context.alMod.getFactorsOverZZ()[0]; // Creates polynomial used to encrypt
-    
+    EncryptedArray ea(context, G);
+
+
     cout << "    1. SET UP CONTEXT -> context"<<endl;
     cout << "      L = "<<L<<" (Levels, # of primes in modulus chain)"<<endl;
     cout << "      c = "<<c<<" (Columns in key switching matrix)"<<endl;
@@ -50,7 +52,7 @@ int main(int argc, char **argv)
     cout << "      r = "<<r<<" (Lifting in the space)"<<endl;
     cout << "      p = "<<p<<" (Plaintext Base)"<<endl;
     cout << "      m = "<<m<<" (Specific modulus calculated with FindM)"<<endl;
-
+    cout <<
 
 
     // ----------------- KEY GENERATION -------------------
@@ -72,7 +74,7 @@ int main(int argc, char **argv)
 
     //   ......... Defining plaintexts .........
     long plaintext1 = 5;           // First plaintext
-    long plaintext2 = 100;           // Second plaintext
+    long plaintext2 = 100;         // Second plaintext
     cout << "      Defined The Two plaintexts (type long): 5, 100"<<endl;
 
     //   ......... Defining Cyphertexts.........
