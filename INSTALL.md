@@ -31,7 +31,9 @@
         * Download NTL from http://www.shoup.net/ntl/download.html. I chose the .tar.gz:
 
          > ntl-X.Y.Z.tar.gz
-
+         
+        > If you had NTL installed before and you have problems with Pyfhel installation, try to download the latest version from the website and install it again.
+        
         * uncompress and cd into the directory ntl-XXX/src
 
          > tar xvf ntl-X.Y.Z.tar.gz
