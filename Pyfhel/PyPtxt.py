@@ -157,8 +157,8 @@ class PyPtxt:
 
  
     # SCALAR PRODUCT:
-    # '@' operator
-    def __matmul__(self, other):
+    # '%' operator
+    def __mod__(self, other):
         if not isinstance(other, (PyPtxt, int)):
             raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or "
                             "int instead of " + str(type(other)))
@@ -172,8 +172,8 @@ class PyPtxt:
             del constPtxt
         return res
     
-    # '@=' operator
-    def __imatmul__(self, other):
+    # '%=' operator
+    def __imod__(self, other):
         if not isinstance(other, (PyPtxt, int)):
             raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or "
                             "int instead of " + str(type(other)))

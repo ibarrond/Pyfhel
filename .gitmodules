@@ -1,0 +1,6 @@
+[submodule "helib"]
+	path = HElib
+	url = https://github.com/shaih/helib
+[submodule "HElib"]
+	path = HElib
+	url = https://github.com/shaih/helib.git

@@ -31,7 +31,7 @@ from PyPtxt import PyPtxt
 
 class PyCtxt:
     
-    # INITIALIZATION -> 
+    # INITIALIZATION 
     def __init__(self, pyfhel, length):
         self.__ids = []
         if not isinstance(pyfhel, Pyfhel):
@@ -73,8 +73,7 @@ class PyCtxt:
             newCtxt += other
         else:
             constCtxt = self.__pyfhel.encrypt(          # Create new PyCtxt from other if int
-                PyPtxt([other for _ in range(self.__length)],
-                       self.__pyfhel))
+                PyPtxt([other for _ in range(self.__length)],self.__pyfhel))
             newCtxt += constCtxt                        # Perform addition like in '+=' operator
             del constCtxt
         return newCtxt
@@ -167,24 +166,24 @@ class PyCtxt:
 
 
     # SCALAR PRODUCT
-    # '@' operator - scalarProd
-    def __matmul__(self, other):
+    # '%' operator - scalarProd
+    def __mod__(self, other):
         if not isinstance(other, (PyCtxt, int)):
             raise TypeError("PyCtxt '*' error: lhs must be of type PyCtxt or "
                             "int instead of " + str(type(other)))
         newCtxt = self.__pyfhel.set(self)
         if isinstance(other, PyCtxt):
-            newCtxt @= other
+            newCtxt %= other
         else:
             constCtxt = self.__pyfhel.encrypt(
                 PyPtxt([other for _ in range(self.__length)],
                        self.__pyfhel))
-            newCtxt @= constCtxt
+            newCtxt %= constCtxt
             del constCtxt
         return newCtxt
 
-    # '@=' operator
-    def __imatmul__(self, other):
+    # '%=' operator
+    def __imod__(self, other):
         if not isinstance(other, (PyCtxt, int)):
             raise TypeError("PyCtxt '*=' error: lhs must be of type PyCtxt "
                             "or int instead of type " + str(type(other)))

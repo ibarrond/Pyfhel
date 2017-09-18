@@ -34,7 +34,12 @@
 *.app
 *_x
 
-**/PyCtxt.c
-**/Pyfhel.cpp
-**/PyPtxt.c
+# Pyfhel building
+Pyfhel/*.pyc
+Pyfhel/*.cpp
+Pyfhel/*.c
+Pyfhel/build
+Pyfhel/build/*
+Pyfhel/src
+Pyfhel/src/*
 

@@ -42,10 +42,12 @@ cdef extern from "../../Afhel/Afhel.h":
         string set(string key) except +
         string encrypt(vector[long] ptxt_vect) except +
         vector[long] decrypt(string key) except +
+
         void add(string k1, string k2, bool negative) except +
         void mult(string k1, string other_key) except +
         void scalarProd(string k1, string k2) except +
         void square(string k1) except +
+
         long numSlots() except +
         void erase(string key) except +
 
@@ -60,29 +62,33 @@ cdef class Pyfhel:
 
 
     # INIT & DESTRUCT
-    def __cinit__(self):        self.afhel = new Afhel()
-    def __dealloc__(self):      del self.afhel
+    def __cinit__(self):
+        self.afhel = new Afhel()
+    def __dealloc__(self):
+        del self.afhel
 
 
     # KEY GENERATION using the Afhel::keyGen for simplicity
     def keyGen(self, run_params):
         cdef vector[long] gens;
         cdef vector[long] ords;
-        for k in run_params["gens"]:   gens.push_back(k)
-        for k in run_params["ords"]:   ords.push_back(k)
+        for k in run_params["gens"]:
+            gens.push_back(k)
+        for k in run_params["ords"]:
+            ords.push_back(k)
         self.afhel.keyGen( run_params["p"],  run_params["r"],
                            run_params["c"],  run_params["d"],
                            run_params["sec"],run_params["w"],
                            run_params["L"],  run_params["m"],
                            run_params["R"],  run_params["s"],
                              gens, ords)
-        self.modulus = int(pow(run_params["p"], run_params["r"]))
+        self.modulus = long(pow(run_params["p"], run_params["r"]))
     
 
     # ENCRYPTION encrypt a PyPtxt object into a PyCtxt object
     def encrypt(self, ptxt, fill=0):
         if not isinstance(ptxt, PyPtxt):
-            raise TypeError("encrypt error ptxt wasn't of type PyPtxt")
+            raise TypeError("Pyfhel encrypt error: ptxt isnt't type PyPtxt")
         cdef vector[long] ptxtVect;
         numSlots = self.numSlots()
         if numSlots < ptxt.numSlots():
@@ -93,8 +99,10 @@ cdef class Pyfhel:
             ptxtVect.clear()
             eltLen = len(elt)
             for k in range(numSlots):       # fills the list with "fill" up to numSlots
-                if k < eltLen:  ptxtVect.push_back(elt[k])
-                else:           ptxtVect.push_back(fill)
+                if k < eltLen:
+                    ptxtVect.push_back(elt[k])
+                else:
+                    ptxtVect.push_back(fill)
                                             # encrypts the list and appends the key
             ctxt.appendID(self.afhel.encrypt(ptxtVect))
         return ctxt                         # returns the PyCtxt with all the appended keys
@@ -198,8 +206,10 @@ cdef class Pyfhel:
     #-------------------------------------------------------------------------#
 
     # AUXILIARY FUNCTIONS
-    def numSlots(self):             return self.afhel.numSlots()
-    def getModulus(self):           return self.modulus
+    def numSlots(self):
+        return self.afhel.numSlots()
+    def getModulus(self):
+        return self.modulus
     def delete(self, ctxt):
         for i in ctxt.getIDs():
             self.afhel.erase(i)

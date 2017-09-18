@@ -1,4 +1,4 @@
-# Pyfhel & Afhel
+# Afhel & Pyfhel
 
 ## Afhel: Abstraction For HELib 
 Afhel is a library that creates an abstraction over the basic functionalities of HElib as a Homomorphic Encryption library, such as addition, multiplication, scalar product and such. The repository includes demos for helib, tests for different ways to implement helib's funcitonalities and a demo for Afhel.
@@ -11,8 +11,8 @@ Built on top of Afhel, Pyfhel is a python module that takes simplicity iven furt
 ## 1. Instalation
 Follow the instructions in the document 'INSTALL.md':
 
-- Installation of Afhel is up to step 4.
-- Installation of Pyfhel on top of Afhel involves steps 5 and 6.
+- Installation of Afhel is up to section 4.
+- Installation of Pyfhel on top of Afhel involves sections 5 and 6.
      
 
 
