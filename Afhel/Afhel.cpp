@@ -79,6 +79,9 @@ void Afhel::keyGen(long p, long r, long c, long w, long d, long sec,
         }
 
         // Context creation
+        global_m = m;
+        global_p = p;
+        global_r = r;
         context = new FHEcontext(m, p, r, gens, ords);  // Initialize context
         buildModChain(*context, L, c);                  // Add primes to modulus chain
         if(flagPrint){std::cout << "  - Created Context: " 
@@ -214,9 +217,11 @@ bool Afhel::restoreEnv(string fileName){
         fstream keyFile(fileName+".aenv", fstream::in);
         assert(keyFile.is_open());
 
-        readContextBase(keyFile, m1, p1, r1, gens, ords);   // Read m, p, r, gens, ords
-        context = new FHEcontext(m1, p1, r1, gens, ords);   // Prepare empty context object
-        secretKey = new FHESecKey(*context);                // Prepareempty FHESecKey object
+        readContextBase(keyFile, m1, p1, r1, gens, ords);   
+                                                            // Read m, p, r, gens, ords
+        context = new FHEcontext(m1, p1, r1, gens, ords);   
+                                                            // Prepare empty context object
+        secretKey = new FHESecKey(*context);                // Prepare empty FHESecKey object
         
         keyFile >> *context;                    // Read the rest of the context
         keyFile >> *secretKey;                  // Read Secret Key
@@ -224,6 +229,9 @@ bool Afhel::restoreEnv(string fileName){
         ea = new EncryptedArray(*context, G);   // Reconstruct ea using G
         publicKey = (FHEPubKey*) secretKey;     // Reconstruct Public Key from Secret Key
         nslots = ea->size();                    // Refill nslots
+        global_m = m1;
+        global_p = p1; 
+        global_r = r1;
     }
     catch(exception& e){
         res=0;
@@ -237,6 +245,10 @@ bool Afhel::restoreEnv(string fileName){
 long Afhel::numSlots() {
     return ea->size();
 }
+
+long Afhel::getM(){ return global_m; }
+long Afhel::getP(){ return global_p; }
+long Afhel::getR(){ return global_r; }
 
 string Afhel::store(Ctxt* ctxt) {
     struct timeval tp;

@@ -33,6 +33,8 @@ Afhel.a: $(OBJ)
 ./%_x: %.cpp $(AFHEL_ARCH)
 	$(CC) $(CFLAGS) -I$(HELIB_SRC) -o $@ $< $(AFHEL_ARCH) $(HELIB_ARCH) $(LDLIBS) $(UTILS)
 
+cleanexe:
+	-rm -f **_x **.aenv
 
 clean:
 	-rm -f *.o *_x *_x.exe *.a core.* $(HELIB_SRC)/*.a $(HELIB_SRC)/*.o $(AFHEL_DIR)/*.a $(AFHEL_DIR)/*.o

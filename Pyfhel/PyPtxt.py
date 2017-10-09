@@ -1,11 +1,11 @@
 #
 #   PyPtxt
 #   --------------------------------------------------------------------
-#   PYthon PlainTeXT is a part of Pyfhel. Pytxt implements the equivalent
+#   PYthon PlainTeXT is a part of Pyfhel. PyPtxt implements the equivalent
 #   to Ptxt class in Afhel (built on top of HElib) for plaintexts, while
 #   being able to hold several plaintexts in a list of lists and treat them 
 #   as if they were a single one.
-#   PyPtxt overrides +, -, * and @ with standard operations over its lists
+#   PyPtxt overrides +, -, * and * with standard operations over its lists
 #   --------------------------------------------------------------------
 #   Author: Alberto Ibarrondo
 #   Date: 14/06/2017  
@@ -29,23 +29,44 @@
 
 
 from Pyfhel import Pyfhel
+from operator import mod
+
 
 class PyPtxt:
 
     # INITIALIZATION -> Take a list or a list of lists and a Pyfhel object
-    def __init__(self, ptxt, pyfhel):
+    def __init__(self, ptxt, pyfhel, pSize=0):
         if not isinstance(ptxt, list):
             raise TypeError("pyPtxt init error: ptxt must be of type list")
         if not isinstance(pyfhel, Pyfhel):
             raise TypeError("pyPtxt init error: pyfhel must be of type Pyfhel")
-
-        from operator import mod
-        self.__ptxt = [mod(elt, pyfhel.getModulus()) for elt in ptxt]
         self.__pyfhel = pyfhel
-        self.__length = len(ptxt)
         self.__numSlots = pyfhel.numSlots()
+        self.__ptxt = []
+        self.__length = len(ptxt)
+        self.__ptxtList = []
         n = max(1, self.__numSlots)
-        self.__ptxtList = [ptxt[i:i + n] for i in range (0, self.__length, n)]
+
+        # Partitioning list in list of lists of pSize length each
+        if (pSize > 0):
+            nPart = len(ptxt)/pSize + int(mod(len(ptxt), pSize)>0)
+            zeroFill = mod(len(ptxt), pSize)
+            if (pSize > self.__numSlots):
+                raise ValueError("pSize cannot be bigger than numSlots: " + self.__numSlots)
+            
+            for i in range(0, nPart):     # Fill the List of lists
+                self.__ptxt.append(ptxt[ (i*pSize) : ((i+1)*pSize) ])    
+            if (zeroFill != 0):           # Filling with zeros the last list
+                [self.__ptxt[nPart-1].append(0) for zero in range(zeroFill, pSize)]
+
+        # Applying modulo operation to all the data
+        if (isinstance(ptxt[0], list)):
+            self.__ptxt = [[mod(elt, pyfhel.getModulus()) for elt in lst] for lst in self.__ptxt]
+            self.__datalength = len(ptxt[0])
+        else:
+            self.__ptxt = [mod(elt, pyfhel.getModulus()) for elt in ptxt]
+            self.__datalength = len(ptxt)
+            self.__ptxt = [ptxt[i:i + n] for i in range (0, self.__length, n)]
         return
 
     def numSlots(self):         return self.__numSlots

@@ -59,7 +59,11 @@ class Afhel{
         FHEPubKey *publicKey;                       // Public key of the public-secret key pair
         ZZX G;                                      // NTL Poly used to create ea
         EncryptedArray *ea;                         // Array used for encryption
+
         boost::unordered_map<string, Ctxt> ctxtMap; // Unordered map which stores the ciphertexts
+        
+        long global_m, global_p, global_r;
+
         /**
         * @brief Store the ciphertext in the unordered map and return key where 
         * it was stored
@@ -221,6 +225,14 @@ class Afhel{
          * @return number of plaintext slots
          */
         long numSlots();
+
+        /**
+         * @brief Getters for global parameters of the class
+         */
+        long getM();
+        long getP();
+        long getR();
+
 
         /**
         * @brief Create a new ciphertext and set it equal to the ciphertext 

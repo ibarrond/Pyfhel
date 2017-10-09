@@ -57,6 +57,9 @@ cdef extern from "../../Afhel/Afhel.h":
         bool restoreEnv(string fileName) except +
 
         long numSlots() except +
+        long getM() except +
+        long getP() except +
+        long getR() except +
         string set(string key) except +
         void erase(string key) except +
 
@@ -76,7 +79,8 @@ cdef class Pyfhel:
     def __dealloc__(self):
         del self.afhel
 
-
+    
+    # ----------------------------- CRYPTOGRAPHY ------------------------------
     # KEY GENERATION using the Afhel::keyGen for simplicity
     def keyGen(self, run_params):
         cdef vector[long] gens;
@@ -144,6 +148,7 @@ cdef class Pyfhel:
         return new_ctxt                     # Return duplicated PyCtxt
 
 
+    # ----------------------------- OPERATIONS --------------------------------
     # ADD two PyCtxt objects for each ID in both
     def add(self, ctxt1, ctxt2, neg=False):
         if not isinstance(ctxt1, PyCtxt):
@@ -312,18 +317,30 @@ cdef class Pyfhel:
             self.afhel.shift(ids[i], c)
 
 
-    #-------------------------------------------------------------------------#
 
-    # I/O - Not working properly yet
+    # ----------------------------------- I/O ---------------------------------
+
+    # SAVE ENVIRONMENT
+    # Saves the environment into a .aenv file
     def saveEnv(self, fileName):
-        pass
+        if not isinstance(fileName, str):
+            raise TypeError("Pyfhel saveEnv error: fileName must be of type str " + 
+                                "instead of type " + str(type(fileName)))
+        self.afhel.saveEnv(fileName)
+        return 
+
+
+    # RESTORE ENVIRONMENT
+    # Restores the environment from a .aenv file
     def restoreEnv(self, fileName):
-        pass
+        if not isinstance(fileName, str):
+            raise TypeError("Pyfhel saveEnv error: fileName must be of type str " +
+                    "instead of type " + str(type(fileName)))
+        self.afhel.restoreEnv(fileName)
+        self.modulus = long(pow(self.afhel.getP(), self.afhel.getR()))
+        return
 
-
-    #-------------------------------------------------------------------------#
-
-    # AUXILIARY FUNCTIONS
+    #--------------------------------- AUXILIARY ------------------------------
     def numSlots(self):
         return self.afhel.numSlots()
     def getModulus(self):

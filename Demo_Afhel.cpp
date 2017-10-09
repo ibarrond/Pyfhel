@@ -60,6 +60,8 @@ int main(int argc, char **argv)
 
     // Store & retrieve environment
     he.saveEnv(fileName);
+    std::cout << "Saved env with values: m=" << he.getM() <<
+        ", p=" << he.getP() << ", r=" << he.getR() << endl;
     std::cout << "END OF DEMO" << endl;
 };
 
