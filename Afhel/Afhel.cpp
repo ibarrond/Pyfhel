@@ -17,8 +17,8 @@
  *  Date: 14/06/2017  
  *  --------------------------------------------------------------------
  *  License: GNU GPL v3
- *
- *  Pyfhel is free software: you can redistribute it and/or modify
+ *  
+ *  Afhel is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -35,14 +35,19 @@
 
 
 #include <NTL/ZZ.h>
+#include <NTL/ZZX.h>
+//#include <NTL/Vector.h>
 #include <NTL/BasicThreadPool.h>
-#include "FHE.h"
-#include "timing.h"
-#include "EncryptedArray.h"
 #include <NTL/lzz_pXFactoring.h>
 #include <cassert>
 #include <cstdio>
+#include <fstream>
+#include <unistd.h>
 
+
+#include "FHE.h"
+#include "timing.h"
+#include "EncryptedArray.h"
 #include "Afhel.h"
 
 using namespace std;
@@ -50,98 +55,181 @@ using namespace std;
 Afhel::Afhel(){}
 Afhel::~Afhel(){}
 
+// ------------------------------ CRYPTOGRAPHY --------------------------------
+// KEY GENERATION
 void Afhel::keyGen(long p, long r, long c, long w, long d, long sec,
                        long L, long m, long R, long s,
                        const vector<long>& gens,
                        const vector<long>& ords){
-    if(flagPrint){std::cout << "Afhel::keyGen START" << endl;}
-    
-    // Initializing possible empty parameters for context
-    //  - L -> Heuristic computation
-    if(L==-1){
-        L=3*R+3;
-        if(p>2 || r>1){
-             L += R * 2*ceil(log((double)p)*r*3)/(log(2.0)*FHE_p2Size) +1;
+        if(flagPrint){std::cout << "Afhel::keyGen START" << endl;}
+        
+        // Initializing possible empty parameters for context
+        //  - L -> Heuristic computation
+        if(L==-1){
+            L=3*R+3;
+            if(p>2 || r>1){
+                 L += R * 2*ceil(log((double)p)*r*3)/(log(2.0)*FHE_p2Size) +1;
+            }
+            if(flagPrint){std::cout << "  - calculated L: " << L <<endl;}
         }
-        if(flagPrint){std::cout << "  - calculated L: " << L <<endl;}
-    }
-    //  - m -> use HElib method FindM with other parameters
-    if(m==-1){
-        m = FindM(sec, L, c, p, d, s, 0, 0);
-        if(flagPrint){std::cout << "  - Calculated m: " << m <<endl;}
-    }
+        //  - m -> use HElib method FindM with other parameters
+        if(m==-1){
+            m = FindM(sec, L, c, p, d, s, 0, 0);
+            if(flagPrint){std::cout << "  - Calculated m: " << m <<endl;}
+        }
 
-    // Context creation
-    context = new FHEcontext(m, p, r, gens, ords);  // Initialize context
-    buildModChain(*context, L, c);                  // Add primes to modulus chain
-    if(flagPrint){std::cout << "  - Created Context: " 
-        << "p="   << p        << ", r=" << r
-        << ", d=" << d        << ", c=" << c
-        << ", sec=" << sec    << ", w=" << w
-        << ", L=" << L        << ", m=" << m
-        << ", gens=" << gens  << ", ords=" << ords <<  endl;}
+        // Context creation
+        context = new FHEcontext(m, p, r, gens, ords);  // Initialize context
+        buildModChain(*context, L, c);                  // Add primes to modulus chain
+        if(flagPrint){std::cout << "  - Created Context: " 
+            << "p="   << p        << ", r=" << r
+            << ", d=" << d        << ", c=" << c
+            << ", sec=" << sec    << ", w=" << w
+            << ", L=" << L        << ", m=" << m
+            << ", gens=" << gens  << ", ords=" << ords <<  endl;}
 
-    // ZZX Polynomial creation
-    ZZX G;
-    if (d == 0){  G = context->alMod.getFactorsOverZZ()[0];}
-    else       {  G = makeIrredPoly(p, d);}
-    if(flagPrint){std::cout << "  - Created ZZX poly from NTL lib" <<endl;}
+        // ZZX Polynomial creation
+        ZZX G;
+        if (d == 0){  G = context->alMod.getFactorsOverZZ()[0];}
+        else       {  G = makeIrredPoly(p, d);}
+        if(flagPrint){std::cout << "  - Created ZZX poly from NTL lib" <<endl;}
 
-    // Secret/Public key pair creation
-    secretKey = new FHESecKey(*context);            // Initialize object
-    publicKey = (FHEPubKey*) secretKey;             // Upcast: FHESecKey to FHEPubKey
-    secretKey->GenSecKey(w);                        // Hamming-weight-w secret key
-    if(flagPrint){std::cout << "  - Created Public/Private Key Pair" << endl;} 
+        // Secret/Public key pair creation
+        secretKey = new FHESecKey(*context);            // Initialize object
+        publicKey = (FHEPubKey*) secretKey;             // Upcast: FHESecKey to FHEPubKey
+        secretKey->GenSecKey(w);                        // Hamming-weight-w secret key
+        if(flagPrint){std::cout << "  - Created Public/Private Key Pair" << endl;} 
 
-    // Additional initializations
-    addSome1DMatrices(*secretKey);                  // Key-switch matrices for relin.
-    ea = new EncryptedArray(*context, G);           // Object for packing in subfields
-    nslots = ea->size();
+        // Additional initializations
+        addSome1DMatrices(*secretKey);                  // Key-switch matrices for relin.
+        ea = new EncryptedArray(*context, G);           // Object for packing in subfields
+        nslots = ea->size();
 
 
-    if(flagPrint){std::cout << "Afhel::keyGen COMPLETED" << endl;}
+        if(flagPrint){std::cout << "Afhel::keyGen COMPLETED" << endl;}
 }
 
+// ENCRYPTION
 string Afhel::encrypt(vector<long> plaintext) {
-    Ctxt cyphertext(*publicKey);                    // Empty cyphertext object
-    //TODO: create a vector of size nddSlots and fill it first with values from plaintext, then with zeros
-    ea->encrypt(cyphertext, *publicKey, plaintext); // Encrypt plaintext
-    string key = store(&cyphertext);
-    if(flagPrint){
-        std::cout << "  Afhel::encrypt({ID" << key << "}[" << plaintext <<  "])" << endl;
-    }
-    return key;
+        Ctxt cyphertext(*publicKey);                    // Empty cyphertext object
+        //TODO: create a vector of size nddSlots and fill it first with values from plaintext, then with zeros
+        ea->encrypt(cyphertext, *publicKey, plaintext); // Encrypt plaintext
+        string id1 = store(&cyphertext);
+        if(flagPrint){
+            std::cout << "  Afhel::encrypt({ID" << id1 << "}[" << plaintext <<  "])" << endl;
+        }
+        return id1;
 }
 
-vector<long> Afhel::decrypt(string key) {
-    vector<long> res(nslots, 0);                    // Empty vector of values
-    ea->decrypt(ctxtMap.at(key), *secretKey, res);  // Decrypt cyphertext
-    if(flagPrint){
-        std::cout << "  Afhel::decrypt({ID" << key << "}[" << res << "])" << endl;
+// DECRYPTION
+vector<long> Afhel::decrypt(string id1) {
+        vector<long> res(nslots, 0);                    // Empty vector of values
+        ea->decrypt(ctxtMap.at(id1), *secretKey, res);  // Decrypt cyphertext
+        if(flagPrint){
+            std::cout << "  Afhel::decrypt({ID" << id1 << "}[" << res << "])" << endl;
+        }
+        return res;
+}
+
+
+// ---------------------------- OPERATIONS ------------------------------------
+// ADDITION
+void Afhel::add(string id1, string id2, bool negative){
+        ctxtMap.at(id1).addCtxt(ctxtMap.at(id2), negative);
+}
+
+// MULTIPLICATION
+void Afhel::mult(string id1, string id2){
+        ctxtMap.at(id1).multiplyBy(ctxtMap.at(id2));
+}
+
+// MULTIPLICATION BY 2
+void Afhel::mult3(string id1, string id2, string id3){
+        ctxtMap.at(id1).multiplyBy2(ctxtMap.at(id2), ctxtMap.at(id3));
+}
+
+// SCALAR PRODUCT
+void Afhel::scalarProd(string id1, string id2, int partitionSize){
+        ctxtMap.at(id1).multiplyBy(ctxtMap.at(id2));
+        totalSums(*ea, ctxtMap.at(id1));
+}
+
+// SQUARE
+void Afhel::square(string id1){
+        ctxtMap.at(id1).square();
+}
+
+// CUBE
+void Afhel::cube(string id1){
+        ctxtMap.at(id1).cube();
+}
+
+// NEGATE
+void Afhel::negate(string id1){
+        ctxtMap.at(id1).negate();
+}
+
+// COMPARE EQUALS
+bool Afhel::equalsTo(string id1, string id2, bool comparePkeys){
+        return ctxtMap.at(id1).equalsTo(ctxtMap.at(id2), comparePkeys);
+}
+
+// ROTATE
+void Afhel::rotate(string id1, long c){
+        ea->rotate(ctxtMap.at(id1), c);
+}
+
+// SHIFT
+void Afhel::shift(string id1, long c){
+        ea->shift(ctxtMap.at(id1), c);
+}
+
+
+// ------------------------------------- I/O ----------------------------------
+// SAVE ENVIRONMENT
+bool Afhel::saveEnv(string fileName){
+    bool res=1;
+    try{
+        fstream keyFile(fileName, fstream::out|fstream::trunc);
+        assert(keyFile.is_open());
+        writeContextBase(keyFile, *context);
+        keyFile << *context << endl;       
+        keyFile << *secretKey << endl;
+        keyFile.close();
+    }
+    catch(exception& e){
+        res=0;
     }
     return res;
 }
 
-void Afhel::add(string k1, string k2, bool negative){
-    ctxtMap.at(k1).addCtxt(ctxtMap.at(k2), negative);
-    if(flagPrint){ std::cout << "  Afhel::add {ID" << k1 << "} + {ID" << k2 << "}" << endl;}
+// RESTORE ENVIRONMENT
+bool Afhel::restoreEnv(string fileName){
+    bool res=1;
+    try{
+        fstream keyFile(fileName, fstream::in);
+        unsigned long m1, p1, r1;
+        vector<long> gens, ords;
+        readContextBase(keyFile, m1, p1, r1, gens, ords);
+        FHEcontext tmpContext(m1, p1, r1, gens, ords);
+        FHESecKey tmpSecretKey(tmpContext);
+        keyFile >> tmpContext;
+        keyFile >> tmpSecretKey;
+        context = &tmpContext;
+        secretKey = &tmpSecretKey;
+        ZZX G = context->alMod.getFactorsOverZZ()[0];
+        ea = new EncryptedArray(*context, G);
+        publicKey = (FHEPubKey*) secretKey;   // Upcast: FHESecKey to FHEPubKey
+        nslots = ea->size();                  // Refill nslots
+    }
+    catch(exception& e){
+        res=0;
+    }
+    return res;
 }
 
-void Afhel::mult(string k1, string k2){
-    ctxtMap.at(k1).multiplyBy(ctxtMap.at(k2));
-    if(flagPrint){ std::cout << "  Afhel::mult {ID" << k1 << "} * {ID" << k2 << "}" <<endl;}
-}
 
-void Afhel::scalarProd(string k1, string k2){
-    ctxtMap.at(k1).multiplyBy(ctxtMap.at(k2));
-    totalSums(*ea, ctxtMap.at(k1));
-    if(flagPrint){ std::cout << "  Afhel::scalarProd {ID" << k1 << "} @ {ID" << k2 << "}" <<endl;}
-}
-
-void Afhel::square(string k1){
-    ctxtMap.at(k1).square();
-    if(flagPrint){ std::cout << "  Afhel::square {ID" << k1 << "}" << endl;}
-}
+// --------------------------------- AUXILIARY --------------------------------
 
 long Afhel::numSlots() {
     return ea->size();
@@ -151,30 +239,30 @@ string Afhel::store(Ctxt* ctxt) {
     struct timeval tp;
     gettimeofday(&tp, NULL);
     long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-    string key = boost::lexical_cast<string>(ms);
-    ctxtMap.insert(make_pair(key, *ctxt));
-    return key;
+    string id1 = boost::lexical_cast<string>(ms);
+    ctxtMap.insert(make_pair(id1, *ctxt));
+    return id1;
 }
 
-string Afhel::set(string key){
-    Ctxt ctxt = ctxtMap.at(key);
+string Afhel::set(string id1){
+    Ctxt ctxt = ctxtMap.at(id1);
     return store(&ctxt);
 }
 
-Ctxt Afhel::retrieve(string key) {
-    return ctxtMap.at(key);
+Ctxt Afhel::retrieve(string id1) {
+    return ctxtMap.at(id1);
 }
 
-void Afhel::replace(string key, Ctxt new_ctxt) {
-    boost::unordered_map<string, Ctxt>::const_iterator i = ctxtMap.find(key);
+void Afhel::replace(string id1, Ctxt new_ctxt) {
+    boost::unordered_map<string, Ctxt>::const_iterator i = ctxtMap.find(id1);
     if(i != ctxtMap.end()) {
-        ctxtMap.at(key) = new_ctxt;
+        ctxtMap.at(id1) = new_ctxt;
     }
 }
 
-void Afhel::erase(string key) {
-    if(ctxtMap.find(key) != ctxtMap.end()) {
-        ctxtMap.erase(key);
+void Afhel::erase(string id1) {
+    if(ctxtMap.find(id1) != ctxtMap.end()) {
+        ctxtMap.erase(id1);
     }
 }
 

@@ -98,7 +98,7 @@ In order to run any of the tests you should compile them first.
     * 65537 (Equivalent to Word) [The one we consider best choice]
     * 4294967311 (Equivalent to Long) -> It took a considerable amount of time (15 mins?) to setup its context, but on the other hand you can work without implementing any conversion.
 * The other parameters in keyGen (and setup context if using the originall HElib) can be played with. For didactic purposes, those parameters are:
-
+MISSING PARAMETER TABLE
 
 * The slowest sections of the whole process are, by far, the "Setup context" and "KeyGen". Declaration of the context the first time and reusage of the same context is a must! That's why it's strongly encouraged to use Pyfhel in an interactive Python environment: once defined, you can reuse that context for the rest of your tests! In comparison, running independent tests in C++/Python are heavily penalized by this (specially when you use higher values of the modulus p).
 * The library is supposed to automatically tell you if the noise level is too high to recover the right value and apply bootstrapping, but this is covered neitherby Afhel nor by Pyfhel.

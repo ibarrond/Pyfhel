@@ -28,6 +28,7 @@
 # Import the other modules from Pyfhel
 from Pyfhel import Pyfhel
 from PyPtxt import PyPtxt
+import numbers
 
 class PyCtxt:
     
@@ -196,6 +197,26 @@ class PyCtxt:
             self.__pyfhel.scalarProd(self, constCtxt)
             del constCtxt
         return self
+
+
+
+    # SHIFT
+    # 'lshift' operator
+    def __lshift__(self, c):
+        if not isinstance(c, numbers.Number):
+            raise TypeError("c '*' error: it must be of type number"
+                            "instead of " + str(type(c)))
+        self.__pyfhel.shift(self, c)
+        return self
+
+    # '<<=' operator
+    def __ilshift__(self, c):
+        if not isinstance(c, numbers.Number):
+            raise TypeError("c '*' error: it must be of type number"
+                            "instead of " + str(type(c)))
+        self.__pyfhel.shift(self,c)    
+        return self
+
 
 
 class PyCtxtLenError(Exception):

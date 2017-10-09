@@ -24,12 +24,13 @@ all: Afhel.a
 obj: $(OBJ)
 
 %.o: %.cpp $(HEADER)
-	$(CC) $(CFLAGS) -I$(HELIB_SRC) -c $< $(LDLIBS)
+	$(CC) $(CFLAGS) -I$(HELIB_SRC) -o$(OBJ) -c $< $(LDLIBS)
 
 Afhel.a: $(OBJ)
 	$(AR) $(ARFLAGS) $@ $(OBJ) $(HELIB_ARCH) $(HELIB_OBJ)
+	mv Afhel.a $(AFHEL_DIR)
 
-./%_x: %.cpp Afhel.a
+./%_x: %.cpp $(AFHEL_ARCH)
 	$(CC) $(CFLAGS) -I$(HELIB_SRC) -o $@ $< $(AFHEL_ARCH) $(HELIB_ARCH) $(LDLIBS) $(UTILS)
 
 

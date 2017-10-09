@@ -20,6 +20,7 @@ int main(int argc, char **argv)
     //   - 257 (Byte)
     //   - 65537 (Word)
     //   - 4294967311 (Long) 
+    /*
     long p = 2;
     long r = 1;
     long d = 1;
@@ -27,8 +28,10 @@ int main(int argc, char **argv)
     long sec = 80;
     long w = 64;
     long L = 10;
+    */
+    // Store & retrieve environment
+    he.restoreEnv(fileName);
 
-    he.keyGen(p, r, c, d, sec, w, L);
     vector<long> v1;
     vector<long> v2;
     for(int i=0; i<he.nslots; i++){v1.push_back(i);}
@@ -58,8 +61,6 @@ int main(int argc, char **argv)
     he.square(k1);
     vector<long> vRes4 = he.decrypt(k1);
 
-    // Store & retrieve environment
-    he.saveEnv(fileName);
     std::cout << "END OF DEMO" << endl;
 };
 

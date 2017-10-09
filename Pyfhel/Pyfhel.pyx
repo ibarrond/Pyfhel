@@ -39,16 +39,25 @@ cdef extern from "../../Afhel/Afhel.h":
             long L, long m, long R, long s,
             const vector[long]& gens,
             const vector[long]& ords) except +
-        string set(string key) except +
         string encrypt(vector[long] ptxt_vect) except +
-        vector[long] decrypt(string key) except +
+        vector[long] decrypt(string id1) except +
 
-        void add(string k1, string k2, bool negative) except +
-        void mult(string k1, string other_key) except +
-        void scalarProd(string k1, string k2) except +
-        void square(string k1) except +
+        void add(string id1, string id2, bool negative) except +
+        void mult(string id1, string id2) except +
+        void mult3(string id1, string id2, string id3) except +
+        void scalarProd(string id1, string id2, int partitionSize) except +
+        void square(string id1) except +
+        void cube(string id1) except +
+        void negate(string id1) except +
+        bool equalsTo(string id1, string id2, bool comparePkeys) except +
+        void rotate(string id1, long c) except +
+        void shift(string id1, long c) except +
+
+        bool saveEnv(string fileName) except +
+        bool restoreEnv(string fileName) except +
 
         long numSlots() except +
+        string set(string key) except +
         void erase(string key) except +
 
 # Import the Plaintext and Cyphertext classes for Python
@@ -172,8 +181,8 @@ cdef class Pyfhel:
             self.afhel.mult(ids1[i],ids2[i])
 
 
-    # SCALAR PRODuct betweentwo PyCtxt objects for each ID in both
-    def scalarProd(self, ctxt1, ctxt2):
+    # MULTIPLY 3 PyCtxt objects for each ID in both
+    def mult3(self, ctxt1, ctxt2, ctxt3):
         if not isinstance(ctxt1, PyCtxt):
             raise TypeError("Pyfhel multiplyBy error: ctxt1 must be of type PyCtxt "
                             "instead of type " + str(type(ctxt1)))
@@ -181,14 +190,42 @@ cdef class Pyfhel:
             raise TypeError("Pyfhel multiplyBy error: ctxt2 must be of "
                             "type PyCtxt instead of type " +
                             str(type(ctxt2)))
+        if not isinstance(ctxt3, PyCtxt):
+            raise TypeError("Pyfhel multiplyBy error: ctxt3 must be of "
+                            "type PyCtxt instead of type " +
+                            str(type(ctxt3)))    
+        ids1 = ctxt1.getIDs()
+        ids2 = ctxt2.getIDs()
+        ids3 = ctxt3.getIDs()
+        n_ids = len(ids1)
+        if n_ids != len(ids2):              # They must have the same # of IDs
+            raise PyCtxtLenError()
+        if n_ids != len(ids3):              # They must have the same # of IDs
+            raise PyCtxtLenError()
+        for i in range(n_ids):              # Use Afhel::mult to * each pair of Ctxts by IDs
+            self.afhel.mult3(ids1[i],ids2[i], ids3[i])
+
+
+
+
+    # SCALAR PRODuct between two PyCtxt objects for each ID in both
+    def scalarProd(self, ctxt1, ctxt2):
+        if not isinstance(ctxt1, PyCtxt):
+            raise TypeError("Pyfhel scalarProd error: ctxt1 must be of type PyCtxt "
+                            "instead of type " + str(type(ctxt1)))
+        if not isinstance(ctxt2, PyCtxt):
+            raise TypeError("Pyfhel scalarProd error: ctxt2 must be of "
+                            "type PyCtxt instead of type " +
+                            str(type(ctxt2)))
         ids1 = ctxt1.getIDs()
         ids2 = ctxt2.getIDs()
         n_ids = len(ids1)
         if n_ids != len(ids2):              # They must have the same # of IDs
             raise PyCtxtLenError()
-        for i in range(n_ids):              # Use Afhel::mult to * each pair of Ctxts by IDs
-            self.afhel.mult(ids1[i],ids2[i])
+        for i in range(n_ids):              # Use Afhel::scalarProd to compute each pair of Ctxts by IDs
+            self.afhel.scalarProd(ids1[i],ids2[i], 0)
             
+
     # SQUARE each cyphertext inside PyCtxt ctxt for each ID in it
     def square(self, ctxt):
         if not isinstance(ctxt, PyCtxt):
@@ -201,6 +238,87 @@ cdef class Pyfhel:
         for i in range(n_ids):
             self.afhel.square(ids[i])
 
+
+
+    # CUBE each cyphertext inside PyCtxt ctxt for each ID in it
+    def cube(self, ctxt):
+        if not isinstance(ctxt, PyCtxt):
+            raise TypeError("Pyfhel cube error: ctxt must be of type PyCtxt "
+                            "instead of type " + str(type(ctxt)))
+
+        ids = ctxt.getIDs()
+        n_ids = len(ids)
+
+        for i in range(n_ids):
+            self.afhel.cube(ids[i])
+
+
+    # NEGATE each cyphertext inside PyCtxt ctxt for each ID in it
+    def negate(self, ctxt):
+        if not isinstance(ctxt, PyCtxt):
+            raise TypeError("Pyfhel negate error: ctxt must be of type PyCtxt "
+                            "instead of type " + str(type(ctxt)))
+
+        ids = ctxt.getIDs()
+        n_ids = len(ids)
+
+        for i in range(n_ids):
+            self.afhel.negate(ids[i])
+
+
+    # COMPARE two PyCtxt objects for each ID in both
+    def equalsTo(self, ctxt1, ctxt2):
+        if not isinstance(ctxt1, PyCtxt):
+            raise TypeError("Pyfhel equalsTo error: ctxt1 must be of type PyCtxt "
+                            "instead of type " + str(type(ctxt1)))
+        if not isinstance(ctxt2, PyCtxt):
+            raise TypeError("Pyfhel equalsTo error: ctxt2 must be of "
+                            "type PyCtxt instead of type " +
+                            str(type(ctxt2)))
+        ids1 = ctxt1.getIDs()
+        ids2 = ctxt2.getIDs()
+        n_ids = len(ids1)
+        comparison = []
+        if n_ids != len(ids2):              # They must have the same # of IDs
+            raise PyCtxtLenError()
+        for i in range(n_ids):              # Use Afhel::equalsTo to * each pair of Ctxts by IDs
+            comparison.append(self.afhel.mult(ids1[i],ids2[i]))
+        return comparison
+
+
+    # RORATE each cyphertext inside PyCtxt ctxt for each ID in it
+    def rotate(self, ctxt, c):
+        if not isinstance(ctxt, PyCtxt):
+            raise TypeError("Pyfhel rotate error: ctxt must be of type PyCtxt "
+                            "instead of type " + str(type(ctxt)))
+
+        ids = ctxt.getIDs()
+        n_ids = len(ids)
+
+        for i in range(n_ids):
+            self.afhel.rotate(ids[i], c)
+
+
+    # SHIFT each cyphertext inside PyCtxt ctxt for each ID in it
+    def shift(self, ctxt, c):
+        if not isinstance(ctxt, PyCtxt):
+            raise TypeError("Pyfhel rotate error: ctxt must be of type PyCtxt "
+                            "instead of type " + str(type(ctxt)))
+
+        ids = ctxt.getIDs()
+        n_ids = len(ids)
+
+        for i in range(n_ids):
+            self.afhel.shift(ids[i], c)
+
+
+    #-------------------------------------------------------------------------#
+
+    # I/O - Not working properly yet
+    def saveEnv(self, fileName):
+        pass
+    def restoreEnv(self, fileName):
+        pass
 
 
     #-------------------------------------------------------------------------#
