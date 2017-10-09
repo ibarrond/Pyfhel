@@ -1,8 +1,5 @@
 #include <NTL/ZZ.h>
 #include <NTL/BasicThreadPool.h>
-#include "FHE.h"
-#include "timing.h"
-#include "EncryptedArray.h"
 #include <NTL/lzz_pXFactoring.h>
 
 #include "Afhel/Afhel.h"
@@ -12,7 +9,7 @@
 
 int main(int argc, char **argv)
 {
-    string fileName = "AfhelContext.txt";
+    string fileName = "DemoAfhelEnv";
     Afhel he;
     he.flagPrint = true;    // Enable print for all functions
     // Values for the modulus p (size of p):

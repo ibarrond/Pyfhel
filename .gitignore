@@ -1,45 +1,20 @@
-# Prerequisites
-*.d
-
 # Compiled Object files
-*.slo
-*.lo
-*.o
 **.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
 
 # Compiled Dynamic libraries
 *.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
 
 # Compiled Static libraries
-*.lai
-*.la
-*.a
 **.a
-*.lib
 
 # Executables
-*.exe
-*.out
-*.app
-*_x
+**_x
 
 # Pyfhel building
 Pyfhel/*.pyc
 Pyfhel/*.cpp
 Pyfhel/*.c
 Pyfhel/build
-Pyfhel/build/*
-Pyfhel/src
-Pyfhel/src/*
 
+# Afhel environments
+**.aenv

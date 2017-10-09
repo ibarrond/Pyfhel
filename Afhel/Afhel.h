@@ -57,6 +57,7 @@ class Afhel{
         FHEcontext *context;                        // Required for key Generation
         FHESecKey *secretKey;                       // Secret key of the Public-Secret key pair
         FHEPubKey *publicKey;                       // Public key of the public-secret key pair
+        ZZX G;                                      // NTL Poly used to create ea
         EncryptedArray *ea;                         // Array used for encryption
         boost::unordered_map<string, Ctxt> ctxtMap; // Unordered map which stores the ciphertexts
         /**
@@ -196,7 +197,21 @@ class Afhel{
 
         
         // -------------------------------- I/O -------------------------------
+        // SAVE ENVIRONMENT
+        /**
+         * @brief Saves the context, SecretKey and G polynomial in a .aenv file
+         * @param fileName name of the file without the extention
+         * @return BOOL 1 if all ok, 0 otherwise
+         */
         bool saveEnv(string fileName);
+
+        // RESTORE ENVIRONMENT
+        /**
+         * @brief Restores the context, SecretKey and G polynomial from a .aenv file.
+         *  Then it reconstucts publicKey and ea (EncriptedArray) with SecretKey & G.
+         * @param fileName name of the file without the extention
+         * @return BOOL 1 if all ok, 0 otherwise
+         */
         bool restoreEnv(string fileName);
 
 

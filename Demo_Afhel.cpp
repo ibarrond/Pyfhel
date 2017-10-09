@@ -12,7 +12,7 @@
 
 int main(int argc, char **argv)
 {
-    string fileName = "AfhelContext.txt";
+    string fileName = "DemoAfhelEnv";
     Afhel he;
     he.flagPrint = true;    // Enable print for all functions
     // Values for the modulus p (size of p):

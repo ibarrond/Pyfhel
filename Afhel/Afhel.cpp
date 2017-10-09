@@ -89,7 +89,6 @@ void Afhel::keyGen(long p, long r, long c, long w, long d, long sec,
             << ", gens=" << gens  << ", ords=" << ords <<  endl;}
 
         // ZZX Polynomial creation
-        ZZX G;
         if (d == 0){  G = context->alMod.getFactorsOverZZ()[0];}
         else       {  G = makeIrredPoly(p, d);}
         if(flagPrint){std::cout << "  - Created ZZX poly from NTL lib" <<endl;}
@@ -190,42 +189,46 @@ void Afhel::shift(string id1, long c){
 bool Afhel::saveEnv(string fileName){
     bool res=1;
     try{
-        fstream keyFile(fileName, fstream::out|fstream::trunc);
+        fstream keyFile(fileName+".aenv", fstream::out|fstream::trunc);
         assert(keyFile.is_open());
-        writeContextBase(keyFile, *context);
-        keyFile << *context << endl;       
-        keyFile << *secretKey << endl;
+
+        writeContextBase(keyFile, *context);    // Write m, p, r, gens, ords
+        keyFile << *context << endl;            // Write the rest of the context
+        keyFile << *secretKey << endl;          // Write Secret key
+        keyFile << G <<endl;                    // Write G poly (ea can't be written, we save
+                                                //  G in order to reconstruct ea in restoreEnv)
         keyFile.close();
     }
     catch(exception& e){
         res=0;
     }
-    return res;
+    return res;                                 // 1 if all OK, 0 otherwise
 }
 
 // RESTORE ENVIRONMENT
 bool Afhel::restoreEnv(string fileName){
     bool res=1;
+    unsigned long m1, p1, r1;
+    vector<long> gens, ords;
     try{
-        fstream keyFile(fileName, fstream::in);
-        unsigned long m1, p1, r1;
-        vector<long> gens, ords;
-        readContextBase(keyFile, m1, p1, r1, gens, ords);
-        FHEcontext tmpContext(m1, p1, r1, gens, ords);
-        FHESecKey tmpSecretKey(tmpContext);
-        keyFile >> tmpContext;
-        keyFile >> tmpSecretKey;
-        context = &tmpContext;
-        secretKey = &tmpSecretKey;
-        ZZX G = context->alMod.getFactorsOverZZ()[0];
-        ea = new EncryptedArray(*context, G);
-        publicKey = (FHEPubKey*) secretKey;   // Upcast: FHESecKey to FHEPubKey
-        nslots = ea->size();                  // Refill nslots
+        fstream keyFile(fileName+".aenv", fstream::in);
+        assert(keyFile.is_open());
+
+        readContextBase(keyFile, m1, p1, r1, gens, ords);   // Read m, p, r, gens, ords
+        context = new FHEcontext(m1, p1, r1, gens, ords);   // Prepare empty context object
+        secretKey = new FHESecKey(*context);                // Prepareempty FHESecKey object
+        
+        keyFile >> *context;                    // Read the rest of the context
+        keyFile >> *secretKey;                  // Read Secret Key
+        keyFile >> G;                           // Read G Poly
+        ea = new EncryptedArray(*context, G);   // Reconstruct ea using G
+        publicKey = (FHEPubKey*) secretKey;     // Reconstruct Public Key from Secret Key
+        nslots = ea->size();                    // Refill nslots
     }
     catch(exception& e){
         res=0;
     }
-    return res;
+    return res;                                 // 1 if all OK, 0 otherwise
 }
 
 
