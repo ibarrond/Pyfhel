@@ -40,7 +40,7 @@
          > cd ntl-X.Y.Z/src
 
         * On the command line run, in this order:
-
+         > sudo apt-get install build-essential g++
          > ./configure NTL_GMP_LIP=on SHARED=on
          > make
          > sudo make install
