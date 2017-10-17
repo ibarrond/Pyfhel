@@ -19,10 +19,7 @@ src/Pyfhel/*.c
 src/Pyfhel/build
 
 # Makefiles
-src/Pyfhel/Makefile
-src/Afhel/Makefile
-src/Demos_Tests/Makefile
-src/Makefile
+**/Makefile
 
 # Afhel environments
 **.aenv
