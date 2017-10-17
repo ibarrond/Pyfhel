@@ -7,7 +7,7 @@
 ##############################################################################################
 #
 # DESCRIPTION: Improved Makefile for HElib project (Shai Halevi), allowing the installation of
-# 			   this library as a shared library and greatly simplifying its usage: the library 
+# 			   this library as a shared library and greatly simplifying its usage: the library
 # 			   can now be linked when compiling a program using the flag [-lfhe]. In addition,
 # 			   all header files (.h) are installed in a folder called 'fhe/'.
 # 			   In order to use the library in your own .cpp code, use this formula (or similar
@@ -248,6 +248,7 @@ info:
 	: * make - compile & link the library
 	: * make install - library available in the host. Requires root 
 	: * make check - test all functionalities
+	: * make fileName_x - Compile & Link binary filename.cpp with HElib and its dependencies
 	: * make clean - remove all library files from the folder
 	: * make uninstall - remove library from host. Requires root
 	: If errors occur, try adding/removing '-std=c++11' in Makefile

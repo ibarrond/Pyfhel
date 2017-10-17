@@ -53,6 +53,7 @@ ext_modules = [
 
 setup(
     name = 'Pyfhel',
+    version = '1.0.0',
     cmdclass = {'build_ext': build_ext},
     ext_modules = ext_modules,
 )

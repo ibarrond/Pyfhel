@@ -41,7 +41,7 @@
 #
 
 
-$(info AFHEL MAKEFILE)
+$(info ----------------------------AFHEL MAKEFILE-----------------------------)
 $(info Afhel requires HElib, NTL version 10.0.0 or higher and GMP)
 $(info If you get compilation errors, try to add/remove -std=c++11 in Makefile)
 $(info For a list if all the available commands, run >make info)
@@ -200,6 +200,7 @@ info:
 	: Commands Available:
 	: * make - compile & link the library
 	: * make install - library available in the host. Requires root 
+	: * make fileName_x - Compile & Link binary filename.cpp with Afhel and its dependencies
 	: * make clean - remove all library files from the folder
 	: * make uninstall - remove library from host. Requires root
 	: If errors occur, try adding/removing '-std=c++11' in Makefile
