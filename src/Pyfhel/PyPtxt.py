@@ -40,41 +40,32 @@ class PyPtxt:
             raise TypeError("pyPtxt init error: ptxt must be of type list")
         if not isinstance(pyfhel, Pyfhel):
             raise TypeError("pyPtxt init error: pyfhel must be of type Pyfhel")
-        self.__pyfhel = pyfhel
-        self.__numSlots = pyfhel.numSlots()
-        self.__ptxt = []
-        self.__ptxtList = []
-        n = max(1, self.__numSlots)
 
-        # Partitioning list in list of lists of pSize length each
+        self.__numSlots = pyfhel.numSlots()
+        self.__pyfhel = pyfhel
         if (pSize > 0):
             nPart = len(ptxt)/pSize + int(mod(len(ptxt), pSize)>0)
-            zeroFill = mod(len(ptxt), pSize)
             if (pSize > self.__numSlots):
                 raise ValueError("pSize cannot be bigger than numSlots: " + self.__numSlots)
-            
+
             for i in range(0, nPart):     # Fill the List of lists
-                self.__ptxt.append(ptxt[ (i*pSize) : ((i+1)*pSize) ])    
-            if (zeroFill != 0):           # Filling with zeros the last list
-                [self.__ptxt[nPart-1].append(0) for zero in range(zeroFill, pSize)]
+                self.__ptxtList.append(ptxt[ (i*pSize) : ((i+1)*pSize) ])
+            self.__ptxtList = [[mod(elt, pyfhel.getModulus()) for elt in lst] for lst in self.__ptxtList]
 
-        # Applying modulo operation to all the data
-        if (ptxt):
-            self.__ptxt = [[mod(elt, pyfhel.getModulus()) for elt in lst] for lst in self.__ptxt]
-            self.__datalength = len(self.__ptxt[0])
         elif (isinstance(ptxt[0], list)):
-            self.__ptxt = [[mod(elt, pyfhel.getModulus()) for elt in lst] for lst in ptxt]
-            self.__datalength = len(ptxt[0])
-        else:
-            self.__ptxt = [mod(elt, pyfhel.getModulus()) for elt in ptxt]
-            self.__ptxt = [ptxt[i:i + n] for i in range (0, len(self.__ptxt), n)]
-            if (len(self.__ptxt)>n):
-                self.__datalength = len(ptxt[0])
-            else:
-                self.__datalength = 0
-        self.__length = len(self.__ptxt)
+            for elt in ptxt:
+                l = len(elt)
+                if ((l) > self.__numSlots):
+                    raise ValueError("No list can have bigger size than numSlots: " + self.__numSlots)
+            self.__ptxtList = [[mod(elt, pyfhel.getModulus()) for elt in lst] for lst in ptxt]
 
+        else:       
+            self.__ptxt = [mod(elt, pyfhel.getModulus()) for elt in ptxt]
+            n = max(1, self.__numSlots)
+            self.__ptxtList = [ptxt[i:i + n] for i in range (0, len(ptxt), n)]
+        self.__length = ([len(elt) for elt in self.__ptxtList])
         return
+
 
     def numSlots(self):         return self.__numSlots
     def numPtxt(self):          return len(self.__ptxtList)
@@ -82,7 +73,7 @@ class PyPtxt:
     def getPtxt(self):          return self.__ptxt
     def getPyfhel(self):        return self.__pyfhel
     def getPtxtLen(self):       return self.__length
-
+    def getPSize(self):         return self.__pSize
 
     # -------------------- OVERRIDE ARITHMETIC OPERATORS -------------------- #
 

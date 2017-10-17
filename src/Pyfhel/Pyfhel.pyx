@@ -129,11 +129,14 @@ cdef class Pyfhel:
         retList = []
         cdef vector[long] retVect
         ids = ctxt.getIDs()
-        for i in ids:                       # For each key in PyCtxt
+        lens = ctxt.getLen()
+        for i,l in zip(ids,lens):                       # For each key in PyCtxt
+            retPtxt = []
             retV = self.afhel.decrypt(i)    # Decrypt its Afhel Ctxt
-            for k in range(self.numSlots()):
-                retList.append(retV[k])     # Append values 1 by 1 to final list
-        return retList[:ctxt.getLen()]      # Return only the non-filler values
+            for k in range(l):
+                retPtxt.append(retV[k])     # Append values 1 by 1 to final list
+            retList.append(retPtxt)
+        return retList                      # Return only the non-filler values
 
 
     # DUPLICATE a PyCtxt with all its parameters, useful to keep originals in ops

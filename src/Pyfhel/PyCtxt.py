@@ -37,7 +37,7 @@ class PyCtxt:
         self.__ids = []
         if not isinstance(pyfhel, Pyfhel):
             raise TypeError("pyPtxt init error: pyfhel must be of type Pyfhel")
-        if not isinstance(length, (int, long, float)):
+        if not isinstance(length, (list, int, long, float)):
             raise TypeError("pyPtxt init error: length not a number")
 
         self.__pyfhel = pyfhel
