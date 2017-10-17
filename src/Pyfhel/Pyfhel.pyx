@@ -32,7 +32,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 
 # Using Ctypes to define the Afhel class
-cdef extern from "../../Afhel/Afhel.h":
+cdef extern from "Afhel.h":
     cdef cppclass Afhel:
         Afhel() except +
         void keyGen(long p, long r, long c, long d, long sec, long w,

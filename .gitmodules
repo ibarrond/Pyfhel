@@ -1,6 +1,3 @@
-[submodule "helib"]
-	path = HElib
+[submodule "src/HElib"]
+	path = src/HElib
 	url = https://github.com/shaih/helib
-[submodule "HElib"]
-	path = HElib
-	url = https://github.com/shaih/helib.git
