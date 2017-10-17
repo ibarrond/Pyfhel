@@ -3,11 +3,11 @@
 **.lo
 
 # Compiled Dynamic libraries
-**.so
+**.so*
 
 # Compiled Static libraries
 **.a
-**.la
+**.la*
 
 # Executables
 **_x

@@ -46,6 +46,7 @@ cdef extern from "Afhel.h":
         void mult(string id1, string id2) except +
         void mult3(string id1, string id2, string id3) except +
         void scalarProd(string id1, string id2, int partitionSize) except +
+        void cumSum(string id1) except +
         void square(string id1) except +
         void cube(string id1) except +
         void negate(string id1) except +
@@ -245,6 +246,22 @@ cdef class Pyfhel:
 
         for i in range(n_ids):
             self.afhel.square(ids[i])
+
+
+
+
+    # CUMSUM Cumulative sum over all the values in the cyphertext
+    def cumSum(self, ctxt):
+        if not isinstance(ctxt, PyCtxt):
+            raise TypeError("Pyfhel cube error: ctxt must be of type PyCtxt "
+                            "instead of type " + str(type(ctxt)))
+
+        ids = ctxt.getIDs()
+        n_ids = len(ids)
+
+        for i in range(n_ids):
+            self.afhel.cumSum(ids[i])
+
 
 
 

@@ -157,6 +157,11 @@ void Afhel::scalarProd(string id1, string id2, int partitionSize){
         totalSums(*ea, ctxtMap.at(id1));
 }
 
+// CUMULATIVE SUM
+void Afhel::cumSum(string id1){
+        totalSums(*ea, ctxtMap.at(id1));
+}
+
 // SQUARE
 void Afhel::square(string id1){
         ctxtMap.at(id1).square();

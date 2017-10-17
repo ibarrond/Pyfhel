@@ -143,14 +143,22 @@ class Afhel{
         void mult(string id1, string id2);
         void mult3(string id1, string id2, string id3);
 
+        // CUMULATIVE SUM
+        /**
+         * @brief sum all the values in the vector. 
+         * @param id1 ID of ctxt1 in unordered map
+         */
+        void cumSum(string id1);
+        
         // SCALAR PRODUCT
         /**
-         * @brief Multiply ciphertext by ciphertext and perform cumulative sum
-         * @param id1 ID of ctxt1 in unordered map
-         * @param id2 ID of ctxt2 in unordered map
+        * @brief Multiply ciphertext by ciphertext and perform cumulative sum
+        * @param id1 ID of ctxt1 in unordered map
+        * @param id2 ID of ctxt2 in unordered map
          */
-        void scalarProd(string id1, string id2, int partitionSize=0);
-        
+         void scalarProd(string id1, string id2, int partitionSize=0);
+
+
         // SQUARE
         /**
          * @brief Square ciphertext at id1 in ctxtMap

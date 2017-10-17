@@ -26,6 +26,7 @@ ext_modules = [
                             "-fwrapv",
                             "-O2",
                             "-Wfatal-errors",
+                            "-Wall",
                             "-fPIC",
                             "-pthread", 
                             "-DFHE_THREADS",
@@ -53,7 +54,7 @@ ext_modules = [
 
 setup(
     name = 'Pyfhel',
-    version = '1.0.0',
+    version = '2.0.1',
     cmdclass = {'build_ext': build_ext},
     ext_modules = ext_modules,
 )

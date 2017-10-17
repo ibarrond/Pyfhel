@@ -170,7 +170,7 @@ class PyCtxt:
     # '%' operator - scalarProd
     def __mod__(self, other):
         if not isinstance(other, (PyCtxt, int)):
-            raise TypeError("PyCtxt '*' error: lhs must be of type PyCtxt or "
+            raise TypeError("PyCtxt '%' error: lhs must be of type PyCtxt or "
                             "int instead of " + str(type(other)))
         newCtxt = self.__pyfhel.set(self)
         if isinstance(other, PyCtxt):
@@ -186,7 +186,7 @@ class PyCtxt:
     # '%=' operator
     def __imod__(self, other):
         if not isinstance(other, (PyCtxt, int)):
-            raise TypeError("PyCtxt '*=' error: lhs must be of type PyCtxt "
+            raise TypeError("PyCtxt '%=' error: lhs must be of type PyCtxt "
                             "or int instead of type " + str(type(other)))
         if isinstance(other, PyCtxt):
             self.__pyfhel.scalarProd(self, other)
@@ -196,6 +196,43 @@ class PyCtxt:
                        self.__pyfhel))
             self.__pyfhel.scalarProd(self, constCtxt)
             del constCtxt
+        return self
+
+
+
+    # POWER
+    # a ** b, b = 2|3 are the only ones supported
+    def __pow__(self, other):
+        if not isinstance(other, int):
+            raise TypeError("PyCtxt '**=' error: lhs must be of type  "
+                            " int instead of type " + str(type(other)))
+        if(other==2):
+            self.__pyfhel.square(self)
+        elif(other==3):
+            self.__pyfhel.cube(self)
+        else:
+            raise ValueError("Pyfhel only supports square (2) and cube (3) exponents")
+        return self
+
+    # a **= b, b = 2|3 are the only ones supported
+    def __ipow__(self, other):
+        if not isinstance(other, int):
+            raise TypeError("PyCtxt '**=' error: lhs must be of type  "
+                            " int instead of type " + str(type(other)))
+        if(other==2):
+            self.__pyfhel.square(self)
+        elif(other==3):
+            self.__pyfhel.cube(self)
+        else:
+            raise ValueError("Pyfhel only supports square (2) and cube (3) exponents")
+        return self
+
+
+
+    # CUMULATIVE SUM
+    # '~' operator, total added value in all positions of the vector
+    def __invert__(self):
+        self.__pyfhel.cumSum(self)
         return self
 
 
