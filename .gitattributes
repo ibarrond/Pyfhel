@@ -1,2 +1,2 @@
-**.cpp linguist-vendored
-**.h   linguist-vendored
+src/*/*.cpp linguist-vendored
+src/*/*.h   linguist-vendored
