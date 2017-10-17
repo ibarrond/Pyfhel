@@ -1,0 +1,206 @@
+##############################################################################################
+##############################################################################################
+###########################                                     ##############################
+###########################            Afhel Makefile           ##############################
+###########################                                     ##############################
+##############################################################################################
+##############################################################################################
+# 
+# DESCRIPTION: Makefile for Afhel project. Allows installation of this library as bot static &
+# 			   shared library, greatly simplifying its usage: this library can now be linked
+# 			   when compiling a program using the flag [-lafhel]. In addition, header Afhel.h 
+# 			   is installed in a public directory.
+# 			   In order to use Afhel library in your own .cpp code, use this formula:
+# 			   		#include <Afhel.h>
+#
+# 			   This makefile also allows the compilation&linking of .cpp files. A file called
+# 			   fname.cpp can be target if this recipe in order to create an executable:
+# 			   		make fname_x
+#
+# 			   Some configuration may be required in the Makefile Variables to accomodate the
+# 			   settings to a given OS.
+#
+# AUTHOR: Alberto Ibarrondo (github @ibarrond)
+# DATE: 16/10/2017
+#	
+#	
+# LICENSE: GNU GPL v3
+#  
+#  Afhel is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Afhel is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+
+$(info AFHEL MAKEFILE)
+$(info Afhel requires HElib, NTL version 10.0.0 or higher and GMP)
+$(info If you get compilation errors, try to add/remove -std=c++11 in Makefile)
+$(info For a list if all the available commands, run >make info)
+
+
+
+##############################################################################################
+#                                   MAKEFILE VARIABLES                                       #
+##############################################################################################
+
+
+#.................................. COMPILER & LINKER ........................................
+CC = g++
+CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
+	   	 -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
+		 -Wfatal-errors -Wshadow -Wall -fmax-errors=2
+		 
+
+# useful flags:
+#   -std=c++11
+#   -DNO_HALF_SIZE_PRIME  tells helib to not use the half size prime
+#                  in the prime chain
+#
+#   -DFHE_THREADS  tells helib to enable generic multithreading capabilities;
+#                  must be used with a thread-enabled NTL and the -pthread
+#                  flag should be passed to gcc
+#
+#   -DFHE_DCRT_THREADS  tells HElib to use a multithreading strategy at the
+#                  DoubleCRT level; requires -DFHE_THREADS (see above)
+#
+#   -DFHE_BOOT_THREADS  tells helib to use a multithreading strategy for
+#                  bootstrapping; requires -DFHE_THREADS (see above)
+#
+#   -DEVALMAP_CACHED=1 Cache some constants for bootstrapping
+#
+#		 * EVALMAP_CACHED=0 caches these constants as ZZX'es, this takes
+#   	 	       less space but it means that they still need to be converted
+#   			   to DoubleCRT's with every recryption operation. 
+#
+#        * EVALMAP_CACHED=1 caches these constants directly as DoubleCRT's,
+#	               this may take a significant amount of memeory.
+#
+#  If you get compilation errors, you may need to add -std=c++11 or -std=c++0x
+
+
+#.................................. LIBRARY ATTRIBUTES .......................................
+LIBNAME = afhel
+									# Prefix 'lib' and extension '.la' are added later on
+VERSION = 0:0:0
+									# Library version, independent from packet/repo version
+LIBDIR = /usr/local/lib
+									# Directory where library will be installed
+INCLUDE_DIR = /usr/local/include
+									# Directory where header will be installed
+
+
+# NOTE: NTL & GMP are distributed under LGPL (v2.1), they can be linked as dynamic libraries.
+GMP=-lgmp
+NTL=-lntl
+HELIB=-lfhe
+AFHEL=-l$(LIBNAME)
+LDLIBS = -L$(LIBDIR) $(NTL) $(GMP) $(HELIB) -lm
+
+
+#......................................  LIBTOOL  ............................................
+LIBTOOL=libtool
+									# May not be installed(e.g.: sudo apt install libtool-bin)
+LIBTOOL_COMPILE =--mode=compile
+									# Mode for prog/lib compilation. It uses $(CC) as compiler
+LIBTOOL_LINK=--mode=link
+									# Mode for prog/lib linking. It uses $(CC) as linker
+LIBTOOL_INSTALL=--mode=install
+									# Mode to install. It uses 'cp', recipe 'make install'
+LIBTOOL_UNINSTALL=--mode=uninstall
+									# Mode to uninstall. It uses 'rm', recipe 'make uninstall'
+LIBTOOL_CLEAN=--mode=clean
+									# Mode for cleaning. It uses 'rm', recipe 'make clean'
+RPATH=-rpath $(LIBDIR)
+
+
+#...................................... HEADER FILES .........................................
+HEADER = Afhel.h
+
+#...................................... SOURCE FILES .........................................
+SRC = Afhel.cpp
+
+#............................... LIBRARY INTERMEDIATE FILES ..................................
+LOBJ = Afhel.lo
+
+#.................................. LIBRARY  FINAL FILES .....................................
+LIB_LA = lib$(LIBNAME).la
+
+
+##############################################################################################
+#                                     BUILD FHE LIBRARY                                      #
+##############################################################################################
+
+all: $(LIB_LA)
+
+# COMPILATION: Create all .lo objects from the cpp source codes
+%.lo: %.cpp $(HEADER)
+	$(LIBTOOL) $(LIBTOOL_COMPILE) $(CC) $(CFLAGS) -fpic -c $< 
+
+# LINKING: Merging all .lo objects into a single .la to use for both static & shared libs
+$(LIB_LA): $(LOBJ)
+	    $(LIBTOOL) $(LIBTOOL_LINK) $(CC) $(CFLAGS) \
+				-o $@ $(LOBJ) $(RPATH) $(LDLIBS) \
+				-version-info $(VERSION)
+
+
+##############################################################################################
+#                                     INSTALL FHE LIBRARY                                    #
+##############################################################################################
+
+install: $(LIB_LA)
+	$(LIBTOOL) $(LIBTOOL_INSTALL) cp $(LIB_LA) $(LIBDIR)
+	ldconfig
+	cp -t $(INCLUDE_DIR) $(HEADER)
+
+
+
+##############################################################################################
+#                                  CREATE BINARIES WITH AFHEL                                #
+##############################################################################################
+
+%_x: %.cpp
+	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS) $(AFHEL)
+
+
+
+##############################################################################################
+#                                       UNINSTALL & CLEAN                                    #
+##############################################################################################
+
+uninstall: 
+	$(LIBTOOL) $(LIBTOOL_UNINSTALL) rm -f $(LIBDIR)/$(LIB_LA) 
+	ldconfig
+	rm -rf $(INCLUDE_DIR)/$(HEADER)
+
+
+clean:
+	$(LIBTOOL) $(LIBTOOL_CLEAN) rm $(LIB_LA)
+	rm -rf .libs/ .deps/
+	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so *.aenv
+
+
+
+##############################################################################################
+#                                        ADDITIONAL INFO                                     #
+##############################################################################################
+
+
+info:
+	: Afhel requires HElib, NTL version 10.0.0 or higher and GMP
+	: Compilation flags are 'CFLAGS=$(CFLAGS)'
+	: Commands Available:
+	: * make - compile & link the library
+	: * make install - library available in the host. Requires root 
+	: * make clean - remove all library files from the folder
+	: * make uninstall - remove library from host. Requires root
+	: If errors occur, try adding/removing '-std=c++11' in Makefile
+										    

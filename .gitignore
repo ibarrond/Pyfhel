@@ -1,20 +1,28 @@
 # Compiled Object files
 **.o
+**.lo
 
 # Compiled Dynamic libraries
-*.so
+**.so
 
 # Compiled Static libraries
 **.a
+**.la
 
 # Executables
 **_x
 
 # Pyfhel building
-Pyfhel/*.pyc
-Pyfhel/*.cpp
-Pyfhel/*.c
-Pyfhel/build
+src/Pyfhel/*.pyc
+src/Pyfhel/*.cpp
+src/Pyfhel/*.c
+src/Pyfhel/build
+
+# Makefiles
+src/Pyfhel/Makefile
+src/Afhel/Makefile
+src/Demos_Tests/Makefile
+src/Makefile
 
 # Afhel environments
 **.aenv
