@@ -54,7 +54,7 @@
 
 2. **INSTALL HELIB**
 
-   Clone the repository from the original source. If you have downloaded Afhel, this may not be neccessary since HElib is included as a submodule. Check the root folder of Afhel, and if you don't see any files inside the HElib folder, run in the root directory:
+   Clone the repository from the original source. If you have downloaded Afhel, this may not be neccessary since HElib is included as a submodule. Check the src/HElib folder, and if you don't see any files inside, run inside the src/ directory:
     
        > git clone https://github.com/shaih/HElib.git
 
