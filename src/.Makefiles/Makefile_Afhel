@@ -183,7 +183,7 @@ uninstall:
 
 
 clean:
-	$(LIBTOOL) $(LIBTOOL_CLEAN) rm $(LIB_LA)
+	$(LIBTOOL) $(LIBTOOL_CLEAN) rm -f $(LIB_LA)
 	rm -rf .libs/ .deps/
 	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so *.aenv
 

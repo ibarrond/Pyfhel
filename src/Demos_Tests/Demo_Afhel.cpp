@@ -9,6 +9,7 @@
 
 #include <cassert>
 #include <cstdio>
+#define VECTOR_SIZE 5
 
 int main(int argc, char **argv)
 {
@@ -21,18 +22,22 @@ int main(int argc, char **argv)
     //   - 65537 (Word)
     //   - 4294967311 (Long) 
     long p = 2;
-    long r = 54;
-    long d = 0;
-    long c = 3;
+    long r = 32;
+    long d = 1;
+    long c = 2;
     long sec = 128;
     long w = 64;
-    long L = 16;
+    long L = 40;
 
     he.keyGen(p, r, c, d, sec, w, L);
     vector<long> v1;
     vector<long> v2;
-    for(int i=0; i<he.nslots; i++){v1.push_back(i);}
-    for(int i=0; i<he.nslots; i++){v2.push_back(2);}
+    for(int i=0; i<he.nslots; i++){
+        if(i<VECTOR_SIZE)   { v1.push_back(i);  }
+        else                { v1.push_back(0);  }}
+    for(int i=0; i<he.nslots; i++){
+        if(i<VECTOR_SIZE)   { v2.push_back(2);  }
+        else                { v2.push_back(0);  }}
 
     // Sum
     string k1 = he.encrypt(v1);

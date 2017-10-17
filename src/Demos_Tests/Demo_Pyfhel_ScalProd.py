@@ -2,10 +2,10 @@ from Pyfhel import Pyfhel
 from PyPtxt import PyPtxt
 from PyCtxt import PyCtxt
 HE = Pyfhel()
-KEYGEN_PARAMS={ "p":2,        "r":54,
+KEYGEN_PARAMS={ "p":2,        "r":32,
                 "d":0,        "c":3,
                 "sec":128,    "w":64,
-                "L":16,       "m":-1,
+                "L":30,       "m":-1,
                 "R":3,        "s":0,
                 "gens":[],    "ords":[]}
 
