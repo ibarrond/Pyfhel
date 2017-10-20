@@ -88,12 +88,58 @@ LDLIBS = -lntl -lgmp -lm -lfhe -lafhel
 
 
 
+
+##############################################################################################
+#                                         EASY INSTALL                                       #
+##############################################################################################
+
+
+all: requirements install
+.PHONY: packages libdownloads pypackages HElib Afhel Pyfhel
+
+
+##############################################################################################
+#                                     INSTALL REQUIREMENTS                                   #
+##############################################################################################
+
+
+requirements: packages libdownloads pypackages
+
+packages:
+	sudo apt-get install python-dev
+	sudo apt-get install libboost-all-dev
+	sudo apt-get install python-pip
+	sudo apt-get install libtool-bin
+	sudo apt-get install m4
+
+libdownloads:
+	mkdir .installers
+	cd .installers
+	wget "https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2"
+	bzip2 -d gmp-6.1.2.tar.bz2
+	tar xvf gmp-6.1.2.tar
+	cd gmp-6.1.2
+	./configure
+	$(MAKE)
+	sudo $(MAKE) install
+	cd ..
+	wget "http://www.shoup.net/ntl/ntl-10.5.0.tar.gz"
+	tar xvf ntl-10.5.0.tar.gz
+	cd ntl-10.5.0/src
+	./configure NTL_GMP_LIP=on SHARED=on
+	$(MAKE)
+	sudo $(MAKE) install
+	sudo ln -s /usr/local/lib/libntl.so.35 /usr/lib/libntl.so.35
+	cd ../../..
+	rm -rf .installers
+pypackages:
+	sudo pip install cython
+
 ##############################################################################################
 #                                     INSTALL ALL LIBRARIES                                  #
 ##############################################################################################
 
-all: HElib Afhel Pyfhel
-.PHONY: HElib Afhel Pyfhel
+install: HElib Afhel Pyfhel
 
 HElib:
 	$(MAKE) -C HElib/src/
