@@ -113,27 +113,13 @@ packages:
 	sudo apt-get install m4
 
 libdownloads:
-	mkdir .installers
-	cd .installers
-	wget "https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2"
-	bzip2 -d gmp-6.1.2.tar.bz2
-	tar xvf gmp-6.1.2.tar
-	cd gmp-6.1.2
-	./configure
-	$(MAKE)
-	sudo $(MAKE) install
-	cd ..
-	wget "http://www.shoup.net/ntl/ntl-10.5.0.tar.gz"
-	tar xvf ntl-10.5.0.tar.gz
-	cd ntl-10.5.0/src
-	./configure NTL_GMP_LIP=on SHARED=on
-	$(MAKE)
-	sudo $(MAKE) install
-	sudo ln -s /usr/local/lib/libntl.so.35 /usr/lib/libntl.so.35
-	cd ../../..
+	mkdir -p .installers
+	cp .Makefiles/Makefile_Inst_GMP_NTL .installers/Makefile
+	$(MAKE) -C .installers
 	rm -rf .installers
+
 pypackages:
-	sudo pip install cython
+	sudo pip install --upgrade cython 
 
 ##############################################################################################
 #                                     INSTALL ALL LIBRARIES                                  #
