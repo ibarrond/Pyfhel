@@ -49,7 +49,7 @@ GMP_VERSION=6.1.2
 NTL_VERSION=10.5.0
 
 GMP_DIR=gmp-$(GMP_VERSION)
-NTL_DIR=ntl-$(NTL_VERSION)/src
+NTL_DIR=ntl-$(NTL_VERSION)
 
 LIBLINK=$(shell cd /usr/local/lib && ls libntl.so.??)
 
@@ -58,13 +58,13 @@ LIBLINK=$(shell cd /usr/local/lib && ls libntl.so.??)
 ##############################################################################################
 
 
-all: downloads gmp ntl linking
+all: downloads decompress gmp ntl linking
 
 downloads:
 	wget "https://gmplib.org/download/gmp/$(GMP_DIR).tar.bz2"
 	wget "http://www.shoup.net/ntl/$(NTL_DIR).tar.gz"
 
-uncompress:
+decompress:
 	bzip2 -df $(GMP_DIR).tar.bz2
 	tar xvf $(GMP_DIR).tar
 	tar xvf $(NTL_DIR).tar.gz
@@ -75,9 +75,9 @@ gmp:
 	sudo $(MAKE) install -C $(GMP_DIR)
 
 ntl:
-	cd $(NTL_DIR) && ./configure NTL_GMP_LIP=on SHARED=on
-	$(MAKE) -C $(NTL_DIR)
-	sudo $(MAKE) install -C $(NTL_DIR)
+	cd $(NTL_DIR)/src && ./configure NTL_GMP_LIP=on SHARED=on
+	$(MAKE) -C $(NTL_DIR)/src
+	sudo $(MAKE) install -C $(NTL_DIR)/src
 
 linking:
 	$(eval $LIBLINK:=$(shell cd /usr/local/lib && ls libntl.so.??))
