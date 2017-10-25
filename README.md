@@ -1,112 +1,129 @@
-# Afhel & Pyfhel
+# Pyfhel
 
-## Afhel: Abstraction For HELib 
-Afhel is a library that creates an abstraction over the basic functionalities of HElib as a Homomorphic Encryption library, such as addition, multiplication, scalar product and such. The repository includes demos for helib, tests for different ways to implement helib's funcitonalities and a demo for Afhel.
+* **_Description_**: Homomorphic Encryption Library for Python. Allows sum, substract, multiplication, scalar product.
+* **_Language_**: Python2.7 on top of C++ (with Cython).
+* **_Dependencies_**: [HElib](https://github.com/shaih/HElib)
+* **_License_**: [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
-## Pyfhel: PYthon For HELib
-Built on top of Afhel, Pyfhel is a python module that takes simplicity iven further when playing with HElib, allowing the use of HElib inside Python and with a syntax similar to normal arithmetics. We can use this with any implementation done in Python, be it normal encryption or maybe some Machine Learning algorithm!. In order to get to know how it works, check the Demo_Pyfhel.py
+### Summary
+**PY**thon **F**or **HEL**ib**, **Pyfhel** implements some basic functionalities of HElib as a Homomorphic Encryption library such as sum, mult, or scalar product in Python (currently only for Python2.7). *Pyfhel* allows the use of HElib inside Python and with a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as implementing Machine Learning algorithms.
+
+*Pyfhel* is built on top of **Afhel**, an **A**bstraction **F**or **HEL**ib in C++. *Afhel* uses an unordered Map to manage HElib Cyphertexts using key-value storage with keys of type _String_. It implements all the HElib operations using only the keys for its functions, adding some extra functionalities not present in HElib such as Scalar Product.
+
+Additionally, this project contains a large series of Demos & Tests for *HElib*, *Afhel* & *Pyfhel*.
 
 ------------
 
-## 1. Instalation
-Follow the instructions in the document 'INSTALL.md':
+## 1. Cloning & Instalation
+In order to download all the files of this project at once including the dependencies (HElib is set as a submodule), run:
+      
+      > git clone --recursive https://github.com/ibarrond/Pyfhel
 
-- Installation of Afhel is up to section 4.
-- Installation of Pyfhel on top of Afhel involves sections 5 and 6.
+Next, Follow the instructions in the document 'INSTALL.md':
+
+- *EASY INSTALL* can be used (only 2 shell commands!) but it is not recommended unless your OS is Ubuntu (Due to package manager 'apt', location of shared files, etc...)
+- *NORMAL INSTALLATION* is the preferred procedure, explained step-by-step in the INSTALL.md document.
+
+The installation relies heavily on **Makefiles** (src/.Makefiles folder, moved to their respective folders by src/configure). In case there is anything wrong with your *NORMAL INSTALLATION*, you can check them and maybe adjust some variables. All of the Makefiles have been heavily commented and cleaned. In order to know what commands are available, just run `make info`. In general, Makefiles include an uninstall command (`make uninstall`) to undo the installation, and a clean command (`make clean`) to erase all non-source files.
      
-
+#### What the Installation does
+First of all, all the requirements for *HElib* & *Afhel* & *Pyfhel* are installed (details about them in INSTALL.md). Next, it installs *HElib* and *Afhel* as **shared libraries** (named _fhe_ and _afhel_ respectively) using `libtool` {} (yes! even though the original *HElib* was a static library, this project has modified the installation for it to be available all across the system), and copies the header files to a well-known folder {/usr/local/include by default}. Lastly, *Pyfhel* is installed as a **Python module** using `pip`.
 
 ---------------
 
-## 2. Usage of Afhel
+## 2. Usage
 
-### 2.1. Write your program program
+The **basic** use of each library (*HElib*, *Afhel* & *Pyfhel*) is shown in their respective demos in the folder _src/Demos\_Tests_. These constitute the basic usage of both (more advanced uses of HElib are found in their repository). Nonetheless, we include here some hints:
 
-#### 2.1.1. Write a basic program for HElib
+### Pyfhel (Python2.7)
+1. Import the three main classes:
 
-You should use the Demo_HElib.cpp as template. The first step is to include the appropiate headers:
+       > from Pyfhel import Pyfhel        -> Core class
+      
+       > from PyPtxt import PyPtxt        -> Plaintext Python class 
+       
+       > from PyCtxt import PyCtxt        -> Cyphertext Python class
 
-> #include "FHE.h"
+2. Setup Context: Define a Pyfhel object and perform keyGen/import saved context&keys (more about this bellow)
 
-After that, there are 5 different sections in the program:
+3. Create a plaintext (PyPtxt) and encrypt it into a cyphertext (PyCtxt). Plaintexts can be created from either a list of numbers ([1,2,3,4]) or a list of lists of numbers ([[1,2,3,5], [12,133],[4]]).
 
-1. SETUP CONTEXT: Create context variables
-2. KEY GENERATION: Creates the Private/Public Key pair
-3. ENCRYPTION: Create the Plaintexts and encrypts them into Cyphertexts
-4. OPERATION: Perform sums, multiplications and so on over the encrypted Cyphertexts.
-5. DECRYPTION: Decrypt the resulting Cyphertexts
+4. Perform Operations, such as:
+- *sum*: ctxt1 + ctxt2 (or ctxt1 += ctxt2)
+- *mult*: ctxt1 * ctxt2 (or ctxt1 \*= ctxt2)
+- *scalarProd*: ctxt1 @ ctxt2 (or ctxt1 @= ctxt2)
+- *square*: ctxt1 = ctxt1 ** 2 (or ctxt1 \*\*= 2)
+- *cube*: ctxt1 = ctxt1 ** 3 (or ctxt1 \*\*= 3)
 
-If you want to compile the demo, run `make Demo_HElib_x` and you should be getting an executable with that name in the same directory. This demo shows an example of a very simple sumation and multiplication of two cyphertexts, with verbose comments.
+5. Decrypt the result, obtaining always a list of lists of integers.
 
-#### 2.1.2. Write a basic program for Afhel
+If you want to see an example of this, run `python Demo_Pyfhel.py` in the src/Demos_Tests directory. This demo shows an example of a very simple sumation and multiplication of two cyphertexts, with verbose comments. You can also run `python` to open an ineractive console and then run inside it `execfile('Demo_Pyfhel.py')`. This way you will also be able to play with the results. 
 
-The file Demo_Afhel.cpp shows the simple functioning of the program, while the complete API is described in Afhel.h.
+### Afhel & HElib (C++)
+Include the headers in the top of your source file:
 
-First of all you need to include the library in the header:
+      #include "FHE.h"             // HElib 
+      #include "Afhel.h"           // Afhel
+      
+Using the libraries is fairly similar to the processyin Pyfhel, but with a different syntax. Refer to the Demos for details.      
+      
+Compile your program named '_mySourceFileName.cpp_' into an executable '_myExecutableName_' using the following flags: 
 
-> #include "Afhel.h"
+      > g++ -g -O2 -std=c++11 -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
+            -lm -lgmp -lntl -lfhe -lafhel -o myExecutableName mySourceFileName.cpp
 
-Then you create an Afhel object (called `he` in the demo) that you will use to call all the functions, and you follow the same order as with HElib, this time using the `keyGen`, `encrypt`, `decrypt`, `add`, `mult`, `scalarProd` or `square` functions that are defined inside Afhel.h (e.g.: `he.add(k1, k2)`).
+To make your life easier, you can also do an EASY COMPILATION of '_mySourceFileName.cpp_' by running inside the src/, src/Afhel or src/Demos_Tests this command:
+      
+      > make '_mySourceFileName\_x_'
 
-### 2.2. Compile your program
+If you want see an example of Afhel, compile the Demo, run `make Demo_Afhel_x` in the src/Demos_Tests and you should be getting an executable with that name in the same directory. This demo shows an example of a very simple sumation and multiplication of two cyphertexts, with verbose comments. Run it by executing `./Demo_Afhel_x`.
 
-If you want to build your own program based on Afhel (and HElib), the easiest way to do it is to write the program in a file called program.cpp inside the root directory and run:
-> make myprog_x    `--> removing the ".cpp" and adding "_x" to the name`
+----------------------------------
 
-This will compile myprog.cpp and link in fhe.a, Afhel.a and all required support libraries, and create the executable program_x. You should only do this while inside the Afhel root folder; nevertheless, it also works inside HElib/src (the difference being that inside the HElib/src you won't have access to the Afhel class).
-
-If you find any problems while compiling a program, try removing some parameters from the CFLAGS  (3rd line inside the Makefile). `-std=c++11` generates problems sometimes.
-
-### 2.3. Details of Afhel
-Afhel implements a higher level of abstraction than the one from HElib, and handles Cyphertexts using an unordered map (key-value pairs) that is accessed via keys of type string. This is done in order to manage Cyphertext using references (the keys), which will allow Pyfhel to work only using strings (keeping the Cyphertexts in C++). Afhel also compresses the Context setup and Key generation into one single KeyGen function with multiple parameter selection.
-
-
-## 3. Usage of Pyfhel
-
-Check out the Demo_Afhel.py, it is really self-explanatory. It doesn't get any better than this! First you import all the modules:
-
-> from Pyfhel import Pyfhel        -> Core class
-> from PyPtxt import PyPtxt        -> Plaintext Python class 
-> from PyCtxt import PyCtxt        -> Cyphertext Python class
-
-Then you go over the same process as in Afhel (define Pyfhel object, keyGen, encrypt, operations, decrypt), with one peculiarity: the operations can be performed directly over the Cyphertexts using standard arithmetic notation:
-
-- sum: ctxt1 + ctxt2 (or ctxt1 += ctxt2)
-- mult: ctxt1 * ctxt2 (or ctxt1 \*= ctxt2)
-- scalarProd: ctxt1 @ ctxt2 (or ctxt1 @= ctxt2)
-
-Inputs for the plaintexts and the output of the decryptions are lists of integers.
-
-
-## 4. Tests & Demos
+## 3. Tests & Demos
 
 The demos have been exhaustively commented in order to provide as much clear information as possible. In comparison, the tests are more focused in benchmarking different possibilities for implementing algorithms.
-- Demo_AfHEl.cpp - Basic usage of Afhel library
+- Demo_Afhel.cpp - Basic usage of Afhel library
 - Demo_HElib.cpp - Basic usage of HElib
 - Demo_Pyfhel.py - Basic usage of Pyfhel
-- Test_sum_HElib.cpp - Three methods to perform addition.
-- Test_scProd_HElib.cpp - Three methods to perform scalar product. 
-In order to run any of the tests you should compile them first.
+- Demo_AfhelRestored.cpp - Using Afhel after restoring the environment (requires previous run of Demo_Afhel)
+- Demo_HElib_SimpleIO.cpp - Saving & Restoring context data
+- Test_sum_HElib.cpp - Three methods to perform addition. Acknowledgements to [Matheus S. H. Cruz](https://github.com/mshcruz/SumEncryptedVectors)
+- Test_scProd_HElib.cpp - Three methods to perform scalar product. Acknowledgements to [Matheus S. H. Cruz](https://github.com/mshcruz/ScalarProductFHE) 
+- Demo_Pyfhel_ScalProd.py - Use of scalar product in Pyfhel.
 
+-------------------------------------
 
-## 5. TIPS & TRICKS based on experience
+## 4. TIPS & TRICKS based on experience
 
-* First of all: Remember that this library is not using float arithmetic! if you want to use floats, you should consider checking on [SEAL](https://sealcrypto.codeplex.com/).
-* Using the right value for the parameter `p` (in keyGen) is crucial! It must be prime. If you use a small value you get much faster KeyGen, but at the cost of requiring some conversion of the results to more suitable data types. Very high values of `p` didn't seem to work correctly in the past, but recently HElib has been fixed and they seem to work. The values that have been tried so far (even though no extensive tests have been done for any of them):
-    * 2 (Equivalent to binary)
-    * 257 (Equivalent to Byte)
-    * 65537 (Equivalent to Word) [The one we consider best choice]
-    * 4294967311 (Equivalent to Long) -> It took a considerable amount of time (15 mins?) to setup its context, but on the other hand you can work without implementing any conversion.
-* The other parameters in keyGen (and setup context if using the originall HElib) can be played with. For didactic purposes, those parameters are:
-MISSING PARAMETER TABLE
-m
-* The slowest sections of the whole process are, by far, the "Setup context" and "KeyGen". Declaration of the context the first time and reusage of the same context is a must! That's why it's strongly encouraged to use Pyfhel in an interactive Python environment: once defined, you can reuse that context for the rest of your tests! In comparison, running independent tests in C++/Python are heavily penalized by this (specially when you use higher values of the modulus p).
-* The library is supposed to automatically tell you if the noise level is too high to recover the right value and apply bootstrapping, but this is covered neitherby Afhel nor by Pyfhel.
+* First of all: Remember that this library is **not using float arithmetic**! if you want to use floats, you should consider checking on [SEAL]( http://sealcrypto.org/). Nevertheless, using a high enough cyphertext space can prove to be sufficient.
+* **KeyGen** (a.k.a. key generation and context creation) takes a somewhat long time, and the choice of parameters is determinant for the general performance of the library:
+
+| Parameter  | Description                                        | Default/Recommended Value(s)                                                                                                                                                                                                                                                                         |
+|------------|----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| p          | Plaintext base. All operations are modulo p^r.     | 2. Total p^r shouldn't be higher than 2^54. It has to be prime. For a faster execution, try a tradeoff p - r so that a value close to 2^40 is achieved (e.g.: 253^5)                                                                                                                                 |
+| r          | Plaintext exponent. All operations are modulo p^r. | 40. Total p^r shouldn't be higher than 2^54.                                                                                                                                                                                                                                                         |
+| c          | # Columns in key switching matrix                  | Affects performance, since it provides a higher security at a higher cost. Set to 1 if not testing security. Set to 3 for secure version.                                                                                                                                                            |
+| d          | Degree of field extension                          | Somewhat obscure. Default to 0.                                                                                                                                                                                                                                                                      |
+| sec        | Number of bits in public/private keys              | Affects performance greatly. Higher security at considerable cost. Set to 30 if not testing security. Set to >128 for secure version.                                                                                                                                                                |
+| W          | Hamming weight of  secret key                      | Cannot be higher than sec. 0 means absolutely insecure. Recommended: sec/2                                                                                                                                                                                                                           |
+| L          | # Levels in modulus chain                          | It defines the maximum number of operations that can be performed without corrupting data. If unset, a heuristic                                                                                                                                                                                     |
+| m          | Use m'th cyclotomic polynomial as specific modulus | Completely obscure. Luckily, Afhel & Pyfhel can compute a heuristic. Leave it to them (blank)                                                                                                                                                                                                        |
+| R          | Number of expected rounds of multiplication        | Used to generate a L if the heuristic version of L is used. It's an approximate                                                                                                                                                                                                                      |
+| s          | Minimum number of slots for the vectors            | Vectors can apply operations to all their values in one single instruction. The more values, the better, but it slows down KeyGen. Vector size is determined by variable nSlots (or numSlots), arround 100-500 depending on other parameters. Leave to 0 or empty by default, but could be changed.  |
+| gens, ords | Vectors of generators and orders                   | Obscure. Leave empty, the libraries won't complain.                                                                                                                                                                                                                                                  |
+
+* Using the right value for the parameters **p** and **r** is crucial, since all the operations are performed modulo **p^r**! It must be prime. If you use a small value you get much faster KeyGen, but at the cost of requiring some conversion of the results to more suitable data types. Very high values of `p` didn't seem to work correctly in the past, but recently HElib has been fixed and they seem to work. The values that have been tried so far (even though no extensive tests have been done for any of them):
+          * 2 (Equivalent to binary)
+          * 257 (Equivalent to Byte)
+          * 65537 (Equivalent to Word)
+          * 4294967311 (Equivalent to Long)
+
+----------------------------------
 
 # Author & Acknowledgements
 
 - Author: Alberto Ibarrondo @ibarrond
-- Tutor: Melek Onen
-- Date: 13/06/2017
+- Latest release: 25/10/2017
 
-This library has been created for the project "Privacy for Big Data Analytics" in EURECOMThis SW is based on [HElib](https://github.com/shaih/HElib) by Shai Halevi, [HEIDE](https://github.com/heide-support/HEIDE) by Grant Frame, [analysis of addition](https://mshcruz.wordpress.com/2017/05/13/sum-of-encrypted-vectors/) by Matheus S.H. Cruz. In compliance with their respective Licenses, I keep a copy of the original licenses in the "Acknowledgements" folder, as well as reference to the changes commited to their originals. Also, the same type of license (GNU GLPv3) applies to Afhel & Pyfhel, as mandated. 
+This library was created originally for the project "Privacy for Big Data Analytics" in EURECOM. The SW is based on **[HElib](https://github.com/shaih/HElib) by Shai Halevi**, **[HEIDE](https://github.com/heide-support/HEIDE) by Grant Frame**, **[analysis of addition](https://mshcruz.wordpress.com/2017/05/13/sum-of-encrypted-vectors/) by Matheus S.H. Cruz**. In compliance with their respective Licenses, I name all of them in this section. This project could not be possible without them. For any legal disclaimer, please contact me. Also, the same type of license (GNU GLPv3) applies to Afhel & Pyfhel, as mandated. 
