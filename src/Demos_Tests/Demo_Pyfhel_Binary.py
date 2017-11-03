@@ -1,3 +1,6 @@
+# Demo on the use of Binary operations (AND, XOR, NOT) using Pyfhel
+#    The key is to use p=2 and r=1, and compress directly the numbers
+#    in binary format (v1 would be equal to 3 and v2 would be equal to 5)
 from Pyfhel import Pyfhel
 from PyPtxt import PyPtxt
 from PyCtxt import PyCtxt
