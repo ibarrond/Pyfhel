@@ -50,6 +50,9 @@ It should take a long time (5-10 min), but if there is no error, everything shou
    * **m4**:  Language to properly setup an installation for GMP
         
          > sudo apt-get install m4
+   * **g++**: C++ compiler
+   
+         > sudo apt-get install build-essential g++
          
 2. **Required Lib Downloads**
 
@@ -86,7 +89,7 @@ It should take a long time (5-10 min), but if there is no error, everything shou
          > cd ntl-X.Y.Z/src
 
         * On the command line run, in this order:
-         > sudo apt-get install build-essential g++
+        
          > ./configure NTL_GMP_LIP=on SHARED=on
          > make
          > sudo make install
