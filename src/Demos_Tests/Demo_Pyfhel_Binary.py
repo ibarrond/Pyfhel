@@ -46,3 +46,22 @@ print("v4: ", v4)
 ctxt1 += cones
 v5 = HE.decrypt(ctxt1)
 print("NOT v4: ", v5)
+
+
+v1 = [0,0,1,1]
+v2 = [0,1,0,1]
+ptxt1 = PyPtxt(v1, HE)
+ptxt11 = PyPtxt(v1, HE)
+ptxt2 = PyPtxt(v2, HE)
+
+ctxt1 = HE.encrypt(ptxt1)
+ctxt11 = HE.encrypt(ptxt11)
+ctxt2 = HE.encrypt(ptxt2)
+print("Encrypted v1: ", v1)
+print("Encrypted v2: ", v2)
+# v1 OR v2 = (v1 XOR v2) XOR (v1 AND v2)
+ctxt1 += ctxt2
+ctxt11 *= ctxt2
+ctxt1 += ctxt11
+v3 = HE.decrypt(ctxt1)
+print("v1 OR v2 -> ", v3)
