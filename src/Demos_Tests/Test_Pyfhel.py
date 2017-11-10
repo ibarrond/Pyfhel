@@ -172,9 +172,9 @@ def runTest(fileName, testID, p=257, r=1, d=1, c=2, sec=80, w=64, L=10, m=-1, R=
     return
 
 # RUN THE ZILLION TESTS!
-fN = 'ZillionTests.txt'
+fN = 'ZillionTests1.txt'
 i=0
-for p,r in zip([2, 2, 2, 2, 2, 253, 257, 257, 257, 65537, 65537, 4294967311],
+for p,r in zip([3, 2, 2, 2, 2, 253, 257, 257, 257, 65537, 65537, 4294967311],
                [5, 16, 30, 40, 54, 5, 1, 2, 3, 4, 1, 2, 1]):
     for L in [10, 20, 30, 35, 40]:
         for d in [0,1]:
