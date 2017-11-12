@@ -255,6 +255,23 @@ class PyCtxt:
         return self
 
 
+#-----------------------------Class Methods------------------------------
+
+
+
+"""@Description:
+#The methode 
+
+#@param: The method takes a mandatory parameter:
+#-param1: The list of coefficients 
+"""
+def polynomialMult(self, *coefficients):
+    n = len(coefficients)
+    print n
+
+
+
+
 
 class PyCtxtLenError(Exception):
     def __init__(self):
