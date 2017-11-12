@@ -259,15 +259,15 @@ class PyCtxt:
 
 
 
-"""@Description:
-#The methode 
+    """@Description:
+    #The methode 
 
-#@param: The method takes a mandatory parameter:
-#-param1: The list of coefficients 
-"""
-def polynomialMult(self, *coefficients):
-    n = len(coefficients)
-    print n
+    #@param: The method takes a mandatory parameter:
+    #-param1: The list of coefficients 
+    """
+    def polynomialMult(self, *coefficients):
+        n = len(coefficients)
+        print n
 
 
 
