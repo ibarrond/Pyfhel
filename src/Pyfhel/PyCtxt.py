@@ -55,7 +55,7 @@ class PyCtxt:
         return self.__pyfhel
     def getLen(self):
         return self.__length
-
+    
 
     # -------------------- OVERRIDE ARITHMETIC OPERATORS -------------------- #
     # SET: '=' operator
@@ -254,7 +254,6 @@ class PyCtxt:
         self.__pyfhel.shift(self,c)    
         return self
 
-
 #-----------------------------Class Methods------------------------------
 
 
@@ -268,8 +267,6 @@ class PyCtxt:
     def polynomialMult(self, *coefficients):
         n = len(coefficients)
         print n
-
-
 
 
 
