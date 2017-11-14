@@ -51,7 +51,7 @@ This library was created originally for the project "Privacy for Big Data Analyt
 
 ## Legal disclaimer
 
-This project is Open Source under the GNU GPLv3 License (LICENSE file), therefore developers that use Pyfhel MUST comply with the following:
+Pyfhel can be used modified, copied in any way you see fit. This project is Open Source under the GNU GPLv3 License (LICENSE file), therefore developers that use Pyfhel MUST comply with the following:
 
    1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, Alberto Ibarrondo & EURECOM.
    2. Offer the exact same License, allowing legal permission to copy, distribute and/or modify any SW using Pyfhel. Hence, any software using Pyfhel must be Open Source.
