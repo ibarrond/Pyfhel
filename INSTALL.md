@@ -10,20 +10,20 @@ Additionally, there are some Packages and Libraries required for the installatio
 |--------------------------|---------------------------------|----------------------------------------|
 | Required Packages        | Boost, Python-dev, PIP, libtool, m4 | sudo apt-get                           |
 | Required Lib Downloads   | NTL, GMP                        | Download .tar.bz2, make, sudo make install |
-| Required Python Packages | Cython                          | sudo pip install                       |
+| Required Python Packages | Cython, numpy                   | sudo pip install                       |
 
 *NOTE: the package manager in this installation was *apt* (Ubuntu). In case you're running a different Linux distribution, use your own package manager (e.g.: rpm,...). If you are running Ubuntu, you may want to perform the EASY INSTALL*
 
 
 ------------------------------------
 
-## EASY INSTALL
-This method is not entirely supported, but it is the fastest. Don't use it unless your OS is Ubuntu. Run inside the src/ folder:
+## EASY INSTALL -> an untested shortcut
+This method is not entirely supported, but it is the fastest, since it is an automatized version. Not recommended unless your OS is Ubuntu (Untested otherwise). Run inside the src/ folder:
        
        > ./configure
        > sudo make all
        
-It should take a long time (5-10 min), but if there is no error, everything should be installed. The easy install is equivalent to all the steps bellow (but it doesn't perform cleaning). If you get any errors, it is better to walk the long way and follow the full installation guide.
+It should take a long time (15-20 min), but if there is no error, everything should be installed. The easy install is equivalent to all the steps bellow (but it doesn't perform cleaning). If you get any errors, it is better to walk the long way and follow the full installation guide.
 
 ---------------------------------------
 
@@ -132,33 +132,7 @@ It should take a long time (5-10 min), but if there is no error, everything shou
        > sudo make Afhel
        > sudo make Pyfhel
        
-    Each of these lines are equivalent to running *make* and *make install* inside src/HElib/src/, src/Afhel/ and src/Pyfhel/ directories respctively
+    Each of these lines is equivalent to running *make* and *make install* inside src/HElib/src/, src/Afhel/ and src/Pyfhel/ directories respctively.
 
-**FINISHED!** You're good to go! if you want to start using Afhel/Pyfhel, please move back to the README.
-
-----------------------------------------
-
-## UPDATE
-   Updating HElib & Afhel can be done with their install commands. In order to update Pyfhel, run inside the src/Pyfhel/ directory:
-       
-       > sudo make upgrade
-
-----------------------------------------
-
-## CLEAN
-   Installation process creates several files that are no longer needed. If you want to erase them, as well as any executable created inside this project (files ending by _\_x_) and any environment files (.aenv, these are very big):
-       
-       > sudo make clean
-
-----------------------------------------
- 
-## UNINSTALL
-   Uninstalling all components at once is performed by running:
-       
-       > sudo make uninstall
-       
-   If you want to uninstall any particular component, navigate to HElib/src/, Afhel/ or Pyfhel/ directories and run that same command.
-   
-   
-
+**FINISHED!** You're good to go! if you want to start using Afhel/Pyfhel, please check the Documentation.
 
