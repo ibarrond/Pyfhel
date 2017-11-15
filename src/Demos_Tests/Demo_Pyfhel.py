@@ -6,6 +6,10 @@ from Pyfhel import Pyfhel
 from PyPtxt import PyPtxt
 from PyCtxt import PyCtxt
 
+#Other import useful for the demo.
+from itertools import izip
+import itertools
+
 print("Pyfhel DEMO")
 
 #Instantiate a Pyfhel object called HE.
@@ -30,6 +34,8 @@ print("  KeyGen completed")
 v1 = [1,2,3,4,5]
 v2 = [2,2,2,2,2]
 
+print("v1: ", v1)
+print("v2: ", v2)
 
 """We will first transform these two vectors in plaintext that could be encrypted, then we'll tranform the plain text of these two vectors in homeomorphic encrypted vector. Then we will add and multiply these two encrypted vectors in an homeomorphic way. Finally, we will decrypted the result of the addition and multiplication of the two encrypted vectors and we verify the result is the same that the addition or multiplication of the two vectors without encryption."""
 
@@ -42,22 +48,33 @@ ptxt2 = PyPtxt(v2, HE)
 ctxt1 = HE.encrypt(ptxt1, fill=1)
 ctxt2 = HE.encrypt(ptxt2, fill=1)
 
-print("Encrypted v1: ", v1)
-print("Encrypted v2: ", v2)
+print("Encryption of v1...")
+print("Encryption of v2...")
+
+print("Encrypted v1: Encrypt(", v1, ")")
+print("Encrypted v2: Encrypt(", v2, ")")
 
 
 """Perform homeomorphic operations on the encrypted vectors."""
 
 """Perform homeomorphic addition"""
+print("Performing Encrypt(v1)+Encrypt(v2)...")
 ctxt1 += ctxt2  # `ctxt1 = ctxt1 + ctxt2` would also be valid->No because of a  bug in add function! Has to be corrected!
 """Decrypt the result of the addition of the two encrypted vectors"""
 v3 = HE.decrypt(ctxt1)
+"""v3 is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]"""
+v3 = list(itertools.chain.from_iterable(v3))
 """The user can then verify if the result of the addition of the two encrypted vectors is the same that the addition of the two vectors without encryption."""
-print("Decrypted result of the addition between encrypted v1 and encrypted v2: Decrypt(encrypt(v1) + encrypt(v2)) -> ", v3)
-print("Result of the addition between v1 and v2: v1 + v2 ->", map(sum, izip(a,b)))
+print("Decrypt(encrypt(v1) + encrypt(v2)) -> ", v3)
+v1Plusv2=map(sum, izip(v1,v2))
+print("v1 + v2 ->", v1Plusv2)
+"""If Decrypt(encrypt(v1) + encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v3==v1Plusv2:
+   print("Homeomorphic operation add is a success: Decrypt(encrypt(v1) + encrypt(v2)) equal to v1+v2")
+else:
+   print("Homeomorphic operation add is a fail: Decrypt(encrypt(v1) + encrypt(v2)) not equal to v1+v2")
 
-
-
+print("\n")
 print("v3: ", v3)
 print("v2: ", v2)
 
