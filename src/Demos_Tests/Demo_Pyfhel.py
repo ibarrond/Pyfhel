@@ -54,10 +54,17 @@ print("Encryption of v2...")
 print("Encrypted v1: Encrypt(", v1, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 
+print("\n")
 
 """Perform homeomorphic operations on the encrypted vectors."""
+print("******Test of the homeomorphic operations******")
+
+print("\n")
 
 """Perform homeomorphic addition"""
+print("Test of the homeomorphic addition")
+print("Encrypted v1: Encrypt(", v1, ")")
+print("Encrypted v2: Encrypt(", v2, ")")
 print("Performing Encrypt(v1)+Encrypt(v2)...")
 ctxt1 += ctxt2  # `ctxt1 = ctxt1 + ctxt2` would also be valid->No because of a  bug in add function! Has to be corrected!
 """Decrypt the result of the addition of the two encrypted vectors"""
@@ -75,12 +82,28 @@ else:
    print("Homeomorphic operation add is a fail: Decrypt(encrypt(v1) + encrypt(v2)) not equal to v1+v2")
 
 print("\n")
-print("v3: ", v3)
-print("v2: ", v2)
 
+"""Perform homeomorphic multiplication"""
+print("Test of the homeomorphic multiplication")
+print("Encrypted v3: Encrypt(", v3, ")")
+print("Encrypted v2: Encrypt(", v2, ")")
+"""ctxt1 contains Encrypt(v3) ie Encrypt(v1) + Encrypt(v2). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v3)*Encrypt(v2)"""
+print("Performing Encrypt(v3)*Encrypt(v2)...")
 ctxt1 *= ctxt2      # `ctxt1 = ctxt1 * ctxt2` would also be valid->No because of a bug in mult function! Has to be corrected!
+"""Decrypt the result of the multiplication of the two encrypted vectors"""
 v4 = HE.decrypt(ctxt1)
-print("mult: v3 * v2 -> ", v4)
+"""v4 is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]"""
+v4 = list(itertools.chain.from_iterable(v4))
+print("Decrypt(encrypt(v3) * encrypt(v2)) -> ", v4)
+v3Multv2= [a*b for a,b in izip(v3,v2)]
+print("v3 * v2 ->", v3Multv2)
+"""If Decrypt(encrypt(v1) + encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v4==v3Multv2:
+   print("Homeomorphic operation mult is a success: Decrypt(encrypt(v3) * encrypt(v2)) equal to v3*v2")
+else:
+   print("Homeomorphic operation mult is a fail: Decrypt(encrypt(v3) + encrypt(v2)) not equal to v3*v2")
+
+
 
 print("------------------TEST REMY1----------------------")
 
