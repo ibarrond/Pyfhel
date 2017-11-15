@@ -264,9 +264,31 @@ class PyCtxt:
     #@param: The method takes a mandatory parameter:
     #-param1: The list of coefficients 
     """
-    def polynomialMult(self, *coefficients):
+    def polynomialMult(self,  ctxt1, coefficients=[], *args):
         n = len(coefficients)
-        print n
+        print("nombre de coefficients", n)
+        if n > 4:
+           raise ValueError("Pyfhel only supports square (2) and cube (3) exponents")
+        else:
+           print("Degree supports")
+
+        coefficients[3] *= self**3
+        coefficients[2] *= self**2
+        coefficients[1] *= self
+        coefficients[2] += coefficients[3]
+        coefficients[1] += coefficients[2]
+        coefficients[0] += coefficients[1]
+        return coefficients[0]
+        print("2")
+        for i, a in enumerate(coefficients):
+                 print("3")
+                 if i != n-1:
+                     print("4")
+                     calc = (a*self)**i
+                     print("4.1")
+                     result += calc
+        print("5")
+        return result   
 
 
 
