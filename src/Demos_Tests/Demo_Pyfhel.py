@@ -26,9 +26,13 @@ print(KEYGEN_PARAMS)
 HE.keyGen(KEYGEN_PARAMS)
 print("  KeyGen completed")
 
-"""Define two vectors that we will use for the tests. We will first transform this two vectors in plaintext, then tranform the plain text of these two vectors in homeomorphic encrypted vector. Then we will add and multiply these two encrypted vectors. Finally, we will decrypted the addition and multiplication of the two encrypted vectors and we will verify that the result is the same that the addition or multiplication of the two vectors without encryption."""
+"""Define two vectors that we will use for the tests."""
 v1 = [1,2,3,4,5]
 v2 = [2,2,2,2,2]
+
+
+"""We will first transform these two vectors in plaintext that could be encrypted, then we'll tranform the plain text of these two vectors in homeomorphic encrypted vector. Then we will add and multiply these two encrypted vectors in an homeomorphic way. Finally, we will decrypted the result of the addition and multiplication of the two encrypted vectors and we verify the result is the same that the addition or multiplication of the two vectors without encryption."""
+
 
 """Tranform the two vectors in plaintext that are objects that could be encrypted."""
 ptxt1 = PyPtxt(v1, HE)
@@ -49,7 +53,10 @@ ctxt1 += ctxt2  # `ctxt1 = ctxt1 + ctxt2` would also be valid->No because of a  
 """Decrypt the result of the addition of the two encrypted vectors"""
 v3 = HE.decrypt(ctxt1)
 """The user can then verify if the result of the addition of the two encrypted vectors is the same that the addition of the two vectors without encryption."""
-print("add: v1 + v2 -> ", v3)
+print("Decrypted result of the addition between encrypted v1 and encrypted v2: Decrypt(encrypt(v1) + encrypt(v2)) -> ", v3)
+print("Result of the addition between v1 and v2: v1 + v2 ->", map(sum, izip(a,b)))
+
+
 
 print("v3: ", v3)
 print("v2: ", v2)
