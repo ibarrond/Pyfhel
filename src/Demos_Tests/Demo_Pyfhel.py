@@ -157,13 +157,17 @@ v_scalprod_v5_v2_decrypt = HE.decrypt(ctxt1)
 """v_scalprod_v5_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]"""
 v_scalprod_v5_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_scalprod_v5_v2_decrypt))
 print("Decrypt(encrypt(v5) . encrypt(v2)) -> ", v_scalprod_v5_v2_decrypt_flatten)
+"""Return the first element of the list or return None if the list is empty."""
+v_scalprod_v5_v2_decrypt_flatten_final = next(iter(v_scalprod_v5_v2_decrypt_flatten or []), None)
+print("First(Decrypt(encrypt(v5) . encrypt(v2))) -> ", v_scalprod_v5_v2_decrypt_flatten_final)
+"""Perform the scalar product on the unencrypted vectors."""
 v5Dotv2 = sum(i[0] * i[1] for i in zip(v_mult_v4_v2_decrypt_flatten, v2))
 print("v5 . v2 ->", v5Dotv2)
-"""If Decrypt(encrypt(v5) . encrypt(v2)) equal to v5 . v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
-if v_scalprod_v5_v2_decrypt_flatten == v5Dotv2:
-   print("Homeomorphic operation Scalar Product is a success: Decrypt(encrypt(v5) . encrypt(v2)) equal to v5 . v2.")
+"""If First(Decrypt(encrypt(v5) . encrypt(v2))) equal to v5 . v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_scalprod_v5_v2_decrypt_flatten_final == v5Dotv2:
+   print("Homeomorphic operation Scalar Product is a success: First(Decrypt(encrypt(v5) . encrypt(v2))) equal to v5 . v2.")
 else:
-   print("Homeomorphic operation Scalar Product is a fail: Decrypt(encrypt(v5) . encrypt(v2)) not equal to v5 . v2.")
+   print("Homeomorphic operation Scalar Product is a fail: First(Decrypt(encrypt(v5) . encrypt(v2))) not equal to v5 . v2.")
 
 
 
