@@ -88,6 +88,7 @@ v_add_v1_v2_decrypt = HE.decrypt(ctxt1)
 v_add_v1_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_add_v1_v2_decrypt))
 """The user can then verify if the result of the addition of the two encrypted vectors is the same that the addition of the two vectors without encryption."""
 print("Decrypt(encrypt(v1) + encrypt(v2)) -> ", v_add_v1_v2_decrypt_flatten)
+"""Perform the sum on the unencrypted vectors""" 
 v1Plusv2 = map(sum, izip(v1,v2))
 print("v3 = v1 + v2 ->", v1Plusv2)
 """If Decrypt(encrypt(v1) + encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
@@ -111,6 +112,7 @@ v_minus_v3_v2_decrypt = HE.decrypt(ctxt1)
 v_minus_v3_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_minus_v3_v2_decrypt))
 """The user can then verify if the result of the substraction of the two encrypted vectors is the same that the substraction of the two vectors without encryption."""
 print("Decrypt(encrypt(v3) - encrypt(v2)) -> ", v_minus_v3_v2_decrypt_flatten)
+"""Perform the substraction on the unencrypted vectors"""
 v3Minusv2 = map(sub, v_add_v1_v2_decrypt_flatten, v2)
 print("v4 = v3 - v2 ->", v3Minusv2)
 """If Decrypt(encrypt(v3) - encrypt(v2)) equal to v3 - v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
@@ -135,6 +137,7 @@ v_mult_v4_v2_decrypt = HE.decrypt(ctxt1)
 """v_mult_v4_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]"""
 v_mult_v4_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_mult_v4_v2_decrypt))
 print("Decrypt(encrypt(v4) * encrypt(v2)) -> ", v_mult_v4_v2_decrypt_flatten)
+"""Perform the multiplication on the unencrypted vectors"""
 v4Multv2= [a*b for a,b in izip(v_minus_v3_v2_decrypt_flatten, v2)]
 print("v4 * v2 ->", v4Multv2)
 """If Decrypt(encrypt(v4) * encrypt(v2)) equal to v4 * v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
@@ -171,8 +174,7 @@ else:
 
 
 
-
-print("------------------TEST REMY1----------------------")
+"""print("------------------TEST Polynomial function----------------------")
 
 a0 = [3,3,3,3,3]
 a1 = [5,5,5,5,5]
@@ -193,4 +195,4 @@ coeff = [cytxt1, cytxt2, cytxt3, cytxt4]
 
 ctxt1polynomial = ctxt1.polynomialMult(ctxt1, coeff)
 result = HE.decrypt(ctxt1polynomial)
-print("Polynomial result: ", result)
+print("Polynomial result: ", result)"""
