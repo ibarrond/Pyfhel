@@ -9,6 +9,7 @@ from PyCtxt import PyCtxt
 #Other import useful for the demo.
 from itertools import izip
 import itertools
+from operator import sub
 
 print("\n")
 print("     ************Pyfhel DEMO************")
@@ -80,40 +81,88 @@ print("Encrypted v2: Encrypt(", v2, ")")
 print("Performing Encrypt(v1) + Encrypt(v2)...")
 ctxt1 += ctxt2  # `ctxt1 = ctxt1 + ctxt2` would also be valid->No because of a  bug in add function! Has to be corrected!
 """Decrypt the result of the addition of the two encrypted vectors"""
-v3 = HE.decrypt(ctxt1)
+v_add_v1_v2_decrypt = HE.decrypt(ctxt1)
 """v3 is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]"""
-v3 = list(itertools.chain.from_iterable(v3))
+v_add_v1_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_add_v1_v2_decrypt))
 """The user can then verify if the result of the addition of the two encrypted vectors is the same that the addition of the two vectors without encryption."""
-print("Decrypt(encrypt(v1) + encrypt(v2)) -> ", v3)
-v1Plusv2=map(sum, izip(v1,v2))
-print("v1 + v2 ->", v1Plusv2)
+print("Decrypt(encrypt(v1) + encrypt(v2)) -> ", v_add_v1_v2_decrypt_flatten)
+v1Plusv2 = map(sum, izip(v1,v2))
+print("v3 = v1 + v2 ->", v1Plusv2)
 """If Decrypt(encrypt(v1) + encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
-if v3==v1Plusv2:
+if v_add_v1_v2_decrypt_flatten == v1Plusv2:
    print("Homeomorphic operation add is a success: Decrypt(encrypt(v1) + encrypt(v2)) equal to v1 + v2.")
 else:
    print("Homeomorphic operation add is a fail: Decrypt(encrypt(v1) + encrypt(v2)) not equal to v1 + v2.")
 
 print("\n")
 
+
+"""Perform homeomorphic substraction"""
+print("***Test of the homeomorphic substraction***")
+print("Encrypted v3: Encrypt(", v_add_v1_v2_decrypt_flatten, ")")
+print("Encrypted v2: Encrypt(", v2, ")")
+print("Performing Encrypt(v3) - Encrypt(v2)...")
+ctxt1 -= ctxt2  # `ctxt1 = ctxt1 - ctxt2` would also be valid->No because of a  bug in sub function! Has to be corrected!
+"""Decrypt the result of the substraction of the two encrypted vectors"""
+v_minus_v3_v2_decrypt = HE.decrypt(ctxt1)
+"""v_add_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]"""
+v_minus_v3_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_minus_v3_v2_decrypt))
+"""The user can then verify if the result of the substraction of the two encrypted vectors is the same that the substraction of the two vectors without encryption."""
+print("Decrypt(encrypt(v3) - encrypt(v2)) -> ", v_minus_v3_v2_decrypt_flatten)
+v3Minusv2 = map(sub, v_add_v1_v2_decrypt_flatten, v2)
+print("v4 = v3 - v2 ->", v3Minusv2)
+"""If Decrypt(encrypt(v3) - encrypt(v2)) equal to v3 - v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_minus_v3_v2_decrypt_flatten == v3Minusv2:
+   print("Homeomorphic operation substraction is a success: Decrypt(encrypt(v3) - encrypt(v2)) equal to v3 - v2.")
+else:
+   print("Homeomorphic operation substraction is a fail: Decrypt(encrypt(v3) - encrypt(v2)) not equal to v3 - v2.")
+
+print("\n")
+
+
+
 """Perform homeomorphic multiplication"""
 print("***Test of the homeomorphic multiplication***")
-print("Encrypted v3: Encrypt(", v3, ")")
+print("Encrypted v4: Encrypt(", v_minus_v3_v2_decrypt_flatten, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
-"""ctxt1 contains Encrypt(v3) ie Encrypt(v1) + Encrypt(v2). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v3)*Encrypt(v2)"""
-print("Performing Encrypt(v3) * Encrypt(v2)...")
+"""ctxt1 contains Encrypt(v4) ie [(Encrypt(v1) + Encrypt(v2))-Encrypt(v2)] ie Encrypt(v1). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v4)*Encrypt(v2) = Encrypt(v1) * Encrypt(v2)"""
+print("Performing Encrypt(v4) * Encrypt(v2)...")
 ctxt1 *= ctxt2      # `ctxt1 = ctxt1 * ctxt2` would also be valid->No because of a bug in mult function! Has to be corrected!
 """Decrypt the result of the multiplication of the two encrypted vectors"""
-v4 = HE.decrypt(ctxt1)
-"""v4 is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]"""
-v4 = list(itertools.chain.from_iterable(v4))
-print("Decrypt(encrypt(v3) * encrypt(v2)) -> ", v4)
-v3Multv2= [a*b for a,b in izip(v3,v2)]
-print("v3 * v2 ->", v3Multv2)
-"""If Decrypt(encrypt(v1) + encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
-if v4==v3Multv2:
-   print("Homeomorphic operation mult is a success: Decrypt(encrypt(v3) * encrypt(v2)) equal to v3 * v2.")
+v_mult_v4_v2_decrypt = HE.decrypt(ctxt1)
+"""v_mult_v4_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]"""
+v_mult_v4_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_mult_v4_v2_decrypt))
+print("Decrypt(encrypt(v4) * encrypt(v2)) -> ", v_mult_v4_v2_decrypt_flatten)
+v4Multv2= [a*b for a,b in izip(v_minus_v3_v2_decrypt_flatten, v2)]
+print("v4 * v2 ->", v4Multv2)
+"""If Decrypt(encrypt(v4) * encrypt(v2)) equal to v4 * v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_mult_v4_v2_decrypt_flatten == v4Multv2:
+   print("Homeomorphic operation mult is a success: Decrypt(encrypt(v4) * encrypt(v2)) equal to v4 * v2.")
 else:
-   print("Homeomorphic operation mult is a fail: Decrypt(encrypt(v3) + encrypt(v2)) not equal to v3 * v2.")
+   print("Homeomorphic operation mult is a fail: Decrypt(encrypt(v4) * encrypt(v2)) not equal to v4 * v2.")
+
+print("\n")
+
+"""Perform homeomorphic Scalar Product"""
+print("***Test of the homeomorphic Scalar Product***")
+print("Encrypted v5: Encrypt(", v_mult_v4_v2_decrypt_flatten, ")")
+print("Encrypted v2: Encrypt(", v2, ")")
+"""ctxt1 contains Encrypt(v5) ie [(Encrypt(v1) + Encrypt(v2))-Encrypt(v2)] * Encrypt(v2) ie Encrypt(v1) * Encrypt(v2). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v5) . Encrypt(v2)"""
+print("Performing Encrypt(v5) . Encrypt(v2)...")
+ctxt1 %= ctxt2      # `ctxt1 = ctxt1 % ctxt2` would also be valid->No because of a bug in mult function! Has to be corrected!
+"""Decrypt the result of the Scalar Product of the two encrypted vectors"""
+v_scalprod_v5_v2_decrypt = HE.decrypt(ctxt1)
+"""v_scalprod_v5_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]"""
+v_scalprod_v5_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_scalprod_v5_v2_decrypt))
+print("Decrypt(encrypt(v5) . encrypt(v2)) -> ", v_scalprod_v5_v2_decrypt_flatten)
+v5Dotv2 = sum(i[0] * i[1] for i in zip(v_mult_v4_v2_decrypt_flatten, v2))
+print("v5 . v2 ->", v5Dotv2)
+"""If Decrypt(encrypt(v5) . encrypt(v2)) equal to v5 . v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_scalprod_v5_v2_decrypt_flatten == v5Dotv2:
+   print("Homeomorphic operation Scalar Product is a success: Decrypt(encrypt(v5) . encrypt(v2)) equal to v5 . v2.")
+else:
+   print("Homeomorphic operation Scalar Product is a fail: Decrypt(encrypt(v5) . encrypt(v2)) not equal to v5 . v2.")
+
 
 
 
