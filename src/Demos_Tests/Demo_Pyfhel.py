@@ -58,8 +58,10 @@ ptxt1 = PyPtxt(v1, HE)
 ptxt2 = PyPtxt(v2, HE)
 
 """Encrypted the two plaintexts to have two Cypher text that are encrypted in an homeomorphic way with the key that have been generated before."""
-ctxt1 = HE.encrypt(ptxt1, fill=1)
-ctxt2 = HE.encrypt(ptxt2, fill=1)
+ctxt1 = HE.encrypt(ptxt1)
+ctxt2 = HE.encrypt(ptxt2)
+#ctxt1 = HE.encrypt(ptxt1, fill=1)
+#ctxt2 = HE.encrypt(ptxt2, fill=1)
 
 print("Encryption of v1...")
 print("Encryption of v2...")
