@@ -88,8 +88,8 @@ print("******Test of the homeomorphic operations******")
 print("\n")
 
 
-"""Perform homeomorphic addition."""
-print("***Test of the homeomorphic addition***")
+"""Perform homeomorphic addition with operator += ."""
+print("*** Test of the homeomorphic addition with operator += ***")
 print("Encrypted v1: Encrypt(", v1, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 print("Performing Encrypt(v1) + Encrypt(v2)...")
@@ -105,17 +105,17 @@ v1Plusv2 = map(sum, izip(v1,v2))
 print("v3 = v1 + v2 ->", v1Plusv2)
 """If Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_add_v1_v2_decrypt_flatten == v1Plusv2:
-   print("Homeomorphic operation add is a success: Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2.")
+   print("Homeomorphic operation add with operator += is a success: Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2.")
 else:
-   print("Homeomorphic operation add is a fail: Decrypt(Encrypt(v1) + Encrypt(v2)) not equal to v1 + v2.")
+   print("Homeomorphic operation add with operator += is a fail: Decrypt(Encrypt(v1) + Encrypt(v2)) not equal to v1 + v2.")
 
 
 """Skip a line."""
 print("\n")
 
 
-"""Perform homeomorphic substraction."""
-print("***Test of the homeomorphic substraction***")
+"""Perform homeomorphic substraction with operator -= ."""
+print("***Test of the homeomorphic substraction with operator -= ***")
 print("Encrypted v3: Encrypt(", v_add_v1_v2_decrypt_flatten, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 print("Performing Encrypt(v3) - Encrypt(v2)...")
@@ -131,17 +131,17 @@ v3Minusv2 = map(sub, v_add_v1_v2_decrypt_flatten, v2)
 print("v4 = v3 - v2 ->", v3Minusv2)
 """If Decrypt(Encrypt(v3) - Encrypt(v2)) equal to v3 - v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_minus_v3_v2_decrypt_flatten == v3Minusv2:
-   print("Homeomorphic operation substraction is a success: Decrypt(Encrypt(v3) - Encrypt(v2)) equal to v3 - v2.")
+   print("Homeomorphic operation substraction with operator -= is a success: Decrypt(Encrypt(v3) - Encrypt(v2)) equal to v3 - v2.")
 else:
-   print("Homeomorphic operation substraction is a fail: Decrypt(Encrypt(v3) - Encrypt(v2)) not equal to v3 - v2.")
+   print("Homeomorphic operation substraction with operation -= is a fail: Decrypt(Encrypt(v3) - Encrypt(v2)) not equal to v3 - v2.")
 
 
 """Skip a line."""
 print("\n")
 
 
-"""Perform homeomorphic multiplication."""
-print("***Test of the homeomorphic multiplication***")
+"""Perform homeomorphic multiplication with operator *= ."""
+print("***Test of the homeomorphic multiplication with operator *= ***")
 print("Encrypted v4: Encrypt(", v_minus_v3_v2_decrypt_flatten, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 """ctxt1 contains Encrypt(v4) ie [(Encrypt(v1) + Encrypt(v2))-Encrypt(v2)] ie Encrypt(v1). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v4)*Encrypt(v2) = Encrypt(v1) * Encrypt(v2)"""
@@ -157,17 +157,17 @@ v4Multv2= [a*b for a,b in izip(v_minus_v3_v2_decrypt_flatten, v2)]
 print("v4 * v2 ->", v4Multv2)
 """If Decrypt(Encrypt(v4) * Encrypt(v2)) equal to v4 * v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_mult_v4_v2_decrypt_flatten == v4Multv2:
-   print("Homeomorphic operation mult is a success: Decrypt(Encrypt(v4) * Encrypt(v2)) equal to v4 * v2.")
+   print("Homeomorphic operation mult with operator *= is a success: Decrypt(Encrypt(v4) * Encrypt(v2)) equal to v4 * v2.")
 else:
-   print("Homeomorphic operation mult is a fail: Decrypt(Encrypt(v4) * Encrypt(v2)) not equal to v4 * v2.")
+   print("Homeomorphic operation mult with operator *= is a fail: Decrypt(Encrypt(v4) * Encrypt(v2)) not equal to v4 * v2.")
 
 
 """Skip a line."""
 print("\n")
 
 
-"""Perform homeomorphic Scalar Product."""
-print("***Test of the homeomorphic Scalar Product***")
+"""Perform homeomorphic Scalar Product with operator %= ."""
+print("***Test of the homeomorphic Scalar Product with operator %= ***")
 print("Encrypted v5: Encrypt(", v_mult_v4_v2_decrypt_flatten, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 """ctxt1 contains Encrypt(v5) ie [(Encrypt(v1) + Encrypt(v2))-Encrypt(v2)] * Encrypt(v2) ie Encrypt(v1) * Encrypt(v2). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v5) . Encrypt(v2)"""
@@ -186,17 +186,17 @@ v5Dotv2 = sum(i[0] * i[1] for i in zip(v_mult_v4_v2_decrypt_flatten, v2))
 print("v5 . v2 ->", v5Dotv2)
 """If First(Decrypt(Encrypt(v5) . Encrypt(v2))) equal to v5 . v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_scalprod_v5_v2_decrypt_flatten_final == v5Dotv2:
-   print("Homeomorphic operation Scalar Product is a success: First(Decrypt(Encrypt(v5) . Encrypt(v2))) equal to v5 . v2.")
+   print("Homeomorphic operation Scalar Product with operator %= is a success: First(Decrypt(Encrypt(v5) . Encrypt(v2))) equal to v5 . v2.")
 else:
-   print("Homeomorphic operation Scalar Product is a fail: First(Decrypt(Encrypt(v5) . Encrypt(v2))) not equal to v5 . v2.")
+   print("Homeomorphic operation Scalar Product with operator %= is a fail: First(Decrypt(Encrypt(v5) . Encrypt(v2))) not equal to v5 . v2.")
 
 
 """Skip a line."""
 print("\n")
 
 
-"""Perform homeomorphic Square Power."""
-print("***Test of the homeomorphic Square Power***")
+"""Perform homeomorphic Square Power with the operator **= ."""
+print("***Test of the homeomorphic Square Power **= ***")
 print("Encrypted v6: Encrypt(", v_scalprod_v5_v2_decrypt_flatten, ")")
 """ctxt1 contains Encrypt(v6) ie [[(Encrypt(v1) + Encrypt(v2))-Encrypt(v2)] * Encrypt(v2)] . Encrypt(v2) ie [Encrypt(v1) * Encrypt(v2)] . Encrypt(v2). So we perform: Encrypt(v6) ** 2"""
 print("Performing Encrypt(v6) ** 2...")
@@ -211,9 +211,9 @@ v6Power2 = [a*b for a,b in izip(v_scalprod_v5_v2_decrypt_flatten, v_scalprod_v5_
 print("v6 ** 2 ->", v6Power2)
 """If Decrypt(Encrypt(v6) ** 2) equal to v6 ** 2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_power_v6_2_decrypt_flatten == v6Power2:
-   print("Homeomorphic operation Square Power is a success: Decrypt(Encrypt(v6) ** 2) equal to v6 ** 2.")
+   print("Homeomorphic operation Square Power with operator **= is a success: Decrypt(Encrypt(v6) ** 2) equal to v6 ** 2.")
 else:
-   print("Homeomorphic operation Square Power is a fail: Decrypt(Encrypt(v6) ** 2) not equal to v6 ** 2.")
+   print("Homeomorphic operation Square Power with operator **= is a fail: Decrypt(Encrypt(v6) ** 2) not equal to v6 ** 2.")
 
 
 """Skip a line."""
