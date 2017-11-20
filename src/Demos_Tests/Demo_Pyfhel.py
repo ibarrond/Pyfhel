@@ -190,8 +190,35 @@ if v_scalprod_v5_v2_decrypt_flatten_final == v5Dotv2:
 else:
    print("Homeomorphic operation Scalar Product is a fail: First(Decrypt(Encrypt(v5) . Encrypt(v2))) not equal to v5 . v2.")
 
+
 """Skip a line."""
 print("\n")
+
+
+"""Perform homeomorphic Square Power."""
+print("***Test of the homeomorphic Square Power***")
+print("Encrypted v6: Encrypt(", v_scalprod_v5_v2_decrypt_flatten, ")")
+"""ctxt1 contains Encrypt(v6) ie [[(Encrypt(v1) + Encrypt(v2))-Encrypt(v2)] * Encrypt(v2)] . Encrypt(v2) ie [Encrypt(v1) * Encrypt(v2)] . Encrypt(v2). So we perform: Encrypt(v6) ** 2"""
+print("Performing Encrypt(v6) ** 2...")
+ctxt1 **= 2      # `ctxt1 = ctxt1 ** ctxt2` would also be valid->No because of a bug in mult function! Has to be corrected!
+"""Decrypt the result of Square Power of the encrypted vector."""
+v_power_v6_2_decrypt = HE.decrypt(ctxt1)
+"""v_power_v6_2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_power_v6_2_decrypt_flatten = list(itertools.chain.from_iterable(v_power_v6_2_decrypt))
+print("Decrypt(Encrypt(v6) ** 2) -> ", v_power_v6_2_decrypt_flatten)
+"""Perform the Square Power on the unencrypted vectors."""
+v6Power2 = [a*b for a,b in izip(v_scalprod_v5_v2_decrypt_flatten, v_scalprod_v5_v2_decrypt_flatten)]
+print("v6 ** 2 ->", v6Power2)
+"""If Decrypt(Encrypt(v6) ** 2) equal to v6 ** 2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_power_v6_2_decrypt_flatten == v6Power2:
+   print("Homeomorphic operation Square Power is a success: Decrypt(Encrypt(v6) ** 2) equal to v6 ** 2.")
+else:
+   print("Homeomorphic operation Square Power is a fail: Decrypt(Encrypt(v6) ** 2) not equal to v6 ** 2.")
+
+
+"""Skip a line."""
+print("\n")
+
 
 """print("------------------TEST Polynomial function----------------------")
 
