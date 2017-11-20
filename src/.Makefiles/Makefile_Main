@@ -127,6 +127,8 @@ pypackages:
 
 install: HElib Afhel Pyfhel
 
+Upgrade: HElib Afhel PyfhelUpgrade
+
 HElib:
 	$(MAKE) -C HElib/src/
 	$(MAKE) install -C HElib/src/	
@@ -138,6 +140,8 @@ Afhel:
 Pyfhel:
 	$(MAKE) -C Pyfhel
 
+PyfhelUpgrade:
+	$(MAKE) upgrade -C Pyfhel
 
 
 ##############################################################################################
