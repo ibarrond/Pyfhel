@@ -68,7 +68,7 @@ class PyCtxt:
     def __add__(self, other):
         if not isinstance(other, (PyCtxt, int)):
             raise TypeError("PyCtxt '+' error: lhs must be of type PyCtxt or int instead of " + str(type(other)))
-        newCtxt = self.__pyfhel.set(self)               # Create new Ctxt for result
+        newCtxt = self              # Create new Ctxt for result
         if isinstance(other, PyCtxt):                   # Add directly if other is PyCtxt
             newCtxt += other
         else:
