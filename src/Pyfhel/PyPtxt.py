@@ -81,8 +81,7 @@ class PyPtxt:
     # '+' operator
     def __add__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '+' error: lhs must be of type PyPtxt or "
-                            "int instead of " + str(type(other)))
+            raise TypeError("PyPtxt '+' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
         newPtxt  = PyPtxt(self.getPtxt(), self.getPyfhel())
         newPtxt += other
         return newPtxt
@@ -90,8 +89,7 @@ class PyPtxt:
     # '+=' operator
     def __iadd__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '+=' error: lhs must be of type PyPtxt "
-                            "or int instead of type " + str(type(other)))
+            raise TypeError("PyPtxt '+=' error: lhs must be of type PyPtxt or int instead of type " + str(type(other)))
         from operator import add, mod
         if isinstance(other, PyPtxt):
             self = PyPtxt([mod(elt, self.__pyfhel.getModulus())
@@ -114,8 +112,7 @@ class PyPtxt:
     def __sub__(self, other):
         if not isinstance(other, PyPtxt):
             if not isinstance(other, (PyPtxt, int)):
-                raise TypeError("PyPtxt '-' error: lhs must be of type PyPtxt or "
-                            "int instead of " + str(type(other)))
+                raise TypeError("PyPtxt '-' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
         newPtxt = PyPtxt(self.getPtxt(), self.getPyfhel())
         newPtxt -= other
         return newPtxt
@@ -123,8 +120,7 @@ class PyPtxt:
     # '-=' operator
     def __isub__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '-=' error: lhs must be of type PyPtxt "
-                            "or int instead of type " + str(type(other)))
+            raise TypeError("PyPtxt '-=' error: lhs must be of type PyPtxt or int instead of type " + str(type(other)))
         from operator import sub, mod
         if isinstance(other, PyPtxt):
             self = PyPtxt([mod(elt, self.__pyfhel.getModulus())
@@ -147,8 +143,7 @@ class PyPtxt:
     # '*' operator
     def __mul__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or "
-                            "int instead of " + str(type(other)))
+            raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
         newPtxt = PyPtxt(self.getPtxt(), self.getPyfhel())
         newPtxt *= other
         return newPtxt
@@ -156,8 +151,7 @@ class PyPtxt:
     # '*=' operator
     def __imul__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '*=' error: lhs must be of type PyPtxt "
-                            "or int instead of type " + str(type(other)))
+            raise TypeError("PyPtxt '*=' error: lhs must be of type PyPtxt or int instead of type " + str(type(other)))
         from operator import mul, mod
         if isinstance(other, PyPtxt):
             self = PyPtxt([mod(elt, self.__pyfhel.getModulus())
@@ -179,8 +173,7 @@ class PyPtxt:
     # '%' operator
     def __mod__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or "
-                            "int instead of " + str(type(other)))
+            raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
         newPtxt = PyPtxt(self.getPtxt(), self.getPyfhel())
         from operator import mul, mod
         if isinstance(other, PyPtxt):
@@ -194,8 +187,7 @@ class PyPtxt:
     # '%=' operator
     def __imod__(self, other):
         if not isinstance(other, (PyPtxt, int)):
-            raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or "
-                            "int instead of " + str(type(other)))
+            raise TypeError("PyPtxt '*' error: lhs must be of type PyPtxt or int instead of " + str(type(other)))
         newPtxt = PyPtxt(self.getPtxt(), self.getPyfhel())
         from operator import mul, mod
         if isinstance(other, PyPtxt):
@@ -219,13 +211,11 @@ class PyPtxt:
     # '==' operator
     def __eq__(self, other):
         if not isinstance(other, PyPtxt):
-            raise TypeError("PyPtxt '==' error: lhs must be of type PyPtxt "
-                            "instead of type " + str(type(other)))
+            raise TypeError("PyPtxt '==' error: lhs must be of type PyPtxt instead of type " + str(type(other)))
         return self.getPtxt() == other.getPtxt()
 
     # '!=' operator
     def __ne__(self, other):
         if not isinstance(other, PyPtxt):
-            raise TypeError("PyPtxt '!=' error: lhs must be of type PyPtxt "
-                            "instead of type " + str(type(other)))
+            raise TypeError("PyPtxt '!=' error: lhs must be of type PyPtxt instead of type " + str(type(other)))
         return not self == other

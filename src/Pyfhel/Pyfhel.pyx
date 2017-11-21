@@ -106,8 +106,7 @@ cdef class Pyfhel:
         cdef vector[long] ptxtVect;
         numSlots = self.numSlots()
         if numSlots < ptxt.numSlots():
-            raise ValueError("Pyfhel encrypt error: input list has more "
-                             "elements than number of plaintext slots")
+            raise ValueError("Pyfhel encrypt error: input list has more elements than number of plaintext slots")
         ctxt = PyCtxt(ptxt.getPyfhel(), ptxt.getPtxtLen())
         for elt in ptxt.getPtxtList():      # for each list of size numSlots in Ptxt
             ptxtVect.clear()
@@ -125,13 +124,12 @@ cdef class Pyfhel:
     # DECRYPT a PyCtxt object into a List of values
     def decrypt(self, ctxt):
         if not isinstance(ctxt, PyCtxt):
-            raise TypeError("Pyfhel decrypt error: ctxt must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt)))
+            raise TypeError("Pyfhel decrypt error: ctxt must be of type PyCtxt instead of type " + str(type(ctxt)))
         retList = []
         cdef vector[long] retVect
         ids = ctxt.getIDs()
         lens = ctxt.getLen()
-        for i,l in zip(ids,lens):                       # For each key in PyCtxt
+        for i,l in zip(ids,lens):           # For each key in PyCtxt
             retPtxt = []
             retV = self.afhel.decrypt(i)    # Decrypt its Afhel Ctxt
             for k in range(l):
@@ -143,8 +141,7 @@ cdef class Pyfhel:
     # DUPLICATE a PyCtxt with all its parameters, useful to keep originals in ops
     def duplicate(self, ctxt):
         if not isinstance(ctxt, PyCtxt):
-            raise TypeError("Pyfhel set error: ctxt must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt)))
+            raise TypeError("Pyfhel set error: ctxt must be of type PyCtxt instead of type " + str(type(ctxt)))
         ids = ctxt.getIDs()                 # Use same Pyfhel class and same #IDs
         new_ctxt = PyCtxt(ctxt.getPyfhel(), ctxt.getLen())
         for i in ids:                       # Loop over all IDs and append them
@@ -156,12 +153,9 @@ cdef class Pyfhel:
     # ADD two PyCtxt objects for each ID in both
     def add(self, ctxt1, ctxt2, neg=False):
         if not isinstance(ctxt1, PyCtxt):
-            raise TypeError("Pyfhel addCtxt error: ctxt1 must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt1)))
+            raise TypeError("Pyfhel addCtxt error: ctxt1 must be of type PyCtxt instead of type " + str(type(ctxt1)))
         if not isinstance(ctxt2, PyCtxt):
-            raise TypeError("Pyfhel addCtxt error: ctxt2 must be of "
-                            "type PyCtxt instead of type " +
-                            str(type(ctxt2)))
+            raise TypeError("Pyfhel addCtxt error: ctxt2 must be of type PyCtxt instead of type " + str(type(ctxt2)))
 
         ids1 = ctxt1.getIDs()
         ids2 = ctxt2.getIDs()
@@ -175,12 +169,9 @@ cdef class Pyfhel:
     # MULTiply two PyCtxt objects for each ID in both
     def mult(self, ctxt1, ctxt2):
         if not isinstance(ctxt1, PyCtxt):
-            raise TypeError("Pyfhel multiplyBy error: ctxt1 must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt1)))
+            raise TypeError("Pyfhel multiplyBy error: ctxt1 must be of type PyCtxt instead of type " + str(type(ctxt1)))
         if not isinstance(ctxt2, PyCtxt):
-            raise TypeError("Pyfhel multiplyBy error: ctxt2 must be of "
-                            "type PyCtxt instead of type " +
-                            str(type(ctxt2)))
+            raise TypeError("Pyfhel multiplyBy error: ctxt2 must be of type PyCtxt instead of type " + str(type(ctxt2)))
         ids1 = ctxt1.getIDs()
         ids2 = ctxt2.getIDs()
         n_ids = len(ids1)
@@ -193,16 +184,11 @@ cdef class Pyfhel:
     # MULTIPLY 3 PyCtxt objects for each ID in both
     def mult3(self, ctxt1, ctxt2, ctxt3):
         if not isinstance(ctxt1, PyCtxt):
-            raise TypeError("Pyfhel multiplyBy error: ctxt1 must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt1)))
+            raise TypeError("Pyfhel multiplyBy error: ctxt1 must be of type PyCtxt instead of type " + str(type(ctxt1)))
         if not isinstance(ctxt2, PyCtxt):
-            raise TypeError("Pyfhel multiplyBy error: ctxt2 must be of "
-                            "type PyCtxt instead of type " +
-                            str(type(ctxt2)))
+            raise TypeError("Pyfhel multiplyBy error: ctxt2 must be of type PyCtxt instead of type " + str(type(ctxt2)))
         if not isinstance(ctxt3, PyCtxt):
-            raise TypeError("Pyfhel multiplyBy error: ctxt3 must be of "
-                            "type PyCtxt instead of type " +
-                            str(type(ctxt3)))    
+            raise TypeError("Pyfhel multiplyBy error: ctxt3 must be of type PyCtxt instead of type " + str(type(ctxt3)))    
         ids1 = ctxt1.getIDs()
         ids2 = ctxt2.getIDs()
         ids3 = ctxt3.getIDs()
@@ -220,12 +206,9 @@ cdef class Pyfhel:
     # SCALAR PRODuct between two PyCtxt objects for each ID in both
     def scalarProd(self, ctxt1, ctxt2):
         if not isinstance(ctxt1, PyCtxt):
-            raise TypeError("Pyfhel scalarProd error: ctxt1 must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt1)))
+            raise TypeError("Pyfhel scalarProd error: ctxt1 must be of type PyCtxt instead of type " + str(type(ctxt1)))
         if not isinstance(ctxt2, PyCtxt):
-            raise TypeError("Pyfhel scalarProd error: ctxt2 must be of "
-                            "type PyCtxt instead of type " +
-                            str(type(ctxt2)))
+            raise TypeError("Pyfhel scalarProd error: ctxt2 must be of type PyCtxt instead of type " + str(type(ctxt2)))
         ids1 = ctxt1.getIDs()
         ids2 = ctxt2.getIDs()
         n_ids = len(ids1)
@@ -238,8 +221,7 @@ cdef class Pyfhel:
     # SQUARE each cyphertext inside PyCtxt ctxt for each ID in it
     def square(self, ctxt):
         if not isinstance(ctxt, PyCtxt):
-            raise TypeError("Pyfhel square error: ctxt must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt)))
+            raise TypeError("Pyfhel square error: ctxt must be of type PyCtxt instead of type " + str(type(ctxt)))
 
         ids = ctxt.getIDs()
         n_ids = len(ids)
@@ -253,8 +235,7 @@ cdef class Pyfhel:
     # CUMSUM Cumulative sum over all the values in the cyphertext
     def cumSum(self, ctxt):
         if not isinstance(ctxt, PyCtxt):
-            raise TypeError("Pyfhel cube error: ctxt must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt)))
+            raise TypeError("Pyfhel cube error: ctxt must be of type PyCtxt instead of type " + str(type(ctxt)))
 
         ids = ctxt.getIDs()
         n_ids = len(ids)
@@ -268,8 +249,7 @@ cdef class Pyfhel:
     # CUBE each cyphertext inside PyCtxt ctxt for each ID in it
     def cube(self, ctxt):
         if not isinstance(ctxt, PyCtxt):
-            raise TypeError("Pyfhel cube error: ctxt must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt)))
+            raise TypeError("Pyfhel cube error: ctxt must be of type PyCtxt instead of type " + str(type(ctxt)))
 
         ids = ctxt.getIDs()
         n_ids = len(ids)
@@ -281,8 +261,7 @@ cdef class Pyfhel:
     # NEGATE each cyphertext inside PyCtxt ctxt for each ID in it
     def negate(self, ctxt):
         if not isinstance(ctxt, PyCtxt):
-            raise TypeError("Pyfhel negate error: ctxt must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt)))
+            raise TypeError("Pyfhel negate error: ctxt must be of type PyCtxt instead of type " + str(type(ctxt)))
 
         ids = ctxt.getIDs()
         n_ids = len(ids)
@@ -294,12 +273,9 @@ cdef class Pyfhel:
     # COMPARE two PyCtxt objects for each ID in both
     def equalsTo(self, ctxt1, ctxt2):
         if not isinstance(ctxt1, PyCtxt):
-            raise TypeError("Pyfhel equalsTo error: ctxt1 must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt1)))
+            raise TypeError("Pyfhel equalsTo error: ctxt1 must be of type PyCtxt instead of type " + str(type(ctxt1)))
         if not isinstance(ctxt2, PyCtxt):
-            raise TypeError("Pyfhel equalsTo error: ctxt2 must be of "
-                            "type PyCtxt instead of type " +
-                            str(type(ctxt2)))
+            raise TypeError("Pyfhel equalsTo error: ctxt2 must be of type PyCtxt instead of type " + str(type(ctxt2)))
         ids1 = ctxt1.getIDs()
         ids2 = ctxt2.getIDs()
         n_ids = len(ids1)
@@ -314,8 +290,7 @@ cdef class Pyfhel:
     # RORATE each cyphertext inside PyCtxt ctxt for each ID in it
     def rotate(self, ctxt, c):
         if not isinstance(ctxt, PyCtxt):
-            raise TypeError("Pyfhel rotate error: ctxt must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt)))
+            raise TypeError("Pyfhel rotate error: ctxt must be of type PyCtxt instead of type " + str(type(ctxt)))
 
         ids = ctxt.getIDs()
         n_ids = len(ids)
@@ -327,8 +302,7 @@ cdef class Pyfhel:
     # SHIFT each cyphertext inside PyCtxt ctxt for each ID in it
     def shift(self, ctxt, c):
         if not isinstance(ctxt, PyCtxt):
-            raise TypeError("Pyfhel rotate error: ctxt must be of type PyCtxt "
-                            "instead of type " + str(type(ctxt)))
+            raise TypeError("Pyfhel rotate error: ctxt must be of type PyCtxt instead of type " + str(type(ctxt)))
 
         ids = ctxt.getIDs()
         n_ids = len(ids)
@@ -344,8 +318,7 @@ cdef class Pyfhel:
     # Saves the environment into a .aenv file
     def saveEnv(self, fileName):
         if not isinstance(fileName, str):
-            raise TypeError("Pyfhel saveEnv error: fileName must be of type str " + 
-                                "instead of type " + str(type(fileName)))
+            raise TypeError("Pyfhel saveEnv error: fileName must be of type str instead of type " + str(type(fileName)))
         self.afhel.saveEnv(fileName)
         return 
 
@@ -354,8 +327,7 @@ cdef class Pyfhel:
     # Restores the environment from a .aenv file
     def restoreEnv(self, fileName):
         if not isinstance(fileName, str):
-            raise TypeError("Pyfhel saveEnv error: fileName must be of type str " +
-                    "instead of type " + str(type(fileName)))
+            raise TypeError("Pyfhel saveEnv error: fileName must be of type str instead of type " + str(type(fileName)))
         self.afhel.restoreEnv(fileName)
         self.modulus = long(pow(self.afhel.getP(), self.afhel.getR()))
         return
