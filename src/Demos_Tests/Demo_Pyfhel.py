@@ -11,9 +11,11 @@ from itertools import izip
 import itertools
 from operator import sub
 import numpy as np
+import matplotlib.pyplot as plt
 import sys
 import argparse
 
+"""Define a parser to parse the arguments given to the program."""
 parser = argparse.ArgumentParser()
 
 """ One can specify in the command line of the program either -r or --random (it will be the same to specify -r or --random). This is optional argument. If the user specify it, args.random == True, else args.random == False)"""
@@ -21,6 +23,9 @@ parser.add_argument("-r", "--random", help="Perform tests on random vectors.", a
 
 """ One can specify in the command line of the program either -f or --fixe (it will be the same to specify -f or --fixe). This is optional argument. If the user specify it, args.fixe == True, else args.fixe == False)"""
 parser.add_argument("-f", "--fixe", help="Perform tests on fixed vectors.", action="store_true")
+
+"""One can view a pie chart of the successful tests versus fail tests by adding this option command."""
+parser.add_argument("-g", "--graph", help="Display a pie chart of the successful tests versus fail tests..", action="store_true")
 
 """Parse the arguments given to the program."""
 args = parser.parse_args()
@@ -53,6 +58,11 @@ if (not args.random and args.fixe):
 if (args.random and args.fixe):
                                  print("Error, you cannot specify -r/--random and -f/--fixe arguments at the same time.")
                                  sys.exit()
+
+
+"""Define a variable to count the number of succes and the number of fail."""
+number_success = 0
+number_fail = 0
 
 
 print("******Definition of the vectors used during the tests******")
@@ -141,9 +151,10 @@ print("v3 = v1 + v2 ->", v1Plusv2)
 """If Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_add_v1_v2_decrypt_flatten == v1Plusv2:
    print("Homeomorphic operation add with operator += is a success: Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2.")
+   number_success += 1
 else:
    print("Homeomorphic operation add with operator += is a fail: Decrypt(Encrypt(v1) + Encrypt(v2)) not equal to v1 + v2.")
-
+   number_fail += 1
 
 """Skip a line."""
 print("\n")
@@ -167,9 +178,10 @@ print("v4 = v3 - v2 ->", v3Minusv2)
 """If Decrypt(Encrypt(v3) - Encrypt(v2)) equal to v3 - v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_minus_v3_v2_decrypt_flatten == v3Minusv2:
    print("Homeomorphic operation substraction with operator -= is a success: Decrypt(Encrypt(v3) - Encrypt(v2)) equal to v3 - v2.")
+   number_success += 1
 else:
    print("Homeomorphic operation substraction with operation -= is a fail: Decrypt(Encrypt(v3) - Encrypt(v2)) not equal to v3 - v2.")
-
+   number_fail += 1
 
 """Skip a line."""
 print("\n")
@@ -193,9 +205,10 @@ print("v4 * v2 ->", v4Multv2)
 """If Decrypt(Encrypt(v4) * Encrypt(v2)) equal to v4 * v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_mult_v4_v2_decrypt_flatten == v4Multv2:
    print("Homeomorphic operation mult with operator *= is a success: Decrypt(Encrypt(v4) * Encrypt(v2)) equal to v4 * v2.")
+   number_success += 1
 else:
    print("Homeomorphic operation mult with operator *= is a fail: Decrypt(Encrypt(v4) * Encrypt(v2)) not equal to v4 * v2.")
-
+   number_fail += 1
 
 """Skip a line."""
 print("\n")
@@ -222,8 +235,10 @@ print("v5 . v2 ->", v5Dotv2)
 """If First(Decrypt(Encrypt(v5) . Encrypt(v2))) equal to v5 . v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_scalprod_v5_v2_decrypt_flatten_final == v5Dotv2:
    print("Homeomorphic operation Scalar Product with operator %= is a success: First(Decrypt(Encrypt(v5) . Encrypt(v2))) equal to v5 . v2.")
+   number_success += 1
 else:
    print("Homeomorphic operation Scalar Product with operator %= is a fail: First(Decrypt(Encrypt(v5) . Encrypt(v2))) not equal to v5 . v2.")
+   number_fail += 1
 
 
 """Skip a line."""
@@ -247,12 +262,32 @@ print("v6 ** 2 ->", v6Power2)
 """If Decrypt(Encrypt(v6) ** 2) equal to v6 ** 2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_power_v6_2_decrypt_flatten == v6Power2:
    print("Homeomorphic operation Square Power with operator **= is a success: Decrypt(Encrypt(v6) ** 2) equal to v6 ** 2.")
+   number_success += 1
 else:
    print("Homeomorphic operation Square Power with operator **= is a fail: Decrypt(Encrypt(v6) ** 2) not equal to v6 ** 2.")
-
+   number_fail += 1
 
 """Skip a line."""
 print("\n")
+print("Number of successful tests: ", number_success)
+print("Number of fail tests: ", number_fail)
+print("\n")
+
+
+"""If the user has specify the -g option, we display a graph of the succesful tests versus the fail tests."""
+if args.graph:
+   # Pie chart, where the slices will be ordered and plotted counter-clockwise:
+   labels = 'Success', 'Fails'
+   sizes = [number_success, number_fail]
+   explode = (0.1, 0)  # only "explode" the 1er slice (i.e. 'Success')
+
+   fig1, ax1 = plt.subplots()
+   ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)
+   ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+   plt.show()
+
+
 
 
 """print("------------------TEST Polynomial function----------------------")
