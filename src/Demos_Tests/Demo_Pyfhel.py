@@ -10,15 +10,50 @@ from PyCtxt import PyCtxt
 from itertools import izip
 import itertools
 from operator import sub
+import numpy as np
+import sys
+import argparse
 
-"""Skip a line, print the title of the Demo, and skip a line again."""
-print("\n")
-print("     ************Pyfhel DEMO************")
-print("\n")
+parser = argparse.ArgumentParser()
 
-"""Define two vectors that we will use for the tests."""
-v1 = [1,2,3,4,5]
-v2 = [2,2,2,2,2]
+""" One can specify in the command line of the program either -r or --random (it will be the same to specify -r or --random). This is optional argument. If the user specify it, args.random == True, else args.random == False)"""
+parser.add_argument("-r", "--random", help="Perform tests on random vectors.", action="store_true")
+
+""" One can specify in the command line of the program either -f or --fixe (it will be the same to specify -f or --fixe). This is optional argument. If the user specify it, args.fixe == True, else args.fixe == False)"""
+parser.add_argument("-f", "--fixe", help="Perform tests on fixed vectors.", action="store_true")
+
+"""Parse the arguments given to the program."""
+args = parser.parse_args()
+
+"""If the user haven't specify (-r/--random) or (-f/--fixe) in the command line of the program, we run the tests with random vectors of size 5, with the elements between 0 and 1000 folowing an uniform law. Do the same if the user specify only -r/--random."""
+if (not args.random and not args.fixe) or (args.random and not args.fixe):
+                                                                          """Skip a line, print the title of the Demo, and skip a line again."""
+                                                                          print("\n")
+                                                                          print("     ************Pyfhel DEMO************")
+                                                                          print("\n")
+
+                                                                          """Define two vectors that we will use for the tests."""
+                                                                          v1 = np.random.randint(0, 10, 5).tolist()
+                                                                          v2 = np .random.randint(0, 5, 5).tolist()
+
+
+"""If the user have only specify (-f/--fixe) in the command line of the program, we run the tests with fixe vectors: [1.2.3.4.5], [2,2,2,2,2]."""
+if (not args.random and args.fixe): 
+                                     """Skip a line, print the title of the Demo, and skip a line again."""
+                                     print("\n")
+                                     print("     ************Pyfhel DEMO************")
+                                     print("\n")
+
+                                     """Define two vectors that we will use for the tests."""
+                                     v1 = [1,2,3,4,5]
+                                     v2 = [2,2,2,2,2]
+
+
+"""If the user have specify (-r or --random) and (-f or --fixe) in the command line of the program, display an error."""
+if (args.random and args.fixe):
+                                 print("Error, you cannot specify -r/--random and -f/--fixe arguments at the same time.")
+                                 sys.exit()
+
 
 print("******Definition of the vectors used during the tests******")
 print("v1: ", v1)
