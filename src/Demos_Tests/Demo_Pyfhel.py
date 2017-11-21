@@ -132,6 +132,31 @@ print("******Test of the homeomorphic operations******")
 """Skip a line."""
 print("\n")
 
+"""Perform homeomorphic addition with operator + ."""
+print("*** Test of the homeomorphic addition with operator + ***")
+print("Encrypted v1: Encrypt(", v1, ")")
+print("Encrypted v2: Encrypt(", v2, ")")
+print("Performing Encrypt(v1) + Encrypt(v2)...")
+ctxt1 = ctxt1 + ctxt2  # `ctxt1 = ctxt1 + ctxt2` would also be valid->No because of a  bug in add function! Has to be corrected!
+"""Decrypt the result of the addition of the two encrypted vectors."""
+v_add_v1_v2_decrypt = HE.decrypt(ctxt1)
+"""v3 is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_add_v1_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_add_v1_v2_decrypt))
+"""The user can then verify if the result of the addition of the two encrypted vectors is the same that the addition of the two vectors without encryption."""
+print("Decrypt(Encrypt(v1) + Encrypt(v2)) -> ", v_add_v1_v2_decrypt_flatten)
+"""Perform the sum on the unencrypted vectors."""
+v1Plusv2 = map(sum, izip(v1,v2))
+print("v3 = v1 + v2 ->", v1Plusv2)
+"""If Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_add_v1_v2_decrypt_flatten == v1Plusv2:
+   print("Homeomorphic operation add with operator + is a success: Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2.")
+   number_success += 1
+else:
+   print("Homeomorphic operation add with operator + is a fail: Decrypt(Encrypt(v1) + Encrypt(v2)) not equal to v1 + v2.")
+   number_fail += 1
+
+"""Skip a line."""
+print("\n")
 
 """Perform homeomorphic addition with operator += ."""
 print("*** Test of the homeomorphic addition with operator += ***")
