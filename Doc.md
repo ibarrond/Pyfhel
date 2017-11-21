@@ -75,7 +75,7 @@ If you want see an example of Afhel, compile the Demo, run `make Demo_Afhel_x` i
 The demos have been exhaustively commented in order to provide as much clear information as possible. In comparison, the tests are more focused in benchmarking different possibilities for implementing algorithms.
 - Demo_Afhel.cpp - Basic usage of Afhel library
 - Demo_HElib.cpp - Basic usage of HElib
-- Demo\_Pyfhel.py - Basic usage of Pyfhel
+- Demo\_Pyfhel.py - Basic usage of Pyfhel: Run tests on the basic operations of Pyfhel. To know which parameters you can provide to the program, you can use: python Demo\_Pyfhel -h 
 - Demo\_Pyfhel\_binary.py - Using Pyfhel for binary operations. Acknowledgemetns to [Tarek Aoukar @severos](https://github.com/severos)
 - Demo\_AfhelRestored.cpp - Using Afhel after restoring the environment (requires previous run of Demo\_Afhel)
 - Demo\_HElib\_SimpleIO.cpp - Saving & Restoring context data
