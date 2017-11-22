@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import argparse
+import copy
 
 """Define a parser to parse the arguments given to the program."""
 parser = argparse.ArgumentParser()
@@ -37,10 +38,13 @@ if (not args.random and not args.fixe) or (args.random and not args.fixe):
                                                                           print("     ************Pyfhel DEMO************")
                                                                           print("\n")
 
-                                                                          """Define two vectors that we will use for the tests."""
+                                                                          """Define two vectors that we will use for the tests (+=, -=, *=, ...)."""
                                                                           v1 = np.random.randint(0, 10, 5).tolist()
                                                                           v2 = np .random.randint(0, 5, 5).tolist()
-
+                                                                          
+                                                                          """Define two vectors that we will use for the tests (+, -, *, ...)."""
+                                                                          v12 = copy.deepcopy(v1)
+                                                                          v22 = copy.deepcopy(v2)
 
 """If the user have only specify (-f/--fixe) in the command line of the program, we run the tests with fixe vectors: [1.2.3.4.5], [2,2,2,2,2]."""
 if (not args.random and args.fixe): 
@@ -49,9 +53,13 @@ if (not args.random and args.fixe):
                                      print("     ************Pyfhel DEMO************")
                                      print("\n")
 
-                                     """Define two vectors that we will use for the tests."""
+                                     """Define two vectors that we will use for the tests (+=, -=, *=, ...)."""
                                      v1 = [1,2,3,4,5]
                                      v2 = [2,2,2,2,2]
+                                     
+                                     """Define two vectors that we will use for the tests (+, -, *, ...)."""
+                                     v12 = copy.deepcopy(v1)
+                                     v22 = copy.deepcopy(v2)
 
 
 """If the user have specify (-r or --random) and (-f or --fixe) in the command line of the program, display an error."""
@@ -104,15 +112,27 @@ print("\n")
 
 print("******Homeomorphic encryption of the two vectors used during the tests******")
 
-"""Tranform the two vectors in plaintext that are objects that could be encrypted."""
+"""Tranform the two vectors (use to test the operation +=, -=, *=, ...) in plaintext that are objects that could be encrypted."""
 ptxt1 = PyPtxt(v1, HE)
 ptxt2 = PyPtxt(v2, HE)
 
-"""Encrypted the two plaintexts to have two Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before."""
+"""Tranform the two vectors (use to test the operation +, -, *, ...) in plaintext that are objects that could be encrypted."""
+ptxt12 = PyPtxt(v12, HE)
+ptxt22 = PyPtxt(v22, HE)
+
+"""Encrypted the two plaintexts to have two Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These two Cypher txt will be use for the test on the homeomorphic operation (+=, -=, *=, ...)"""
 ctxt1 = HE.encrypt(ptxt1)
 ctxt2 = HE.encrypt(ptxt2)
 #ctxt1 = HE.encrypt(ptxt1, fill=1)
 #ctxt2 = HE.encrypt(ptxt2, fill=1)
+
+
+"""Encrypted the two plaintexts to have two Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These two Cypher txt will be use for the test on the homeomorphic operation (+, -, *, ...)"""
+ctxt12 = HE.encrypt(ptxt12)
+ctxt22 = HE.encrypt(ptxt22)
+#ctxt12 = HE.encrypt(ptxt12, fill=1)
+#ctxt22 = HE.encrypt(ptxt22, fill=1)
+
 
 print("Encryption of v1...")
 print("Encryption of v2...")
@@ -137,21 +157,23 @@ print("*** Test of the homeomorphic addition with operator + ***")
 print("Encrypted v1: Encrypt(", v1, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 print("Performing Encrypt(v1) + Encrypt(v2)...")
-ctxt1 = ctxt1 + ctxt2  # `ctxt1 = ctxt1 + ctxt2` would also be valid->No because of a  bug in add function! Has to be corrected!
+ctxtAdd1_2 = ctxt12 + ctxt22 #This operation modify the ctxt1! It is a bug that should be corrected!
 """Decrypt the result of the addition of the two encrypted vectors."""
-v_add_v1_v2_decrypt = HE.decrypt(ctxt1)
-"""v3 is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
-v_add_v1_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_add_v1_v2_decrypt))
+v_add_v12_v22_decrypt = HE.decrypt(ctxtAdd1_2)
+"""v_add_v12_v22_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_add_v12_v22_decrypt_flatten = list(itertools.chain.from_iterable(v_add_v12_v22_decrypt))
 """The user can then verify if the result of the addition of the two encrypted vectors is the same that the addition of the two vectors without encryption."""
-print("Decrypt(Encrypt(v1) + Encrypt(v2)) -> ", v_add_v1_v2_decrypt_flatten)
+print("Decrypt(Encrypt(v1) + Encrypt(v2)) -> ", v_add_v12_v22_decrypt_flatten)
 """Perform the sum on the unencrypted vectors."""
 v1Plusv2 = map(sum, izip(v1,v2))
 print("v3 = v1 + v2 ->", v1Plusv2)
 """If Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
-if v_add_v1_v2_decrypt_flatten == v1Plusv2:
+if v_add_v12_v22_decrypt_flatten == v1Plusv2:
+   """On a success, print the success and increase the number of successful tests."""
    print("Homeomorphic operation add with operator + is a success: Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2.")
    number_success += 1
 else:
+   """On a fail, print the fail and increase the number of fail tests."""
    print("Homeomorphic operation add with operator + is a fail: Decrypt(Encrypt(v1) + Encrypt(v2)) not equal to v1 + v2.")
    number_fail += 1
 
@@ -163,6 +185,7 @@ print("*** Test of the homeomorphic addition with operator += ***")
 print("Encrypted v1: Encrypt(", v1, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 print("Performing Encrypt(v1) + Encrypt(v2)...")
+print ("test", HE.decrypt(ctxt1))
 ctxt1 += ctxt2  # `ctxt1 = ctxt1 + ctxt2` would also be valid->No because of a  bug in add function! Has to be corrected!
 """Decrypt the result of the addition of the two encrypted vectors."""
 v_add_v1_v2_decrypt = HE.decrypt(ctxt1)
