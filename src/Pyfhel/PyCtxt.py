@@ -29,6 +29,7 @@
 from Pyfhel import Pyfhel
 from PyPtxt import PyPtxt
 import numbers
+import copy
 
 class PyCtxt:
     
@@ -98,7 +99,8 @@ class PyCtxt:
         if not isinstance(other, PyCtxt):
             if not isinstance(other, (PyCtxt, int)):
                 raise TypeError("PyCtxt '-' error: lhs must be of type PyCtxt or int instead of " + str(type(other)))
-        newCtxt = self.__pyfhel.set(self)
+        #newCtxt = self.__pyfhel.set(self)
+        newCtxt = self
         if isinstance(other, PyCtxt):
             newCtxt -= other                            # Substract directly if other is PyCtxt
         else:
@@ -128,7 +130,8 @@ class PyCtxt:
     def __mul__(self, other):
         if not isinstance(other, (PyCtxt, int)):
             raise TypeError("PyCtxt '*' error: lhs must be of type PyCtxt or int instead of " + str(type(other)))
-        newCtxt = self.__pyfhel.set(self)
+        #newCtxt = self.__pyfhel.set(self)
+        newCtxt = self
         if isinstance(other, PyCtxt):
             newCtxt *= other
         else:
@@ -156,7 +159,8 @@ class PyCtxt:
     def __mod__(self, other):
         if not isinstance(other, (PyCtxt, int)):
             raise TypeError("PyCtxt '%' error: lhs must be of type PyCtxt or int instead of " + str(type(other)))
-        newCtxt = self.__pyfhel.set(self)
+        #newCtxt = self.__pyfhel.set(self)
+        newCtxt = self
         if isinstance(other, PyCtxt):
             newCtxt %= other
         else:
