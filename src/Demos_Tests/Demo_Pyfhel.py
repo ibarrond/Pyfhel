@@ -41,10 +41,18 @@ if (not args.random and not args.fixe) or (args.random and not args.fixe):
                                                                           """Define two vectors that we will use for the tests (+=, -=, *=, ...)."""
                                                                           v1 = np.random.randint(0, 10, 5).tolist()
                                                                           v2 = np .random.randint(0, 5, 5).tolist()
+
+                                                                          """Define a vector that we will use for the tests (**=2, **=3)."""
+                                                                          v_powerSquare = copy.deepcopy(v1)
+                                                                          v_powerCube = copy.deepcopy(v1)
                                                                           
                                                                           """Define two vectors that we will use for the tests (+, -, *, ...)."""
                                                                           v12 = copy.deepcopy(v1)
                                                                           v22 = copy.deepcopy(v2)
+
+                                                                          """Define a vector that we will use for the tests (**2, **3)."""
+                                                                          v_powerSquare2 = copy.deepcopy(v1)
+                                                                          v_powerCube2 = copy.deepcopy(v1)
 
 """If the user have only specify (-f/--fixe) in the command line of the program, we run the tests with fixe vectors: [1.2.3.4.5], [2,2,2,2,2]."""
 if (not args.random and args.fixe): 
@@ -56,10 +64,20 @@ if (not args.random and args.fixe):
                                      """Define two vectors that we will use for the tests (+=, -=, *=, ...)."""
                                      v1 = [1,2,3,4,5]
                                      v2 = [2,2,2,2,2]
+
+                                     """Define a vector that we will use for the tests (**=2, **=3)."""
+                                     v_powerSquare = copy.deepcopy(v1)
+                                     v_powerCube = copy.deepcopy(v1)
                                      
                                      """Define two vectors that we will use for the tests (+, -, *, ...)."""
                                      v12 = copy.deepcopy(v1)
                                      v22 = copy.deepcopy(v2)
+
+                                     """Define a vector that we will use for the tests (**2, **3)."""
+                                     v_powerSquare2 = copy.deepcopy(v1)
+                                     v_powerCube2 = copy.deepcopy(v1)
+
+                                     
 
 
 """If the user have specify (-r or --random) and (-f or --fixe) in the command line of the program, display an error."""
@@ -116,9 +134,18 @@ print("******Homeomorphic encryption of the two vectors used during the tests***
 ptxt1 = PyPtxt(v1, HE)
 ptxt2 = PyPtxt(v2, HE)
 
+"""Tranform the vectors (use to test the operation **=2, **=3) in plaintext that are objects that could be encrypted."""
+ptxt_powerSquare = PyPtxt(v_powerSquare, HE)
+ptxt_powerCube = PyPtxt(v_powerCube, HE)
+
 """Tranform the two vectors (use to test the operation +, -, *, ...) in plaintext that are objects that could be encrypted."""
 ptxt12 = PyPtxt(v12, HE)
 ptxt22 = PyPtxt(v22, HE)
+
+"""Tranform the vectors (use to test the operation **2, **3) in plaintext that are objects that could be encrypted."""
+ptxt_powerSquare2 = PyPtxt(v_powerSquare2, HE)
+ptxt_powerCube2 = PyPtxt(v_powerCube2, HE)
+
 
 """Encrypted the two plaintexts to have two Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These two Cypher txt will be use for the test on the homeomorphic operation (+=, -=, *=, ...)"""
 ctxt1 = HE.encrypt(ptxt1)
@@ -127,11 +154,21 @@ ctxt2 = HE.encrypt(ptxt2)
 #ctxt2 = HE.encrypt(ptxt2, fill=1)
 
 
+"""Encrypted the plaintexts to have Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These Cypher txt will be use for the tests on the homeomorphic operations (**=2, **=3)"""
+ctxt_powerSquare = HE.encrypt(ptxt_powerSquare)
+ctxt_powerCube = HE.encrypt(ptxt_powerCube)
+
+
 """Encrypted the two plaintexts to have two Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These two Cypher txt will be use for the test on the homeomorphic operation (+, -, *, ...)"""
 ctxt12 = HE.encrypt(ptxt12)
 ctxt22 = HE.encrypt(ptxt22)
 #ctxt12 = HE.encrypt(ptxt12, fill=1)
 #ctxt22 = HE.encrypt(ptxt22, fill=1)
+
+
+"""Encrypted the plaintexts to have Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These Cypher txt will be use for the tests on the homeomorphic operations (**2, **3)"""
+ctxt_powerSquare2 = HE.encrypt(ptxt_powerSquare2)
+ctxt_powerCube2 = HE.encrypt(ptxt_powerCube2)
 
 
 print("Encryption of v1...")
@@ -186,7 +223,7 @@ print("Encrypted v1: Encrypt(", v1, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 print("Performing Encrypt(v1) + Encrypt(v2)...")
 print ("test", HE.decrypt(ctxt1))
-ctxt1 += ctxt2  # `ctxt1 = ctxt1 + ctxt2` would also be valid->No because of a  bug in add function! Has to be corrected!
+ctxt1 += ctxt2
 """Decrypt the result of the addition of the two encrypted vectors."""
 v_add_v1_v2_decrypt = HE.decrypt(ctxt1)
 """v3 is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
@@ -213,7 +250,7 @@ print("***Test of the homeomorphic substraction with operator -= ***")
 print("Encrypted v3: Encrypt(", v_add_v1_v2_decrypt_flatten, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 print("Performing Encrypt(v3) - Encrypt(v2)...")
-ctxt1 -= ctxt2  # `ctxt1 = ctxt1 - ctxt2` would also be valid->No because of a  bug in sub function! Has to be corrected!
+ctxt1 -= ctxt2
 """Decrypt the result of the substraction of the two encrypted vectors."""
 v_minus_v3_v2_decrypt = HE.decrypt(ctxt1)
 """v_add_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
@@ -241,7 +278,7 @@ print("Encrypted v4: Encrypt(", v_minus_v3_v2_decrypt_flatten, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 """ctxt1 contains Encrypt(v4) ie [(Encrypt(v1) + Encrypt(v2))-Encrypt(v2)] ie Encrypt(v1). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v4)*Encrypt(v2) = Encrypt(v1) * Encrypt(v2)"""
 print("Performing Encrypt(v4) * Encrypt(v2)...")
-ctxt1 *= ctxt2      # `ctxt1 = ctxt1 * ctxt2` would also be valid->No because of a bug in mult function! Has to be corrected!
+ctxt1 *= ctxt2
 """Decrypt the result of the multiplication of the two encrypted vectors."""
 v_mult_v4_v2_decrypt = HE.decrypt(ctxt1)
 """v_mult_v4_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
@@ -268,7 +305,7 @@ print("Encrypted v5: Encrypt(", v_mult_v4_v2_decrypt_flatten, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 """ctxt1 contains Encrypt(v5) ie [(Encrypt(v1) + Encrypt(v2))-Encrypt(v2)] * Encrypt(v2) ie Encrypt(v1) * Encrypt(v2). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v5) . Encrypt(v2)"""
 print("Performing Encrypt(v5) . Encrypt(v2)...")
-ctxt1 %= ctxt2      # `ctxt1 = ctxt1 % ctxt2` would also be valid->No because of a bug in mult function! Has to be corrected!
+ctxt1 %= ctxt2
 """Decrypt the result of the Scalar Product of the two encrypted vectors."""
 v_scalprod_v5_v2_decrypt = HE.decrypt(ctxt1)
 """v_scalprod_v5_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
@@ -293,26 +330,53 @@ else:
 print("\n")
 
 
-"""Perform homeomorphic Square Power with the operator **= ."""
-print("***Test of the homeomorphic Square Power **= ***")
-print("Encrypted v6: Encrypt(", v_scalprod_v5_v2_decrypt_flatten, ")")
-"""ctxt1 contains Encrypt(v6) ie [[(Encrypt(v1) + Encrypt(v2))-Encrypt(v2)] * Encrypt(v2)] . Encrypt(v2) ie [Encrypt(v1) * Encrypt(v2)] . Encrypt(v2). So we perform: Encrypt(v6) ** 2"""
-print("Performing Encrypt(v6) ** 2...")
-ctxt1 **= 2      # `ctxt1 = ctxt1 ** ctxt2` would also be valid->No because of a bug in mult function! Has to be corrected!
+"""Perform homeomorphic Square Power with the operator **=2 ."""
+print("***Test of the homeomorphic Square Power **=2 ***")
+print("Encrypted v1: Encrypt(", v1, ")")
+"""ctxt_powerSquare contains Encrypt(v1). So we perform: Encrypt(v1) ** 2"""
+print("Performing Encrypt(v1) ** 2...")
+ctxt_powerSquare **= 2
 """Decrypt the result of Square Power of the encrypted vector."""
-v_power_v6_2_decrypt = HE.decrypt(ctxt1)
-"""v_power_v6_2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
-v_power_v6_2_decrypt_flatten = list(itertools.chain.from_iterable(v_power_v6_2_decrypt))
-print("Decrypt(Encrypt(v6) ** 2) -> ", v_power_v6_2_decrypt_flatten)
+v_powerSquare_decrypt = HE.decrypt(ctxt_powerSquare)
+"""v_powerSquare_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_powerSquare_decrypt_flatten = list(itertools.chain.from_iterable(v_powerSquare_decrypt))
+print("Decrypt(Encrypt(v1) ** 2) -> ", v_powerSquare_decrypt_flatten)
 """Perform the Square Power on the unencrypted vectors."""
-v6Power2 = [a*b for a,b in izip(v_scalprod_v5_v2_decrypt_flatten, v_scalprod_v5_v2_decrypt_flatten)]
-print("v6 ** 2 ->", v6Power2)
-"""If Decrypt(Encrypt(v6) ** 2) equal to v6 ** 2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
-if v_power_v6_2_decrypt_flatten == v6Power2:
-   print("Homeomorphic operation Square Power with operator **= is a success: Decrypt(Encrypt(v6) ** 2) equal to v6 ** 2.")
+v1Power2 = [a*b for a,b in izip(v1, v1)]
+print("v1 ** 2 ->", v1Power2)
+"""If Decrypt(Encrypt(v1) ** 2) equal to v1 ** 2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_powerSquare_decrypt_flatten == v1Power2:
+   print("Homeomorphic operation Square Power with operator **=2 is a success: Decrypt(Encrypt(v1) ** 2) equal to v1 ** 2.")
    number_success += 1
 else:
-   print("Homeomorphic operation Square Power with operator **= is a fail: Decrypt(Encrypt(v6) ** 2) not equal to v6 ** 2.")
+   print("Homeomorphic operation Square Power with operator **=2 is a fail: Decrypt(Encrypt(v1) ** 2) not equal to v1 ** 2.")
+   number_fail += 1
+
+
+"""Skip a line."""
+print("\n")
+
+
+"""Perform homeomorphic Cube Power with the operator **=3 ."""
+print("***Test of the homeomorphic Cube Power **=3 ***")
+print("Encrypted v1: Encrypt(", v1, ")")
+"""ctxt_powerCube contains Encrypt(v1). So we perform: Encrypt(v1) ** 3"""
+print("Performing Encrypt(v1) ** 3...")
+ctxt_powerCube **= 3
+"""Decrypt the result of Cube Power of the encrypted vector."""
+v_powerCube_decrypt = HE.decrypt(ctxt_powerCube)
+"""v_powerCube_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_powerCube_decrypt_flatten = list(itertools.chain.from_iterable(v_powerCube_decrypt))
+print("Decrypt(Encrypt(v1) ** 3) -> ", v_powerCube_decrypt_flatten)
+"""Perform the Cube Power on the unencrypted vectors."""
+v1Power3 = [a*b*c for a,b,c in izip(v1, v1, v1)]
+print("v1 ** 3 ->", v1Power3)
+"""If Decrypt(Encrypt(v1) ** 3) equal to v1 ** 3, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_powerCube_decrypt_flatten == v1Power3:
+   print("Homeomorphic operation Cube Power with operator **=3 is a success: Decrypt(Encrypt(v1) ** 3) equal to v1 ** 3.")
+   number_success += 1
+else:
+   print("Homeomorphic operation Cube Power with operator **=3 is a fail: Decrypt(Encrypt(v1) ** 3) not equal to v1 ** 3.")
    number_fail += 1
 
 """Skip a line."""
