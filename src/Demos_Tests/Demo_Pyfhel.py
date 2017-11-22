@@ -185,35 +185,6 @@ print("\n")
 """Perform homeomorphic operations on the encrypted vectors."""
 print("******Test of the homeomorphic operations******")
 
-
-"""Skip a line."""
-print("\n")
-
-"""Perform homeomorphic addition with operator + ."""
-print("*** Test of the homeomorphic addition with operator + ***")
-print("Encrypted v1: Encrypt(", v1, ")")
-print("Encrypted v2: Encrypt(", v2, ")")
-print("Performing Encrypt(v1) + Encrypt(v2)...")
-ctxtAdd1_2 = ctxt12 + ctxt22 #This operation modify the ctxt1! It is a bug that should be corrected!
-"""Decrypt the result of the addition of the two encrypted vectors."""
-v_add_v12_v22_decrypt = HE.decrypt(ctxtAdd1_2)
-"""v_add_v12_v22_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
-v_add_v12_v22_decrypt_flatten = list(itertools.chain.from_iterable(v_add_v12_v22_decrypt))
-"""The user can then verify if the result of the addition of the two encrypted vectors is the same that the addition of the two vectors without encryption."""
-print("Decrypt(Encrypt(v1) + Encrypt(v2)) -> ", v_add_v12_v22_decrypt_flatten)
-"""Perform the sum on the unencrypted vectors."""
-v1Plusv2 = map(sum, izip(v1,v2))
-print("v3 = v1 + v2 ->", v1Plusv2)
-"""If Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
-if v_add_v12_v22_decrypt_flatten == v1Plusv2:
-   """On a success, print the success and increase the number of successful tests."""
-   print("Homeomorphic operation add with operator + is a success: Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2.")
-   number_success += 1
-else:
-   """On a fail, print the fail and increase the number of fail tests."""
-   print("Homeomorphic operation add with operator + is a fail: Decrypt(Encrypt(v1) + Encrypt(v2)) not equal to v1 + v2.")
-   number_fail += 1
-
 """Skip a line."""
 print("\n")
 
@@ -383,23 +354,52 @@ else:
 """Skip a line."""
 print("\n")
 
+"""Perform homeomorphic addition with operator + ."""
+print("*** Test of the homeomorphic addition with operator + ***")
+print("Encrypted v1: Encrypt(", v1, ")")
+print("Encrypted v2: Encrypt(", v2, ")")
+print("Performing Encrypt(v1) + Encrypt(v2)...")
+ctxtAdd1_2 = ctxt12 + ctxt22 #This operation modify the ctxt1! It is a bug that should be corrected!
+"""Decrypt the result of the addition of the two encrypted vectors."""
+v_add_v12_v22_decrypt = HE.decrypt(ctxtAdd1_2)
+"""v_add_v12_v22_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_add_v12_v22_decrypt_flatten = list(itertools.chain.from_iterable(v_add_v12_v22_decrypt))
+"""The user can then verify if the result of the addition of the two encrypted vectors is the same that the addition of the two vectors without encryption."""
+print("Decrypt(Encrypt(v1) + Encrypt(v2)) -> ", v_add_v12_v22_decrypt_flatten)
+"""Perform the sum on the unencrypted vectors."""
+v1Plusv2 = map(sum, izip(v1,v2))
+print("v3 = v1 + v2 ->", v1Plusv2)
+"""If Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_add_v12_v22_decrypt_flatten == v1Plusv2:
+   """On a success, print the success and increase the number of successful tests."""
+   print("Homeomorphic operation add with operator + is a success: Decrypt(Encrypt(v1) + Encrypt(v2)) equal to v1 + v2.")
+   number_success += 1
+else:
+   """On a fail, print the fail and increase the number of fail tests."""
+   print("Homeomorphic operation add with operator + is a fail: Decrypt(Encrypt(v1) + Encrypt(v2)) not equal to v1 + v2.")
+   number_fail += 1
+
+
+"""Skip a line."""
+print("\n")
+
 
 """Perform homeomorphic Square Power with the operator **2 ."""
 print("***Test of the homeomorphic Square Power **2 ***")
 print("Encrypted v1: Encrypt(", v1, ")")
 """ctxt_powerSquare2 contains Encrypt(v1). So we perform: Encrypt(v1) ** 2"""
 print("Performing Encrypt(v1) ** 2...")
-ctxt_powerSquare2 **= 2
+ctxt_powerSquare2_result = ctxt_powerSquare2 ** 2
 """Decrypt the result of Square Power of the encrypted vector."""
-v_powerSquare2_decrypt = HE.decrypt(ctxt_powerSquare2)
-"""v_powerSquare2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
-v_powerSquare2_decrypt_flatten = list(itertools.chain.from_iterable(v_powerSquare2_decrypt))
-print("Decrypt(Encrypt(v1) ** 2) -> ", v_powerSquare2_decrypt_flatten)
+v_powerSquare2_decrypt_result = HE.decrypt(ctxt_powerSquare2_result)
+"""v_powerSquare2_decrypt_result is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_powerSquare2_decrypt_result_flatten = list(itertools.chain.from_iterable(v_powerSquare2_decrypt_result))
+print("Decrypt(Encrypt(v1) ** 2) -> ", v_powerSquare2_decrypt_result_flatten)
 """Perform the Square Power on the unencrypted vectors."""
 v1Power22 = [a*b for a,b in izip(v1, v1)]
 print("v1 ** 2 ->", v1Power22)
 """If Decrypt(Encrypt(v1) ** 2) equal to v1 ** 2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
-if v_powerSquare2_decrypt_flatten == v1Power22:
+if v_powerSquare2_decrypt_result_flatten == v1Power22:
    print("Homeomorphic operation Square Power with operator **2 is a success: Decrypt(Encrypt(v1) ** 2) equal to v1 ** 2.")
    number_success += 1
 else:
@@ -416,17 +416,17 @@ print("***Test of the homeomorphic Cube Power **3 ***")
 print("Encrypted v1: Encrypt(", v1, ")")
 """ctxt_powerCube2 contains Encrypt(v1). So we perform: Encrypt(v1) ** 3"""
 print("Performing Encrypt(v1) ** 3...")
-ctxt_powerCube2 **= 3
+ctxt_powerCube2_result = ctxt_powerCube2 ** 3
 """Decrypt the result of Cube Power of the encrypted vector."""
-v_powerCube2_decrypt = HE.decrypt(ctxt_powerCube2)
-"""v_powerCube2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
-v_powerCube2_decrypt_flatten = list(itertools.chain.from_iterable(v_powerCube2_decrypt))
-print("Decrypt(Encrypt(v1) ** 3) -> ", v_powerCube2_decrypt_flatten)
+v_powerCube2_decrypt_result = HE.decrypt(ctxt_powerCube2_result)
+"""v_powerCube2_decrypt_result is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_powerCube2_decrypt_result_flatten = list(itertools.chain.from_iterable(v_powerCube2_decrypt_result))
+print("Decrypt(Encrypt(v1) ** 3) -> ", v_powerCube2_decrypt_result_flatten)
 """Perform the Cube Power on the unencrypted vectors."""
 v1Power32 = [a*b*c for a,b,c in izip(v1, v1, v1)]
 print("v1 ** 3 ->", v1Power32)
 """If Decrypt(Encrypt(v1) ** 3) equal to v1 ** 3, The homeomorphic operation works and so it is a success. Else, it is a fail."""
-if v_powerCube2_decrypt_flatten == v1Power3:
+if v_powerCube2_decrypt_result_flatten == v1Power3:
    print("Homeomorphic operation Cube Power with operator **3 is a success: Decrypt(Encrypt(v1) ** 3) equal to v1 ** 3.")
    number_success += 1
 else:
