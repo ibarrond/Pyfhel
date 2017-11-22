@@ -379,6 +379,60 @@ else:
    print("Homeomorphic operation Cube Power with operator **=3 is a fail: Decrypt(Encrypt(v1) ** 3) not equal to v1 ** 3.")
    number_fail += 1
 
+
+"""Skip a line."""
+print("\n")
+
+
+"""Perform homeomorphic Square Power with the operator **2 ."""
+print("***Test of the homeomorphic Square Power **2 ***")
+print("Encrypted v1: Encrypt(", v1, ")")
+"""ctxt_powerSquare2 contains Encrypt(v1). So we perform: Encrypt(v1) ** 2"""
+print("Performing Encrypt(v1) ** 2...")
+ctxt_powerSquare2 **= 2
+"""Decrypt the result of Square Power of the encrypted vector."""
+v_powerSquare2_decrypt = HE.decrypt(ctxt_powerSquare2)
+"""v_powerSquare2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_powerSquare2_decrypt_flatten = list(itertools.chain.from_iterable(v_powerSquare2_decrypt))
+print("Decrypt(Encrypt(v1) ** 2) -> ", v_powerSquare2_decrypt_flatten)
+"""Perform the Square Power on the unencrypted vectors."""
+v1Power22 = [a*b for a,b in izip(v1, v1)]
+print("v1 ** 2 ->", v1Power22)
+"""If Decrypt(Encrypt(v1) ** 2) equal to v1 ** 2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_powerSquare2_decrypt_flatten == v1Power22:
+   print("Homeomorphic operation Square Power with operator **2 is a success: Decrypt(Encrypt(v1) ** 2) equal to v1 ** 2.")
+   number_success += 1
+else:
+   print("Homeomorphic operation Square Power with operator **2 is a fail: Decrypt(Encrypt(v1) ** 2) not equal to v1 ** 2.")
+   number_fail += 1
+
+
+"""Skip a line."""
+print("\n")
+
+
+"""Perform homeomorphic Cube Power with the operator **3 ."""
+print("***Test of the homeomorphic Cube Power **3 ***")
+print("Encrypted v1: Encrypt(", v1, ")")
+"""ctxt_powerCube2 contains Encrypt(v1). So we perform: Encrypt(v1) ** 3"""
+print("Performing Encrypt(v1) ** 3...")
+ctxt_powerCube2 **= 3
+"""Decrypt the result of Cube Power of the encrypted vector."""
+v_powerCube2_decrypt = HE.decrypt(ctxt_powerCube2)
+"""v_powerCube2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_powerCube2_decrypt_flatten = list(itertools.chain.from_iterable(v_powerCube2_decrypt))
+print("Decrypt(Encrypt(v1) ** 3) -> ", v_powerCube2_decrypt_flatten)
+"""Perform the Cube Power on the unencrypted vectors."""
+v1Power32 = [a*b*c for a,b,c in izip(v1, v1, v1)]
+print("v1 ** 3 ->", v1Power32)
+"""If Decrypt(Encrypt(v1) ** 3) equal to v1 ** 3, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_powerCube2_decrypt_flatten == v1Power3:
+   print("Homeomorphic operation Cube Power with operator **3 is a success: Decrypt(Encrypt(v1) ** 3) equal to v1 ** 3.")
+   number_success += 1
+else:
+   print("Homeomorphic operation Cube Power with operator **3 is a fail: Decrypt(Encrypt(v1) ** 3) not equal to v1 ** 3.")
+   number_fail += 1
+
 """Skip a line."""
 print("\n")
 print("Number of successful tests: ", number_success)
