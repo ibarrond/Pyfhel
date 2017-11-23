@@ -390,8 +390,8 @@ print("\n")
 
 """Perform homeomorphic addition with operator + ."""
 print("*** Test of the homeomorphic addition with operator + ***")
-print("Encrypted v1: Encrypt(", v1, ")")
-print("Encrypted v2: Encrypt(", v2, ")")
+print("Encrypted v1: Encrypt(", v12, ")")
+print("Encrypted v2: Encrypt(", v22, ")")
 print("Performing Encrypt(v1) + Encrypt(v2)...")
 ctxtAdd1_2 = ctxt12 + ctxt22 #This operation modify the ctxt1! It is a bug that should be corrected!
 """Decrypt the result of the addition of the two encrypted vectors."""
@@ -467,6 +467,37 @@ if v_mult_v1_v2_decrypt_flatten == v1Multv2:
    number_success += 1
 else:
    print("Homeomorphic operation multiplication with operation * is a fail: Decrypt(Encrypt(v1) * Encrypt(v2)) not equal to v1 * v2.")
+   number_fail += 1
+
+
+"""Skip a line."""
+print("\n")
+
+
+"""Perform homeomorphic Scalar Product with operator % ."""
+print("***Test of the homeomorphic Scalar Product with operator % ***")
+print("Encrypted v1: Encrypt(", v1_scalProd, ")")
+print("Encrypted v2: Encrypt(", v2_scalProd, ")")
+"""ctxt1 contains Encrypt(v1). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v1) . Encrypt(v2)"""
+print("Performing Encrypt(v1) . Encrypt(v2)...")
+ctxtScalProd1_2 = ctxt1_scalProd % ctxt2_scalProd #This operation modify the first operand ie ctxt1_scalProd! This is a bug that should be correted.
+"""Decrypt the result of the Scalar Product of the two encrypted vectors."""
+v_scalprod_v1_v2_decrypt = HE.decrypt(ctxtScalProd1_2)
+"""v_scalprod_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_scalprod_v1_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_scalprod_v1_v2_decrypt))
+print("Decrypt(Encrypt(v1) . Encrypt(v2)) -> ", v_scalprod_v1_v2_decrypt_flatten)
+"""Return the first element of the list or return None if the list is empty."""
+v_scalprod_v1_v2_decrypt_flatten_final = next(iter(v_scalprod_v1_v2_decrypt_flatten or []), None)
+print("First(Decrypt(Encrypt(v1) . Encrypt(v2))) -> ", v_scalprod_v1_v2_decrypt_flatten_final)
+"""Perform the scalar product on the unencrypted vectors."""
+v1Dotv2 = sum(i[0] * i[1] for i in zip(v1_scalProd, v2_scalProd))
+print("v1 . v2 ->", v1Dotv2)
+"""If First(Decrypt(Encrypt(v1) . Encrypt(v2))) equal to v1 . v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_scalprod_v1_v2_decrypt_flatten_final == v1Dotv2:
+   print("Homeomorphic operation Scalar Product with operator % is a success: First(Decrypt(Encrypt(v1) . Encrypt(v2))) equal to v1 . v2.")
+   number_success += 1
+else:
+   print("Homeomorphic operation Scalar Product with operator % is a fail: First(Decrypt(Encrypt(v1) . Encrypt(v2))) not equal to v1 . v2.")
    number_fail += 1
 
 
