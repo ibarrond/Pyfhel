@@ -421,25 +421,54 @@ print("\n")
 """Perform homeomorphic substraction with operator - ."""
 print("***Test of the homeomorphic substraction with operator - ***")
 print("Encrypted v1: Encrypt(", v1_minus, ")")
-print("Encrypted v2: Encrypt(", v2_minus, ")")
-print("Performing Encrypt(v1) - Encrypt(v2)...")
+print("Encrypted v2_minus: Encrypt(", v2_minus, ")")
+print("Performing Encrypt(v1) - Encrypt(v2_minus)...")
 ctxtMinus1_2 = ctxt1_minus - ctxt2_minus #This operation modify the first operand ie ctxt1_minus! This is a bug that should be correted.
 """Decrypt the result of the substraction of the two encrypted vectors."""
 v_minus_v1_v2_decrypt = HE.decrypt(ctxtMinus1_2)
-"""v_add_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+"""v_minus_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
 v_minus_v1_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_minus_v1_v2_decrypt))
 """The user can then verify if the result of the substraction of the two encrypted vectors is the same that the substraction of the two vectors without encryption."""
-print("Decrypt(Encrypt(v1) - Encrypt(v2)) -> ", v_minus_v1_v2_decrypt_flatten)
+print("Decrypt(Encrypt(v1) - Encrypt(v2_minus)) -> ", v_minus_v1_v2_decrypt_flatten)
 """Perform the substraction on the unencrypted vectors."""
 v1Minusv2 = map(sub, v1_minus, v2_minus)
-print("v = v1 - v2 ->", v1Minusv2)
-"""If Decrypt(Encrypt(v1) - Encrypt(v2)) equal to v1 - v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+print("v = v1 - v2_minus ->", v1Minusv2)
+"""If Decrypt(Encrypt(v1) - Encrypt(v2_minus)) equal to v1 - v2_minus, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_minus_v1_v2_decrypt_flatten == v1Minusv2:
-   print("Homeomorphic operation substraction with operator - is a success: Decrypt(Encrypt(v1) - Encrypt(v2)) equal to v1 - v2.")
+   print("Homeomorphic operation substraction with operator - is a success: Decrypt(Encrypt(v1) - Encrypt(v2_minus)) equal to v1 - v2_minus.")
    number_success += 1
 else:
-   print("Homeomorphic operation substraction with operation - is a fail: Decrypt(Encrypt(v1) - Encrypt(v2)) not equal to v1 - v2.")
+   print("Homeomorphic operation substraction with operation - is a fail: Decrypt(Encrypt(v1) - Encrypt(v2_minus)) not equal to v1 - v2_minus.")
    number_fail += 1
+
+
+"""Skip a line."""
+print("\n")
+
+
+"""Perform homeomorphic substraction with operator * ."""
+print("***Test of the homeomorphic substraction with operator * ***")
+print("Encrypted v1: Encrypt(", v1_mult, ")")
+print("Encrypted v2: Encrypt(", v2_mult, ")")
+print("Performing Encrypt(v1) - Encrypt(v2)...")
+ctxtMult1_2 = ctxt1_mult * ctxt2_mult #This operation modify the first operand ie ctxt1_mult! This is a bug that should be correted.
+"""Decrypt the result of the multiplication of the two encrypted vectors."""
+v_mult_v1_v2_decrypt = HE.decrypt(ctxtMult1_2)
+"""v_mult_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_mult_v1_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_mult_v1_v2_decrypt))
+"""The user can then verify if the result of the multiplication of the two encrypted vectors is the same that the multiplication of the two vectors without encryption."""
+print("Decrypt(Encrypt(v1) - Encrypt(v2)) -> ", v_mult_v1_v2_decrypt_flatten)
+"""Perform the multiplication on the unencrypted vectors."""
+v1Multv2 = [a*b for a,b in izip(v1_mult, v2_mult)]
+print("v = v1 * v2 ->", v1Multv2)
+"""If Decrypt(Encrypt(v1) * Encrypt(v2)) equal to v1 * v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_mult_v1_v2_decrypt_flatten == v1Multv2:
+   print("Homeomorphic operation multiplication with operator * is a success: Decrypt(Encrypt(v1) * Encrypt(v2)) equal to v1 * v2.")
+   number_success += 1
+else:
+   print("Homeomorphic operation multiplication with operation * is a fail: Decrypt(Encrypt(v1) * Encrypt(v2)) not equal to v1 * v2.")
+   number_fail += 1
+
 
 """Skip a line."""
 print("\n")
