@@ -47,8 +47,19 @@ if (not args.random and not args.fixe) or (args.random and not args.fixe):
                                                                           v_powerCube = copy.deepcopy(v1)
                                                                           
                                                                           """Define two vectors that we will use for the tests (+, -, *, ...)."""
+                                                                          #For +.
                                                                           v12 = copy.deepcopy(v1)
                                                                           v22 = copy.deepcopy(v2)
+                                                                          #For -.
+                                                                          v1_minus = copy.deepcopy(v1)
+                                                                          v2_minus = copy.deepcopy(v2)
+                                                                          v2_minus[0]= 0 #Transform the vector to avoid negative elements in the result. (because the result is currently mod 257).
+                                                                          #For *.
+                                                                          v1_mult = copy.deepcopy(v1)
+                                                                          v2_mult = copy.deepcopy(v2)
+                                                                          #For %.
+                                                                          v1_scalProd = copy.deepcopy(v1)
+                                                                          v2_scalProd = copy.deepcopy(v2)
 
                                                                           """Define a vector that we will use for the tests (**2, **3)."""
                                                                           v_powerSquare2 = copy.deepcopy(v1)
@@ -70,8 +81,19 @@ if (not args.random and args.fixe):
                                      v_powerCube = copy.deepcopy(v1)
                                      
                                      """Define two vectors that we will use for the tests (+, -, *, ...)."""
+                                     #For +.
                                      v12 = copy.deepcopy(v1)
                                      v22 = copy.deepcopy(v2)
+                                     #For -.
+                                     v1_minus = copy.deepcopy(v1)
+                                     v2_minus = copy.deepcopy(v2)
+                                     v2_minus[0]= 0 #Transform the vector to avoid negative elements in the result. (because the result is currently mod 257).
+                                     #For *.
+                                     v1_mult = copy.deepcopy(v1)
+                                     v2_mult = copy.deepcopy(v2)
+                                     #For %.
+                                     v1_scalProd = copy.deepcopy(v1)
+                                     v2_scalProd = copy.deepcopy(v2)
 
                                      """Define a vector that we will use for the tests (**2, **3)."""
                                      v_powerSquare2 = copy.deepcopy(v1)
@@ -141,6 +163,12 @@ ptxt_powerCube = PyPtxt(v_powerCube, HE)
 """Tranform the two vectors (use to test the operation +, -, *, ...) in plaintext that are objects that could be encrypted."""
 ptxt12 = PyPtxt(v12, HE)
 ptxt22 = PyPtxt(v22, HE)
+ptxt1_minus = PyPtxt(v1_minus, HE)
+ptxt2_minus = PyPtxt(v2_minus, HE)
+ptxt1_mult = PyPtxt(v1_mult, HE)
+ptxt2_mult = PyPtxt(v2_mult, HE)
+ptxt1_scalProd = PyPtxt(v1_scalProd, HE)
+ptxt2_scalProd = PyPtxt(v2_scalProd, HE)
 
 """Tranform the vectors (use to test the operation **2, **3) in plaintext that are objects that could be encrypted."""
 ptxt_powerSquare2 = PyPtxt(v_powerSquare2, HE)
@@ -159,11 +187,17 @@ ctxt_powerSquare = HE.encrypt(ptxt_powerSquare)
 ctxt_powerCube = HE.encrypt(ptxt_powerCube)
 
 
-"""Encrypted the two plaintexts to have two Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These two Cypher txt will be use for the test on the homeomorphic operation (+, -, *, ...)"""
+"""Encrypted the plaintexts to have two Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These Cypher txt will be use for the test on the homeomorphic operation (+, -, *, ...)"""
 ctxt12 = HE.encrypt(ptxt12)
 ctxt22 = HE.encrypt(ptxt22)
 #ctxt12 = HE.encrypt(ptxt12, fill=1)
 #ctxt22 = HE.encrypt(ptxt22, fill=1)
+ctxt1_minus = HE.encrypt(ptxt1_minus)
+ctxt2_minus = HE.encrypt(ptxt2_minus)
+ctxt1_mult = HE.encrypt(ptxt1_mult)
+ctxt2_mult = HE.encrypt(ptxt2_mult)
+ctxt1_scalProd = HE.encrypt(ptxt1_scalProd)
+ctxt2_scalProd = HE.encrypt(ptxt2_scalProd)
 
 
 """Encrypted the plaintexts to have Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These Cypher txt will be use for the tests on the homeomorphic operations (**2, **3)"""
@@ -379,6 +413,33 @@ else:
    print("Homeomorphic operation add with operator + is a fail: Decrypt(Encrypt(v1) + Encrypt(v2)) not equal to v1 + v2.")
    number_fail += 1
 
+
+"""Skip a line."""
+print("\n")
+
+
+"""Perform homeomorphic substraction with operator - ."""
+print("***Test of the homeomorphic substraction with operator - ***")
+print("Encrypted v1: Encrypt(", v1_minus, ")")
+print("Encrypted v2: Encrypt(", v2_minus, ")")
+print("Performing Encrypt(v1) - Encrypt(v2)...")
+ctxtMinus1_2 = ctxt1_minus - ctxt2_minus #This operation modify the first operand ie ctxt1_minus! This is a bug that should be correted.
+"""Decrypt the result of the substraction of the two encrypted vectors."""
+v_minus_v1_v2_decrypt = HE.decrypt(ctxtMinus1_2)
+"""v_add_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
+v_minus_v1_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_minus_v1_v2_decrypt))
+"""The user can then verify if the result of the substraction of the two encrypted vectors is the same that the substraction of the two vectors without encryption."""
+print("Decrypt(Encrypt(v1) - Encrypt(v2)) -> ", v_minus_v1_v2_decrypt_flatten)
+"""Perform the substraction on the unencrypted vectors."""
+v1Minusv2 = map(sub, v1_minus, v2_minus)
+print("v = v1 - v2 ->", v1Minusv2)
+"""If Decrypt(Encrypt(v1) - Encrypt(v2)) equal to v1 - v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
+if v_minus_v1_v2_decrypt_flatten == v1Minusv2:
+   print("Homeomorphic operation substraction with operator - is a success: Decrypt(Encrypt(v1) - Encrypt(v2)) equal to v1 - v2.")
+   number_success += 1
+else:
+   print("Homeomorphic operation substraction with operation - is a fail: Decrypt(Encrypt(v1) - Encrypt(v2)) not equal to v1 - v2.")
+   number_fail += 1
 
 """Skip a line."""
 print("\n")
