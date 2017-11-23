@@ -227,7 +227,6 @@ print("*** Test of the homeomorphic addition with operator += ***")
 print("Encrypted v1: Encrypt(", v1, ")")
 print("Encrypted v2: Encrypt(", v2, ")")
 print("Performing Encrypt(v1) + Encrypt(v2)...")
-print ("test", HE.decrypt(ctxt1))
 ctxt1 += ctxt2
 """Decrypt the result of the addition of the two encrypted vectors."""
 v_add_v1_v2_decrypt = HE.decrypt(ctxt1)
@@ -291,7 +290,7 @@ v_mult_v4_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_mult_v4_v2_d
 print("Decrypt(Encrypt(v4) * Encrypt(v2)) -> ", v_mult_v4_v2_decrypt_flatten)
 """Perform the multiplication on the unencrypted vectors."""
 v4Multv2= [a*b for a,b in izip(v_minus_v3_v2_decrypt_flatten, v2)]
-print("v4 * v2 ->", v4Multv2)
+print("v5 = v4 * v2 ->", v4Multv2)
 """If Decrypt(Encrypt(v4) * Encrypt(v2)) equal to v4 * v2, The homeomorphic operation works and so it is a success. Else, it is a fail."""
 if v_mult_v4_v2_decrypt_flatten == v4Multv2:
    print("Homeomorphic operation mult with operator *= is a success: Decrypt(Encrypt(v4) * Encrypt(v2)) equal to v4 * v2.")
@@ -450,14 +449,14 @@ print("\n")
 print("***Test of the homeomorphic substraction with operator * ***")
 print("Encrypted v1: Encrypt(", v1_mult, ")")
 print("Encrypted v2: Encrypt(", v2_mult, ")")
-print("Performing Encrypt(v1) - Encrypt(v2)...")
+print("Performing Encrypt(v1) * Encrypt(v2)...")
 ctxtMult1_2 = ctxt1_mult * ctxt2_mult #This operation modify the first operand ie ctxt1_mult! This is a bug that should be correted.
 """Decrypt the result of the multiplication of the two encrypted vectors."""
 v_mult_v1_v2_decrypt = HE.decrypt(ctxtMult1_2)
 """v_mult_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
 v_mult_v1_v2_decrypt_flatten = list(itertools.chain.from_iterable(v_mult_v1_v2_decrypt))
 """The user can then verify if the result of the multiplication of the two encrypted vectors is the same that the multiplication of the two vectors without encryption."""
-print("Decrypt(Encrypt(v1) - Encrypt(v2)) -> ", v_mult_v1_v2_decrypt_flatten)
+print("Decrypt(Encrypt(v1) * Encrypt(v2)) -> ", v_mult_v1_v2_decrypt_flatten)
 """Perform the multiplication on the unencrypted vectors."""
 v1Multv2 = [a*b for a,b in izip(v1_mult, v2_mult)]
 print("v = v1 * v2 ->", v1Multv2)
