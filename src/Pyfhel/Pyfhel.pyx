@@ -6,8 +6,8 @@
 #   preserving the same keyGen-encryption-decryption from Afhel. Pyfhel
 #   works with PyPtxt as plaintext class and PyCtxt as cyphertext class.
 #   --------------------------------------------------------------------
-#   Author: Alberto Ibarrondo
-#   Date: 14/06/2017  
+#   Author: Alberto Ibarrondo and Remy AUDA
+#   Date: 23/11/2017 
 #   --------------------------------------------------------------------
 #   License: GNU GPL v3
 #
