@@ -7,8 +7,8 @@
 #   as if they were a single one.
 #   PyPtxt overrides +, -, * and * with standard operations over its lists
 #   --------------------------------------------------------------------
-#   Author: Alberto Ibarrondo
-#   Date: 14/06/2017  
+#   Author: Alberto Ibarrondo and Remy AUDA
+#   Date: 23/11/2017  
 #   --------------------------------------------------------------------
 #   License: GNU GPL v3
 #

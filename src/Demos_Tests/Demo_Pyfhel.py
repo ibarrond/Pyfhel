@@ -1,3 +1,28 @@
+#
+#   Demo_Pyfhel
+#   --------------------------------------------------------------------
+#   Perform tests on all the main operations of pyfhel. 
+#   You can view how to run this program (executed in the directory Pyfhel/src/Demo_Pyfhel), with the command: python Demo_Pyfhel -h
+#   --------------------------------------------------------------------
+#   Author: Remy AUDA and Alberto Ibarrondo 
+#   Date: 23/11/2017  
+#   --------------------------------------------------------------------
+#   License: GNU GPL v3
+#
+#   Demo_Pyfhel is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   Demo_Pyfhel is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   --------------------------------------------------------------------
+
 """Import all the packages useful for the Demo.
 #-Pyfhel is useful to generate keys, encrypt and decrypt.
 #-PyPtxt is useful to tranform the input vectors into plain text objects that could be encrypted.

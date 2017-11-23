@@ -8,8 +8,8 @@
 #   PyCtxt overrides +, -, * and @ with add, substract, mult and scalarProd
 #   from Pyfhel.
 #   --------------------------------------------------------------------
-#   Author: Alberto Ibarrondo
-#   Date: 14/06/2017  
+#   Author: Alberto Ibarrondo and Remy AUDA
+#   Date: 23/11/2017  
 #   --------------------------------------------------------------------
 #   License: GNU GPL v3
 #
@@ -186,13 +186,14 @@ class PyCtxt:
     def __pow__(self, other):
         if not isinstance(other, int):
             raise TypeError("PyCtxt '**=' error: lhs must be of type int instead of type " + str(type(other)))
+        newCtxt = self.copy(self)                        # Create new Ctxt for result
         if(other==2):
-            self.__pyfhel.square(self)
+            self.__pyfhel.square(newCtxt)
         elif(other==3):
-            self.__pyfhel.cube(self)
+            self.__pyfhel.cube(newCtxt)
         else:
             raise ValueError("Pyfhel only supports square (2) and cube (3) exponents")
-        return self
+        return newCtxt
 
     # a **= b, b = 2|3 are the only ones supported
     def __ipow__(self, other):
