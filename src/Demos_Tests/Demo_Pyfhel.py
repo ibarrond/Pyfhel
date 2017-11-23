@@ -392,7 +392,7 @@ print("*** Test of the homeomorphic addition with operator + ***")
 print("Encrypted v1: Encrypt(", v12, ")")
 print("Encrypted v2: Encrypt(", v22, ")")
 print("Performing Encrypt(v1) + Encrypt(v2)...")
-ctxtAdd1_2 = ctxt12 + ctxt22 #This operation modify the ctxt1! It is a bug that should be corrected!
+ctxtAdd1_2 = ctxt12 + ctxt22
 """Decrypt the result of the addition of the two encrypted vectors."""
 v_add_v12_v22_decrypt = HE.decrypt(ctxtAdd1_2)
 """v_add_v12_v22_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
@@ -422,7 +422,7 @@ print("***Test of the homeomorphic substraction with operator - ***")
 print("Encrypted v1: Encrypt(", v1_minus, ")")
 print("Encrypted v2_minus: Encrypt(", v2_minus, ")")
 print("Performing Encrypt(v1) - Encrypt(v2_minus)...")
-ctxtMinus1_2 = ctxt1_minus - ctxt2_minus #This operation modify the first operand ie ctxt1_minus! This is a bug that should be correted.
+ctxtMinus1_2 = ctxt1_minus - ctxt2_minus
 """Decrypt the result of the substraction of the two encrypted vectors."""
 v_minus_v1_v2_decrypt = HE.decrypt(ctxtMinus1_2)
 """v_minus_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
@@ -450,7 +450,7 @@ print("***Test of the homeomorphic substraction with operator * ***")
 print("Encrypted v1: Encrypt(", v1_mult, ")")
 print("Encrypted v2: Encrypt(", v2_mult, ")")
 print("Performing Encrypt(v1) * Encrypt(v2)...")
-ctxtMult1_2 = ctxt1_mult * ctxt2_mult #This operation modify the first operand ie ctxt1_mult! This is a bug that should be correted.
+ctxtMult1_2 = ctxt1_mult * ctxt2_mult
 """Decrypt the result of the multiplication of the two encrypted vectors."""
 v_mult_v1_v2_decrypt = HE.decrypt(ctxtMult1_2)
 """v_mult_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
@@ -479,7 +479,7 @@ print("Encrypted v1: Encrypt(", v1_scalProd, ")")
 print("Encrypted v2: Encrypt(", v2_scalProd, ")")
 """ctxt1 contains Encrypt(v1). ctxt2 contains Encrypt(v2). So we perform: Encrypt(v1) . Encrypt(v2)"""
 print("Performing Encrypt(v1) . Encrypt(v2)...")
-ctxtScalProd1_2 = ctxt1_scalProd % ctxt2_scalProd #This operation modify the first operand ie ctxt1_scalProd! This is a bug that should be correted.
+ctxtScalProd1_2 = ctxt1_scalProd % ctxt2_scalProd
 """Decrypt the result of the Scalar Product of the two encrypted vectors."""
 v_scalprod_v1_v2_decrypt = HE.decrypt(ctxtScalProd1_2)
 """v_scalprod_v1_v2_decrypt is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""

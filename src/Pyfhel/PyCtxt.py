@@ -59,9 +59,9 @@ class PyCtxt:
     
 
     # -------------------- OVERRIDE ARITHMETIC OPERATORS -------------------- #
-    # SET: '=' operator
-    def set(self):
-        return self.__pyfhel.set(self)
+    # Copy the ctxt and return the copy without modify the original one.
+    def copy(self, ctxt):
+        return self.__pyfhel.duplicate(ctxt)
 
 
     # ADD:
@@ -69,7 +69,7 @@ class PyCtxt:
     def __add__(self, other):
         if not isinstance(other, (PyCtxt, int)):
             raise TypeError("PyCtxt '+' error: lhs must be of type PyCtxt or int instead of " + str(type(other)))
-        newCtxt = self              # Create new Ctxt for result
+        newCtxt = self.copy(self)                        # Create new Ctxt for result
         if isinstance(other, PyCtxt):                   # Add directly if other is PyCtxt
             newCtxt += other
         else:
@@ -100,7 +100,7 @@ class PyCtxt:
             if not isinstance(other, (PyCtxt, int)):
                 raise TypeError("PyCtxt '-' error: lhs must be of type PyCtxt or int instead of " + str(type(other)))
         #newCtxt = self.__pyfhel.set(self)
-        newCtxt = self
+        newCtxt = self.copy(self)                        # Create new Ctxt for result
         if isinstance(other, PyCtxt):
             newCtxt -= other                            # Substract directly if other is PyCtxt
         else:
@@ -130,8 +130,7 @@ class PyCtxt:
     def __mul__(self, other):
         if not isinstance(other, (PyCtxt, int)):
             raise TypeError("PyCtxt '*' error: lhs must be of type PyCtxt or int instead of " + str(type(other)))
-        #newCtxt = self.__pyfhel.set(self)
-        newCtxt = self
+        newCtxt = self.copy(self)                        # Create new Ctxt for result
         if isinstance(other, PyCtxt):
             newCtxt *= other
         else:
@@ -159,8 +158,7 @@ class PyCtxt:
     def __mod__(self, other):
         if not isinstance(other, (PyCtxt, int)):
             raise TypeError("PyCtxt '%' error: lhs must be of type PyCtxt or int instead of " + str(type(other)))
-        #newCtxt = self.__pyfhel.set(self)
-        newCtxt = self
+        newCtxt = self.copy(self)                        # Create new Ctxt for result
         if isinstance(other, PyCtxt):
             newCtxt %= other
         else:
