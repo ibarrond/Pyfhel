@@ -90,6 +90,9 @@ if (not args.random and not args.fixe) or (args.random and not args.fixe):
                                                                           v_powerSquare2 = copy.deepcopy(v1)
                                                                           v_powerCube2 = copy.deepcopy(v1)
 
+                                                                          """Define a vector that we will use for the tests (polynomial)."""
+                                                                          v_poly = copy.deepcopy(v1)
+
 """If the user have only specify (-f/--fixe) in the command line of the program, we run the tests with fixe vectors: [1.2.3.4.5], [2,2,2,2,2]."""
 if (not args.random and args.fixe): 
                                      """Skip a line, print the title of the Demo, and skip a line again."""
@@ -124,8 +127,10 @@ if (not args.random and args.fixe):
                                      v_powerSquare2 = copy.deepcopy(v1)
                                      v_powerCube2 = copy.deepcopy(v1)
 
-                                     
+                                     """Define a vector that we will use for the tests (polynomial)."""
+                                     v_poly = copy.deepcopy(v1)
 
+                                     
 
 """If the user have specify (-r or --random) and (-f or --fixe) in the command line of the program, display an error."""
 if (args.random and args.fixe):
@@ -199,6 +204,9 @@ ptxt2_scalProd = PyPtxt(v2_scalProd, HE)
 ptxt_powerSquare2 = PyPtxt(v_powerSquare2, HE)
 ptxt_powerCube2 = PyPtxt(v_powerCube2, HE)
 
+"""Tranform the vectors (use to test the operation polynomial) in plaintext that are objects that could be encrypted."""
+ptxt_poly = PyPtxt(v_poly, HE)
+
 
 """Encrypted the two plaintexts to have two Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These two Cypher txt will be use for the test on the homeomorphic operation (+=, -=, *=, ...)"""
 ctxt1 = HE.encrypt(ptxt1)
@@ -228,6 +236,9 @@ ctxt2_scalProd = HE.encrypt(ptxt2_scalProd)
 """Encrypted the plaintexts to have Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These Cypher txt will be use for the tests on the homeomorphic operations (**2, **3)"""
 ctxt_powerSquare2 = HE.encrypt(ptxt_powerSquare2)
 ctxt_powerCube2 = HE.encrypt(ptxt_powerCube2)
+
+"""Encrypted the plaintexts to have Cypher texts that are encrypted in an homeomorphic way with the key that have been generated before. These Cypher txt will be use for the tests on the homeomorphic operations (polynomial)"""
+ctxt_poly = HE.encrypt(ptxt_poly)
 
 
 print("Encryption of v1...")
@@ -602,25 +613,45 @@ if args.graph:
 
 
 
-"""print("------------------TEST Polynomial function----------------------")
+print("------------------TEST Polynomial function----------------------")
 
-a0 = [3,3,3,3,3]
-a1 = [5,5,5,5,5]
-a2 = [2,2,2,2,2]
-a3 = [4,4,4,4,4]
+a0 = [1,1,1,1,1]
+a1 = [1,1,1,1,1]
+a2 = [1,1,1,1,1]
+a3 = [1,1,1,1,1]
 
-pltxt1 = PyPtxt(a0, HE)
-pltxt2 = PyPtxt(a1, HE)
-pltxt3 = PyPtxt(a2, HE)
-pltxt4 = PyPtxt(a3, HE)
+pltxt0 = PyPtxt(a0, HE)
+pltxt1 = PyPtxt(a1, HE)
+pltxt2 = PyPtxt(a2, HE)
+pltxt3 = PyPtxt(a3, HE)
 
+cytxt0 = HE.encrypt(pltxt0)
 cytxt1 = HE.encrypt(pltxt1)
 cytxt2 = HE.encrypt(pltxt2)
 cytxt3 = HE.encrypt(pltxt3)
-cytxt4 = HE.encrypt(pltxt4)
 
-coeff = [cytxt1, cytxt2, cytxt3, cytxt4]
+print("Polynome: a0 + a1 * v + a2 * v**2 + a3 * v**3")
+print("Decrypt(coefficient_a0): ", HE.decrypt(cytxt0))
+print("Decrypt(coefficient_a1): ", HE.decrypt(cytxt1))
+print("Decrypt(coefficient_a2): ", HE.decrypt(cytxt2))
+print("Decrypt(coefficient_a3): ", HE.decrypt(cytxt3))
+print("Decrypt(v): ", HE.decrypt(ctxt_poly))
 
-ctxt1polynomial = ctxt1.polynomialMult(ctxt1, coeff)
-result = HE.decrypt(ctxt1polynomial)
-print("Polynomial result: ", result)"""
+coeff = [cytxt0, cytxt1, cytxt2, cytxt3]
+
+ctxt_polynomial = ctxt_poly.polynomialMult(coeff)
+result = HE.decrypt(ctxt_polynomial)
+print("Polynomial result: ", result)
+
+"""Perform the Cube Power on the unencrypted vectors."""
+ppar = [1, 1, 1, 1]
+p = np.poly1d(ppar)
+print("1: ", p(1))
+print("2: ", p(2))
+print("3: ", p(3))
+print("4: ", p(4))
+print("5: ", p(5))
+
+
+
+
