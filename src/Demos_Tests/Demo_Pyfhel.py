@@ -615,10 +615,10 @@ if args.graph:
 
 print("------------------TEST Polynomial function----------------------")
 
-a0 = [1,1,1,1,1,1]
-a1 = [1,1,1,1,1,1]
-a2 = [1,1,1,1,1,1]
-a3 = [1,1,1,1,1,1]
+a0 = [1,1,1,1,1]
+a1 = [1,1,1,1,1]
+a2 = [1,1,1,1,1]
+a3 = [1,1,1,1,1]
 
 pltxt0 = PyPtxt(a0, HE)
 pltxt1 = PyPtxt(a1, HE)
@@ -646,11 +646,8 @@ print("Polynomial result: ", result)
 """Perform the Cube Power on the unencrypted vectors."""
 ppar = [1, 1, 1, 1]
 p = np.poly1d(ppar)
-print("1: ", p(1))
-print("2: ", p(2))
-print("3: ", p(3))
-print("4: ", p(4))
-print("5: ", p(5))
+print("Polynomial evaluation on unencrypted vector:")
+print(p(1), ", ", p(2), ", ", p(3), ", ", p(4), ", ", p(5))
 
 
 

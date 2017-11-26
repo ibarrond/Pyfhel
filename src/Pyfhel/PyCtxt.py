@@ -268,7 +268,7 @@ class PyCtxt:
                            print("Ciphertexts coefficients and the Ciphertexts X of the polynome P(X) have mismatched lengths.")
                            raise PyCtxtLenError()
         
-        """Verifications on the degree of the polynome given."""
+        """Verifications on the degree of the polynome given. TODO: could be improve to support degree n."""
         #Define the number of coefficients of the polynome ie the degree of the polynome.
         n = len(coefficients)
         if n == 0:
@@ -278,11 +278,11 @@ class PyCtxt:
            raise ValueError("Pyfhel only supports square (2) and cube (3) exponents.")
 
         """Perform the polynomial computations."""
-        calc = self.copy(coefficients[0])
+        polynome_computation = self.copy(coefficients[0])
         for i, a in enumerate(coefficients):
                  if i != 0:
-                     calc += (a*self)**i
-        return calc   
+                     polynome_computation += (a*self)**i
+        return polynome_computation   
 
 
 
