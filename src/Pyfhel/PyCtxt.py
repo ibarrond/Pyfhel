@@ -187,7 +187,10 @@ class PyCtxt:
         if not isinstance(other, int):
             raise TypeError("PyCtxt '**=' error: lhs must be of type int instead of type " + str(type(other)))
         newCtxt = self.copy(self)                        # Create new Ctxt for result
-        if(other==2):
+        if(other==1):
+            #Do nothing.
+            newCtxt = newCtxt
+        elif(other==2):
             self.__pyfhel.square(newCtxt)
         elif(other==3):
             self.__pyfhel.cube(newCtxt)
@@ -199,7 +202,10 @@ class PyCtxt:
     def __ipow__(self, other):
         if not isinstance(other, int):
             raise TypeError("PyCtxt '**=' error: lhs must be of type int instead of type " + str(type(other)))
-        if(other==2):
+        if(other==1):
+            #Do nothing.
+            self = self
+        elif(other==2):
             self.__pyfhel.square(self)
         elif(other==3):
             self.__pyfhel.cube(self)
@@ -242,31 +248,34 @@ class PyCtxt:
     #@param: The method takes a mandatory parameter:
     #-param1: The list of coefficients 
     """
-    def polynomialMult(self,  ctxt1, coefficients=[], *args):
+    def polynomialMult(self, coefficients=[], *args):
+        if not isinstance(coefficients, list):
+                raise TypeError("PyCtxt '-' error: coefficients must be of type list instead of " + str(type(coefficients)))
         n = len(coefficients)
-        print("nombre de coefficients", n)
+        print("nombre de coefficients: ", n)
         if n > 4:
            raise ValueError("Pyfhel only supports square (2) and cube (3) exponents")
         else:
            print("Degree supports")
 
-        coefficients[3] *= self**3
+        """coefficients[3] *= self**3
         coefficients[2] *= self**2
         coefficients[1] *= self
         coefficients[2] += coefficients[3]
         coefficients[1] += coefficients[2]
         coefficients[0] += coefficients[1]
-        return coefficients[0]
+        return coefficients[0]"""
         print("2")
+        calc = self.copy(coefficients[0])
         for i, a in enumerate(coefficients):
-                 print("3")
-                 if i != n-1:
-                     print("4")
-                     calc = (a*self)**i
+                 print("3. Value of i: ", i, ". Value of  a: ", a)
+                 if i != 0:
+                     print("4. Value of i: ", i, ". Value of  a: ", a)
+                     calc += (a*self)**i
                      print("4.1")
-                     result += calc
+                    
         print("5")
-        return result   
+        return calc   
 
 
 
