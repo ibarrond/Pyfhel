@@ -249,32 +249,39 @@ class PyCtxt:
     #-param1: The list of coefficients 
     """
     def polynomialMult(self, coefficients=[], *args):
+
+        """Verifications on the type of the arguments given"""
+        #If coefficients is not a list, we throw an error.
         if not isinstance(coefficients, list):
                 raise TypeError("PyCtxt '-' error: coefficients must be of type list instead of " + str(type(coefficients)))
-        n = len(coefficients)
-        print("nombre de coefficients: ", n)
-        if n > 4:
-           raise ValueError("Pyfhel only supports square (2) and cube (3) exponents")
-        else:
-           print("Degree supports")
+        #Otherwise, if coefficients is a list...
+        elif isinstance(coefficients, list):
+                #We verify if each items in the list coefficients are all of type PyCtxt. If not, we throw an error.
+                if not all(isinstance(item, PyCtxt) for item in coefficients):
+                       raise TypeError("PyCtxt '-' error: the coefficients must be of type PyCtxt instead of " + str(type(coefficients)))
 
-        """coefficients[3] *= self**3
-        coefficients[2] *= self**2
-        coefficients[1] *= self
-        coefficients[2] += coefficients[3]
-        coefficients[1] += coefficients[2]
-        coefficients[0] += coefficients[1]
-        return coefficients[0]"""
-        print("2")
+        """Verifications on the lenght of the encrypted vectors."""
+        #The lenght of each coefficients must be equal to the lenght of the X vector of the polynome P(X).
+        for i, a in enumerate(coefficients):
+                    if not self.getLen() == a.getLen():
+                           print("\n")
+                           print("Ciphertexts coefficients and the Ciphertexts X of the polynome P(X) have mismatched lengths.")
+                           raise PyCtxtLenError()
+        
+        """Verifications on the degree of the polynome given."""
+        #Define the number of coefficients of the polynome ie the degree of the polynome.
+        n = len(coefficients)
+        if n == 0:
+           raise ValueError("No coefficients have been given.")
+        #If we have more than 4 coefficients, it means that the degree of the polynome is greater than 4. And currently, Pyfhel only supports square and cube exponents.
+        if n > 4:
+           raise ValueError("Pyfhel only supports square (2) and cube (3) exponents.")
+
+        """Perform the polynomial computations."""
         calc = self.copy(coefficients[0])
         for i, a in enumerate(coefficients):
-                 print("3. Value of i: ", i, ". Value of  a: ", a)
                  if i != 0:
-                     print("4. Value of i: ", i, ". Value of  a: ", a)
                      calc += (a*self)**i
-                     print("4.1")
-                    
-        print("5")
         return calc   
 
 
