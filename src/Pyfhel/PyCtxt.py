@@ -182,7 +182,7 @@ class PyCtxt:
 
 
     # POWER
-    # a ** b, b = 2|3 are the only ones supported
+    # a ** b
     def __pow__(self, other):
         if not isinstance(other, int):
             raise TypeError("PyCtxt '**=' error: lhs must be of type int instead of type " + str(type(other)))
@@ -195,10 +195,12 @@ class PyCtxt:
         elif(other==3):
             self.__pyfhel.cube(newCtxt)
         else:
-            raise ValueError("Pyfhel only supports square (2) and cube (3) exponents")
+            copySelf = self.copy(self)                        # Create a copy of self.
+            for i in range(other - 1):
+                 newCtxt *= copySelf  
         return newCtxt
 
-    # a **= b, b = 2|3 are the only ones supported
+    # a **= b
     def __ipow__(self, other):
         if not isinstance(other, int):
             raise TypeError("PyCtxt '**=' error: lhs must be of type int instead of type " + str(type(other)))
@@ -210,7 +212,9 @@ class PyCtxt:
         elif(other==3):
             self.__pyfhel.cube(self)
         else:
-            raise ValueError("Pyfhel only supports square (2) and cube (3) exponents")
+            copySelf = self.copy(self)                        # Create a copy of self.
+            for i in range(other - 1):
+                 self *= copySelf
         return self
 
 
