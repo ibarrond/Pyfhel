@@ -287,7 +287,7 @@ cdef class Pyfhel:
         return comparison
 
 
-    # RORATE each cyphertext inside PyCtxt ctxt for each ID in it
+    # ROTATE each cyphertext inside PyCtxt ctxt for each ID in it
     def rotate(self, ctxt, c):
         if not isinstance(ctxt, PyCtxt):
             raise TypeError("Pyfhel rotate error: ctxt must be of type PyCtxt instead of type " + str(type(ctxt)))
