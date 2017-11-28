@@ -30,9 +30,7 @@
 |-------------------------|---------------|
 | **functions**           |               |
 | _ init _                | Create an instance of PyCtxt |
-| copy                 | @Description: The method copy allow to copy a PyCtxt object and to return the copy without modify the original one.
-@param: The method takes a mandatory parameter: a PyCtxt.
--param1: The PyCtxt object to copy. |
+| copy                 | @Description: The method copy allow to copy a PyCtxt object and to return the copy without modify the original one. \n @param: The method takes a mandatory parameter: a PyCtxt. \n -param1: The PyCtxt object to copy. |
 | +                   | @Description:
     #The operator + allow to add a PyCtxt object with an other PyCtxt object or an int and to return a PyCtxt object that contain the sum. This operator doesn't modify the first operand.
 
