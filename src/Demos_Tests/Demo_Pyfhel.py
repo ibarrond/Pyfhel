@@ -642,30 +642,30 @@ else:
    number_fail += 1
 
 """Skip a line."""
-print("\n")
+#print("\n")
 
 
 """Perform homeomorphic Power with the operator **4 ."""
-print("***Test of the homeomorphic Power **4 ***")
-print("Encrypted v1: Encrypt(", v_powern2, ")")
+#print("***Test of the homeomorphic Power **4 ***")
+#print("Encrypted v1: Encrypt(", v_powern2, ")")
 """ctxt_power4 contains Encrypt(v1). So we perform: Encrypt(v1) ** 4"""
-print("Performing Encrypt(v1) ** 4...")
-ctxt_powern2_result = ctxt_powern2 ** 4
+#print("Performing Encrypt(v1) ** 4...")
+#ctxt_powern2_result = ctxt_powern2 ** 4
 """Decrypt the result of Power 4 of the encrypted vector."""
-v_powern2_decrypt_result = HE.decrypt(ctxt_powern2_result)
+#v_powern2_decrypt_result = HE.decrypt(ctxt_powern2_result)
 """v_powern2_decrypt_result is a list of list ie [[a, b, c,...]], so we want to flatten it to obtain [a, b, c,...]."""
-v_powern2_decrypt_result_flatten = list(itertools.chain.from_iterable(v_powern2_decrypt_result))
-print("Decrypt(Encrypt(v1) ** 4) -> ", v_powern2_decrypt_result_flatten)
+#v_powern2_decrypt_result_flatten = list(itertools.chain.from_iterable(v_powern2_decrypt_result))
+#print("Decrypt(Encrypt(v1) ** 4) -> ", v_powern2_decrypt_result_flatten)
 """Perform the Power4 on the unencrypted vectors."""
-v_Powern2 = [a*b*c*d for a,b,c,d in izip(v_powern2, v_powern2, v_powern2, v_powern2)]
-print("v1 ** 4 ->", v_Powern2)
+#v_Powern2 = [a*b*c*d for a,b,c,d in izip(v_powern2, v_powern2, v_powern2, v_powern2)]
+#print("v1 ** 4 ->", v_Powern2)
 """If Decrypt(Encrypt(v1) ** 4) equal to v1 ** 4, The homeomorphic operation works and so it is a success. Else, it is a fail."""
-if v_powern2_decrypt_result_flatten == v_Powern2:
-   print("Homeomorphic operation Power with operator **4 is a success: Decrypt(Encrypt(v1) ** 4) equal to v1 ** 4.")
-   number_success += 1
-else:
-   print("Homeomorphic operation Power with operator **4 is a fail: Decrypt(Encrypt(v1) ** 4) not equal to v1 ** 4.")
-   number_fail += 1
+#if v_powern2_decrypt_result_flatten == v_Powern2:
+#   print("Homeomorphic operation Power with operator **4 is a success: Decrypt(Encrypt(v1) ** 4) equal to v1 ** 4.")
+#   number_success += 1
+#else:
+#   print("Homeomorphic operation Power with operator **4 is a fail: Decrypt(Encrypt(v1) ** 4) not equal to v1 ** 4.")
+#   number_fail += 1
 
 """Skip a line."""
 print("\n")

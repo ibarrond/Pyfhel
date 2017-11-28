@@ -410,7 +410,7 @@ class PyCtxt:
 
         """Perform the polynomial computations."""
         # Store the Pyctxt that represent a0 in a variable. 
-        polynome_computation = self.copy(coefficients[0])
+        polynome_computation = coefficients[0]
         # Add to Pyctxt that represent a0, the other monomes.
         for i, a in enumerate(coefficients):
                  if i != 0:
