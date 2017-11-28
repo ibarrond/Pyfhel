@@ -72,7 +72,7 @@ if (not args.random and not args.fixe) or (args.random and not args.fixe):
                                                                           v_powerCube = copy.deepcopy(v1)
 
                                                                           """Define a vector that we will use for the tests (**=n)."""
-                                                                          v_powern = [1,2,3,4,4]
+                                                                          v_powern = copy.deepcopy(v1)
                                                                           
                                                                           """Define two vectors that we will use for the tests (+, -, *, ...)."""
                                                                           #For +.
