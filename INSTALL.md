@@ -18,7 +18,13 @@ Additionally, there are some Packages and Libraries required for the installatio
 ------------------------------------
 
 ## EASY INSTALL -> an untested shortcut
-This method is not entirely supported, but it is the fastest, since it is an automatized version. Not recommended unless your OS is Ubuntu (Untested otherwise). Run inside the src/ folder:
+This method is not entirely supported, but it is the fastest, since it is an automatized version. Not recommended unless your OS is Ubuntu (Untested otherwise).
+
+PULLING HELIB AS SUBMODULE Check the src/HElib folder, and if you don't see any files inside, it means you didn't clone/pull Pyfhel using --recursive. To fix it, run anywhere inside Pyfhel:
+
+> git submodule update --init --recursive
+
+Then, run inside the src/ folder:
        
        > ./configure
        > sudo make all
