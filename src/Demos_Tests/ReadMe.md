@@ -4,6 +4,7 @@ To do so, you have two ways to do it:
 
 Method 1 (recommended):
 Run the following batch file: installAdditionalPackage.sh, by running the following command in this current folder:
+
 ./installAdditionalPackage.sh
 
 
