@@ -111,6 +111,9 @@ packages:
 	sudo apt-get install python-pip
 	sudo apt-get install libtool-bin
 	sudo apt-get install m4
+	pip install --upgrade pip
+	python -m pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose
+	sudo apt-get install python-tk
 
 libdownloads:
 	mkdir -p .installers
