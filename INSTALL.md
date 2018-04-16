@@ -1,5 +1,14 @@
 # INSTALLATION OF PYFHEL
 
+### Cloning/Downloading the repository
+In order to download all the files of this project at once including the dependencies (HElib is set as a submodule), run:
+
+      > git clone --recursive https://github.com/ibarrond/Pyfhel
+
+If you downloaded the source code directly (zip or clone wothout recursive), run this command to obtain HElib:
+
+      > git submodule update --init --recursive 
+
 ### Dependencies
 The dependencies between the different libraries included in this project are:
    **Pyfhel -> Afhel -> HElib**
@@ -20,16 +29,14 @@ Additionally, there are some Packages and Libraries required for the installatio
 ## EASY INSTALL -> an untested shortcut
 This method is not entirely supported, but it is the fastest, since it is an automatized version. Not recommended unless your OS is Ubuntu (Untested otherwise).
 
-PULLING HELIB AS SUBMODULE Check the src/HElib folder, and if you don't see any files inside, it means you didn't clone/pull Pyfhel using --recursive. To fix it, run anywhere inside Pyfhel:
-
-> git submodule update --init --recursive
-
 Then, run inside the src/ folder:
        
        > ./configure
        > sudo make all
        
-It should take a long time (15-20 min), but if there is no error, everything should be installed. The easy install is equivalent to all the steps bellow (but it doesn't perform cleaning). If you get any errors, it is better to walk the long way and follow the full installation guide.
+You will have to accept installation of several packages during the process.
+
+It should take some time (15-20 min), but if there is no error, everything should be installed. The easy install is equivalent to all the steps bellow (but it doesn't perform cleaning). If you get any errors, it is better to walk the long way and follow the full installation guide.
 
 ---------------------------------------
 
@@ -108,7 +115,7 @@ It should take a long time (15-20 min), but if there is no error, everything sho
 
          > sudo ln -s /usr/local/lib/libntl.so.XX /usr/lib/libntl.so.XX
 
-2. **Required Python packages**
+3. **Required Python packages**
   * Cython: bridge between C++ and Python, essential to build Pyfhel:
         
         > sudo pip install cython
