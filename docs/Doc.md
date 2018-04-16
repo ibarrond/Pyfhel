@@ -1,21 +1,29 @@
 # Documentation on Pyfhel
 
+
 ## 1. Cloning & Installation
-In order to download all the files of this project at once including the dependencies (HElib is set as a submodule), run:
-      
-      > git clone --recursive https://github.com/ibarrond/Pyfhel
-
-If you downloaded the source code directly (zip or clone wothout recursive), run this command to obtain HElib:
-
-      > git submodule update --init --recursive
-
-Next, Follow the instructions in the document 'INSTALL.md'. 
+Follow the instructions in the document 'INSTALL.md'. 
 
 - *EASY INSTALL* can be used (only 2 shell commands!) but it is not recommended unless your OS is Ubuntu (Due to package manager 'apt', location of shared files, etc...)
 - *NORMAL INSTALLATION* is the preferred procedure, explained step-by-step in the INSTALL.md document.
 
 The installation relies heavily on **Makefiles** (src/.Makefiles folder, moved to their respective folders by src/configure). In case there is anything wrong with your *NORMAL INSTALLATION*, you can check them and maybe adjust some variables. All of the Makefiles have been heavily commented and cleaned. In order to know what commands are available, just run `make info`. In general, Makefiles include an uninstall command (`make uninstall`) to undo the installation, and a clean command (`make clean`) to erase all non-source files.
-     
+
+### Dependencies
+The dependencies between the different libraries included in this project are:
+   **Pyfhel -> Afhel -> HElib**
+
+Additionally, there are some Packages and Libraries required for the installation & compilation of all three:
+
+| Requirements             | Names                           | Installation process                   |
+|--------------------------|---------------------------------|----------------------------------------|
+| Required Packages        | Boost, Python-dev, pip, libtool, m4 | sudo apt-get                           |
+| Required Lib Downloads   | NTL, GMP                        | Download .tar.bz2, make, sudo make install |
+| Required Python Packages | Cython, numpy                   | sudo pip install                       |
+
+*NOTE: the package manager in this installation was *apt* (Ubuntu). In case you're running a different Linux distribution, use your own package manager (e.g.: rpm,...). If you are running Ubuntu, you may want to perform the EASY INSTALL*
+
+    
 #### What the Installation does
 First of all, all the requirements for *HElib* & *Afhel* & *Pyfhel* are installed (details about them in INSTALL.md). Next, it installs *HElib* and *Afhel* as **shared libraries** (named _fhe_ and _afhel_ respectively) using `libtool` {} (yes! even though the original *HElib* was a static library, this project has modified the installation for it to be available all across the system), and copies the header files to a well-known folder {/usr/local/include by default}. Lastly, *Pyfhel* is installed as a **Python module** using `pip`.
 

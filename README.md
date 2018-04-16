@@ -12,12 +12,10 @@
 
 Additionally, this project contains a large series of Demos & Tests for **HElib**, **Afhel** & **Pyfhel**.
 
-## Installation
-In order to download all the files of this project at once including the dependencies (HElib is set as a submodule), run:
+Last but not least, we include a Makefile to compile and install **HElib** as a shared library, which can then be linked to other C++ programs using the tag `-fhe`.
 
-      > git clone --recursive https://github.com/ibarrond/Pyfhel
-  
-After that, follow the instructions in *INSTALL.md* for the complete installation process. 
+## Installation
+Follow the instructions in *INSTALL.md* for the complete installation process. 
 
 ## Update, Clean & Uninstall
    Update by running inthe src/ directory:
@@ -32,20 +30,23 @@ After that, follow the instructions in *INSTALL.md* for the complete installatio
        
        > sudo make uninstall
        
-   If you want to uninstall any particular component, navigate to HElib/src/, Afhel/ or Pyfhel/ directories and run that same command.
+If you want to uninstall any particular component, navigate to HElib/src/, Afhel/ or Pyfhel/ directories and run that same command.
    
 ## Project contents
+- `src/` contains the source code for Pyfhel, Afhel and HElib.
 
-- `Docs/` includes all documentation of the project:
+- `docs/` includes all documentation of the project:
 
-     - *Doc.md*: Essential documentation of the project. A must-read.
-     - *PyfhelLibrary.md*: Comprehensive list of all classes & methods available in Pyfhel.
- 
+     - *Doc.md*: Essential documentation of the project. A recommended reading material.
+     - *Doc_API.md*: Comprehensive list of all classes & methods available in Pyfhel.
+
+- `src/Demos_Tests`, a collection of Demos and Tests for all three libraries
+- `src/.Makefiles/Makefile_HElib`, a makefile to compile and install HElib as a dynamic library (`-fhe`).
 
 ## Author & Acknowledgements
 
 - Author: Alberto Ibarrondo [@ibarrond](https://github.com/ibarrond) in collaboration with EURECOM ([Melek Onen](http://www.eurecom.fr/~onen/)).
-- Latest release: 25/10/2017
+- Latest release: 16/04/2018
 
 This library was created originally for the project "Privacy for Big Data Analytics" in EURECOM. The SW is based on **[HElib](https://github.com/shaih/HElib) by Shai Halevi**, **[HEIDE](https://github.com/heide-support/HEIDE) by Grant Frame**, **[analysis of addition](https://mshcruz.wordpress.com/2017/05/13/sum-of-encrypted-vectors/) by Matheus S.H. Cruz**. In compliance with their respective Licenses, I name all of them in this section. This project could not be possible without them. For any legal disclaimer, please contact me. Also, the same type of license (GNU GLPv3) applies to Afhel & Pyfhel, as mandated.
 
