@@ -1,3 +1,0 @@
-AND, OR, XOR operations for modulus 2.
-Demo for those operations.
-PyPtxt greatly improved with numpy, allowing simple debugging of operations.
