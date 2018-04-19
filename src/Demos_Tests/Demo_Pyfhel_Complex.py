@@ -32,6 +32,14 @@ from PyPtxt import PyPtxt
 from PyCtxt import PyCtxt
 
 """Other imports useful for the demo."""
+from itertools import izip
+import itertools
+from operator import sub
+import numpy as np
+import matplotlib.pyplot as plt
+import sys
+import argparse
+import copy
 
 """Define a parser to parse the arguments given to the program."""
 parser = argparse.ArgumentParser()
