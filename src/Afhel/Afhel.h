@@ -1,7 +1,7 @@
 /**
- *  Afhel
+ * @file Afhel.h
  *  --------------------------------------------------------------------
- *  Afhel is a library that creates an abstraction over the basic
+ * @brief Afhel is a library that creates an abstraction over the basic
  *  functionalities of HElib as a Homomorphic Encryption library, such as
  *  addition, multiplication, scalar product and others.
  *
@@ -13,8 +13,7 @@
  *  the Context setup and Key generation into one single KeyGen function
  *  with multiple parameter selection.
  *  --------------------------------------------------------------------
- *  Author: Alberto Ibarrondo
- *  Date: 14/06/2017  
+ * @author: Alberto Ibarrondo (@ibarrond)
  *  --------------------------------------------------------------------
  *  License: GNU GPL v3
  *
@@ -31,6 +30,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *  --------------------------------------------------------------------
+ * @bugs No known bugs
  */
 
 
