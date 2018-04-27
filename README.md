@@ -1,14 +1,14 @@
 # Pyfhel
 
-* **_Description_**: Homomorphic Encryption Library for Python. Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR, SHIFT & ROTATE) over encrypted vectors of integers/binaries. 
+* **_Description_**: Homomorphic Encryption Library for Python. Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR, SHIFT & ROTATE) over encrypted vectors of integers/binaries. EXTRA: Documentation and Tests for Helib, as well as a Makefile to turn Helib into a shared library.
 * **_Language_**: Python2.7 on top of C++ (with Cython).
 * **_Dependencies_**: [HElib](https://github.com/shaih/HElib), [GMP](http://www.gmplib.org), [NTL](http://www.shoup.net/ntl/download.html)
 * **_License_**: [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Summary
-**PY**thon **F**or **HEL**ib, **Pyfhel** implements some basic functionalities of HElib as a Homomorphic Encryption library such as sum, mult, or scalar product in Python (currently only for Python2.7). **Pyfhel** allows the use of HElib inside Python and with a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as implementing Machine Learning algorithms.
+**PY**thon **F**or **H**momorphic **E**ncryption **L**ibraries, **Pyfhel** implements some basic functionalities of HElib as a Homomorphic Encryption library such as sum, mult, or scalar product in Python (currently only for Python2.7). **Pyfhel** allows the use of HElib inside Python and with a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as implementing Machine Learning algorithms.
 
-**Pyfhel** is built on top of **Afhel**, an **A**bstraction **F**or **HEL**ib in C++. **Afhel** uses an unordered Map to manage HElib Cyphertexts using key-value storage with keys of type _String_. It implements the most important the HElib operations using only the keys for its functions, adding some extra functionalities not present in HElib such as Scalar Product.
+**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**momorphic **E**ncryption **L**ibraries in C++. **Afhel** uses an unordered Map to manage HElib Cyphertexts using key-value storage with keys of type _String_. It implements the most important the HElib operations using only the keys for its functions, adding some extra functionalities not present in HElib such as Scalar Product.
 
 Additionally, this project contains a large series of Demos & Tests for **HElib**, **Afhel** & **Pyfhel**.
 
@@ -18,7 +18,7 @@ Last but not least, we include a Makefile to compile and install **HElib** as a 
 Follow the instructions in *INSTALL.md* for the complete installation process. 
 
 ## Update, Clean & Uninstall
-   Update by running inthe src/ directory:
+   Update by running in the src/ directory:
        
        > sudo make upgrade
 
@@ -39,6 +39,7 @@ If you want to uninstall any particular component, navigate to HElib/src/, Afhel
 
      - *Doc.md*: Essential documentation of the project. A recommended reading material.
      - *Doc_API.md*: Comprehensive list of all classes & methods available in Pyfhel.
+     - `Helib/`: docs and images explaining this otherwise undocumented library.
 
 - `src/Demos_Tests`, a collection of Demos and Tests for all three libraries
 - `src/.Makefiles/Makefile_HElib`, a makefile to compile and install HElib as a dynamic library (`-fhe`).
