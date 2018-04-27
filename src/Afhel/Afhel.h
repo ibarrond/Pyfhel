@@ -1,4 +1,4 @@
-/*
+/**
  *  Afhel
  *  --------------------------------------------------------------------
  *  Afhel is a library that creates an abstraction over the basic
@@ -34,8 +34,8 @@
  */
 
 
-#ifndef ALFHEL_H
-#define ALFHEL_H
+#ifndef AFHEL_H
+#define AFHEL_H
 
 #include <fstream>
 #include <sstream>
@@ -43,44 +43,55 @@
 #include <sys/time.h>
 #include <string.h>
 
-#include <boost/unordered_map.hpp>
-#include <boost/lexical_cast.hpp>
-
 #include "FHE.h"
 #include "EncryptedArray.h"
 #include "PAlgebra.h"
 
 
+/**
+* Abstraction For Homomorphic Encryption Libraries. 
+* 
+*  Afhel is a library that creates an abstraction over the basic
+*  functionalities of HElib as a Homomorphic Encryption library, such as
+*  addition, multiplication, scalar product and others.
+*  
+*/
 class Afhel{
 
     private:
-        FHEcontext *context;                        // Required for key Generation
-        FHESecKey *secretKey;                       // Secret key of the Public-Secret key pair
-        FHEPubKey *publicKey;                       // Public key of the public-secret key pair
-        ZZX G;                                      // NTL Poly used to create ea
-        EncryptedArray *ea;                         // Array used for encryption
+        // -------------------------- ATTRIBUTES ----------------------------
+        FHEcontext *context;              /**< HElib context. Required for key Generation */
+        FHESecKey *secretKey;             /**< Secret key. Part of the key pair */
+        FHEPubKey *publicKey;             /**< Public key. Part of the key pair */  
+        EncryptedArray *ea;               /**< HElib encrypted array. Used for operations (depends on context and publicKey) */
+        long p, r;                        /**< Modulo and exponent of cyphertext space. All operations are modulo p^r */
+        long nSlots;                      /*!< Number of values that fit in a Ctxt. Can also be seen as the vectorization factor */
+        bool flagVerbose = false;         /*!< Flag to print messages on console */
 
-        boost::unordered_map<string, Ctxt> ctxtMap; // Unordered map which stores the ciphertexts
-        
-        long global_m, global_p, global_r;
-
+        // ------------------ STREAM OPERATORS OVERLOAD ----------------------
         /**
-        * @brief Store the ciphertext in the unordered map and return key where 
-        * it was stored
-        * @param ctxt Ciphertext to store in unordered map
-        * @return the ID used to locate this ciphertext in the unordered map
-        */
-        string store(Ctxt* ctxt);
+         * An output stream operator, parsing the object into a string.
+         * @param outs output stream where to bulk the Afhel object
+         * @param af Afhel object ot be exported
+         *
+        friend std::ostream& operator<< (std::ostream& outs, Afhel const& af);
+        friend std::istream& operator>> (std::istream& ins, Afhel& af);
 
+        
 
     public:
+        // ----------------------- CLASS MANAGEMENT --------------------------
+        //DEFAULT CONSTRUCTOR
         Afhel();
+
+        //COPY CONSTRUCTOR
+        Afhel(Afhel const& otherAfhel);
+
+        //DEFAULT DESTRUCTOR
         virtual ~Afhel();
         
-        bool flagPrint = false;                     // Flag to print messages on console
-        long nslots;                                // Nº of slots in scheme
 
-        // -------------------------- CRYPTOGRAPHY ----------------------------
+        // -------------------------- CRYPTOGRAPHY ---------------------------
         // KEY GENERATION
         /**
          * @brief Performs Key Generation using HElib functions
