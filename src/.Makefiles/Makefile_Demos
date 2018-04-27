@@ -7,20 +7,20 @@
 ##############################################################################################
 # 
 # DESCRIPTION: Makefile for creation of Binaries based on Afhel.
-# 			   In order to use Afhel library in your own .cpp code, use this formula:
-# 			   		#include <Afhel.h>
+#                In order to use Afhel library in your own .cpp code, use this formula:
+#                        #include <Afhel.h>
 #
-# 			   This makefile allows the compilation&linking of .cpp files. A file called
-# 			   fname.cpp can be target if this recipe in order to create an executable:
-# 			   		make fname_x
+#                This makefile allows the compilation&linking of .cpp files. A file called
+#                fname.cpp can be target if this recipe in order to create an executable:
+#                        make fname_x
 #
-# 			   Some configuration may be required in the Makefile Variables to accomodate the
-# 			   settings to a given OS.
+#                Some configuration may be required in the Makefile Variables to accomodate the
+#                settings to a given OS.
 #
 # AUTHOR: Alberto Ibarrondo (github @ibarrond)
 # DATE: 16/10/2017
-#	
-#	
+#    
+#    
 # LICENSE: GNU GPL v3
 #  
 #  This file is part of Afhel
@@ -55,9 +55,9 @@ $(info For a list if all the available commands, run >make info)
 #.................................. COMPILER & LINKER ........................................
 CC = g++
 CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
-	   	 -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
-		 -Wfatal-errors -Wshadow -Wall -fmax-errors=2
-		 
+            -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
+         -Wfatal-errors -Wshadow -Wall -fmax-errors=2
+         
 
 # useful flags:
 #   -std=c++11
@@ -76,12 +76,12 @@ CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
 #
 #   -DEVALMAP_CACHED=1 Cache some constants for bootstrapping
 #
-#		 * EVALMAP_CACHED=0 caches these constants as ZZX'es, this takes
-#   	 	       less space but it means that they still need to be converted
-#   			   to DoubleCRT's with every recryption operation. 
+#         * EVALMAP_CACHED=0 caches these constants as ZZX'es, this takes
+#                   less space but it means that they still need to be converted
+#                  to DoubleCRT's with every recryption operation. 
 #
 #        * EVALMAP_CACHED=1 caches these constants directly as DoubleCRT's,
-#	               this may take a significant amount of memeory.
+#                   this may take a significant amount of memeory.
 #
 #  If you get compilation errors, you may need to add -std=c++11 or -std=c++0x
 
@@ -104,7 +104,7 @@ HEADER = Afhel.h
 ##############################################################################################
 
 %_x: %.cpp
-	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS)
+    $(CC) $(CFLAGS) -o $@ $< $(LDLIBS)
 
 
 
@@ -113,7 +113,7 @@ HEADER = Afhel.h
 ##############################################################################################
 
 clean:
-	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so *.aenv
+    rm -f *.o *_x *_x.exe *.a *.lo *.la *.so *.aenv
 
 
 
@@ -123,10 +123,10 @@ clean:
 
 
 info:
-	: Afhel requires HElib, NTL version 10.0.0 or higher and GMP
-	: Compilation flags are 'CFLAGS=$(CFLAGS)'
-	: Commands Available:
-	: * make fileName_x - Compile & Link binary filename.cpp with Afhel and its dependencies 
-	: * make clean - remove all library files from the folder
-	: If errors occur, try adding/removing '-std=c++11' in Makefile
-										    
+    : Afhel requires HElib, NTL version 10.0.0 or higher and GMP
+    : Compilation flags are 'CFLAGS=$(CFLAGS)'
+    : Commands Available:
+    : * make fileName_x - Compile & Link binary filename.cpp with Afhel and its dependencies 
+    : * make clean - remove all library files from the folder
+    : If errors occur, try adding/removing '-std=c++11' in Makefile
+                                            
