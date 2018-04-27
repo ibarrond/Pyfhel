@@ -7,13 +7,13 @@
 ##############################################################################################
 #
 # DESCRIPTION: Main Makefile that acts as installer for HElib, Afhel & Pyfhel. With it, there
-# 			   is no need to travel across directories unless some particular configuration is
-# 			   desired. Just type the next command and wait for everything to be finished.
-# 			   		> sudo make
+#                is no need to travel across directories unless some particular configuration is
+#                desired. Just type the next command and wait for everything to be finished.
+#                        > sudo make
 #
-# 			   You can also select which library to build&install (e.g.:sudo make Afhel), and
-# 			   clean all the subdirectories all at once with 'make clean'. Finally, 'make
-# 			   uninstall' allows the fast removal of all libraries
+#                You can also select which library to build&install (e.g.:sudo make Afhel), and
+#                clean all the subdirectories all at once with 'make clean'. Finally, 'make
+#                uninstall' allows the fast removal of all libraries
 #
 #
 # AUTHOR: Alberto Ibarrondo (github @ibarrond)
@@ -106,21 +106,21 @@ all: requirements install
 requirements: packages libdownloads pypackages
 
 packages:
-	sudo apt-get install python-dev
-	sudo apt-get install libboost-all-dev
-	sudo apt-get install python-pip
-	sudo apt-get install libtool-bin
-	sudo apt-get install m4
-	sudo pip install --upgrade pip
+    sudo apt-get install python-dev
+    sudo apt-get install libboost-all-dev
+    sudo apt-get install python-pip
+    sudo apt-get install libtool-bin
+    sudo apt-get install m4
+    sudo pip install --upgrade pip
 
 libdownloads:
-	mkdir -p .installers
-	cp .Makefiles/Makefile_Inst_GMP_NTL .installers/Makefile
-	$(MAKE) -C .installers
-	rm -rf .installers
+    mkdir -p .installers
+    cp .Makefiles/Makefile_Inst_GMP_NTL .installers/Makefile
+    $(MAKE) -C .installers
+    rm -rf .installers
 
 pypackages:
-	sudo pip install --upgrade cython 
+    sudo pip install --upgrade cython 
 
 ##############################################################################################
 #                                     INSTALL ALL LIBRARIES                                  #
@@ -131,18 +131,18 @@ install: HElib Afhel Pyfhel
 Upgrade: HElib Afhel PyfhelUpgrade
 
 HElib:
-	$(MAKE) -C HElib/src/
-	$(MAKE) install -C HElib/src/	
+    $(MAKE) -C HElib/src/
+    $(MAKE) install -C HElib/src/    
 
 Afhel:
-	$(MAKE) -C Afhel/
-	$(MAKE) install -C Afhel/
+    $(MAKE) -C Afhel/
+    $(MAKE) install -C Afhel/
 
 Pyfhel:
-	$(MAKE) -C Pyfhel
+    $(MAKE) -C Pyfhel
 
 PyfhelUpgrade:
-	$(MAKE) upgrade -C Pyfhel
+    $(MAKE) upgrade -C Pyfhel
 
 
 ##############################################################################################
@@ -150,7 +150,7 @@ PyfhelUpgrade:
 ##############################################################################################
 
 ./%_x: %.cpp
-	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS)
+    $(CC) $(CFLAGS) -o $@ $< $(LDLIBS)
 
 
 
@@ -159,17 +159,17 @@ PyfhelUpgrade:
 ##############################################################################################
 
 clean:
-	$(MAKE) clean -C HElib/src/
-	$(MAKE) clean -C Afhel/
-	$(MAKE) clean -C Pyfhel/
+    $(MAKE) clean -C HElib/src/
+    $(MAKE) clean -C Afhel/
+    $(MAKE) clean -C Pyfhel/
 
 uninstall:
-	$(MAKE) uninstall -C HElib/src/
-	$(MAKE) uninstall -C Afhel/
-	$(MAKE) uninstall -C Pyfhel/
+    $(MAKE) uninstall -C HElib/src/
+    $(MAKE) uninstall -C Afhel/
+    $(MAKE) uninstall -C Pyfhel/
 
 cleanexe:
-	-rm -f *.aenv *_x
+    -rm -f *.aenv *_x
 
 
 
@@ -180,13 +180,13 @@ cleanexe:
 
 
 info:
-	: Dependencies = Pyfhel -> Afhel -> HElib -> NTL>=10.0.0 & GMP
-	: Compilation flags are 'CFLAGS=$(CFLAGS)'
-	: Commands Available:
-	: * sudo make - build & install all three libraries. Requires root
-	: * sudo make HElib|Afhel|Pyfhel - build&instlal a single library. Requires root
-	: * make fileName_x - Compile & Link binary filename.cpp with Afhel and its dependencies
-	: * make clean - remove all library files from the folder
-	: * sudo make uninstall - remove libraries from host. Requires root
-	: If errors occur, try adding/removing '-std=c++11' in Makefile
+    : Dependencies = Pyfhel -> Afhel -> HElib -> NTL>=10.0.0 & GMP
+    : Compilation flags are 'CFLAGS=$(CFLAGS)'
+    : Commands Available:
+    : * sudo make - build & install all three libraries. Requires root
+    : * sudo make HElib|Afhel|Pyfhel - build&instlal a single library. Requires root
+    : * make fileName_x - Compile & Link binary filename.cpp with Afhel and its dependencies
+    : * make clean - remove all library files from the folder
+    : * sudo make uninstall - remove libraries from host. Requires root
+    : If errors occur, try adding/removing '-std=c++11' in Makefile
 
