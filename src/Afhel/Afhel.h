@@ -1,37 +1,39 @@
 /**
  * @file Afhel.h
  *  --------------------------------------------------------------------
- * @brief Afhel is a library that creates an abstraction over the basic
+ * @brief Header of Afhel, library that creates an abstraction over basic
  *  functionalities of HElib as a Homomorphic Encryption library, such as
  *  addition, multiplication, scalar product and others.
  *
  *  Afhel implements a higher level of abstraction than HElib, and handles
- *  Cyphertexts using an unordered map (key-value pairs) that is accessed
- *  via keys of type string. This is done in order to manage Cyphertext 
+ *  ciphertexts using an unordered map (key-value pairs) that is accessed
+ *  via keys of type string. This is done in order to manage ciphertext 
  *  using references (the keys), which will allow Pyfhel to work only 
- *  using strings (keeping the Cyphertexts in C++). Afhel also compresses
+ *  using strings (keeping the ciphertexts in C++). Afhel also compresses
  *  the Context setup and Key generation into one single KeyGen function
  *  with multiple parameter selection.
  *  --------------------------------------------------------------------
- * @author: Alberto Ibarrondo (@ibarrond)
- *  --------------------------------------------------------------------
- *  License: GNU GPL v3
- *
- *  Pyfhel is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  Pyfhel is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @author Alberto Ibarrondo (ibarrond)
  *  --------------------------------------------------------------------
  * @bugs No known bugs
  */
+
+ /*  License: GNU GPL v3
+  *
+  *  Pyfhel is free software: you can redistribute it and/or modify
+  *  it under the terms of the GNU General Public License as published by
+  *  the Free Software Foundation, either version 3 of the License, or
+  *  (at your option) any later version.
+  *
+  *  Pyfhel is distributed in the hope that it will be useful,
+  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *  GNU General Public License for more details.
+  *
+  *  You should have received a copy of the GNU General Public License
+  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  
+  */
 
 
 #ifndef AFHEL_H
@@ -42,14 +44,16 @@
 #include <cstdlib>
 #include <sys/time.h>
 #include <string.h>
+#include <iostream>
 
 #include "FHE.h"
 #include "EncryptedArray.h"
 #include "PAlgebra.h"
+#include "timing.h"
 
 
 /**
-* Abstraction For Homomorphic Encryption Libraries. 
+* @brief Abstraction For Homomorphic Encryption Libraries. 
 * 
 *  Afhel is a library that creates an abstraction over the basic
 *  functionalities of HElib as a Homomorphic Encryption library, such as
@@ -60,252 +64,357 @@ class Afhel{
 
     private:
         // -------------------------- ATTRIBUTES ----------------------------
-        FHEcontext *context;              /**< HElib context. Required for key Generation */
         FHESecKey *secretKey;             /**< Secret key. Part of the key pair */
         FHEPubKey *publicKey;             /**< Public key. Part of the key pair */  
         EncryptedArray *ea;               /**< HElib encrypted array. Used for operations (depends on context and publicKey) */
-        long p, r;                        /**< Modulo and exponent of cyphertext space. All operations are modulo p^r */
-        long nSlots;                      /*!< Number of values that fit in a Ctxt. Can also be seen as the vectorization factor */
-        bool flagVerbose = false;         /*!< Flag to print messages on console */
+        ZZX G;                            /**< NTL Poly used to create ea */
+        long p, r;                        /**< Modulo and exponent of ciphertext space. All operations are modulo p^r */
+        long m;                           /**< Cyclotomic index, determines Z_m^* */
+        long nSlots;                      /**< Number of values that fit in a Ctxt. Can also be seen as the vectorization factor */
+        bool flagVerbose = false;         /**< Flag to print messages on console */
+        bool flagTime = false;            /**< Flag to print timings on console */
 
         // ------------------ STREAM OPERATORS OVERLOAD ----------------------
         /**
-         * An output stream operator, parsing the object into a string.
-         * @param outs output stream where to bulk the Afhel object
-         * @param af Afhel object ot be exported
-         *
+         * @brief An output stream operator, parsing the object into a string.
+         * @param[out] outs output stream where to bulk the Afhel object
+         * @param[in] af Afhel object to be exported
+         * @see operator>>
+         */
         friend std::ostream& operator<< (std::ostream& outs, Afhel const& af);
+
+        /**
+         * @brief An input stream operator, reading the parsed Afhel object from a string.
+         * @param[in] ins input stream where to extract the Afhel object
+         * @param[out] af Afhel object to contain the parsed one
+         * @see operator<<
+         */
         friend std::istream& operator>> (std::istream& ins, Afhel& af);
 
         
 
     public:
         // ----------------------- CLASS MANAGEMENT --------------------------
-        //DEFAULT CONSTRUCTOR
+        /**
+         * @brief Default constructor.
+         */
         Afhel();
 
-        //COPY CONSTRUCTOR
+        /**
+         * @brief Copy constructor.         
+         * @param[in] otherAfhel Afhel object to be copied
+         */
         Afhel(Afhel const& otherAfhel);
 
-        //DEFAULT DESTRUCTOR
+        /**
+        * @brief Default destructor.
+        */
         virtual ~Afhel();
         
 
         // -------------------------- CRYPTOGRAPHY ---------------------------
+        // CONTEXT GENERATION
+        /**
+         * @brief Performs generation of FHE context using HElib functions.
+         *          As a result, context, ea and nSlots are initialized.
+         * @param[in] p ciphertext space base.
+         * @param[in] r ciphertext space lifting .
+         * @param[in] m (optional) use m'th cyclotomic polynomial. Default set by heuristics (-1)
+         * @param[in] L (optional) # of levels in modulus chain.
+                            Default set by heuristics on R and r (0). If set, overrides R.
+         * @param[in] R (optional) # of expected rounds of mult. Default 3.
+         * @param[in] sec (optional) security parameter. Default is  80.
+         * @param[in] w (optional) Hamming weight of secret key. Default is 64.
+         * @param[in] c (optional) # of columns in key switching matrix. Default 2. Typ 2-4.
+         * @param[in] d (optional) degree of field extension. Default unset (0).
+         * @return Void.
+         */
+        void ContextGen(long p, long r, long m = -1, bool isBootstrappable = false,
+                        long L = -1, long R = 3, long sec, long c = 2, long d = 0);
+
         // KEY GENERATION
         /**
-         * @brief Performs Key Generation using HElib functions
-         * @param p plaintext base
-         * @param r lifting 
-         * @param c # of columns in key switching matrix
-         * @param d degree of field extension
-         * @param sec security parameter
-         * @param w Hamming weight of secret key
-         * @param L # of levels in modulus chain
-         * @param m (optional) use m'th cyclotomic polynomial
-         * @param R (=3) number of expected rounds of multiplication
-         * @param s (=0) minimum number of slots for vectors.
-         * @param gens (optional) Vector of Generators
-         * @param ords (optional) Vector of Orders
+         * @brief Performs Key generation using HElib functions vased on current context.
+         *          As a result, a pair of Private/Public Keys are initialized and stored.
+         * @param[in] w Hamming weight of secret key. Default is 64 bits.
+         * @return Void.
          */
-        void keyGen(long p, long r, long c, long d, long sec, long w = 64,
-                    long L = -1, long m = -1, long R = 3, long s = 0, 
-                    const vector<long>& gens = vector<long>(),
-                    const vector<long>& ords = vector<long>());
+        void KeyGen(long w=64);
 
         // ENCRYPTION
         /**
-         * @brief Enctypts a provided plaintext vector and stores the cyphertext
-         * in the unordered map, returning the key(string) used to access it.
-         * The encryption is carried out with HElib. 
-         * @param ptxt_vect plaintext vector to encrypt
-         * @return id (string) used to access ciphertext in the ctxtMap.
+         * @brief Enctypts a provided plaintext vector using pubKey as public key.
+         *      The encryption is carried out with HElib. 
+         * @param[in] ptxt_vect plaintext vector to encrypt.
+         * @param[in] pubKey the public key to be used. Default is publicKey, attribute of Afhel.
+         * @return ciphertext the HElib encrypted ciphertext.
          */
-        string encrypt(vector<long> ptxt_vect);
+        Ctxt encrypt(vector<long> ptxt_vect, FHEPubKey& pubKey=this.publicKey);
         
         // DECRYPTION
         /**
-         * @brief Decrypts the cyphertext accessed in the ctxtMap using the id.
+         * @brief Decrypts the ciphertext using secKey as secret key.
          * The decryption is carried out with HElib.
-         * @param id (string) used to access ciphertext in the ctxtMap.
-         * @return plaintext, the result of decrypting the ciphertext
+         * @param[in] ciphertext a Ctxt object from HElib.
+         * @param[in] secKey the secret key to be used. Default is secretKey, attribute of Afhel.
+         * @return vector<long> the resulting of decrypting the ciphertext, a plaintext.
          */
-        vector<long> decrypt(string id1);
+        vector<long> decrypt(Ctxt ciphertext, FHESecKey& secKey=this.secretKey);
         
         // -------------------------- OPERATIONS ------------------------------
         // ADDITION
         /**
-         * @brief Add ciphertext at key to ciphertext at other_key and store result
-         * back in unordered map at key
-         * @param id1 ID of ctxt1 in unordered map
-         * @param id2 ID of ctxt2 in unordered map
-         * @param negative if True then perform subtraction
+         * @brief Add second ciphertext to the first ciphertext.
+         * @param[in,out] c1 First HElib Ctxt ciphertext.
+         * @param[in] c2 Second HElib Ctxt ciphertext, to be added to the first.
+         * @param[in] negative if True then perform subtraction.
+         * @return Void.      
          */
-        void add(string id1, string id2, bool negative=false);
+        void add(Ctxt c1, Ctxt c2, bool negative=false);
         
         // MULTIPLICATION
         /**
-         * @breif Multiply ciphertext at key by ciphertext at other_key and store
-         * result in unordered map at key
-         * @param id1 ID of ctxt 1 in unordered map
-         * @param id2 ID of ctxt 2 in unordered map
-         * @param id3 ID of ctxt 3 in unordered map
+         * @brief Multiply first ciphertext by the second ciphertext.
+         * @param[in,out] c1 First HElib Ctxt ciphertext.
+         * @param[in] c2 Second HElib Ctxt ciphertext, to be miltuplied to the first.
+         * @return Void.
          */
-        void mult(string id1, string id2);
-        void mult3(string id1, string id2, string id3);
+        void mult(Ctxt c1, Ctxt c2);
+
+        /**
+         * @brief Multiply first ciphertext by the second and third ciphertexts.
+         * @param[in,out] c1 First HElib Ctxt ciphertext.
+         * @param[in] c2 Second HElib Ctxt ciphertext, to be miltuplied to the first.
+         * @param[in] c3 Third HElib Ctxt ciphertext, to be miltuplied to the first.
+         * @return Void.
+         */
+        void mult3(Ctxt c1, Ctxt c2, Ctxt c3);
 
         // CUMULATIVE SUM
         /**
-         * @brief sum all the values in the vector. 
-         * @param id1 ID of ctxt1 in unordered map
+         * @brief Sum all the values in the vector. 
+         * As a result, all the slots inside the ciphertext will contain the sum.
+         * It is recommended to use instead your own algorithm using addition and rotation.
+         * @param c1 Ciphertext where the cumsum will happen.
+         * @return Void.
          */
-        void cumSum(string id1);
+        void cumSum(Ctxt c1);
         
         // SCALAR PRODUCT
         /**
-        * @brief Multiply ciphertext by ciphertext and perform cumulative sum
-        * @param id1 ID of ctxt1 in unordered map
-        * @param id2 ID of ctxt2 in unordered map
+         * @brief Multiply ciphertext by ciphertext and perform cumulative sum
+         * @param[in,out] c1 First HElib Ctxt ciphertext, where cumsum and mult will happen.
+         * @param[in] c2 Second HElib Ctxt ciphertext, to be miltuplied to the first.
+         * @return Void.
          */
-         void scalarProd(string id1, string id2, int partitionSize=0);
+         void scalarProd(Ctxt c1, Ctxt c2, int partitionSize=0);
 
 
         // SQUARE
         /**
-         * @brief Square ciphertext at id1 in ctxtMap
-         * @param id1 ID of ctxt in unordered map
+         * @brief Square ciphertext values.
+         * @param[in,out] c1 HElib Ctxt ciphertext whose values will get squared.
+         * @return Void.
          */
-        void square(string id1);
+        void square(Ctxt c1);
 
         // CUBE
         /**
-         * @brief Cube ciphertext at id1 in ctxtMap
-         * @param id1 ID of ctxt in unordered map
+         * @brief Raise to cube the ciphertext values.
+         * @param[in,out] c1 HElib Ctxt ciphertext whose values will get cubed.
+         * @return Void.
          */
-        void cube(string id1);
+        void cube(Ctxt c1);
 
         // NEGATE
         /**
-        * @brief Multiply ciphertext at id1 by -1
-        * @param id1 ID of ctxt in unordered map ctxtMap
+        * @brief Negate values in a ciphertext
+        * @param[in,out] c1 HElib Ctxt ciphertext whose values get negated.
+        * @return Void.
         */
-        void negate(string id1);
+        void negate(Ctxt c1);
         
         // COMPARE EQUALS
         /**
-        * @brief Compare ciphertext at id1 and ciphertext at id2 
-        * to see if they are equal
-        * @param id1 ID of ctxt 1 in unordered map ctxtMap
-        * @param id2 ID of ctxt 2 in unordered map ctxtMap
-        * @param comparePkeys if true then pkeys will be compared
-        * @return BOOL --> ctxt(id1) == ctxt(id2)
-        */
-        bool equalsTo(string id1, string id2, bool comparePkeys=true);
+         * @brief Compare ciphertext c1 and ciphertext c2.
+         * @param[in] c1 HElib Ctxt ciphertext.
+         * @param[in] c2 HElib Ctxt ciphertext.
+         * @param[in] comparePkeys if true then keys will be compared.
+         * @return BOOL with the comparison c1 == c2
+         */
+        bool equalsTo(Ctxt c1, Ctxt c2, bool comparePkeys=true);
 
         // ROTATE
         /**
-        * @brief Rotate ciphertext at id1 by c spaces
-        * @param id1 ID of ctxt in unordered map ctxtMap
-        * @param c number of spaces to rotate
-        */
-        void rotate(string id1, long c);
+         * @brief Rotate ciphertext by c spaces.
+         * Overflowing values are added at the other side
+         * @param[in,out] c1 HElib Ctxt ciphertext whose values get rotated.
+         * @param[in] c number of spaces to rotate
+         * @return Void.
+         */
+        void rotate(Ctxt c1, long c);
         
         // SHIFT
         /**
-        * @brief Shift ciphertext at id1 by c spaces
-        * @param id1 ID of ctxt in unordered map ctxtMap
-        * @param c number of spaces to shift
-        */
-        void shift(string id1, long c);
+         * @brief Rotate ciphertext by c spaces.
+         * Overflowing values are added at the other side
+         * @param[in,out] c1 HElib Ctxt ciphertext whose values get rotated.
+         * @param[in] c number of spaces to rotate
+         * @return Void.
+         */
+        void shift(Ctxt c1, long c);
 
+        // POLYNOMIALS.
+        /**
+         * @brief Create ZZX polynomial using coefficients.
+         * @param[in] coeffPoly Vector of long coefficients for the polynomial
+         * @return ZZXpoly polynomial object with coefficients.
+         */
+        ZZX createPolynomeWithCoeff(vector<long> const& coeffPoly); 
         
+        /**
+         * @brief Compute polynomial over a cyphertext
+         * @param[in] coeffPoly Vector of long coefficients for the polynomial
+         * @param[in,out] c1 HElib Ctxt ciphertext whose values get applied the polynomial.
+         * @return void.
+         */
+        void polyEval(Ctxt c1, vector<long> const& coeffPoly); 
+
+
         // -------------------------------- I/O -------------------------------
         // SAVE ENVIRONMENT
         /**
-         * @brief Saves the context, SecretKey and G polynomial in a .aenv file
-         * @param fileName name of the file without the extention
+         * @brief Saves the context and G polynomial in a .aenv file
+         * @param[in] fileName name of the file without the extention
          * @return BOOL 1 if all ok, 0 otherwise
          */
-        bool saveEnv(string fileName);
+        bool saveContext(string fileName);
 
         // RESTORE ENVIRONMENT
         /**
-         * @brief Restores the context, SecretKey and G polynomial from a .aenv file.
-         *  Then it reconstucts publicKey and ea (EncriptedArray) with SecretKey & G.
-         * @param fileName name of the file without the extention
+         * @brief Restores the context extracted form ea (containing m, p and r) 
+         *  and G polynomial from a .aenv file.
+          * @param[in] fileName name of the file without the extention
          * @return BOOL 1 if all ok, 0 otherwise
          */
-        bool restoreEnv(string fileName);
+        bool restoreContext(string fileName);
+
+        // PUBLIC KEY
+        /**
+         * @brief Saves the public key in a .apub file. 
+         * @param[in] fileName name of the file without the extention
+         * @return BOOL 1 if all ok, 0 otherwise
+         */
+        bool savepublicKey(string fileName);
+
+        /**
+         * @brief Restores the public key from a .apub file.
+         * @param[in] fileName name of the file without the extention
+         * @return BOOL 1 if all ok, 0 otherwise
+         */
+        bool restorepublicKey(string fileName);
+
+        // SECRET KEY
+        /**
+         * @brief Saves the secretKey in a .apub file
+         * @param[in] fileName name of the file without the extention
+         * @return BOOL 1 if all ok, 0 otherwise
+         */
+        bool savesecretKey(string fileName);
+
+        /**
+         * @brief Restores the secretKey from a .apub file
+         * @param[in] fileName name of the file without the extention
+         * @return BOOL 1 if all ok, 0 otherwise
+         */
+        bool restoresecretKey(string fileName);
+
+        /**
+         * @brief Fills a vector with random values up to nSlots
+         * @param[in] array vector to be filled with random values.
+         * @return Void.
+         */
+        void random(vector<long>& array) const;
 
 
         // ----------------------------- AUXILIARY ----------------------------
+        // GETTERS
         /**
-         * @brief Number of plaintext slots 
-         * @return number of plaintext slots
+         * @brief Getter for secretKey, the key used to decrypt vectors.
+         * @return secKey the secret key of the key pair.
          */
-        long numSlots();
+        FHESecKey getsecretKey();
 
         /**
-         * @brief Getters for global parameters of the class
+         * @brief Getter for for publicKey, the key used to encrypt vectors.
+         * @return pubKey the public key of the key pair.
          */
-        long getM();
-        long getP();
-        long getR();
-
+        FHEPubKey getpublicKey();
 
         /**
-        * @brief Create a new ciphertext and set it equal to the ciphertext 
-        * stored in unordered map under ID id1
-        * @param id1 ID of ctxt in unordered map ctxtMap
-        * @return ID corresponding to new ciphertext
-        */
-        string set(string id1);
+         * @brief Getter for # of slots in ctxt vectors.
+         * @return number of plaintext slots.
+         */
+        long getnSlots();
 
         /**
-        * @brief Retrieve the ciphertext object from the unordered map
-        * @param id1 ID of ctxt in unordered map ctxtMap
-        * @return the ciphertext corresponding to the one stored with ID id1
-        */
-        Ctxt retrieve(string id1);
-        
-        /**
-        * Replace the ciphertext at id1 with the new one provided
-        * @param id1 ID of ctxt in unordered map ctxtMap
-        * @param new_ctxt new Ctxt object to store in the unordered map
-        */
-        void replace(string id1, Ctxt new_ctxt);
-        
-        /**
-        * @brief Delete from the unordered map the entry at key
-        * @param id1 ID of ctxt in unordered map ctxtMap
-        */
-        void erase(string id1);
+         * @brief Getter for p, cyphertext space modulus.
+         * @return p cyphertext space modulus.
+         */
+        long getp();
 
+        /**
+         * @brief Getter for c, cyphertext space exponent.
+         * @return r cyphertext space exponent.
+         */
+        long getr();
+
+        /**
+         * @brief get the whole cyphertext space size, p^r
+         * @return p2r p^r, cyphertext space size
+         */
+        long getp2r() const;
+
+        /**
+         * @brief Getter for flagVerbose, boolean to print info on terminal.
+         * @return flagVerbose boolean to print info on terminal.
+         */
+        bool getflagVerbose();
+
+        /**
+         * @brief Getter for flagTime, boolean to print timings on terminal.
+         * @return flagTime boolean to print timings on terminal.
+         */
+        bool getflagTime();
+
+        //SETTERS
+        /**
+         * @brief Setter for publicKey, the key used to encrypt vectors.
+         * @param[in] pubKey public key of the key pair.
+         * @return Void.
+         */
+        void setpublicKey(FHEPubKey *pubKey);
+
+        /**
+         * @brief Setter for secretKey, the key used to decrypt vectors.
+         * @param[in] secKey secret key of the key pair.
+         * @return Void.
+         */
+        void setsecretKey(FHESecKey *secKey);
+
+        /**
+         * @brief Getter for flagVerbose, boolean to print info on terminal.
+         * @param[in] flagVerbose boolean to print info on terminal.
+         * @return Void.
+         */
+        void setflagVerbose(bool flagV);
+
+        /**
+         * @brief Getter for flagTime, boolean to print timings on terminal.
+         * @param[in] flagTime boolean to print timings on terminal.
+         * @return Void.
+         */
+        void setflagVerbose(bool flagT);
 };
 
-#endif
-
-
-#ifndef TIMER_H
-#define TIMER_H
-
-#include <sys/time.h>
-#include <cstddef>
-
-class Timer{
-    private:
-    double m_start;
-    double m_stop;
-    double my_clock();
-
-    public:
-    Timer(bool print=false);
-    virtual ~Timer();
-    void start();
-    void stop();
-    double elapsed_time();
-    bool flagPrint=false;
-};
-
-#endif
 
