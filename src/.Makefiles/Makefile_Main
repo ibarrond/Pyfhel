@@ -18,10 +18,10 @@
 #
 # AUTHOR: Alberto Ibarrondo (github @ibarrond)
 # DATE: 17/10/2017
-#   
-#   
+#
+#
 # LICENSE: GNU GPL v3
-#  
+#
 #  This file is part of Pyfhel project
 #
 #  Pyfhel is free software: you can redistribute it and/or modify
@@ -74,13 +74,13 @@ CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
 #
 #        * EVALMAP_CACHED=0 caches these constants as ZZX'es, this takes
 #                  less space but it means that they still need to be converted
-#                  to DoubleCRT's with every recryption operation. 
+#                  to DoubleCRT's with every recryption operation.
 #
 #        * EVALMAP_CACHED=1 caches these constants directly as DoubleCRT's,
 #                  this may take a significant amount of memeory.
 #
 #  If you get compilation errors, you may need to add -std=c++11 or -std=c++0x
-# 
+#
 
 
 #.................................. LIBRARY ATTRIBUTES .......................................
@@ -103,7 +103,7 @@ all: requirements install
 ##############################################################################################
 
 
-requirements: packages libdownloads pypackages
+requirements: packages libdownloads pypackages submodules
 
 packages:
     sudo apt-get install python-dev
@@ -120,7 +120,10 @@ libdownloads:
     rm -rf .installers
 
 pypackages:
-    sudo pip install --upgrade cython 
+    sudo pip install --upgrade cython
+
+submodules:
+		git submodule foreach --recursive git pull
 
 ##############################################################################################
 #                                     INSTALL ALL LIBRARIES                                  #
@@ -128,11 +131,11 @@ pypackages:
 
 install: HElib Afhel Pyfhel
 
-Upgrade: HElib Afhel PyfhelUpgrade
+Upgrade: submodules HElib Afhel PyfhelUpgrade
 
 HElib:
     $(MAKE) -C HElib/src/
-    $(MAKE) install -C HElib/src/    
+    $(MAKE) install -C HElib/src/
 
 Afhel:
     $(MAKE) -C Afhel/
@@ -189,4 +192,3 @@ info:
     : * make clean - remove all library files from the folder
     : * sudo make uninstall - remove libraries from host. Requires root
     : If errors occur, try adding/removing '-std=c++11' in Makefile
-
