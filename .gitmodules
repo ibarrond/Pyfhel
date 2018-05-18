@@ -1,3 +1,7 @@
-[submodule "src/HElib"]
+[submodule "HElib"]
 	path = src/HElib
 	url = https://github.com/shaih/helib
+
+[submodule "PALISADE"]
+	path = src/PALISADE
+	url = https://git.njit.edu/palisade/PALISADE

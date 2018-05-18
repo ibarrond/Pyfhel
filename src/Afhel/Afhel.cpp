@@ -148,7 +148,7 @@ vector<long> Afhel::decode(NewPlaintextArray& ptxtArr) {
         vector<long> res(nslots, 0);                    // Empty vector of values
         ea->decrypt(ptxtArr, res);                      // Decode using ea
         if(flagVerbose){
-            std::cout << "  Afhel::decrypt([" << res << "])" << endl;
+            std::cout << "  Afhel::decode([" << res << "])" << endl;
         }
         return res;
 }
@@ -202,8 +202,12 @@ bool Afhel::restoreContext(string fileName){
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
+
+
 // ----------------------------- AUXILIARY ----------------------------
 // GETTERS
+FHESecKey getsecretKey()	{return this.secretKey;}
+FHEPubKey getpublicKey()	{return this.publicKey;}
 long Afhel::getnSlots()     {this.nSlots = ea->size(); return this.nSlots;}
 long Afhel::getm()          {return this.m;}
 long Afhel::getp()          {return this.p;}
@@ -213,6 +217,8 @@ bool Afhel::getflagVerbose(){return this.flagVerbose;}
 bool Afhel::getflagTime()   {return this.flagTime;}
 
 // SETTERS  
-void Afhel::setflagVerbose(bool flagV) {this.flagVerbose = flagV;}
-void Afhel::setflagVerbose(bool flagT) {this.flagTime = flagT;}
+void setpublicKey(FHEPubKey& pubKey)   	{this.publicKey = pubKey;}
+void setsecretKey(FHESecKey& secKey)	{this.secretKey = secKey}
+void Afhel::setflagVerbose(bool flagV) 	{this.flagVerbose = flagV;}
+void Afhel::setflagVerbose(bool flagT) 	{this.flagTime = flagT;}
 
