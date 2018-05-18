@@ -53,20 +53,20 @@ PY_PACKAGE_MGT=pip
 ##############################################################################################
 
 all: Pyfhel.pyx PyPtxt.py PyCtxt.py
-    sudo $(PY_PACKAGE_MGT) install .
+	sudo $(PY_PACKAGE_MGT) install .
 
 upgrade: 
-    sudo $(PY_PACKAGE_MGT) install --upgrade .
+	sudo $(PY_PACKAGE_MGT) install --upgrade .
 
 ##############################################################################################
 #                                     UNINSTALL & CLEAN                                      #
 ##############################################################################################
 
 uninstall: 
-    sudo $(PY_PACKAGE_MGT) uninstall Pyfhel
+	sudo $(PY_PACKAGE_MGT) uninstall Pyfhel
 
 clean:
-    sudo rm -rf *.pyc *.c *.cpp build
+	sudo rm -rf *.pyc *.c *.cpp build
 
 
 ##############################################################################################
@@ -75,10 +75,10 @@ clean:
 
 
 info:
-    : Pyfhel requires Afhel, HElib, NTL>=10.0.0 and GMP
-    : Commands Available:
-    : * make - build & install module
-    : * make upgrade - rebuild & reinstall module to upgrade from previous version
-    : * make clean - remove all library files from the folder
-    : * make uninstall - remove library from host. Requires root
+	: Pyfhel requires Afhel, HElib, NTL>=10.0.0 and GMP
+	: Commands Available:
+	: * make - build & install module
+	: * make upgrade - rebuild & reinstall module to upgrade from previous version
+	: * make clean - remove all library files from the folder
+	: * make uninstall - remove library from host. Requires root
 

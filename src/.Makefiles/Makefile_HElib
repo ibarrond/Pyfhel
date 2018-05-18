@@ -88,13 +88,13 @@ CFLAGS= -g -O2 -std=c++11 -pthread -DFHE_THREADS -DFHE_BOOT_THREADS -DFHE_DCRT_T
 
 #.................................. LIBRARY ATTRIBUTES .......................................
 LIBNAME = fhe
-                                    # Prefix 'lib' and extension '.la' are added later on
+	                                # Prefix 'lib' and extension '.la' are added later on
 VERSION = 1:0:0
-                                    # Library version, independent from packet/repo version
+	                                # Library version, independent from packet/repo version
 LIBDIR = /usr/local/lib
-                                    # Directory where library will be installed
+	                                # Directory where library will be installed
 INCLUDE_DIR = /usr/local/include
-                                    # Directory where headers will be installed
+	                                # Directory where headers will be installed
 
 
 # NOTE: NTL & GMP are distributed under LGPL (v2.1), they can be linked as dynamic libraries.
@@ -106,17 +106,17 @@ LDLIBS = -L$(LIBDIR) $(NTL) $(GMP) -lm
 
 #......................................  LIBTOOL  ............................................
 LIBTOOL=libtool
-                                    # May not be installed(e.g.: sudo apt install libtool-bin)
+	                                # May not be installed(e.g.: sudo apt install libtool-bin)
 LIBTOOL_COMPILE =--mode=compile
-                                    # Mode for prog/lib compilation. It uses $(CC) as compiler
+	                                # Mode for prog/lib compilation. It uses $(CC) as compiler
 LIBTOOL_LINK=--mode=link
-                                    # Mode for prog/lib linking. It uses $(CC) as linker
+	                                # Mode for prog/lib linking. It uses $(CC) as linker
 LIBTOOL_INSTALL=--mode=install
-                                    # Mode to install. It uses 'cp', recipe 'make install'
+	                                # Mode to install. It uses 'cp', recipe 'make install'
 LIBTOOL_UNINSTALL=--mode=uninstall
-                                    # Mode to uninstall. It uses 'rm', recipe 'make uninstall'
+	                                # Mode to uninstall. It uses 'rm', recipe 'make uninstall'
 LIBTOOL_CLEAN=--mode=clean
-                                    # Mode for cleaning. It uses 'rm', recipe 'make clean'
+	                                # Mode for cleaning. It uses 'rm', recipe 'make clean'
 RPATH=-rpath $(LIBDIR)
 
 
@@ -125,19 +125,19 @@ HEADER = *.h
 
 #...................................... SOURCE FILES .........................................
 SRC = KeySwitching.cpp EncryptedArray.cpp FHE.cpp Ctxt.cpp CModulus.cpp FHEContext.cpp \
-    PAlgebra.cpp DoubleCRT.cpp NumbTh.cpp bluestein.cpp IndexSet.cpp timing.cpp \
-    replicate.cpp hypercube.cpp matching.cpp powerful.cpp BenesNetwork.cpp \
-    permutations.cpp PermNetwork.cpp OptimizePermutations.cpp eqtesting.cpp \
-    polyEval.cpp extractDigits.cpp EvalMap.cpp recryption.cpp debugging.cpp \
-    matmul.cpp intraSlot.cpp binaryArith.cpp binaryCompare.cpp tableLookup.cpp
+	PAlgebra.cpp DoubleCRT.cpp NumbTh.cpp bluestein.cpp IndexSet.cpp timing.cpp \
+	replicate.cpp hypercube.cpp matching.cpp powerful.cpp BenesNetwork.cpp \
+	permutations.cpp PermNetwork.cpp OptimizePermutations.cpp eqtesting.cpp \
+	polyEval.cpp extractDigits.cpp EvalMap.cpp recryption.cpp debugging.cpp \
+	matmul.cpp intraSlot.cpp binaryArith.cpp binaryCompare.cpp tableLookup.cpp
 
 #............................... LIBRARY INTERMEDIATE FILES ..................................
 LOBJ = NumbTh.lo timing.lo bluestein.lo PAlgebra.lo CModulus.lo FHEContext.lo \
-        IndexSet.lo DoubleCRT.lo FHE.lo KeySwitching.lo Ctxt.lo EncryptedArray.lo \
-        replicate.lo hypercube.lo matching.lo powerful.lo BenesNetwork.lo \
-        permutations.lo PermNetwork.lo OptimizePermutations.lo eqtesting.lo \
-        polyEval.lo extractDigits.lo EvalMap.lo recryption.lo debugging.lo \
-        matmul.lo intraSlot.lo binaryArith.lo binaryCompare.lo tableLookup.lo
+	    IndexSet.lo DoubleCRT.lo FHE.lo KeySwitching.lo Ctxt.lo EncryptedArray.lo \
+	    replicate.lo hypercube.lo matching.lo powerful.lo BenesNetwork.lo \
+	    permutations.lo PermNetwork.lo OptimizePermutations.lo eqtesting.lo \
+	    polyEval.lo extractDigits.lo EvalMap.lo recryption.lo debugging.lo \
+	    matmul.lo intraSlot.lo binaryArith.lo binaryCompare.lo tableLookup.lo
 
 #.................................. LIBRARY  FINAL FILES .....................................
 LIB_LA = lib$(LIBNAME).la
@@ -152,11 +152,11 @@ all: $(LIB_LA)
 
 # COMPILATION: Create each .lo object from the cpp source code and all headers
 %.lo: %.cpp $(HEADER)
-    $(LIBTOOL) $(LIBTOOL_COMPILE) $(CC) $(CFLAGS) -fpic -c $< 
+	$(LIBTOOL) $(LIBTOOL_COMPILE) $(CC) $(CFLAGS) -fpic -c $< 
 
 # LINKING: Merging all .lo objects into a single .la to use for both static & shared libs
 $(LIB_LA): $(LOBJ)
-    $(LIBTOOL) $(LIBTOOL_LINK) $(CC) $(CFLAGS) -c -o $@ $^ $(RPATH) $(LDLIBS) -version-info $(VERSION)
+	$(LIBTOOL) $(LIBTOOL_LINK) $(CC) $(CFLAGS) -c -o $@ $^ $(RPATH) $(LDLIBS) -version-info $(VERSION)
 
 
 
@@ -165,9 +165,9 @@ $(LIB_LA): $(LOBJ)
 ##############################################################################################
 
 install: $(LIB_LA)
-    $(LIBTOOL) $(LIBTOOL_INSTALL) cp $(LIB_LA) $(LIBDIR)
-    ldconfig
-    cp -t $(INCLUDE_DIR) $(HEADER)
+	$(LIBTOOL) $(LIBTOOL_INSTALL) cp $(LIB_LA) $(LIBDIR)
+	ldconfig
+	cp -t $(INCLUDE_DIR) $(HEADER)
 
 
 
@@ -176,7 +176,7 @@ install: $(LIB_LA)
 ##############################################################################################
 
 %_x: %.cpp
-    $(CC) $(CFLAGS) -o $@ $< $(LDLIBS) $(HELIB)
+	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS) $(HELIB)
 
 
 
@@ -185,37 +185,37 @@ install: $(LIB_LA)
 ##############################################################################################
 
 TESTPROGS = Test_General_x \
-            Test_PAlgebra_x \
-            Test_IO_x \
-            Test_Replicate_x \
-            Test_LinPoly_x \
-            Test_matmul_x \
-            Test_matmul1D_x \
-            Test_Powerful_x \
-            Test_Permutations_x \
-            Test_Timing_x \
-            Test_PolyEval_x \
-            Test_extractDigits_x \
-            Test_EvalMap_x \
-            Test_bootstrapping_x
+	        Test_PAlgebra_x \
+	        Test_IO_x \
+	        Test_Replicate_x \
+	        Test_LinPoly_x \
+	        Test_matmul_x \
+	        Test_matmul1D_x \
+	        Test_Powerful_x \
+	        Test_Permutations_x \
+	        Test_Timing_x \
+	        Test_PolyEval_x \
+	        Test_extractDigits_x \
+	        Test_EvalMap_x \
+	        Test_bootstrapping_x
 
 test: $(TESTPROGS)
 
 check: Test_General_x Test_matmul_x Test_matmul1D_x Test_LinPoly_x Test_Permutations_x \
-    Test_PolyEval_x Test_Replicate_x Test_EvalMap_x Test_extractDigits_x Test_bootstrapping_x
-    ./Test_General_x R=1 k=10 p=2 r=2 noPrint=1
-    ./Test_General_x R=1 k=10 p=2 d=2 noPrint=1
-    ./Test_General_x R=2 k=10 p=7 r=2 noPrint=1
-    ./Test_matmul_x m=1365
-    ./Test_matmul1D_x m=96 p=7
-    ./Test_LinPoly_x noPrint=1
-    ./Test_Permutations_x noPrint=1
-    ./Test_PolyEval_x p=7 r=2 d=34 noPrint=1
-    ./Test_Replicate_x m=1247 noPrint=1
-    ./Test_EvalMap_x mvec="[7 3 221]" gens="[3979 3095 3760]" ords="[6 2 -8]" noPrint=1
-    ./Test_extractDigits_x m=2047 p=5 noPrint=1
-    ./Test_bootstrapping_x noPrint=1
-    ./Test_bootstrapping_x p=7 noPrint=1
+	Test_PolyEval_x Test_Replicate_x Test_EvalMap_x Test_extractDigits_x Test_bootstrapping_x
+	./Test_General_x R=1 k=10 p=2 r=2 noPrint=1
+	./Test_General_x R=1 k=10 p=2 d=2 noPrint=1
+	./Test_General_x R=2 k=10 p=7 r=2 noPrint=1
+	./Test_matmul_x m=1365
+	./Test_matmul1D_x m=96 p=7
+	./Test_LinPoly_x noPrint=1
+	./Test_Permutations_x noPrint=1
+	./Test_PolyEval_x p=7 r=2 d=34 noPrint=1
+	./Test_Replicate_x m=1247 noPrint=1
+	./Test_EvalMap_x mvec="[7 3 221]" gens="[3979 3095 3760]" ords="[6 2 -8]" noPrint=1
+	./Test_extractDigits_x m=2047 p=5 noPrint=1
+	./Test_bootstrapping_x noPrint=1
+	./Test_bootstrapping_x p=7 noPrint=1
 
 
 
@@ -224,16 +224,16 @@ check: Test_General_x Test_matmul_x Test_matmul1D_x Test_LinPoly_x Test_Permutat
 ##############################################################################################
 
 uninstall: 
-    $(LIBTOOL) $(LIBTOOL_UNINSTALL) rm -f $(LIBDIR)/$(LIB_LA)
-    ldconfig
-    cd $(INCLUDE_DIR)
-    rm -rf $(HEADER)
-    cd -
+	$(LIBTOOL) $(LIBTOOL_UNINSTALL) rm -f $(LIBDIR)/$(LIB_LA)
+	ldconfig
+	cd $(INCLUDE_DIR)
+	rm -rf $(HEADER)
+	cd -
 
 clean:
-    $(LIBTOOL) $(LIBTOOL_CLEAN) rm -f $(LIB_LA)
-    rm -rf .libs/ .deps/
-    rm -f *.o *_x *_x.exe *.a *.lo *.la *.so
+	$(LIBTOOL) $(LIBTOOL_CLEAN) rm -f $(LIB_LA)
+	rm -rf .libs/ .deps/
+	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so
 
 
 
@@ -243,14 +243,14 @@ clean:
 
 
 info:
-    : HElib requires NTL version 10.0.0 or higher
-    : Compilation flags are 'CFLAGS=$(CFLAGS)'
-    : Commands Available:
-    : * make - compile & link the library
-    : * make install - library available in the host. Requires root 
-    : * make check - test all functionalities
-    : * make fileName_x - Compile & Link binary filename.cpp with HElib and its dependencies
-    : * make clean - remove all library files from the folder
-    : * make uninstall - remove library from host. Requires root
-    : If errors occur, try adding/removing '-std=c++11' in Makefile
-    
+	: HElib requires NTL version 10.0.0 or higher
+	: Compilation flags are 'CFLAGS=$(CFLAGS)'
+	: Commands Available:
+	: * make - compile & link the library
+	: * make install - library available in the host. Requires root 
+	: * make check - test all functionalities
+	: * make fileName_x - Compile & Link binary filename.cpp with HElib and its dependencies
+	: * make clean - remove all library files from the folder
+	: * make uninstall - remove library from host. Requires root
+	: If errors occur, try adding/removing '-std=c++11' in Makefile
+	
