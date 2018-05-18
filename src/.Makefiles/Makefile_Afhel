@@ -55,9 +55,9 @@ $(info For a list if all the available commands, run >make info)
 #.................................. COMPILER & LINKER ........................................
 CC = g++
 CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
-            -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
-         -Wfatal-errors -Wshadow -Wall -fmax-errors=2
-         
+	        -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
+	     -Wfatal-errors -Wshadow -Wall -fmax-errors=2
+	     
 
 # useful flags:
 #   -std=c++11
@@ -88,13 +88,13 @@ CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
 
 #.................................. LIBRARY ATTRIBUTES .......................................
 LIBNAME = afhel
-                                    # Prefix 'lib' and extension '.la' are added later on
+	                                # Prefix 'lib' and extension '.la' are added later on
 VERSION = 1:0:0
-                                    # Library version, independent from packet/repo version
+	                                # Library version, independent from packet/repo version
 LIBDIR = /usr/local/lib
-                                    # Directory where library will be installed
+	                                # Directory where library will be installed
 INCLUDE_DIR = /usr/local/include
-                                    # Directory where header will be installed
+	                                # Directory where header will be installed
 
 
 # NOTE: NTL & GMP are distributed under LGPL (v2.1), they can be linked as dynamic libraries.
@@ -107,17 +107,17 @@ LDLIBS = -L$(LIBDIR) $(NTL) $(GMP) $(HELIB) -lm
 
 #......................................  LIBTOOL  ............................................
 LIBTOOL=libtool
-                                    # May not be installed(e.g.: sudo apt install libtool-bin)
+	                                # May not be installed(e.g.: sudo apt install libtool-bin)
 LIBTOOL_COMPILE =--mode=compile
-                                    # Mode for prog/lib compilation. It uses $(CC) as compiler
+	                                # Mode for prog/lib compilation. It uses $(CC) as compiler
 LIBTOOL_LINK=--mode=link
-                                    # Mode for prog/lib linking. It uses $(CC) as linker
+	                                # Mode for prog/lib linking. It uses $(CC) as linker
 LIBTOOL_INSTALL=--mode=install
-                                    # Mode to install. It uses 'cp', recipe 'make install'
+	                                # Mode to install. It uses 'cp', recipe 'make install'
 LIBTOOL_UNINSTALL=--mode=uninstall
-                                    # Mode to uninstall. It uses 'rm', recipe 'make uninstall'
+	                                # Mode to uninstall. It uses 'rm', recipe 'make uninstall'
 LIBTOOL_CLEAN=--mode=clean
-                                    # Mode for cleaning. It uses 'rm', recipe 'make clean'
+	                                # Mode for cleaning. It uses 'rm', recipe 'make clean'
 RPATH=-rpath $(LIBDIR)
 
 
@@ -142,13 +142,13 @@ all: $(LIB_LA)
 
 # COMPILATION: Create all .lo objects from the cpp source codes
 %.lo: %.cpp $(HEADER)
-    $(LIBTOOL) $(LIBTOOL_COMPILE) $(CC) $(CFLAGS) -fpic -c $< 
+	$(LIBTOOL) $(LIBTOOL_COMPILE) $(CC) $(CFLAGS) -fpic -c $< 
 
 # LINKING: Merging all .lo objects into a single .la to use for both static & shared libs
 $(LIB_LA): $(LOBJ)
-        $(LIBTOOL) $(LIBTOOL_LINK) $(CC) $(CFLAGS) \
-                -o $@ $(LOBJ) $(RPATH) $(LDLIBS) \
-                -version-info $(VERSION)
+	    $(LIBTOOL) $(LIBTOOL_LINK) $(CC) $(CFLAGS) \
+	            -o $@ $(LOBJ) $(RPATH) $(LDLIBS) \
+	            -version-info $(VERSION)
 
 
 ##############################################################################################
@@ -156,9 +156,9 @@ $(LIB_LA): $(LOBJ)
 ##############################################################################################
 
 install: $(LIB_LA)
-    $(LIBTOOL) $(LIBTOOL_INSTALL) cp $(LIB_LA) $(LIBDIR)
-    ldconfig
-    cp -t $(INCLUDE_DIR) $(HEADER)
+	$(LIBTOOL) $(LIBTOOL_INSTALL) cp $(LIB_LA) $(LIBDIR)
+	ldconfig
+	cp -t $(INCLUDE_DIR) $(HEADER)
 
 
 
@@ -167,7 +167,7 @@ install: $(LIB_LA)
 ##############################################################################################
 
 %_x: %.cpp
-    $(CC) $(CFLAGS) -o $@ $< $(LDLIBS) $(AFHEL)
+	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS) $(AFHEL)
 
 
 
@@ -176,15 +176,15 @@ install: $(LIB_LA)
 ##############################################################################################
 
 uninstall: 
-    $(LIBTOOL) $(LIBTOOL_UNINSTALL) rm -f $(LIBDIR)/$(LIB_LA) 
-    ldconfig
-    rm -rf $(INCLUDE_DIR)/$(HEADER)
+	$(LIBTOOL) $(LIBTOOL_UNINSTALL) rm -f $(LIBDIR)/$(LIB_LA) 
+	ldconfig
+	rm -rf $(INCLUDE_DIR)/$(HEADER)
 
 
 clean:
-    $(LIBTOOL) $(LIBTOOL_CLEAN) rm -f $(LIB_LA)
-    rm -rf .libs/ .deps/
-    rm -f *.o *_x *_x.exe *.a *.lo *.la *.so *.aenv
+	$(LIBTOOL) $(LIBTOOL_CLEAN) rm -f $(LIB_LA)
+	rm -rf .libs/ .deps/
+	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so *.aenv
 
 
 
@@ -194,13 +194,13 @@ clean:
 
 
 info:
-    : Afhel requires HElib, NTL version 10.0.0 or higher and GMP
-    : Compilation flags are 'CFLAGS=$(CFLAGS)'
-    : Commands Available:
-    : * make - compile & link the library
-    : * make install - library available in the host. Requires root 
-    : * make fileName_x - Compile & Link binary filename.cpp with Afhel and its dependencies
-    : * make clean - remove all library files from the folder
-    : * make uninstall - remove library from host. Requires root
-    : If errors occur, try adding/removing '-std=c++11' in Makefile
-                                            
+	: Afhel requires HElib, NTL version 10.0.0 or higher and GMP
+	: Compilation flags are 'CFLAGS=$(CFLAGS)'
+	: Commands Available:
+	: * make - compile & link the library
+	: * make install - library available in the host. Requires root 
+	: * make fileName_x - Compile & Link binary filename.cpp with Afhel and its dependencies
+	: * make clean - remove all library files from the folder
+	: * make uninstall - remove library from host. Requires root
+	: If errors occur, try adding/removing '-std=c++11' in Makefile
+	                                        

@@ -55,9 +55,9 @@ $(info For a list if all the available commands, run >make info)
 #.................................. COMPILER & LINKER ........................................
 CC = g++
 CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
-            -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
-         -Wfatal-errors -Wshadow -Wall -fmax-errors=2
-         
+	        -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
+	     -Wfatal-errors -Wshadow -Wall -fmax-errors=2
+	     
 
 # useful flags:
 #   -std=c++11
@@ -104,7 +104,7 @@ HEADER = Afhel.h
 ##############################################################################################
 
 %_x: %.cpp
-    $(CC) $(CFLAGS) -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS)
 
 
 
@@ -113,7 +113,7 @@ HEADER = Afhel.h
 ##############################################################################################
 
 clean:
-    rm -f *.o *_x *_x.exe *.a *.lo *.la *.so *.aenv
+	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so *.aenv
 
 
 
@@ -123,10 +123,10 @@ clean:
 
 
 info:
-    : Afhel requires HElib, NTL version 10.0.0 or higher and GMP
-    : Compilation flags are 'CFLAGS=$(CFLAGS)'
-    : Commands Available:
-    : * make fileName_x - Compile & Link binary filename.cpp with Afhel and its dependencies 
-    : * make clean - remove all library files from the folder
-    : If errors occur, try adding/removing '-std=c++11' in Makefile
-                                            
+	: Afhel requires HElib, NTL version 10.0.0 or higher and GMP
+	: Compilation flags are 'CFLAGS=$(CFLAGS)'
+	: Commands Available:
+	: * make fileName_x - Compile & Link binary filename.cpp with Afhel and its dependencies 
+	: * make clean - remove all library files from the folder
+	: If errors occur, try adding/removing '-std=c++11' in Makefile
+	                                        
