@@ -24,5 +24,12 @@ src/Pyfhel/build
 # Makefiles
 **/Makefile
 
+# SEAL - They don't allow redistribution
+src/SEAL/*
+!src/SEAL/.gitkeep
+
 # Afhel environments
 **.aenv
+
+# Visual Studio Code
+**.vscode
