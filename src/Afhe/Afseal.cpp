@@ -31,7 +31,7 @@
   *  --------------------------------------------------------------------
   */
 
-#include <math.h>       /* pow */
+#include <math.h>       /* pow */ 
 #include <fstream>      /* file management */
 
 #include "Afseal.h"
@@ -41,14 +41,12 @@ using namespace std;
 // ----------------------------- CLASS MANAGEMENT -----------------------------
 Afseal::Afseal(){}
 
-Afseal::Afseal(Afseal const& otherAfseal){
-    this->secretKey =    new SecretKey(*(otherAfseal.secretKey));
-    this->publicKey =    new PublicKey(*(otherAfseal.publicKey));
+Afseal::Afseal(Afseal &otherAfseal){
+    this->secretKey =    new SecretKey(otherAfseal.getsecretKey());
+    this->publicKey =    new PublicKey(otherAfseal.getpublicKey());
     this->m =            otherAfseal.getm();
     this->p =            otherAfseal.getp();
     this->r =            otherAfseal.getr();
-    this->nSlots =       otherAfseal.getnSlots();
-    this->flagVerbose =  otherAfseal.getflagVerbose();
     this->flagTime =     otherAfseal.getflagTime();
 }
 
@@ -56,7 +54,7 @@ Afseal::~Afseal(){}
 
 // ------------------------------ CRYPTOGRAPHY --------------------------------
 // GENERATION
-void Afseal::ContextGen(long p, long r, long m, encoderType encodeType){
+void Afseal::ContextGen(long p, long r, long m){
 
     EncryptionParameters parms;
 
@@ -71,22 +69,15 @@ void Afseal::ContextGen(long p, long r, long m, encoderType encodeType){
     parms.set_coeff_modulus(coeff_modulus_128(m));
     parms.set_plain_modulus(1 << p);
     this->context = new SEALContext(parms);
-    if(this->flagVerbose){print_parameters(context);}
 
-    // Choose encoding type
-    this->chosenEncoder = encodeType;
-    IntegerEncoder encoder(context.plain_modulus());
-    FractionalEncoder encoder(context.plain_modulus(), context.poly_modulus(),
-      intCoeffs, fracCoeffs, p);
-    IntegerEncoder encoder(context.plain_modulus());
-    }
-    this->evaluator=new Evaluator(context);
+    // Create Evaluator Key
+    this->evaluator=new Evaluator(this->context*);
 }
 
-void Afseal::KeyGen(long w){
+void Afseal::KeyGen(){
     if(flagVerbose){std::cout << "Afseal::keyGen START" << endl;}
 
-    KeyGenerator keygen(this->context);         // Sec/Pub key pair creation
+    KeyGenerator keygen = new KeyGenerator(this->context*);        // Sec/Pub key pair creation
     this->publicKey = keygen.public_key();      // Extract keys from keygen
     this->secretKey = keygen.secret_key();
 
@@ -120,6 +111,11 @@ Plaintext Afseal::decrypt(Ciphertext cipher1) {
     return res;
 }
 int Afseal::decrypt(Ciphertext cipher1, int value1) {
+    Plaintext plain1;
+    decryptor.decrypt(encrypted, plain1);
+    return res;
+}
+float Afseal::decrypt(Ciphertext cipher1, float value1) {
     Plaintext plain1;
     decryptor.decrypt(encrypted, plain1);
     return res;
@@ -223,9 +219,9 @@ bool Afseal::restoreContext(string fileName){
 
 // ----------------------------- AUXILIARY ----------------------------
 // GETTERS
-FHESecKey getsecretKey()	{return this->secretKey;}
-FHEPubKey getpublicKey()	{return this->publicKey;}
-FHEPubKey getevKey()	    {return this->evKeys;}
+PublicKey getsecretKey()	 {return this->secretKey;}
+SecretKey getpublicKey()	 {return this->publicKey;}
+EvaluationKeys getevKey()	 {return this->evKeys;}
 long Afseal::getnSlots()     {this->nSlots = ea->size(); return this->nSlots;}
 long Afseal::getm()          {return this->m;}
 long Afseal::getp()          {return this->p;}
@@ -235,7 +231,7 @@ bool Afseal::getflagVerbose(){return this->flagVerbose;}
 bool Afseal::getflagTime()   {return this->flagTime;}
 long Afseal::relinBitCount() {return this->evKeys.decomposition_bit_count()}
 // SETTERS
-void setpublicKey(FHEPubKey& pubKey)   	{this->publicKey = pubKey;}
-void setsecretKey(FHESecKey& secKey)	{this->secretKey = secKey}
+void setpublicKey(PublicKey& pubKey)   	    {this->publicKey = pubKey;}
+void setsecretKey(SecretKey& secKey)	    {this->secretKey = secKey}
+void setsecretKey(EvaluationKeys& evKey)	{this->evKeys = evKey}
 void Afseal::setflagVerbose(bool flagV) 	{this->flagVerbose = flagV;}
-void Afseal::setflagVerbose(bool flagT) 	{this->flagTime = flagT;}
