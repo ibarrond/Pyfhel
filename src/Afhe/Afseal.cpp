@@ -71,98 +71,102 @@ void Afseal::ContextGen(long p, long r, long m){
     this->context = new SEALContext(parms);
 
     // Create Evaluator Key
-    this->evaluator=new Evaluator(this->context*);
+    this->evaluator=new Evaluator(*context);
 }
 
 void Afseal::KeyGen(){
-    if(flagVerbose){std::cout << "Afseal::keyGen START" << endl;}
+    this->keyGenObj = new KeyGenerator(*context);
+    this->publicKey = new PublicKey(keyGenObj->public_key());   // Extract keys
+    this->secretKey = new SecretKey(keyGenObj->secret_key());
 
-    KeyGenerator keygen = new KeyGenerator(this->context*);        // Sec/Pub key pair creation
-    this->publicKey = keygen.public_key();      // Extract keys from keygen
-    this->secretKey = keygen.secret_key();
-
-    this->encryptor=new Encryptor(context, this->publicKey); // encr/decr objs
-    this->decryptor=new Decryptor(context, this->secretKey);
-
-    if(flagVerbose){std::cout << "Afseal::keyGen COMPLETED" << endl;}
+    this->encryptor=new Encryptor(*context, *publicKey); // encr/decr objs
+    this->decryptor=new Decryptor(*context, *secretKey);
 }
 
-// ENCRYPTION/DECRYPTION
-Ciphertext Afseal::encrypt(Plaintext plain1) {
+// ENCRYPTION
+Ciphertext Afseal::encrypt(Plaintext& plain1) {
     Ciphertext cipher1;
-    encryptor.encrypt(plain1, cipher1);
+    encryptor->encrypt(plain1, cipher1);
     return cipher1;
-}
-Ciphertext Afseal::encrypt(float value1) {
+    }
+Ciphertext Afseal::encrypt(double& value1) {
     Ciphertext cipher1;
-    encryptor.encrypt(fracEncoder.encode(value1), cipher1);
+    encryptor->encrypt(fracEncoder->encode(value1), cipher1);
     return cipher1;
-}
-Ciphertext Afseal::encrypt(int value1) {
+    }
+Ciphertext Afseal::encrypt(int& value1) {
     Ciphertext cipher1;
-    encryptor.encrypt(intEncoder.encode(value1), cipher1);
+    encryptor->encrypt(intEncoder->encode(value1), cipher1);
     return cipher1;
-}
+    }
+void Afseal::encrypt(Plaintext& plain1, Ciphertext& cipher1) {
+    encryptor->encrypt(plain1, cipher1);
+    }
+void Afseal::encrypt(double& value1, Ciphertext& cipher1) {
+    encryptor->encrypt(fracEncoder->encode(value1), cipher1);
+    }
+void Afseal::encrypt(int& value1, Ciphertext& cipher1) {
+    encryptor->encrypt(intEncoder->encode(value1), cipher1);
+    }
 
-
-Plaintext Afseal::decrypt(Ciphertext cipher1) {
-    Plaintext plain1;
-    decryptor.decrypt(encrypted, plain1);
-    return res;
-}
-int Afseal::decrypt(Ciphertext cipher1, int value1) {
-    Plaintext plain1;
-    decryptor.decrypt(encrypted, plain1);
-    return res;
-}
-float Afseal::decrypt(Ciphertext cipher1, float value1) {
-    Plaintext plain1;
-    decryptor.decrypt(encrypted, plain1);
-    return res;
-}
+//DECRYPTION
+Plaintext Afseal::decrypt(Ciphertext& cipher1) {
+    Plaintext plain1; 
+    decryptor->decrypt(cipher1, plain1);
+    return plain1;
+    }
+void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1) {
+    decryptor->decrypt(cipher1, plain1);
+    }
+void Afseal::decrypt(Ciphertext& cipher1, int& value1) {
+    Plaintext plain1; decryptor->decrypt(cipher1, plain1);
+    value1 = fracEncoder->decode(plain1);
+    }
+void Afseal::decrypt(Ciphertext& cipher1, double& value1) {
+    Plaintext plain1; decryptor->decrypt(cipher1, plain1);
+    }
 
 // -------------------------------- ENCODING ----------------------------------
 
-Plaintext Afseal::encode(int value1) {
-        Plaintext plain1 = intEncoder.encode(value1);
-        return plain1;
+Plaintext Afseal::encode(int& value1) {
+    Plaintext plain1 = intEncoder->encode(value1);
+    return plain1;
 }
 
 Plaintext Afseal::encode(double value1) {
-        Plaintext plain1 = fracEncoder.encode(value1);
-        return plain1;
+Plaintext plain1 = fracEncoder->encode(value1);
+    return plain1;
 }
 
-int Afseal::decode(Plaintext plain1) {
-        int value1 = intEncoder.decode_int32(plain1);
-        return value1;
+void Afseal::decode(Plaintext& plain1, int value1) {
+    value1 = intEncoder->decode_int32(plain1);
 }
 
-int Afseal::noiseLevel(Ciphertext cipher1) {
-        int noiseLevel = decryptor.invariant_noise_budget(cipher1);
-        return noiseLevel;
+int Afseal::noiseLevel(Ciphertext& cipher1) {
+    int noiseLevel = decryptor->invariant_noise_budget(cipher1);
+    return noiseLevel;
 }
 
 // ------------------------------- BOOTSTRAPPING ------------------------------
-void evalKeyGen(int bitCount){
+void Afseal::relinKeyGen(int bitCount){
   if(bitCount>dbc_max()){throw std::invalid_argument("bitCount must be =< 60");}
   if(bitCount<dbc_min()){throw std::invalid_argument("bitCount must be >= 1");}
-  keygen.generate_evaluation_keys(bitCount, evKeys);
+  keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
 }
-void relinearize(Ciphertext cipher1){
-  evaluator.relinearize(cipher1, evKeys);
+void Afseal::relinearize(Ciphertext cipher1){
+  >evaluator->relinearize(cipher1, *relinKey);
 }
 
 
 // --------------------------------- OPERATIONS -------------------------------
 
-void negate(Ciphertext cipher1){ this->evaluator.negate(cipher1);}
-void square(Ciphertext cipher1){ this->evaluator.square(cipher1);}
-void add(Ciphertext cipher1, Ciphertext cipher2){
-  this->evaluator.add(cipher1, cipher2);
+void Afseal::negate(Ciphertext& cipher1){ evaluator->negate(cipher1);}
+void Afseal::square(Ciphertext& cipher1){ this->evaluator->square(cipher1);}
+void Afseal::add(Ciphertext& cipher1, Ciphertext& cipher2){
+  evaluator->add(cipher1, cipher2);
 }
-void multiply(Ciphertext cipher1, Ciphertext cipher2){
-  this->evaluator.multiply(cipher1, cipher2);
+void Afseal::multiply(Ciphertext& cipher1, Ciphertext& cipher2){
+  evaluator->multiply(cipher1, cipher2);
 }
 
 

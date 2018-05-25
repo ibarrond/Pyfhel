@@ -60,14 +60,18 @@ class Afseal{
 
     private: 
         // -------------------------- ATTRIBUTES ----------------------------
-
-        SEALContext *context;             /**< Context object. Used for init*/
+        /** @defgroup ATTRIBUTES Afseal member objects;
+         *  @{
+         */
+        SEALContext* context;             /**< Context object. Used for init*/
   
-        IntegerEncoder *intEncoder;       /**< Integer Encoding.*/
-        FractionalEncoder *fracEncoder;   /**< Fractional Encoding.*/
+        IntegerEncoder* intEncoder;       /**< Integer Encoding.*/
+        FractionalEncoder* fracEncoder;   /**< Fractional Encoding.*/
 
-        SecretKey *secretKey;             /**< Secret key.*/
-        PublicKey *publicKey;             /**< Public key.*/
+        KeyGenerator* keyGenObj;          /**< Key Generator Object.*/
+        SecretKey* secretKey;             /**< Secret key.*/
+        PublicKey* publicKey;             /**< Public key.*/
+        EvaluationKeys* relinKey;         /**< Relinearization object*/
 
         Encryptor *encryptor;
         Evaluator *evaluator;
@@ -78,10 +82,14 @@ class Afseal{
         bool flagVerbose = false;         /**< Print messages on console */
         bool flagTime = false;            /**< Print timings on console */
 
+        /** @} ATTRIBUTES*/
 
-        EvaluationKeys evRel;            /**< Evaluation auxiliars for relin.*/
 
         // ------------------ STREAM OPERATORS OVERLOAD ----------------------
+        /** @defgroup STREAM_OPERATORS_OVERLOAD
+         * import/export to string streams
+         *  @{
+         */
         /**
          * @brief An output stream operator, parsing the object into a string.
          * @param[out] outs output stream where to bulk the Afseal object
@@ -91,17 +99,22 @@ class Afseal{
         friend std::ostream& operator<< (std::ostream& outs, Afseal const& af);
 
         /**
-         * @brief An input stream operator, reading the parsed Afseal object from a string.
+         * @brief An input stream operator, reading the parsed Afseal object from
+         *        a string stream.
          * @param[in] ins input stream where to extract the Afseal object
          * @param[out] af Afseal object to contain the parsed one
          * @see operator<<
          */
         friend std::istream& operator>> (std::istream& ins, Afseal const& af);
+        /** @} STREAM_OPERATORS_OVERLOAD*/
 
 
 
     public:
         // ----------------------- CLASS MANAGEMENT --------------------------
+        /** @defgroup CLASS_MANAGEMENT Constructor, Copy and Destructor.
+         *  @{
+         */
         /**
          * @brief Default constructor.
          */
@@ -117,9 +130,14 @@ class Afseal{
         * @brief Default destructor.
         */
         virtual ~Afseal();
+        /** @} CLASS_MANAGEMENT*/
+
 
 
         // -------------------------- CRYPTOGRAPHY ---------------------------
+        /** @defgroup CRYPTOGRAPHY ContextGen, KeyGen, Encrypt and Decrypt
+         *  @{
+         */
         // CONTEXT GENERATION
         /**
          * @brief Performs generation of FHE context using SEAL functions.
@@ -141,24 +159,89 @@ class Afseal{
         void KeyGen();
 
         // ENCRYPTION
+        /** @defgroup ENCRYPTION
+         *  @{
+         */
         /**
          * @brief Enctypts a provided plaintext vector using pubKey as public key.
          *      The encryption is carried out with SEAL.
          * @param[in] plain1 plaintext vector to encrypt.
          * @return ciphertext the SEAL encrypted ciphertext.
          */
-        Ciphertext encrypt(Plaintext plain1);
+        Ciphertext encrypt(Plaintext& plain1);
+        /**
+         * \overload Ciphertext encrypt(Plaintext plain1)
+         */
+        Ciphertext encrypt(double& value1);
+        /**
+         * \overload Ciphertext encrypt(Plaintext plain1)
+         */
+        Ciphertext encrypt(int& value1);
+        /**
+         * @brief Enctypts a provided plaintext vector and stored in the
+         *      provided ciphertext. The encryption is carried out with SEAL. 
+         * @param[in] plain1 plaintext vector to encrypt.
+         * @param[in, out] cipher1 ciphertext to hold the result of encryption.
+         * @return ciphertext the SEAL encrypted ciphertext.
+         */
+        void encrypt(Plaintext& plain1, Ciphertext& cipher1);
+        /**
+         * \overload void encrypt(Plaintext& plain1, Ciphertext& cipher1)
+         */
+        void encrypt(double& value1, Ciphertext& cipher1);
+        /**
+         * \overload void encrypt(Plaintext& plain1, Ciphertext& cipher1)
+         */
+        void encrypt(int& value1, Ciphertext& cipher1);
+        /** @} ENCRYPTION*/
+
 
         // DECRYPTION
+        /** @defgroup DECRYPTION
+         *  @{
+         */
         /**
          * @brief Decrypts the ciphertext using secKey as secret key.
          * The decryption is carried out with SEAL.
          * @param[in] cipher1 a Ciphertext object from SEAL.
-         * @return vector<long> the resulting of decrypting the ciphertext, a plaintext.
+         * @return Plaintext the resulting of decrypting the ciphertext, a plaintext.
          */
-        Plaintext decrypt(Ciphertext cipher1);
+        Plaintext decrypt(Ciphertext& cipher1);
+        /**
+         * @brief Decrypts the ciphertext using secKey as secret key and stores
+         *         it in a provided Plaintext.
+         * The decryption is carried out with SEAL.
+         * @param[in] cipher1 a Ciphertext object from SEAL.
+         * @param[in, out] plain1 a Plaintext object from SEAL.
+         * @return Void.
+         */
+        void decrypt(Ciphertext& cipher1, Plaintext& plain1);
+        /**
+         * \overload void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1)
+         */
+        void decrypt(Ciphertext& cipher1, int& value1); 
+        /**
+         * \overload void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1)
+         */
+        void decrypt(Ciphertext& cipher1, double& value1);
+        /** @} DECRYPTION*/
+        /** @} CRYPTOGRAPHY*/
 
-        // -------------------------- OPERATIONS ------------------------------
+
+        int noiseLevel(Ciphertext& cipher1);
+
+        // --------------------- ENCODING ---------------------
+        Plaintext encode(int& value1);
+        Plaintext encode(double value1);
+        
+        void decode(Plaintext& plain1, int value1);
+        
+        void relinKeyGen(int bitCount);
+        void relinearize(Ciphertext cipher1);
+        // --------------------- HOMOMORPHIC OPERATIONS ---------------------
+        /** @defgroup HOMOMORPHIC_OPERATIONS
+         *  @{
+         */
         // ADDITION
         /**
          * @brief Add second ciphertext to the first ciphertext.
@@ -166,7 +249,7 @@ class Afseal{
          * @param[in] cipher2 Second SEAL ciphertext, to be added to the first.
          * @return Void.
          */
-        void add(Ciphertext cipher1, Ciphertext cipher2);
+        void add(Ciphertext& cipher1, Ciphertext& cipher2);
 
         // MULTIPLICATION
         /**
@@ -175,7 +258,7 @@ class Afseal{
          * @param[in] cipher2 Second SEAL Ciphertext , to be miltuplied to the first.
          * @return Void.
          */
-        void mult(Ciphertext cipher1, Ciphertext cipher2);
+        void multiply(Ciphertext& cipher1, Ciphertext& cipher2);
 
         // SQUARE
         /**
@@ -183,7 +266,7 @@ class Afseal{
          * @param[in,out] cipher1 SEAL Ciphertext  whose values will get squared.
          * @return Void.
          */
-        void square(Ciphertext cipher1);
+        void square(Ciphertext& cipher1);
 
         // NEGATE
         /**
@@ -191,7 +274,7 @@ class Afseal{
         * @param[in,out] c1  Ciphertext  whose values get negated.
         * @return Void.
         */
-        void negate(Ciphertext cipher1);
+        void negate(Ciphertext& cipher1);
 
         // COMPARE EQUALS
         /**
