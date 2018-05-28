@@ -46,15 +46,13 @@ Afseal::Afseal(Afseal &otherAfseal){
     this->publicKey =    new PublicKey(otherAfseal.getpublicKey());
     this->m =            otherAfseal.getm();
     this->p =            otherAfseal.getp();
-    this->r =            otherAfseal.getr();
-    this->flagTime =     otherAfseal.getflagTime();
 }
 
 Afseal::~Afseal(){}
 
 // ------------------------------ CRYPTOGRAPHY --------------------------------
 // GENERATION
-void Afseal::ContextGen(long p, long r, long m){
+void Afseal::ContextGen(long p, long m, long sec, bool flagBatching){
 
     EncryptionParameters parms;
 
@@ -66,8 +64,10 @@ void Afseal::ContextGen(long p, long r, long m){
 
     // Context generation
     parms.set_poly_modulus("1x^"+std::to_string(m)+" + 1");
-    parms.set_coeff_modulus(coeff_modulus_128(m));
-    parms.set_plain_modulus(1 << p);
+    if      (sec==128)  {parms.set_coeff_modulus(coeff_modulus_128(m));}
+    else if (sec==192)  {parms.set_coeff_modulus(coeff_modulus_192(m));}
+    else {throw std::invalid_argument("sec must be 128 or 192 bits.");}
+    parms.set_plain_modulus(p);
     this->context = new SEALContext(parms);
 
     // Create Evaluator Key
@@ -94,7 +94,7 @@ Ciphertext Afseal::encrypt(double& value1) {
     encryptor->encrypt(fracEncoder->encode(value1), cipher1);
     return cipher1;
     }
-Ciphertext Afseal::encrypt(int& value1) {
+Ciphertext Afseal::encrypt(int64_t& value1) {
     Ciphertext cipher1;
     encryptor->encrypt(intEncoder->encode(value1), cipher1);
     return cipher1;
@@ -105,7 +105,7 @@ void Afseal::encrypt(Plaintext& plain1, Ciphertext& cipher1) {
 void Afseal::encrypt(double& value1, Ciphertext& cipher1) {
     encryptor->encrypt(fracEncoder->encode(value1), cipher1);
     }
-void Afseal::encrypt(int& value1, Ciphertext& cipher1) {
+void Afseal::encrypt(int64_t& value1, Ciphertext& cipher1) {
     encryptor->encrypt(intEncoder->encode(value1), cipher1);
     }
 
@@ -118,7 +118,7 @@ Plaintext Afseal::decrypt(Ciphertext& cipher1) {
 void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1) {
     decryptor->decrypt(cipher1, plain1);
     }
-void Afseal::decrypt(Ciphertext& cipher1, int& value1) {
+void Afseal::decrypt(Ciphertext& cipher1, int64_t& value1) {
     Plaintext plain1; decryptor->decrypt(cipher1, plain1);
     value1 = fracEncoder->decode(plain1);
     }
@@ -128,18 +128,36 @@ void Afseal::decrypt(Ciphertext& cipher1, double& value1) {
 
 // -------------------------------- ENCODING ----------------------------------
 
-Plaintext Afseal::encode(int& value1) {
+Plaintext Afseal::encode(int64_t& value1) {
     Plaintext plain1 = intEncoder->encode(value1);
     return plain1;
 }
 
-Plaintext Afseal::encode(double value1) {
-Plaintext plain1 = fracEncoder->encode(value1);
+Plaintext Afseal::encode(double& value1) {
+    Plaintext plain1 = fracEncoder->encode(value1);
     return plain1;
 }
+Plaintext Afseal::encode(std::vector<std::int64_t> &values) {
+    Plaintext plain1;
+    crtBuilder->compose(values, plain1);
+    return plain1;
+}
+void Afseal::encode(int64_t& value1, Plaintext& plainOut){
+    plainOut = intEncoder->encode(value1);
+}
+void Afseal::encode(double& value1, Plaintext& plainOut){
+    plainOut = fracEncoder->encode(value1);
+}
+void Afseal::encode(std::vector<std::int64_t> &values, Plaintext& plainOut){
+    crtBuilder->compose(values, plainOut);
+}
 
-void Afseal::decode(Plaintext& plain1, int value1) {
+
+void Afseal::decode(Plaintext& plain1, int64_t& value1) {
     value1 = intEncoder->decode_int32(plain1);
+}
+void Afseal::decode(Plaintext& plain1, double& value1) {
+    value1 = fracEncoder->decode(plain1);
 }
 
 int Afseal::noiseLevel(Ciphertext& cipher1) {
@@ -148,26 +166,43 @@ int Afseal::noiseLevel(Ciphertext& cipher1) {
 }
 
 // ------------------------------- BOOTSTRAPPING ------------------------------
-void Afseal::relinKeyGen(int bitCount){
+void Afseal::relinKeyGen(int& bitCount){
   if(bitCount>dbc_max()){throw std::invalid_argument("bitCount must be =< 60");}
   if(bitCount<dbc_min()){throw std::invalid_argument("bitCount must be >= 1");}
+  relinKey = new EvaluationKeys();
   keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
 }
-void Afseal::relinearize(Ciphertext cipher1){
-  >evaluator->relinearize(cipher1, *relinKey);
+void Afseal::relinearize(Ciphertext& cipher1){
+  evaluator->relinearize(cipher1, *relinKey);
 }
-
+void Afseal::galoisKeyGen(int& bitCount){
+  if(bitCount>dbc_max()){throw std::invalid_argument("bitCount must be =< 60");}
+  if(bitCount<dbc_min()){throw std::invalid_argument("bitCount must be >= 1");}
+  GaloisKeys galKeys;
+  keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
+}
 
 // --------------------------------- OPERATIONS -------------------------------
 
 void Afseal::negate(Ciphertext& cipher1){ evaluator->negate(cipher1);}
-void Afseal::square(Ciphertext& cipher1){ this->evaluator->square(cipher1);}
+void Afseal::square(Ciphertext& cipher1){ evaluator->square(cipher1);}
+
+void Afseal::add(std::vector<Ciphertext>& cipherV1, Ciphertext& cipherOut){
+  evaluator->add_many(cipherV1, cipherOut);
+}
 void Afseal::add(Ciphertext& cipher1, Ciphertext& cipher2){
   evaluator->add(cipher1, cipher2);
+}
+void Afseal::add(Ciphertext& cipher1, Plaintext& plain2){
+  evaluator->add_plain(cipher1, plain2);
 }
 void Afseal::multiply(Ciphertext& cipher1, Ciphertext& cipher2){
   evaluator->multiply(cipher1, cipher2);
 }
+void Afseal::multiply(Ciphertext& cipher1, Plaintext& plain1){
+  evaluator->multiply_plain(cipher1, plain1);
+}
+
 
 
 // ------------------------------------- I/O ----------------------------------
@@ -175,14 +210,7 @@ void Afseal::multiply(Ciphertext& cipher1, Ciphertext& cipher2){
 bool Afseal::saveContext(string fileName){
     bool res=1;
     try{
-        fstream keyFile(fileName+".aenv", fstream::out|fstream::trunc);
-        assert(keyFile.is_open());
 
-        writeContextBase(keyFile, ea->getContext());// Write m, p, r, gens, ords
-        keyFile << ea->getContext();                // Write the rest of the context
-        keyFile << G;                               // Write G poly (ea can't be written, we save
-                                                    //  G in order to reconstruct ea in restoreContext)
-        keyFile.close();
     }
     catch(exception& e){
         res=0;
@@ -198,20 +226,6 @@ bool Afseal::restoreContext(string fileName){
 
     try{
 
-        fstream keyFile(fileName+".aenv", fstream::in);
-        assert(keyFile.is_open());
-
-        readContextBase(keyFile, m1, p1, r1, gens, ords);   // Read m, p, r, gens, ords
-        context = new FHEcontext(m1, p1, r1, gens, ords);   // Initialize context
-        keyFile >> *context;                                // Read the rest of the context
-        keyFile >> G;                                       // Read G Poly
-
-        keyFile.close();
-
-        ea = new EncryptedArray(*context, G);        // Reconstruct ea using G and context
-        this->nSlots = ea->size();                    // Refill nslots
-        this->p = p1;
-        this->r = r1;
     }
     catch(exception& e){
         res=0;
@@ -221,21 +235,21 @@ bool Afseal::restoreContext(string fileName){
 
 
 
-// ----------------------------- AUXILIARY ----------------------------
+// --------------------------------- AUXILIARY --------------------------------
+bool Afseal::batchEnabled(){return (*context).qualifiers().enable_batching;}
+long Afseal::relinBitCount(){return this->relinKey->decomposition_bit_count();}
+
 // GETTERS
-PublicKey getsecretKey()	 {return this->secretKey;}
-SecretKey getpublicKey()	 {return this->publicKey;}
-EvaluationKeys getevKey()	 {return this->evKeys;}
-long Afseal::getnSlots()     {this->nSlots = ea->size(); return this->nSlots;}
+SecretKey Afseal::getsecretKey()	 {return *(this->secretKey);}
+PublicKey Afseal::getpublicKey()	 {return *(this->publicKey);}
+EvaluationKeys Afseal::getrelinKey() {return *(this->relinKey);} 
 long Afseal::getm()          {return this->m;}
 long Afseal::getp()          {return this->p;}
-long Afseal::getr()          {return this->r;}
-long Afseal::getp2r() const  {return this->ea.getAlMod().getPPowR()}
-bool Afseal::getflagVerbose(){return this->flagVerbose;}
-bool Afseal::getflagTime()   {return this->flagTime;}
-long Afseal::relinBitCount() {return this->evKeys.decomposition_bit_count()}
+long Afseal::getnSlots()     {return this->crtBuilder->slot_count();}
 // SETTERS
-void setpublicKey(PublicKey& pubKey)   	    {this->publicKey = pubKey;}
-void setsecretKey(SecretKey& secKey)	    {this->secretKey = secKey}
-void setsecretKey(EvaluationKeys& evKey)	{this->evKeys = evKey}
-void Afseal::setflagVerbose(bool flagV) 	{this->flagVerbose = flagV;}
+void Afseal::setpublicKey(PublicKey& pubKey)   	 
+    {this->publicKey = new PublicKey (pubKey);}
+void Afseal::setsecretKey(SecretKey& secKey)	    
+    {this->secretKey = new SecretKey (secKey);}
+void Afseal::setrelinKey(EvaluationKeys& evKey)
+    {this->relinKey = new EvaluationKeys(evKey);}
