@@ -72,15 +72,16 @@ class Afseal{
         SecretKey* secretKey;             /**< Secret key.*/
         PublicKey* publicKey;             /**< Public key.*/
         EvaluationKeys* relinKey;         /**< Relinearization object*/
+        GaloisKeys* galKeys;              /**< Galois key for batching*/
 
-        Encryptor *encryptor;
-        Evaluator *evaluator;
-        Decryptor *decryptor;
+        Encryptor* encryptor;             /**< Requires a Public Key.*/
+        Evaluator* evaluator;             /**< Requires a context.*/
+        Decryptor* decryptor;             /**< Requires a Secret Key.*/
 
-        long p, r;                        /**< All operations are modulo p^r */
-        long m;                           /**< Cyclotomic index */
-        bool flagVerbose = false;         /**< Print messages on console */
-        bool flagTime = false;            /**< Print timings on console */
+        PolyCRTBuilder* crtBuilder;       /**< used for Batching. */
+
+        int32_t p;                        /**< All operations are modulo p^r */
+        int32_t m;                        /**< Cyclotomic index */
 
         /** @} ATTRIBUTES*/
 
@@ -144,11 +145,12 @@ class Afseal{
          *          As a result, context, ea and nSlots are initialized.
          * @param[in] p ciphertext space base.
          * @param[in] r ciphertext space lifting .
-         * @param[in] m (optional) use m'th cyclotomic polynomial. Default set by heuristics (-1)
+         * @param[in] m m'th cyclotomic polynomial. Power of 2. Default 2048
          * @param[in] 
          * @return Void.
          */
-        void ContextGen(long p, long r, long m = 2048);
+        void ContextGen(long p, long m = 2048, long sec=128,
+                                bool flagBatching=false);
 
         // KEY GENERATION
         /**
@@ -176,7 +178,7 @@ class Afseal{
         /**
          * \overload Ciphertext encrypt(Plaintext plain1)
          */
-        Ciphertext encrypt(int& value1);
+        Ciphertext encrypt(int64_t& value1);
         /**
          * @brief Enctypts a provided plaintext vector and stored in the
          *      provided ciphertext. The encryption is carried out with SEAL. 
@@ -184,15 +186,15 @@ class Afseal{
          * @param[in, out] cipher1 ciphertext to hold the result of encryption.
          * @return ciphertext the SEAL encrypted ciphertext.
          */
-        void encrypt(Plaintext& plain1, Ciphertext& cipher1);
+        void encrypt(Plaintext& plain1, Ciphertext& cipherOut);
         /**
          * \overload void encrypt(Plaintext& plain1, Ciphertext& cipher1)
          */
-        void encrypt(double& value1, Ciphertext& cipher1);
+        void encrypt(double& value1, Ciphertext& cipherOut);
         /**
          * \overload void encrypt(Plaintext& plain1, Ciphertext& cipher1)
          */
-        void encrypt(int& value1, Ciphertext& cipher1);
+        void encrypt(int64_t& value1, Ciphertext& cipherOut);
         /** @} ENCRYPTION*/
 
 
@@ -215,30 +217,36 @@ class Afseal{
          * @param[in, out] plain1 a Plaintext object from SEAL.
          * @return Void.
          */
-        void decrypt(Ciphertext& cipher1, Plaintext& plain1);
+        void decrypt(Ciphertext& cipher1, Plaintext& plainOut);
         /**
          * \overload void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1)
          */
-        void decrypt(Ciphertext& cipher1, int& value1); 
+        void decrypt(Ciphertext& cipher1, int64_t& valueOut); 
         /**
          * \overload void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1)
          */
-        void decrypt(Ciphertext& cipher1, double& value1);
+        void decrypt(Ciphertext& cipher1, double& valueOut);
         /** @} DECRYPTION*/
         /** @} CRYPTOGRAPHY*/
 
 
         int noiseLevel(Ciphertext& cipher1);
 
-        // --------------------- ENCODING ---------------------
-        Plaintext encode(int& value1);
-        Plaintext encode(double value1);
+        // ----------------------------- ENCODING -----------------------------
+        Plaintext encode(int64_t& value1);
+        Plaintext encode(double& value1);
+        Plaintext encode(std::vector<std::int64_t> &values);
+        void encode(int64_t& value1, Plaintext& plainOut);
+        void encode(double& value1, Plaintext& plainOut);
+        void encode(std::vector<std::int64_t> &values, Plaintext& plainOut);
+
+        void decode(Plaintext& plain1, int64_t& valOut);
+        void decode(Plaintext& plain1, double& valOut);
         
-        void decode(Plaintext& plain1, int value1);
-        
-        void relinKeyGen(int bitCount);
-        void relinearize(Ciphertext cipher1);
-        // --------------------- HOMOMORPHIC OPERATIONS ---------------------
+        void relinKeyGen(int& bitCount);
+        void relinearize(Ciphertext& cipher1);
+        void galoisKeyGen(int& bitCount);
+        // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
         /** @defgroup HOMOMORPHIC_OPERATIONS
          *  @{
          */
@@ -250,6 +258,8 @@ class Afseal{
          * @return Void.
          */
         void add(Ciphertext& cipher1, Ciphertext& cipher2);
+        void add(Ciphertext& cipher1, Plaintext& plain2);
+        void add(std::vector<Ciphertext>& cipherV1, Ciphertext& cipherOut);
 
         // MULTIPLICATION
         /**
@@ -259,6 +269,8 @@ class Afseal{
          * @return Void.
          */
         void multiply(Ciphertext& cipher1, Ciphertext& cipher2);
+        void multiply(Ciphertext& cipher1, Plaintext& plain1);
+        void multiply(std::vector<Ciphertext>& cipherV1, Ciphertext& cipherOut);
 
         // SQUARE
         /**
@@ -372,6 +384,8 @@ class Afseal{
 
 
         // ----------------------------- AUXILIARY ----------------------------
+        bool batchEnabled();
+        long relinBitCount();
         // GETTERS
         /**
          * @brief Getter for secretKey, the key used to decrypt vectors.
@@ -387,9 +401,9 @@ class Afseal{
 
         /**
          * @brief Getter for for evaluationKeys, the key used to perform operations.
-         * @return pubKey the evaluation key.
+         * @return relinKey the evaluation key.
          */
-        PublicKey getevKey();
+        EvaluationKeys getrelinKey(); 
 
         /**
          * @brief Getter for # of slots in ctxt vectors.
@@ -416,16 +430,10 @@ class Afseal{
         long getm();
 
         /**
-         * @brief Getter for flagVerbose, boolean to print info on terminal.
-         * @return flagVerbose boolean to print info on terminal.
+         * @brief Getter for nSlots, number of plaintext slots in batching.
+         * @return nSlots number of plaintext slots in batching.
          */
-        bool getflagVerbose();
-
-        /**
-         * @brief Getter for flagTime, boolean to print timings on terminal.
-         * @return flagTime boolean to print timings on terminal.
-         */
-        bool getflagTime();
+        long getnSlots();
 
         //SETTERS
         /**
@@ -433,27 +441,21 @@ class Afseal{
          * @param[in] pubKey public key of the key pair.
          * @return Void.
          */
-        void setpublicKey(PublicKey *pubKey);
+        void setpublicKey(PublicKey& pubKey);
 
         /**
          * @brief Setter for secretKey, the key used to decrypt vectors.
          * @param[in] secKey secret key of the key pair.
          * @return Void.
          */
-        void setsecretKey(SecretKey *secKey);
+        void setsecretKey(SecretKey& secKey);
 
         /**
-         * @brief Getter for flagVerbose, boolean to print info on terminal.
-         * @param[in] flagVerbose boolean to print info on terminal.
+         * @brief Setter for relinKey, the key used to decrypt vectors.
+         * @param[in] secKey secret key of the key pair.
          * @return Void.
          */
-        void setflagVerbose(bool flagV);
+        void setrelinKey(EvaluationKeys& relKey);
 
-        /**
-         * @brief Getter for flagTime, boolean to print timings on terminal.
-         * @param[in] flagTime boolean to print timings on terminal.
-         * @return Void.
-         */
-        void setflagVerbose(bool flagT);
 };
 #endif
