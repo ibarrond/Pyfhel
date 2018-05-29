@@ -59,29 +59,31 @@ using namespace seal;
 class Afseal{ 
 
     private: 
-        // -------------------------- ATTRIBUTES ----------------------------
+        // --------------------------- ATTRIBUTES -----------------------------
         /** @defgroup ATTRIBUTES Afseal member objects;
          *  @{
          */
-        SEALContext* context;             /**< Context object. Used for init*/
+        SEALContext* context;           /**< Context object. Used for init*/
   
-        IntegerEncoder* intEncoder;       /**< Integer Encoding.*/
-        FractionalEncoder* fracEncoder;   /**< Fractional Encoding.*/
+        IntegerEncoder* intEncoder;     /**< Integer Encoding.*/
+        FractionalEncoder* fracEncoder; /**< Fractional Encoding.*/
 
-        KeyGenerator* keyGenObj;          /**< Key Generator Object.*/
-        SecretKey* secretKey;             /**< Secret key.*/
-        PublicKey* publicKey;             /**< Public key.*/
-        EvaluationKeys* relinKey;         /**< Relinearization object*/
-        GaloisKeys* galKeys;              /**< Galois key for batching*/
+        KeyGenerator* keyGenObj;        /**< Key Generator Object.*/
+        SecretKey* secretKey;           /**< Secret key.*/
+        PublicKey* publicKey;           /**< Public key.*/
+        EvaluationKeys* relinKey;       /**< Relinearization object*/
+        GaloisKeys* galKeys;            /**< Galois key for batching*/
 
-        Encryptor* encryptor;             /**< Requires a Public Key.*/
-        Evaluator* evaluator;             /**< Requires a context.*/
-        Decryptor* decryptor;             /**< Requires a Secret Key.*/
+        Encryptor* encryptor;           /**< Requires a Public Key.*/
+        Evaluator* evaluator;           /**< Requires a context.*/
+        Decryptor* decryptor;           /**< Requires a Secret Key.*/
 
-        PolyCRTBuilder* crtBuilder;       /**< used for Batching. */
+        PolyCRTBuilder* crtBuilder;     /**< used for Batching. */
 
-        int32_t p;                        /**< All operations are modulo p^r */
-        int32_t m;                        /**< Cyclotomic index */
+        int p;                          /**< All operations are modulo p^r */
+        int m;                          /**< Cyclotomic index */
+
+        bool flagBatching = false;      /**< Whether to use batching or not */
 
         /** @} ATTRIBUTES*/
 
@@ -97,7 +99,7 @@ class Afseal{
          * @param[in] af Afseal object to be exported
          * @see operator>>
          */
-        friend std::ostream& operator<< (std::ostream& outs, Afseal const& af);
+        friend ostream& operator<< (ostream& outs, Afseal const& af);
 
         /**
          * @brief An input stream operator, reading the parsed Afseal object from
@@ -106,7 +108,7 @@ class Afseal{
          * @param[out] af Afseal object to contain the parsed one
          * @see operator<<
          */
-        friend std::istream& operator>> (std::istream& ins, Afseal const& af);
+        friend istream& operator>> (istream& ins, Afseal const& af);
         /** @} STREAM_OPERATORS_OVERLOAD*/
 
 
@@ -180,6 +182,10 @@ class Afseal{
          */
         Ciphertext encrypt(int64_t& value1);
         /**
+         * \overload Ciphertext encrypt(Plaintext plain1)
+         */
+        Ciphertext Afseal::encrypt(vector<int64_t>& value1);
+        /**
          * @brief Enctypts a provided plaintext vector and stored in the
          *      provided ciphertext. The encryption is carried out with SEAL. 
          * @param[in] plain1 plaintext vector to encrypt.
@@ -195,6 +201,9 @@ class Afseal{
          * \overload void encrypt(Plaintext& plain1, Ciphertext& cipher1)
          */
         void encrypt(int64_t& value1, Ciphertext& cipherOut);
+        /**
+         * \overload void encrypt(Plaintext& plain1, Ciphertext& cipher1)
+         */
         /** @} ENCRYPTION*/
 
 
@@ -235,14 +244,22 @@ class Afseal{
         // ----------------------------- ENCODING -----------------------------
         Plaintext encode(int64_t& value1);
         Plaintext encode(double& value1);
-        Plaintext encode(std::vector<std::int64_t> &values);
+        Plaintext encode(vector<int64_t> &values);
+        vector<Plaintext> encode(vector<int64_t> &values, bool dummy_notUsed);
+        vector<Plaintext> encode(vector<double> &values);
         void encode(int64_t& value1, Plaintext& plainOut);
         void encode(double& value1, Plaintext& plainOut);
-        void encode(std::vector<std::int64_t> &values, Plaintext& plainOut);
+        void encode(vector<int64_t> &values, Plaintext& plainOut);
+        void encode(vector<int64_t> &values, vector<Plaintext>& plainVOut);
+        void encode(vector<double> &values, vector<Plaintext>& plainVOut);
 
         void decode(Plaintext& plain1, int64_t& valOut);
         void decode(Plaintext& plain1, double& valOut);
-        
+        void decode(Plaintext& plain1, vector<int64_t> &valueVOut);
+        void decode(vector<Plaintext>& plain1, vector<int64_t> &valueVOut);
+        void decode(vector<Plaintext>& plain1, vector<double> &valueVOut);
+
+        // -------------------------- RELINEARIZATION -------------------------
         void relinKeyGen(int& bitCount);
         void relinearize(Ciphertext& cipher1);
         void galoisKeyGen(int& bitCount);
@@ -259,7 +276,7 @@ class Afseal{
          */
         void add(Ciphertext& cipher1, Ciphertext& cipher2);
         void add(Ciphertext& cipher1, Plaintext& plain2);
-        void add(std::vector<Ciphertext>& cipherV1, Ciphertext& cipherOut);
+        void add(vector<Ciphertext>& cipherV1, Ciphertext& cipherOut);
 
         // MULTIPLICATION
         /**
@@ -270,7 +287,7 @@ class Afseal{
          */
         void multiply(Ciphertext& cipher1, Ciphertext& cipher2);
         void multiply(Ciphertext& cipher1, Plaintext& plain1);
-        void multiply(std::vector<Ciphertext>& cipherV1, Ciphertext& cipherOut);
+        void multiply(vector<Ciphertext>& cipherV1, Ciphertext& cipherOut);
 
         // SQUARE
         /**
@@ -386,76 +403,21 @@ class Afseal{
         // ----------------------------- AUXILIARY ----------------------------
         bool batchEnabled();
         long relinBitCount();
+
         // GETTERS
-        /**
-         * @brief Getter for secretKey, the key used to decrypt vectors.
-         * @return secKey the secret key of the key pair.
-         */
         SecretKey getsecretKey();
-
-        /**
-         * @brief Getter for for publicKey, the key used to encrypt vectors.
-         * @return pubKey the public key of the key pair.
-         */
         PublicKey getpublicKey();
-
-        /**
-         * @brief Getter for for evaluationKeys, the key used to perform operations.
-         * @return relinKey the evaluation key.
-         */
         EvaluationKeys getrelinKey(); 
-
-        /**
-         * @brief Getter for # of slots in ctxt vectors.
-         * @return number of plaintext slots.
-         */
-        long getnSlots();
-
-        /**
-         * @brief Getter for p, cyphertext space modulus.
-         * @return p cyphertext space modulus.
-         */
-        long getp();
-
-        /**
-         * @brief Getter for c, cyphertext space exponent.
-         * @return r cyphertext space exponent.
-         */
-        long getr();
-
-        /**
-         * @brief Getter for m, cyclotomical polynomial exponent.
-         * @return m cyclotomical polynomial exponent.
-         */
-        long getm();
-
-        /**
-         * @brief Getter for nSlots, number of plaintext slots in batching.
-         * @return nSlots number of plaintext slots in batching.
-         */
-        long getnSlots();
+        int getnSlots();
+        int getp();
+        int getm();
+        bool getflagBatching();
 
         //SETTERS
-        /**
-         * @brief Setter for publicKey, the key used to encrypt vectors.
-         * @param[in] pubKey public key of the key pair.
-         * @return Void.
-         */
         void setpublicKey(PublicKey& pubKey);
-
-        /**
-         * @brief Setter for secretKey, the key used to decrypt vectors.
-         * @param[in] secKey secret key of the key pair.
-         * @return Void.
-         */
         void setsecretKey(SecretKey& secKey);
-
-        /**
-         * @brief Setter for relinKey, the key used to decrypt vectors.
-         * @param[in] secKey secret key of the key pair.
-         * @return Void.
-         */
         void setrelinKey(EvaluationKeys& relKey);
+        void setflagBatching(bool f_batch);
 
 };
 #endif
