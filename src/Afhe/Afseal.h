@@ -173,18 +173,11 @@ class Afseal{
          * @return ciphertext the SEAL encrypted ciphertext.
          */
         Ciphertext encrypt(Plaintext& plain1);
-        /**
-         * \overload Ciphertext encrypt(Plaintext plain1)
-         */
         Ciphertext encrypt(double& value1);
-        /**
-         * \overload Ciphertext encrypt(Plaintext plain1)
-         */
         Ciphertext encrypt(int64_t& value1);
-        /**
-         * \overload Ciphertext encrypt(Plaintext plain1)
-         */
-        Ciphertext Afseal::encrypt(vector<int64_t>& value1);
+        Ciphertext encrypt(vector<int64_t>& valueV);
+        vector<Ciphertext> encrypt(vector<int64_t>& valueV, bool& dummy_NoBatch);
+        vector<Ciphertext> encrypt(vector<double>& valueV);
         /**
          * @brief Enctypts a provided plaintext vector and stored in the
          *      provided ciphertext. The encryption is carried out with SEAL. 
@@ -193,19 +186,11 @@ class Afseal{
          * @return ciphertext the SEAL encrypted ciphertext.
          */
         void encrypt(Plaintext& plain1, Ciphertext& cipherOut);
-        /**
-         * \overload void encrypt(Plaintext& plain1, Ciphertext& cipher1)
-         */
         void encrypt(double& value1, Ciphertext& cipherOut);
-        /**
-         * \overload void encrypt(Plaintext& plain1, Ciphertext& cipher1)
-         */
         void encrypt(int64_t& value1, Ciphertext& cipherOut);
-        /**
-         * \overload void encrypt(Plaintext& plain1, Ciphertext& cipher1)
-         */
-        /** @} ENCRYPTION*/
-
+        void encrypt(vector<int64_t>& valueV, Ciphertext& cipherOut);
+        void encrypt(vector<int64_t>& valueV, vector<Ciphertext>& cipherOut);
+        void encrypt(vector<double>& valueV, vector<Ciphertext>& cipherOut);
 
         // DECRYPTION
         /** @defgroup DECRYPTION
@@ -227,46 +212,63 @@ class Afseal{
          * @return Void.
          */
         void decrypt(Ciphertext& cipher1, Plaintext& plainOut);
-        /**
-         * \overload void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1)
-         */
         void decrypt(Ciphertext& cipher1, int64_t& valueOut); 
-        /**
-         * \overload void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1)
-         */
         void decrypt(Ciphertext& cipher1, double& valueOut);
-        /** @} DECRYPTION*/
-        /** @} CRYPTOGRAPHY*/
+        void decrypt(Ciphertext& cipher1, vector<int64_t>& valueVOut); 
+        void decrypt(vector<Ciphertext>& cipherV, vector<int64_t>& valueVOut);
+        void decrypt(vector<Ciphertext>& cipherV, vector<double>& valueVOut);
 
 
+        // NOISE MEASUREMENT
         int noiseLevel(Ciphertext& cipher1);
 
-        // ----------------------------- ENCODING -----------------------------
+        // ------------------------------ CODEC -------------------------------
+        // ENCODE 
         Plaintext encode(int64_t& value1);
         Plaintext encode(double& value1);
         Plaintext encode(vector<int64_t> &values);
-        vector<Plaintext> encode(vector<int64_t> &values, bool dummy_notUsed);
+        vector<Plaintext> encode(vector<int64_t> &values, bool dummy_NoBatch);
         vector<Plaintext> encode(vector<double> &values);
+
         void encode(int64_t& value1, Plaintext& plainOut);
         void encode(double& value1, Plaintext& plainOut);
         void encode(vector<int64_t> &values, Plaintext& plainOut);
         void encode(vector<int64_t> &values, vector<Plaintext>& plainVOut);
         void encode(vector<double> &values, vector<Plaintext>& plainVOut);
 
+        // DECODE 
         void decode(Plaintext& plain1, int64_t& valOut);
         void decode(Plaintext& plain1, double& valOut);
         void decode(Plaintext& plain1, vector<int64_t> &valueVOut);
         void decode(vector<Plaintext>& plain1, vector<int64_t> &valueVOut);
         void decode(vector<Plaintext>& plain1, vector<double> &valueVOut);
 
+
         // -------------------------- RELINEARIZATION -------------------------
         void relinKeyGen(int& bitCount);
         void relinearize(Ciphertext& cipher1);
         void galoisKeyGen(int& bitCount);
+
+
         // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
-        /** @defgroup HOMOMORPHIC_OPERATIONS
-         *  @{
+        // SQUARE
+        /**
+         * @brief Square ciphertext values.
+         * @param[in,out] cipher1 SEAL Ciphertext  whose values will get squared.
+         * @return Void.
          */
+        void square(Ciphertext& cipher1);
+        void square(vector<Ciphertext>& cipherV);
+        // NEGATE
+        /**
+        * @brief Negate values in a ciphertext
+        * @param[in,out] c1  Ciphertext  whose values get negated.
+        * @return Void.
+        */
+        void negate(Ciphertext& cipher1);
+        void negate(vector<Ciphertext>& cipherV);
+
+        
         // ADDITION
         /**
          * @brief Add second ciphertext to the first ciphertext.
@@ -276,8 +278,9 @@ class Afseal{
          */
         void add(Ciphertext& cipher1, Ciphertext& cipher2);
         void add(Ciphertext& cipher1, Plaintext& plain2);
-        void add(vector<Ciphertext>& cipherV1, Ciphertext& cipherOut);
-
+        void add(vector<Ciphertext>& cipherV, Ciphertext& cipherOut);
+        void add(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2);
+        void add(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2);
         // MULTIPLICATION
         /**
          * @brief Multiply first ciphertext by the second ciphertext.
@@ -288,22 +291,8 @@ class Afseal{
         void multiply(Ciphertext& cipher1, Ciphertext& cipher2);
         void multiply(Ciphertext& cipher1, Plaintext& plain1);
         void multiply(vector<Ciphertext>& cipherV1, Ciphertext& cipherOut);
-
-        // SQUARE
-        /**
-         * @brief Square ciphertext values.
-         * @param[in,out] cipher1 SEAL Ciphertext  whose values will get squared.
-         * @return Void.
-         */
-        void square(Ciphertext& cipher1);
-
-        // NEGATE
-        /**
-        * @brief Negate values in a ciphertext
-        * @param[in,out] c1  Ciphertext  whose values get negated.
-        * @return Void.
-        */
-        void negate(Ciphertext& cipher1);
+        void multiply(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2);
+        void multiply(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2);
 
         // COMPARE EQUALS
         /**
@@ -317,18 +306,19 @@ class Afseal{
 
         // ROTATE
         /**
-         * @brief Rotate ciphertext by c spaces.
+         * @brief Rotate ciphertext by k spaces.
          * Overflowing values are added at the other side
          * @param[in,out] c1 SEAL Ciphertext  whose values get rotated.
-         * @param[in] c number of spaces to rotate
+         * @param[in] k number of spaces to rotate
          * @return Void.
          */
-        void rotate(Ciphertext c1, long c);
-
+        void rotate(Ciphertext c1, int k);
+        void rotate(vector<Ciphertext>& cipherV, int k);
+        
         // SHIFT
         /**
          * @brief Rotate ciphertext by c spaces.
-         * Overflowing values are added at the other side
+         * Overflowing values dissappear
          * @param[in,out] c1 SEAL Ciphertext  whose values get rotated.
          * @param[in] c number of spaces to rotate
          * @return Void.

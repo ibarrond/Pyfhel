@@ -36,7 +36,7 @@
 
 #include "Afseal.h"
 
-using namespace std;
+typedef vector<Ciphertext> vCipher_t;
 
 // ----------------------------- CLASS MANAGEMENT -----------------------------
 Afseal::Afseal(){}
@@ -51,7 +51,7 @@ Afseal::Afseal(Afseal &otherAfseal){
 Afseal::~Afseal(){}
 
 // ------------------------------ CRYPTOGRAPHY --------------------------------
-// GENERATION
+// CONTEXT GENERATION
 void Afseal::ContextGen(long p, long m, long sec, bool f_Batch){
 
     EncryptionParameters parms;
@@ -81,6 +81,8 @@ void Afseal::ContextGen(long p, long m, long sec, bool f_Batch){
     }
 }
 
+
+// KEY GENERATION
 void Afseal::KeyGen(){
     this->keyGenObj = new KeyGenerator(*context);
     this->publicKey = new PublicKey(keyGenObj->public_key());   // Extract keys
@@ -90,58 +92,89 @@ void Afseal::KeyGen(){
     this->decryptor=new Decryptor(*context, *secretKey);
 }
 
+
 // ENCRYPTION
 Ciphertext Afseal::encrypt(Plaintext& plain1) {
     Ciphertext cipher1; encryptor->encrypt(plain1, cipher1);
-    return cipher1;
-    }
+    return cipher1;}
 Ciphertext Afseal::encrypt(double& value1) {
-    Ciphertext cipher1; encryptor->encrypt(fracEncoder->encode(value1), cipher1);
-    return cipher1;
-    }
+    Ciphertext cipher1; encryptor->encrypt(fracEncoder->encode(value1),cipher1);
+    return cipher1;}
 Ciphertext Afseal::encrypt(int64_t& value1) {
-    Ciphertext cipher1; encryptor->encrypt(intEncoder->encode(value1), cipher1);
-    return cipher1;
-    }
-Ciphertext Afseal::encrypt(vector<int64_t>& value1) {
-    Ciphertext cipher1; encryptor->encrypt(intEncoder->encode(value1), cipher1);
-    return cipher1;
-    }
+    Ciphertext cipher1; encryptor->encrypt(intEncoder->encode(value1),cipher1);
+    return cipher1;}
+Ciphertext Afseal::encrypt(vector<int64_t>& valueV) {
+    Ciphertext cipher1; Plaintext plain1; crtBuilder->compose(valueV, plain1);
+    encryptor->encrypt(plain1, cipher1);  return cipher1;}
+vector<Ciphertext> Afseal::encrypt(vector<int64_t>& valueV, bool& dummy_NoBatch){
+    vector<Ciphertext> cipherV; Ciphertext cipher1;
+    for(int64_t& v:valueV){
+        encryptor->encrypt(intEncoder->encode(v), cipher1);
+        cipherV.emplace_back(cipher1);}
+    return cipherV;}
+vector<Ciphertext> Afseal::encrypt(vector<double>& valueV) {
+    vector<Ciphertext> cipherV; Ciphertext cipher1;
+    for(double& v:valueV){
+        encryptor->encrypt(fracEncoder->encode(v), cipher1);
+        cipherV.emplace_back(cipher1);}
+    return cipherV;}
+
 void Afseal::encrypt(Plaintext& plain1, Ciphertext& cipher1) {
-    encryptor->encrypt(plain1, cipher1);
-    }
+    encryptor->encrypt(plain1, cipher1);}
 void Afseal::encrypt(double& value1, Ciphertext& cipher1) {
-    encryptor->encrypt(fracEncoder->encode(value1), cipher1);
-    }
+    encryptor->encrypt(fracEncoder->encode(value1), cipher1);}
 void Afseal::encrypt(int64_t& value1, Ciphertext& cipher1) {
-    encryptor->encrypt(intEncoder->encode(value1), cipher1);
-    }
+    encryptor->encrypt(intEncoder->encode(value1), cipher1);}
+void Afseal::encrypt(vector<int64_t>& valueV, Ciphertext& cipherOut){
+    Plaintext plain1; crtBuilder->compose(valueV, plain1);
+    encryptor->encrypt(plain1, cipherOut);}
+void Afseal::encrypt(vector<int64_t>& valueV, vector<Ciphertext>& cipherOut){
+    Ciphertext cipher1;
+    for(int64_t& v:valueV){
+        encryptor->encrypt(intEncoder->encode(v), cipher1);
+        cipherOut.emplace_back(cipher1);}}
+void Afseal::encrypt(vector<double>& valueV, vector<Ciphertext>& cipherOut){
+    Ciphertext cipher1;
+    for(double& v:valueV){
+        encryptor->encrypt(fracEncoder->encode(v), cipher1);
+        cipherOut.emplace_back(cipher1);}}
+
 
 //DECRYPTION
 Plaintext Afseal::decrypt(Ciphertext& cipher1) {
     Plaintext plain1; decryptor->decrypt(cipher1, plain1);
-    return plain1;
-    }
+    return plain1;}
 void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1) {
-    decryptor->decrypt(cipher1, plain1);
-    }
+    decryptor->decrypt(cipher1, plain1);}
 void Afseal::decrypt(Ciphertext& cipher1, int64_t& valueOut) {
     Plaintext plain1; decryptor->decrypt(cipher1, plain1);
-    valueOut = intEncoder->decode_int64(plain1);
-    }
+    valueOut = intEncoder->decode_int64(plain1);}
 void Afseal::decrypt(Ciphertext& cipher1, double& valueOut) {
     Plaintext plain1; decryptor->decrypt(cipher1, plain1);
-    valueOut = fracEncoder->decode(plain1);
-    }
+    valueOut = fracEncoder->decode(plain1);}
+void Afseal::decrypt(vector<Ciphertext>& cipherV, vector<int64_t>& valueVOut) {
+    Plaintext plain1;
+    for(Ciphertext& c:cipherV){
+        decryptor->decrypt(c, plain1);
+        valueVOut.emplace_back(intEncoder->decode_int64(plain1));}}
+void Afseal::decrypt(vector<Ciphertext>& cipherV, vector<double>& valueVOut) {
+    Plaintext plain1;
+    for(Ciphertext& c:cipherV){
+        decryptor->decrypt(c, plain1);
+        valueVOut.emplace_back(fracEncoder->decode(plain1));}}
+void Afseal::decrypt(Ciphertext& cipher1, vector<int64_t>& valueVOut){
+    Plaintext plain1;
+    decryptor->decrypt(cipher1, plain1);
+    crtBuilder->decompose(plain1, valueVOut);
+}
 
-// -------------------------------- ENCODING ----------------------------------
-
+// ---------------------------------- CODEC -----------------------------------
+// ENCODE 
 Plaintext Afseal::encode(int64_t& value1) {
     Plaintext plain1 = intEncoder->encode(value1);  return plain1;}
 Plaintext Afseal::encode(double& value1) {
     Plaintext plain1 = fracEncoder->encode(value1); return plain1;}
 Plaintext Afseal::encode(vector<int64_t> &values) { // Batching
-    if(!flagBatching){throw invalid_argument("p not prime | 2*m*K ~= p-1 ");}
     Plaintext plain1; crtBuilder->compose(values, plain1); return plain1;}
 vector<Plaintext> Afseal::encode(vector<int64_t> &values, bool dummy_notUsed){
     vector<Plaintext> plainVOut;
@@ -162,29 +195,32 @@ void Afseal::encode(vector<int64_t> &values, Plaintext& plainOut){
         throw range_error("Data vector size is bigger than nSlots");}
     crtBuilder->compose(values, plainOut);}
 void Afseal::encode(vector<int64_t> &values, vector<Plaintext>& plainVOut){
-    for(int64_t& val:values){plainVOut.emplace_back(intEncoder->encode(val));}}
+    for(int64_t& val:values){
+        plainVOut.emplace_back(intEncoder->encode(val));}}
 void Afseal::encode(vector<double> &values, vector<Plaintext>& plainVOut){
-    for(double& val:values){plainVOut.emplace_back(fracEncoder->encode(val));}}
+    for(double& val:values){
+        plainVOut.emplace_back(fracEncoder->encode(val));}}
 
-
-
+// DECODE
 void Afseal::decode(Plaintext& plain1, int64_t& valueOut) {
     valueOut = intEncoder->decode_int64(plain1);}
 void Afseal::decode(Plaintext& plain1, double& valueOut) {
     valueOut = fracEncoder->decode(plain1);}
 void Afseal::decode(Plaintext& plain1, vector<int64_t> &valueVOut) {
-    valueVOut = fracEncoder->decode(plain1);}
+    crtBuilder->decompose(plain1, valueVOut);}
 void Afseal::decode(vector<Plaintext>& plainV, vector<int64_t> &valueVOut) {
-    for(Plaintext& p:plainV){valueVOut.emplace_back(intEncoder->decode_int64(p));}}
-void Afseal::decode(vector<Plaintext>& plain1, vector<double> &valueVOut) {
-    value1 = fracEncoder->decode(plain1);}
+    for(Plaintext& p:plainV){
+        valueVOut.emplace_back(intEncoder->decode_int64(p));}}
+void Afseal::decode(vector<Plaintext>& plainV, vector<double> &valueVOut) {
+    for(Plaintext& p:plainV){
+        valueVOut.emplace_back(fracEncoder->decode(p));}}
 
+// NOISE MEASUREMENT
 int Afseal::noiseLevel(Ciphertext& cipher1) {
     int noiseLevel = decryptor->invariant_noise_budget(cipher1);
-    return noiseLevel;
-}
+    return noiseLevel;}
 
-// ------------------------------- BOOTSTRAPPING ------------------------------
+// ------------------------------ RELINEARIZATION -----------------------------
 void Afseal::relinKeyGen(int& bitCount){
   if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
   if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
@@ -202,28 +238,58 @@ void Afseal::galoisKeyGen(int& bitCount){
 }
 
 // --------------------------------- OPERATIONS -------------------------------
-
+// NOT
 void Afseal::negate(Ciphertext& cipher1){ evaluator->negate(cipher1);}
+void Afseal::negate(vector<Ciphertext>& cipherV){
+    for (Ciphertext& c:cipherV){evaluator->negate(c);}}
+// SQUARE
 void Afseal::square(Ciphertext& cipher1){ evaluator->square(cipher1);}
+void Afseal::square(vector<Ciphertext>& cipherV){
+    for (Ciphertext& c:cipherV){evaluator->square(c);}}
 
-void Afseal::add(vector<Ciphertext>& cipherV1, Ciphertext& cipherOut){
-  evaluator->add_many(cipherV1, cipherOut);
-}
-void Afseal::add(Ciphertext& cipher1, Ciphertext& cipher2){
-  evaluator->add(cipher1, cipher2);
-}
-void Afseal::add(Ciphertext& cipher1, Plaintext& plain2){
-  evaluator->add_plain(cipher1, plain2);
-}
-void Afseal::multiply(Ciphertext& cipher1, Ciphertext& cipher2){
-  evaluator->multiply(cipher1, cipher2);
-}
-void Afseal::multiply(Ciphertext& cipher1, Plaintext& plain1){
-  evaluator->multiply_plain(cipher1, plain1);
-}
+// ADDITION
+void Afseal::add(Ciphertext& cipherInOut, Ciphertext& cipher2){
+    evaluator->add(cipherInOut, cipher2);}
+void Afseal::add(Ciphertext& cipherInOut, Plaintext& plain2){
+    evaluator->add_plain(cipherInOut, plain2);}
+void Afseal::add(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2){
+    vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
+    vector<Ciphertext>::iterator c2 = cipherV2.begin();
+    for(; c1 != cipherVInOut.end(), c2 != cipherV2.end(); c1++, c2++){
+            evaluator->add(*c1, *c2);}}
+void Afseal::add(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2){
+    vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
+    vector<Plaintext>::iterator p2 = plainV2.begin();
+    for(; c1 != cipherVInOut.end(), p2 != plainV2.end(); c1++, p2++){
+        evaluator->add_plain(*c1, *p2);}}
+void Afseal::add(vector<Ciphertext>& cipherV, Ciphertext& cipherOut){
+  evaluator->add_many(cipherV, cipherOut);}
+
+// MULTIPLICATION
+void Afseal::multiply(Ciphertext& cipherInOut, Ciphertext& cipher2){
+  evaluator->multiply(cipherInOut, cipher2);}
+void Afseal::multiply(Ciphertext& cipherInOut, Plaintext& plain1){
+  evaluator->multiply_plain(cipherInOut, plain1);}
+void Afseal::multiply(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2){
+    vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
+    vector<Ciphertext>::iterator c2 = cipherV2.begin();
+    for(; c1 != cipherVInOut.end(), c2 != cipherV2.end(); c1++, c2++){
+            evaluator->multiply(*c1, *c2);}}
+void Afseal::multiply(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2){
+    vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
+    vector<Plaintext>::iterator p2 = plainV2.begin();
+    for(; c1 != cipherVInOut.end(), p2 != plainV2.end(); c1++, p2++){
+        evaluator->multiply_plain(*c1, *p2);}}
+void Afseal::multiply(vector<Ciphertext>& cipherV, Ciphertext& cipherOut){
+  evaluator->multiply_many(cipherV, *relinKey, cipherOut);} 
 
 
-
+// ROTATION
+void Afseal::rotate(Ciphertext c1, int k){
+    evaluator->rotate_rows(c1, k, *galKeys);}
+void Afseal::rotate(vector<Ciphertext>& cipherV, int k){
+    for (Ciphertext& c:cipherV){evaluator->rotate_rows(c, k, *galKeys);}}
+    
 // ------------------------------------- I/O ----------------------------------
 // SAVE CONTEXT
 bool Afseal::saveContext(string fileName){
