@@ -151,8 +151,9 @@ class Afseal{
          * @param[in] 
          * @return Void.
          */
-        void ContextGen(long p, long m = 2048, long sec=128,
-                                bool flagBatching=false);
+        void ContextGen(long p, long m = 2048, long base = 2, long sec=128,
+                        int intDigits = 64, int fracDigits = 32,
+                        bool flagBatching=false);
 
         // KEY GENERATION
         /**
@@ -281,6 +282,20 @@ class Afseal{
         void add(vector<Ciphertext>& cipherV, Ciphertext& cipherOut);
         void add(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2);
         void add(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2);
+
+        // SUBSTRACTION
+        /**
+         * @brief Substract second ciphertext to the first ciphertext.
+         * @param[in,out] cipher1 First SEAL ciphertext.
+         * @param[in] cipher2 Second SEAL ciphertext, substracted to the first.
+         * @return Void.
+         */
+        void sub(Ciphertext& cipher1, Ciphertext& cipher2);
+        void sub(Ciphertext& cipher1, Plaintext& plain2);
+        void sub(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2);
+        void sub(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2);
+        
+
         // MULTIPLICATION
         /**
          * @brief Multiply first ciphertext by the second ciphertext.

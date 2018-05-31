@@ -31,7 +31,7 @@
   *  --------------------------------------------------------------------
   */
 
-#include <math.h>       /* pow */ 
+#include <math.h>       /* pow */
 #include <fstream>      /* file management */
 
 #include "Afseal.h"
@@ -52,7 +52,8 @@ Afseal::~Afseal(){}
 
 // ------------------------------ CRYPTOGRAPHY --------------------------------
 // CONTEXT GENERATION
-void Afseal::ContextGen(long p, long m, long sec, bool f_Batch){
+void Afseal::ContextGen(long p, long m, long base, long sec, 
+                        int intDigits, int fracDigits, bool f_Batch){
 
     EncryptionParameters parms;
 
@@ -70,6 +71,11 @@ void Afseal::ContextGen(long p, long m, long sec, bool f_Batch){
     parms.set_plain_modulus(p);
     this->context = new SEALContext(parms);
 
+    // Codec
+    this->intEncoder = new IntegerEncoder((*context).plain_modulus(), base);
+    this->fracEncoder = new FractionalEncoder((*context).plain_modulus(),
+              (*context).poly_modulus(), intDigits, fracDigits, base);
+
     // Create Evaluator Key
     this->evaluator=new Evaluator(*context);
     if(f_Batch){
@@ -80,7 +86,7 @@ void Afseal::ContextGen(long p, long m, long sec, bool f_Batch){
         this->crtBuilder=new PolyCRTBuilder(*context);
     }
 }
-
+ 
 
 // KEY GENERATION
 void Afseal::KeyGen(){
@@ -169,7 +175,7 @@ void Afseal::decrypt(Ciphertext& cipher1, vector<int64_t>& valueVOut){
 }
 
 // ---------------------------------- CODEC -----------------------------------
-// ENCODE 
+// ENCODE
 Plaintext Afseal::encode(int64_t& value1) {
     Plaintext plain1 = intEncoder->encode(value1);  return plain1;}
 Plaintext Afseal::encode(double& value1) {
@@ -265,6 +271,22 @@ void Afseal::add(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2){
 void Afseal::add(vector<Ciphertext>& cipherV, Ciphertext& cipherOut){
   evaluator->add_many(cipherV, cipherOut);}
 
+// SUBSTRACTION
+void Afseal::sub(Ciphertext& cipherInOut, Ciphertext& cipher2){
+    evaluator->sub(cipherInOut, cipher2);}
+void Afseal::sub(Ciphertext& cipherInOut, Plaintext& plain2){
+    evaluator->sub_plain(cipherInOut, plain2);}
+void Afseal::sub(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2){
+    vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
+    vector<Ciphertext>::iterator c2 = cipherV2.begin();
+    for(; c1 != cipherVInOut.end(), c2 != cipherV2.end(); c1++, c2++){
+            evaluator->sub(*c1, *c2);}}
+void Afseal::sub(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2){
+    vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
+    vector<Plaintext>::iterator p2 = plainV2.begin();
+    for(; c1 != cipherVInOut.end(), p2 != plainV2.end(); c1++, p2++){
+        evaluator->sub_plain(*c1, *p2);}}
+
 // MULTIPLICATION
 void Afseal::multiply(Ciphertext& cipherInOut, Ciphertext& cipher2){
   evaluator->multiply(cipherInOut, cipher2);}
@@ -281,7 +303,7 @@ void Afseal::multiply(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plain
     for(; c1 != cipherVInOut.end(), p2 != plainV2.end(); c1++, p2++){
         evaluator->multiply_plain(*c1, *p2);}}
 void Afseal::multiply(vector<Ciphertext>& cipherV, Ciphertext& cipherOut){
-  evaluator->multiply_many(cipherV, *relinKey, cipherOut);} 
+  evaluator->multiply_many(cipherV, *relinKey, cipherOut);}
 
 
 // ROTATION
@@ -289,7 +311,7 @@ void Afseal::rotate(Ciphertext c1, int k){
     evaluator->rotate_rows(c1, k, *galKeys);}
 void Afseal::rotate(vector<Ciphertext>& cipherV, int k){
     for (Ciphertext& c:cipherV){evaluator->rotate_rows(c, k, *galKeys);}}
-    
+
 // ------------------------------------- I/O ----------------------------------
 // SAVE CONTEXT
 bool Afseal::saveContext(string fileName){
@@ -327,14 +349,14 @@ long Afseal::relinBitCount(){return this->relinKey->decomposition_bit_count();}
 // GETTERS
 SecretKey Afseal::getsecretKey()	 {return *(this->secretKey);}
 PublicKey Afseal::getpublicKey()	 {return *(this->publicKey);}
-EvaluationKeys Afseal::getrelinKey() {return *(this->relinKey);} 
+EvaluationKeys Afseal::getrelinKey() {return *(this->relinKey);}
 int Afseal::getm()          {return this->m;}
 int Afseal::getp()          {return this->p;}
 int Afseal::getnSlots()     {return this->crtBuilder->slot_count();}
 // SETTERS
-void Afseal::setpublicKey(PublicKey& pubKey)   	 
+void Afseal::setpublicKey(PublicKey& pubKey)
     {this->publicKey = new PublicKey (pubKey);}
-void Afseal::setsecretKey(SecretKey& secKey)	    
+void Afseal::setsecretKey(SecretKey& secKey)
     {this->secretKey = new SecretKey (secKey);}
 void Afseal::setrelinKey(EvaluationKeys& evKey)
     {this->relinKey = new EvaluationKeys(evKey);}
