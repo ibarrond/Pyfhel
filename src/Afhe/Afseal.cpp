@@ -48,7 +48,20 @@ Afseal::Afseal(Afseal &otherAfseal){
     this->p =            otherAfseal.getp();
 }
 
-Afseal::~Afseal(){}
+Afseal::~Afseal(){
+    delete context;
+    delete intEncoder;
+    delete fracEncoder;
+    delete keyGenObj;
+    delete secretKey;
+    delete publicKey;
+    delete relinKey;
+    delete galKeys;
+    delete encryptor;
+    delete evaluator;
+    delete decryptor;
+    delete crtBuilder; 
+}
 
 // ------------------------------ CRYPTOGRAPHY --------------------------------
 // CONTEXT GENERATION
@@ -307,10 +320,25 @@ void Afseal::multiply(vector<Ciphertext>& cipherV, Ciphertext& cipherOut){
 
 
 // ROTATION
-void Afseal::rotate(Ciphertext c1, int k){
-    evaluator->rotate_rows(c1, k, *galKeys);}
-void Afseal::rotate(vector<Ciphertext>& cipherV, int k){
+void Afseal::rotate(Ciphertext& cipher1, int& k){
+    evaluator->rotate_rows(cipher1, k, *galKeys);}
+void Afseal::rotate(vector<Ciphertext>& cipherV, int& k){
     for (Ciphertext& c:cipherV){evaluator->rotate_rows(c, k, *galKeys);}}
+
+
+// POLYNOMIALS
+void Afseal::exponentiate(Ciphertext cipher1, uint64_t& expon){
+    evaluator->exponentiate(cipher1, expon, *relinKey);}
+void Afseal::exponentiate(vector<Ciphertext>& cipherV, uint64_t& expon){
+    for (Ciphertext& c:cipherV){evaluator->exponentiate(c, expon, *relinKey);}}
+
+void Afseal::polyEval(Ciphertext cipher1, vector<int64_t>& coeffPoly){
+    Ciphertext res; encryptor->encrypt();
+    for (int64_t coeff: coeffPoly){
+        evaluator->multiply(res, intEncoder->encode(coeff));
+        evaluator->add_plain(cipher1, intEncoder->encode(coeff));
+    }
+}
 
 // ------------------------------------- I/O ----------------------------------
 // SAVE CONTEXT
