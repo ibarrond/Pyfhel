@@ -246,9 +246,9 @@ class Afseal{
 
 
         // -------------------------- RELINEARIZATION -------------------------
+        void galoisKeyGen(int& bitCount);
         void relinKeyGen(int& bitCount);
         void relinearize(Ciphertext& cipher1);
-        void galoisKeyGen(int& bitCount);
 
 
         // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
@@ -309,16 +309,6 @@ class Afseal{
         void multiply(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2);
         void multiply(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2);
 
-        // COMPARE EQUALS
-        /**
-         * @brief Compare ciphertext c1 and ciphertext c2.
-         * @param[in] c1 SEAL Ciphertext.
-         * @param[in] c2 SEAL Ciphertext.
-         * @param[in] comparePkeys if true then keys will be compared.
-         * @return BOOL with the comparison c1 == c2
-         */
-        bool equalsTo(Ciphertext c1, Ciphertext c2, bool comparePkeys=true);
-
         // ROTATE
         /**
          * @brief Rotate ciphertext by k spaces.
@@ -327,26 +317,20 @@ class Afseal{
          * @param[in] k number of spaces to rotate
          * @return Void.
          */
-        void rotate(Ciphertext c1, int k);
-        void rotate(vector<Ciphertext>& cipherV, int k);
-        
-        // SHIFT
-        /**
-         * @brief Rotate ciphertext by c spaces.
-         * Overflowing values dissappear
-         * @param[in,out] c1 SEAL Ciphertext  whose values get rotated.
-         * @param[in] c number of spaces to rotate
-         * @return Void.
-         */
-        void shift(Ciphertext c1, long c);
+        void rotate(Ciphertext& cipher1, int& k);
+        void rotate(vector<Ciphertext>& cipherV, int& k);
 
+
+        // POLYNOMIALS
         /**
          * @brief Compute polynomial over a cyphertext
          * @param[in] coeffPoly Vector of long coefficients for the polynomial
          * @param[in,out] c1 SEAL Ciphertext  whose values get applied the polynomial.
          * @return void.
          */
-        void polyEval(Ciphertext c1, vector<long> const& coeffPoly);
+        void exponentiate(Ciphertext cipher1, uint64_t& exponent);
+        void exponentiate(vector<Ciphertext>& cipherV, uint64_t& expon);
+        void polyEval(Ciphertext cipher1, vector<int64_t>& coeffPoly);
 
 
         // -------------------------------- I/O -------------------------------
