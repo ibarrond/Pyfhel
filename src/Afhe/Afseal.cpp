@@ -41,11 +41,27 @@ typedef vector<Ciphertext> vCipher_t;
 // ----------------------------- CLASS MANAGEMENT -----------------------------
 Afseal::Afseal(){}
 
-Afseal::Afseal(Afseal &otherAfseal){
-    this->secretKey =    new SecretKey(otherAfseal.getsecretKey());
-    this->publicKey =    new PublicKey(otherAfseal.getpublicKey());
-    this->m =            otherAfseal.getm();
-    this->p =            otherAfseal.getp();
+Afseal::Afseal(const Afseal &otherAfseal){
+    this->context =      new SEALContext(*(otherAfseal.context));
+
+    this->intEncoder =   new IntegerEncoder(*(otherAfseal.intEncoder));
+    this->fracEncoder =  new FractionalEncoder(*(otherAfseal.fracEncoder));
+
+    this->keyGenObj =    new KeyGenerator(*(this->context));
+    this->secretKey =    new SecretKey(*(otherAfseal.secretKey));
+    this->publicKey =    new PublicKey(*(otherAfseal.publicKey));
+    this->relinKey =     new EvaluationKeys(*(otherAfseal.relinKey));
+    this->galKeys =      new GaloisKeys(*(otherAfseal.galKeys));
+    
+    this->encryptor =    new Encryptor(*(otherAfseal.encryptor));
+    this->evaluator =    new Evaluator(*(otherAfseal.evaluator));
+    this->decryptor =    new Decryptor(*(otherAfseal.decryptor));
+    
+    this->crtBuilder =   new PolyCRTBuilder(*(otherAfseal.crtBuilder));
+
+    this->m =            otherAfseal.m;
+    this->p =            otherAfseal.p;
+    this->flagBatching = otherAfseal.flagBatching;
 }
 
 Afseal::~Afseal(){
@@ -72,8 +88,8 @@ void Afseal::ContextGen(long p, long m, long base, long sec,
 
     // m - cyclotomic polynomial exponent, must be power 2 in FV scheme
     bool m_is_pow2 = false;
-    for (float i = 10; i < 30; i++) {
-      if((float)(m)==pow(2, i)){m_is_pow2 = true;}}
+    for (double i = 10; i < 30; i++) {
+      if((double)(m)==pow(2, i)){m_is_pow2 = true;}}
     if(!m_is_pow2){throw invalid_argument("m must be power of 2 in SEAL");}
 
     // Context generation
@@ -327,18 +343,28 @@ void Afseal::rotate(vector<Ciphertext>& cipherV, int& k){
 
 
 // POLYNOMIALS
-void Afseal::exponentiate(Ciphertext cipher1, uint64_t& expon){
+void Afseal::exponentiate(Ciphertext& cipher1, uint64_t& expon){
     evaluator->exponentiate(cipher1, expon, *relinKey);}
 void Afseal::exponentiate(vector<Ciphertext>& cipherV, uint64_t& expon){
     for (Ciphertext& c:cipherV){evaluator->exponentiate(c, expon, *relinKey);}}
 
-void Afseal::polyEval(Ciphertext cipher1, vector<int64_t>& coeffPoly){
-    Ciphertext res; encryptor->encrypt();
+void Afseal::polyEval(Ciphertext& cipher1, vector<int64_t>& coeffPoly){
+    Ciphertext res;
+    evaluator->multiply_plain(cipher1, intEncoder->encode(coeffPoly[0]), res);
+    evaluator->add_plain(cipher1, intEncoder->encode(coeffPoly[1]));
+    coeffPoly.erase(coeffPoly.begin(), coeffPoly.begin()+1);
     for (int64_t coeff: coeffPoly){
-        evaluator->multiply(res, intEncoder->encode(coeff));
-        evaluator->add_plain(cipher1, intEncoder->encode(coeff));
-    }
-}
+        evaluator->multiply(res, cipher1);
+        evaluator->add_plain(cipher1, intEncoder->encode(coeff));}}
+
+void Afseal::polyEval(Ciphertext& cipher1, vector<double>& coeffPoly){
+    Ciphertext res;
+    evaluator->multiply_plain(cipher1, fracEncoder->encode(coeffPoly[0]), res);
+    evaluator->add_plain(cipher1, fracEncoder->encode(coeffPoly[1]));
+    coeffPoly.erase(coeffPoly.begin(), coeffPoly.begin()+1);
+    for (int64_t coeff: coeffPoly){
+        evaluator->multiply(res, cipher1);
+        evaluator->add_plain(cipher1, intEncoder->encode(coeff));}}
 
 // ------------------------------------- I/O ----------------------------------
 // SAVE CONTEXT

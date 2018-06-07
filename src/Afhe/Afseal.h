@@ -114,7 +114,7 @@ class Afseal{
 
 
     public:
-        // ----------------------- CLASS MANAGEMENT --------------------------
+        // ----------------------- CLASS MANAGEMENT ---------------------------
         /** @defgroup CLASS_MANAGEMENT Constructor, Copy and Destructor.
          *  @{
          */
@@ -127,8 +127,18 @@ class Afseal{
          * @brief Copy constructor.
          * @param[in] otherAfseal Afseal object to be copied
          */
-        Afseal(Afseal &otherAfseal);
-
+        Afseal(const Afseal &otherAfseal);
+        /**
+         * @brief Overwrites current Afseal instance by a deep copy of a 
+         *          given instance.
+         * @param[in] assign The Afseal instance to overwrite current instance
+         */
+        Afseal &operator =(const Afseal &assign) = default;
+        /**
+         * @brief Creates a new Afseal instance by moving a given instance.
+         * @param[in] source The Afseal to move from
+         */
+        Afseal(Afseal &&source) = default;
         /**
         * @brief Default destructor.
         */
@@ -328,10 +338,10 @@ class Afseal{
          * @param[in,out] c1 SEAL Ciphertext  whose values get applied the polynomial.
          * @return void.
          */
-        void exponentiate(Ciphertext cipher1, uint64_t& exponent);
+        void exponentiate(Ciphertext& cipher1, uint64_t& expon);
         void exponentiate(vector<Ciphertext>& cipherV, uint64_t& expon);
-        void polyEval(Ciphertext cipher1, vector<int64_t>& coeffPoly);
-
+        void polyEval(Ciphertext& cipher1, vector<int64_t>& coeffPoly);
+        void polyEval(Ciphertext& cipher1, vector<double>& coeffPoly);
 
         // -------------------------------- I/O -------------------------------
         // SAVE ENVIRONMENT
