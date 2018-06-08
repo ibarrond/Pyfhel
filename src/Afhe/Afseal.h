@@ -83,6 +83,11 @@ class Afseal{
         int p;                          /**< All operations are modulo p^r */
         int m;                          /**< Cyclotomic index */
 
+        int base;
+        int sec;
+        int intDigits;
+        int fracDigits;
+        
         bool flagBatching = false;      /**< Whether to use batching or not */
 
         /** @} ATTRIBUTES*/
