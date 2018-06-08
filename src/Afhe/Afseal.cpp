@@ -1,4 +1,3 @@
-
 /**
  * @file Afseal.cpp
  * --------------------------------------------------------------------
@@ -33,6 +32,7 @@
 
 #include <math.h>       /* pow */
 #include <fstream>      /* file management */
+#include <assert.h>     /* assert */
 
 #include "Afseal.h"
 
@@ -108,7 +108,7 @@ void Afseal::ContextGen(long p, long m, long base, long sec,
     // Create Evaluator Key
     this->evaluator=new Evaluator(*context);
     if(f_Batch){
-        if((*context).qualifiers().enable_batching){
+        if(!(*context).qualifiers().enable_batching){
             throw invalid_argument("p not prime | p-1 not multiple 2*m");
         }
         this->flagBatching=true;
@@ -367,11 +367,20 @@ void Afseal::polyEval(Ciphertext& cipher1, vector<double>& coeffPoly){
         evaluator->add_plain(cipher1, intEncoder->encode(coeff));}}
 
 // ------------------------------------- I/O ----------------------------------
-// SAVE CONTEXT
+// SAVE/RESTORE CONTEXT
 bool Afseal::saveContext(string fileName){
     bool res=1;
     try{
-
+        fstream keyFile(fileName+".aenv", fstream::in);
+        assert(keyFile.is_open());
+        context->parms().save(keyFile);
+        keyFile << base;
+        keyFile << sec;
+        keyFile << intDigits;
+        keyFile << fracDigits;
+        keyFile << flagBatching;
+        
+        keyFile.close();
     }
     catch(exception& e){
         res=0;
@@ -379,14 +388,31 @@ bool Afseal::saveContext(string fileName){
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
-// RESTORE CONTEXT
 bool Afseal::restoreContext(string fileName){
+    EncryptionParameters parms;
     bool res=1;
-    long m1, p1, r1;
-    vector<long> gens, ords;
+    try{        
+        fstream keyFile(fileName+".aenv", fstream::in);
+        assert(keyFile.is_open());
+        parms.load(keyFile);
+        keyFile >> base;
+        keyFile >> sec;
+        keyFile >> intDigits;
+        keyFile >> fracDigits;
+        keyFile >> flagBatching;
 
-    try{
-
+        this->context = new SEALContext(parms);
+        this->intEncoder = new IntegerEncoder((*context).plain_modulus(), base);
+        this->fracEncoder = new FractionalEncoder((*context).plain_modulus(),
+                (*context).poly_modulus(), intDigits, fracDigits, base);
+        this->evaluator=new Evaluator(*context);
+        if(flagBatching){
+            if(!(*context).qualifiers().enable_batching){
+                throw invalid_argument("p not prime | p-1 not multiple 2*m");
+            }
+            this->flagBatching=true;
+            this->crtBuilder=new PolyCRTBuilder(*context);
+        }
     }
     catch(exception& e){
         res=0;
@@ -394,6 +420,57 @@ bool Afseal::restoreContext(string fileName){
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
+// SAVE/RESTORE KEYS
+bool Afseal::saveContext(string fileName){
+    bool res=1;
+    try{
+        fstream keyFile(fileName+".aenv", fstream::in);
+        assert(keyFile.is_open());
+        context->parms().save(keyFile);
+        keyFile << base;
+        keyFile << sec;
+        keyFile << intDigits;
+        keyFile << fracDigits;
+        keyFile << flagBatching;
+        
+        keyFile.close();
+    }
+    catch(exception& e){
+        res=0;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::restorepublicKey(string fileName){
+    bool res=1;
+    try{        
+        fstream keyFile(fileName+".apk", fstream::in);
+        assert(keyFile.is_open());
+        parms.load(keyFile);
+        keyFile >> base;
+        keyFile >> sec;
+        keyFile >> intDigits;
+        keyFile >> fracDigits;
+        keyFile >> flagBatching;
+
+        this->context = new SEALContext(parms);
+        this->intEncoder = new IntegerEncoder((*context).plain_modulus(), base);
+        this->fracEncoder = new FractionalEncoder((*context).plain_modulus(),
+                (*context).poly_modulus(), intDigits, fracDigits, base);
+        this->evaluator=new Evaluator(*context);
+        if(flagBatching){
+            if(!(*context).qualifiers().enable_batching){
+                throw invalid_argument("p not prime | p-1 not multiple 2*m");
+            }
+            this->flagBatching=true;
+            this->crtBuilder=new PolyCRTBuilder(*context);
+        }
+    }
+    catch(exception& e){
+        res=0;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
 
 
 // --------------------------------- AUXILIARY --------------------------------
