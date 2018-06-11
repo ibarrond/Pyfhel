@@ -396,6 +396,13 @@ class Afseal{
          */
         bool restoresecretKey(string fileName);
 
+
+
+        bool saverelinKey(string fileName);
+
+        bool restorerelinKey(string fileName);
+
+
         /**
          * @brief Fills a vector with random values up to nSlots
          * @param[in] array vector to be filled with random values.

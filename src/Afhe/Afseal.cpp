@@ -371,16 +371,16 @@ void Afseal::polyEval(Ciphertext& cipher1, vector<double>& coeffPoly){
 bool Afseal::saveContext(string fileName){
     bool res=1;
     try{
-        fstream keyFile(fileName+".aenv", fstream::in);
-        assert(keyFile.is_open());
-        context->parms().save(keyFile);
-        keyFile << base;
-        keyFile << sec;
-        keyFile << intDigits;
-        keyFile << fracDigits;
-        keyFile << flagBatching;
+        fstream contextFile(fileName+".aenv", fstream::in);
+        assert(contextFile.is_open());
+        context->parms().save(contextFile);
+        contextFile << base;
+        contextFile << sec;
+        contextFile << intDigits;
+        contextFile << fracDigits;
+        contextFile << flagBatching;
         
-        keyFile.close();
+        contextFile.close();
     }
     catch(exception& e){
         res=0;
@@ -392,14 +392,15 @@ bool Afseal::restoreContext(string fileName){
     EncryptionParameters parms;
     bool res=1;
     try{        
-        fstream keyFile(fileName+".aenv", fstream::in);
-        assert(keyFile.is_open());
-        parms.load(keyFile);
-        keyFile >> base;
-        keyFile >> sec;
-        keyFile >> intDigits;
-        keyFile >> fracDigits;
-        keyFile >> flagBatching;
+        fstream contextFile(fileName+".aenv", fstream::in);
+        assert(contextFile.is_open());
+        parms.load(contextFile);
+        contextFile >> base;
+        contextFile >> sec;
+        contextFile >> intDigits;
+        contextFile >> fracDigits;
+        contextFile >> flagBatching;
+        contextFile.close();
 
         this->context = new SEALContext(parms);
         this->intEncoder = new IntegerEncoder((*context).plain_modulus(), base);
@@ -421,21 +422,16 @@ bool Afseal::restoreContext(string fileName){
 }
 
 // SAVE/RESTORE KEYS
-bool Afseal::saveContext(string fileName){
+bool Afseal::savepublicKey(string fileName){
     bool res=1;
-    try{
-        fstream keyFile(fileName+".aenv", fstream::in);
+    try{fstream keyFile(fileName+".apk", fstream::in);
         assert(keyFile.is_open());
-        context->parms().save(keyFile);
-        keyFile << base;
-        keyFile << sec;
-        keyFile << intDigits;
-        keyFile << fracDigits;
-        keyFile << flagBatching;
+        publicKey->save(keyFile);
         
         keyFile.close();
     }
     catch(exception& e){
+        std::cout << "Afseal ERROR: PublicKey could not be saved";
         res=0;
     }
     return res;                                 // 1 if all OK, 0 otherwise
@@ -446,25 +442,71 @@ bool Afseal::restorepublicKey(string fileName){
     try{        
         fstream keyFile(fileName+".apk", fstream::in);
         assert(keyFile.is_open());
-        parms.load(keyFile);
-        keyFile >> base;
-        keyFile >> sec;
-        keyFile >> intDigits;
-        keyFile >> fracDigits;
-        keyFile >> flagBatching;
+        this->publicKey = new PublicKey();
+        this->publicKey->load(keyFile);
+        this->encryptor=new Encryptor(*context, *publicKey);
+        keyFile.close();
+    }
+    catch(exception& e){
+        res=0;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
 
-        this->context = new SEALContext(parms);
-        this->intEncoder = new IntegerEncoder((*context).plain_modulus(), base);
-        this->fracEncoder = new FractionalEncoder((*context).plain_modulus(),
-                (*context).poly_modulus(), intDigits, fracDigits, base);
-        this->evaluator=new Evaluator(*context);
-        if(flagBatching){
-            if(!(*context).qualifiers().enable_batching){
-                throw invalid_argument("p not prime | p-1 not multiple 2*m");
-            }
-            this->flagBatching=true;
-            this->crtBuilder=new PolyCRTBuilder(*context);
-        }
+bool Afseal::savesecretKey(string fileName){
+    bool res=1;
+    try{fstream keyFile(fileName+".ask", fstream::in);
+        assert(keyFile.is_open());
+        secretKey->save(keyFile);
+        
+        keyFile.close();
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: PublicKey could not be saved";
+        res=0;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::restoresecretKey(string fileName){
+    bool res=1;
+    try{        
+        fstream keyFile(fileName+".ask", fstream::in);
+        assert(keyFile.is_open());
+        this->secretKey = new SecretKey();
+        this->secretKey->load(keyFile);
+        this->decryptor=new Decryptor(*context, *secretKey);
+        keyFile.close();
+    }
+    catch(exception& e){
+        res=0;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::saverelinKey(string fileName){
+    bool res=1;
+    try{fstream keyFile(fileName+".ark", fstream::in);
+        assert(keyFile.is_open());
+        relinKey->save(keyFile);
+        
+        keyFile.close();
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: PublicKey could not be saved";
+        res=0;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::restorerelinKey(string fileName){
+    bool res=1;
+    try{        
+        fstream keyFile(fileName+".ark", fstream::in);
+        assert(keyFile.is_open());
+        this->relinKey = new EvaluationKeys();
+        this->relinKey->load(keyFile);
+        keyFile.close();
     }
     catch(exception& e){
         res=0;
