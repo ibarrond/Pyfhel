@@ -43,7 +43,7 @@
 #include <random>
 #include <limits>
 
-#include "../SEAL/SEAL/seal.h"
+#include "SEAL/seal.h"
 
 using namespace std;
 using namespace seal;
