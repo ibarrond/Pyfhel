@@ -431,7 +431,7 @@ bool Afseal::savepublicKey(string fileName){
         keyFile.close();
     }
     catch(exception& e){
-        std::cout << "Afseal ERROR: PublicKey could not be saved";
+        std::cout << "Afseal ERROR: public key could not be saved";
         res=0;
     }
     return res;                                 // 1 if all OK, 0 otherwise
@@ -448,6 +448,7 @@ bool Afseal::restorepublicKey(string fileName){
         keyFile.close();
     }
     catch(exception& e){
+        std::cout << "Afseal ERROR: public key could not be loaded";
         res=0;
     }
     return res;                                 // 1 if all OK, 0 otherwise
@@ -462,7 +463,7 @@ bool Afseal::savesecretKey(string fileName){
         keyFile.close();
     }
     catch(exception& e){
-        std::cout << "Afseal ERROR: PublicKey could not be saved";
+        std::cout << "Afseal ERROR: secret key could not be saved";
         res=0;
     }
     return res;                                 // 1 if all OK, 0 otherwise
@@ -479,6 +480,7 @@ bool Afseal::restoresecretKey(string fileName){
         keyFile.close();
     }
     catch(exception& e){
+        std::cout << "Afseal ERROR: secret key could not be saved";
         res=0;
     }
     return res;                                 // 1 if all OK, 0 otherwise
@@ -493,7 +495,7 @@ bool Afseal::saverelinKey(string fileName){
         keyFile.close();
     }
     catch(exception& e){
-        std::cout << "Afseal ERROR: PublicKey could not be saved";
+        std::cout << "Afseal ERROR: relinearization key could not be saved";
         res=0;
     }
     return res;                                 // 1 if all OK, 0 otherwise
@@ -509,6 +511,38 @@ bool Afseal::restorerelinKey(string fileName){
         keyFile.close();
     }
     catch(exception& e){
+        std::cout << "Afseal ERROR: relinearization key could not be loaded";
+        res=0;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::savegalKey(string fileName){
+    bool res=1;
+    try{fstream keyFile(fileName+".agk", fstream::in);
+        assert(keyFile.is_open());
+        galKeys->save(keyFile);
+        
+        keyFile.close();
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: Galois could not be saved";
+        res=0;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::restoregalKey(string fileName){
+    bool res=1;
+    try{        
+        fstream keyFile(fileName+".agk", fstream::in);
+        assert(keyFile.is_open());
+        this->galKeys = new GaloisKeys();
+        this->galKeys->load(keyFile);
+        keyFile.close();
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: Galois could not be loaded";
         res=0;
     }
     return res;                                 // 1 if all OK, 0 otherwise
