@@ -81,11 +81,15 @@ Afseal::~Afseal(){
 
 // ------------------------------ CRYPTOGRAPHY --------------------------------
 // CONTEXT GENERATION
-void Afseal::ContextGen(long p, long m, long base, long sec, 
-                        int intDigits, int fracDigits, bool f_Batch){
-
+void Afseal::ContextGen(long new_p, long new_m, long new_base, long new_sec,
+						int new_intDigits, int new_fracDigits, bool new_flagBatching){
+	
     EncryptionParameters parms;
-
+	this->p = new_p;    	this->m = new_m;
+	this->base = new_base;	this->sec = new_sec;
+	this->intDigits = new_intDigits; 
+	this->fracDigits = new_fracDigits;
+	this->flagBatching = new_flagBatching;
     // m - cyclotomic polynomial exponent, must be power 2 in FV scheme
     bool m_is_pow2 = false;
     for (double i = 10; i < 30; i++) {
@@ -107,11 +111,10 @@ void Afseal::ContextGen(long p, long m, long base, long sec,
 
     // Create Evaluator Key
     this->evaluator=new Evaluator(*context);
-    if(f_Batch){
+    if(flagBatching){
         if(!(*context).qualifiers().enable_batching){
             throw invalid_argument("p not prime | p-1 not multiple 2*m");
         }
-        this->flagBatching=true;
         this->crtBuilder=new PolyCRTBuilder(*context);
     }
 }
@@ -244,11 +247,11 @@ void Afseal::decode(Plaintext& plain1, double& valueOut) {
 void Afseal::decode(Plaintext& plain1, vector<int64_t> &valueVOut) {
     crtBuilder->decompose(plain1, valueVOut);}
 void Afseal::decode(vector<Plaintext>& plainV, vector<int64_t> &valueVOut) {
-    for(Plaintext& p:plainV){
-        valueVOut.emplace_back(intEncoder->decode_int64(p));}}
+    for(Plaintext& pl:plainV){
+        valueVOut.emplace_back(intEncoder->decode_int64(pl));}}
 void Afseal::decode(vector<Plaintext>& plainV, vector<double> &valueVOut) {
-    for(Plaintext& p:plainV){
-        valueVOut.emplace_back(fracEncoder->decode(p));}}
+    for(Plaintext& pl:plainV){
+        valueVOut.emplace_back(fracEncoder->decode(pl));}}
 
 // NOISE MEASUREMENT
 int Afseal::noiseLevel(Ciphertext& cipher1) {
