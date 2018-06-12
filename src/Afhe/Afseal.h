@@ -402,8 +402,8 @@ class Afseal{
 
         bool restorerelinKey(string fileName);
 
-        bool Afseal::savegalKey(string fileName);
-        bool Afseal::restoregalKey(string fileName);
+        bool savegalKey(string fileName);
+        bool restoregalKey(string fileName);
         /**
          * @brief Fills a vector with random values up to nSlots
          * @param[in] array vector to be filled with random values.
