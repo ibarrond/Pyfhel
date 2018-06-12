@@ -61,6 +61,10 @@ Afseal::Afseal(const Afseal &otherAfseal){
 
     this->m =            otherAfseal.m;
     this->p =            otherAfseal.p;
+    this->base =         otherAfseal.base;
+    this->sec =          otherAfseal.sec;
+    this->intDigits =    otherAfseal.intDigits;
+    this->fracDigits =   otherAfseal.fracDigits;
     this->flagBatching = otherAfseal.flagBatching;
 }
 
@@ -179,9 +183,12 @@ void Afseal::encrypt(vector<double>& valueV, vector<Ciphertext>& cipherOut){
 
 
 //DECRYPTION
-Plaintext Afseal::decrypt(Ciphertext& cipher1) {
-    Plaintext plain1; decryptor->decrypt(cipher1, plain1);
-    return plain1;}
+vector<int64_t> Afseal::decrypt(Ciphertext& cipher1) {
+    Plaintext plain1;
+    vector<int64_t> valueVOut;
+    decryptor->decrypt(cipher1, plain1);
+    crtBuilder->decompose(plain1, valueVOut);
+    }
 void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1) {
     decryptor->decrypt(cipher1, plain1);}
 void Afseal::decrypt(Ciphertext& cipher1, int64_t& valueOut) {

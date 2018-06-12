@@ -218,7 +218,7 @@ class Afseal{
          * @param[in] cipher1 a Ciphertext object from SEAL.
          * @return Plaintext the resulting of decrypting the ciphertext, a plaintext.
          */
-        Plaintext decrypt(Ciphertext& cipher1);
+        vector<int64_t> decrypt(Ciphertext& cipher1);
         /**
          * @brief Decrypts the ciphertext using secKey as secret key and stores
          *         it in a provided Plaintext.
@@ -251,7 +251,7 @@ class Afseal{
         void encode(vector<int64_t> &values, Plaintext& plainOut);
         void encode(vector<int64_t> &values, vector<Plaintext>& plainVOut);
         void encode(vector<double> &values, vector<Plaintext>& plainVOut);
-
+        
         // DECODE 
         void decode(Plaintext& plain1, int64_t& valOut);
         void decode(Plaintext& plain1, double& valOut);
