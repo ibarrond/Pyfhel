@@ -6,7 +6,7 @@
 ##############################################################################################
 ##############################################################################################
 # 
-# DESCRIPTION: Makefile for Afhel project. Allows installation of this library as bot static &
+# DESCRIPTION: Makefile for Afhel project. Allows installation of this library as static and
 #              shared library, greatly simplifying its usage: this library can now be linked
 #              when compiling a program using the flag [-lafhel]. In addition, header Afhel.h 
 #              is installed in a public directory.
@@ -42,7 +42,7 @@
 
 
 $(info ----------------------------AFHEL MAKEFILE-----------------------------)
-$(info Afhel requires HElib, NTL version 10.0.0 or higher and GMP)
+$(info Afhel requires [HElib, SEAL, PALISADE], NTL <=10.0.0 and GMP <6.0.0)
 $(info For a list if all the available commands, run >make info)
 
 
@@ -54,9 +54,10 @@ $(info For a list if all the available commands, run >make info)
 
 #.................................. COMPILER & LINKER ........................................
 CC = g++
-CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
+CFLAGS = -g -O2 -std=c++11 -march=native -I/usr/local/include \
 	        -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
-	     -Wfatal-errors -Wshadow -Wall -fmax-errors=2
+	        -Wfatal-errors -Wshadow -Wall -fmax-errors=2 \
+
 	     
 
 # useful flags:
@@ -87,9 +88,9 @@ CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
 
 
 #.................................. LIBRARY ATTRIBUTES .......................................
-LIBNAME = afhel
+LIBNAME = seal
 	                                # Prefix 'lib' and extension '.la' are added later on
-VERSION = 1:0:0
+VERSION = 2:0:0
 	                                # Library version, independent from packet/repo version
 LIBDIR = /usr/local/lib
 	                                # Directory where library will be installed
@@ -100,7 +101,7 @@ INCLUDE_DIR = /usr/local/include
 # NOTE: NTL & GMP are distributed under LGPL (v2.1), they can be linked as dynamic libraries.
 GMP=-lgmp
 NTL=-lntl
-HELIB=-lfhe
+HELIB=-lhelib
 AFHEL=-l$(LIBNAME)
 LDLIBS = -L$(LIBDIR) $(NTL) $(GMP) $(HELIB) -lm
 
@@ -122,13 +123,13 @@ RPATH=-rpath $(LIBDIR)
 
 
 #...................................... HEADER FILES .........................................
-HEADER = Afhel.h
+HEADER = Afhel.h Afseal.h
 
 #...................................... SOURCE FILES .........................................
-SRC = Afhel.cpp
+SRC = Afseal.cpp
 
 #............................... LIBRARY INTERMEDIATE FILES ..................................
-LOBJ = Afhel.lo
+LOBJ = Afseal.lo
 
 #.................................. LIBRARY  FINAL FILES .....................................
 LIB_LA = lib$(LIBNAME).la
