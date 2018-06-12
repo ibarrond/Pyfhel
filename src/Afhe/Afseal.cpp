@@ -268,8 +268,8 @@ void Afseal::relinearize(Ciphertext& cipher1){
 void Afseal::galoisKeyGen(int& bitCount){
   if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
   if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
-  GaloisKeys galKeys;
-  keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
+  galKeys = new GaloisKeys();
+  keyGenObj->generate_galois_keys(bitCount, *galKeys);
 }
 
 // --------------------------------- OPERATIONS -------------------------------
