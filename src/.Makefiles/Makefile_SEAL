@@ -1,0 +1,203 @@
+###############################################################################
+###############################################################################
+#####################                                     #####################
+#####################            SEAL MAKEFILE            #####################
+#####################                                     #####################
+###############################################################################
+###############################################################################
+#
+# DESCRIPTION: Makefile for SEAL encryption library from Microsoft. Installs 
+#			   this library as a shared library, and simplifying its usage: 
+#              the lib can now be linked when compiling a program using the 
+#              flag [-lseal]. Plus,all header files (.h) are installed in a 
+#              folder called 'seal/'.In order to use the library in your own
+#              .cpp code, append at the top of the file:
+#                       #include <fhe/FHE.h>
+#
+#              This makefile also allows the compilation&linking of .cpp files
+#              . A file fname.cpp can be target of this recipe in order to 
+#			   create an executable:
+#                       make fname_x
+#
+#              Some configuration may be required in the Makefile variables to 
+#              accomodate the settings of a given OS. Our default is Ubuntu.
+#
+# AUTHOR: Alberto Ibarrondo (github @ibarrond)
+# DATE: 18/05/2018
+#   
+#   
+# LICENSE: GNU GPL v3
+#  
+#  This file is part of Pyfhel project
+#
+#  Pyfhel is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Pyfhel is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+
+$(info ---------------------- PYFHEL: SEAL MAKEFILE -----------------------)
+$(info Dependencies:)
+$(info  Pyfhel -> Afhel -> Afhelib    -> HElib    -> NTL & GMP)
+$(info                     Afpalisade -> PALISADE -> NTL & GMP)
+$(info                     Afseal     -> SEAL)
+
+
+##############################################################################################
+#                                   MAKEFILE VARIABLES                                       #
+##############################################################################################
+
+#.................................. LIBRARY ATTRIBUTES .......................................
+LIBNAME = seal
+	                                # Prefix 'lib' and extension '.la' are added later on
+VERSION = 2:3:0
+	                                # Library version, independent from packet/repo version
+PREFIX = /usr/local
+
+LIBDIR = $(PREFIX)/lib
+	                                # Directory where library will be installed
+INCLUDE_DIR = $(PREFIX)/include
+	                                # Directory where headers will be installed
+LDLIBS = -L$(LIBDIR) -lm
+
+
+#.............................. LIBRARY DOWNLOAD  .............................
+SEAL_DIR=SEAL_v2.3.0-4_Linux
+
+SEAL_URL=https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C\
+-751EF194CBE7/$(SEAL_DIR).tar.gz
+
+
+#............................. COMPILER & LINKER ..............................
+CC = g++
+CFLAGS = -g -O2 -std=c++11 -march=native -I/usr/local/include \
+	        -pthread -Wfatal-errors -Wshadow -Wall -fmax-errors=2 \
+
+#.................................  LIBTOOL  ..................................
+LIBTOOL=libtool
+	                # May not be installed(e.g.: sudo apt install libtool-bin)
+LIBTOOL_COMPILE =--mode=compile
+	                # Mode for prog/lib compilation. It uses $(CC) as compiler
+LIBTOOL_LINK=--mode=link
+	                # Mode for prog/lib linking. It uses $(CC) as linker
+LIBTOOL_INSTALL=--mode=install
+	                # Mode to install. It uses 'cp', recipe 'make install'
+LIBTOOL_UNINSTALL=--mode=uninstall
+	                # Mode to uninstall. It uses 'rm', recipe 'make uninstall'
+LIBTOOL_CLEAN=--mode=clean
+	                # Mode for cleaning. It uses 'rm', recipe 'make clean'
+RPATH=-rpath $(LIBDIR)
+
+
+#.................................. HEADER FILES ..............................
+HEADER = $(wildcard SEAL/seal/*.h) $(wildcard SEAL/seal/util/*.h)
+
+#.................................. SOURCE FILES ..............................
+SRC = $(wildcard SEAL/seal/*.cpp) $(wildcard SEAL/seal/util/*.cpp)
+TESTPROGS = Test_General_x
+
+#........................... LIBRARY INTERMEDIATE FILES .......................
+LOBJ = $(SRC:%.cpp=%.lo)
+
+#.............................. LIBRARY FINAL FILES ...........................
+LIB_LA = lib$(LIBNAME).la
+
+
+###############################################################################
+#                                  OBTAIN LIBRARY                             #
+###############################################################################
+
+download:
+	wget $(SEAL_URL)
+	tar xvf $(SEAL_DIR).tar.gz -C .
+
+
+###############################################################################
+#                               BUILD FHE LIBRARY                             #
+###############################################################################
+
+all: $(LIB_LA)
+
+# COMPILATION: Create each .lo object from the cpp source code and all headers
+%.lo: %.cpp $(HEADER)
+	$(LIBTOOL) $(LIBTOOL_COMPILE) $(CC) $(CFLAGS) -fpic -c $< 
+
+# LINKING: Merging all .lo objs into a single .la to use for static/shared libs
+$(LIB_LA): $(LOBJ)
+	$(LIBTOOL) $(LIBTOOL_LINK) $(CC) $(CFLAGS) -c -o $@ $^ $(RPATH) $(LDLIBS) \
+	-version-info $(VERSION)
+
+
+
+###############################################################################
+#                             INSTALL FHE LIBRARY                             #
+###############################################################################
+
+install: $(LIB_LA)
+	$(LIBTOOL) $(LIBTOOL_INSTALL) cp $(LIB_LA) $(LIBDIR)
+	ldconfig
+	cp -t $(INCLUDE_DIR)/$(LIBNAME) $(HEADER)
+	find $(INCLUDE_DIR)/$(LIBNAME) -name '*.h' -exec sed -i 's-"seal/-"-g' {} \
+
+linking:
+	$(eval $LIBLINK:=$(shell cd /usr/local/lib && ls libseal.so.??))
+	sudo ln -sf /usr/local/lib/$($LIBLINK) /usr/lib/$($LIBLINK)
+
+
+###############################################################################
+#                           CREATE BINARIES WITH SEAL                         #
+###############################################################################
+
+%_x: %.cpp
+	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS) $(SEAL)
+
+
+###############################################################################
+#                                TEST PROGRAMS                                #
+###############################################################################
+
+test: $(TESTPROGS)
+
+
+###############################################################################
+#                               UNINSTALL & CLEAN                             #
+###############################################################################
+
+uninstall: 
+	$(LIBTOOL) $(LIBTOOL_UNINSTALL) rm -f $(LIBDIR)/$(LIB_LA)
+	ldconfig
+	rm -rf $(INCLUDE_DIR)/$(HEADER)
+
+clean:
+	$(LIBTOOL) $(LIBTOOL_CLEAN) rm -f $(LIB_LA)
+	rm -rf .libs/ .deps/
+	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so
+
+
+
+##############################################################################################
+#                                        ADDITIONAL INFO                                     #
+##############################################################################################
+
+
+info:
+	: SEAL has no external dependencies
+	: Compilation flags are 'CFLAGS=$(CFLAGS)'
+	: Commands Available:
+	: * make - compile & link the library
+	: * make install - library available in the host. Requires root 
+	: * make check - test all functionalities
+	: * make fileName_x - Compile & Link binary filename.cpp with SEAL
+	: * make test - compile the tests for SEAL
+	: * make clean - remove all library files from the folder
+	: * make uninstall - remove library from host. Requires root
+	
