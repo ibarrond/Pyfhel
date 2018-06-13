@@ -188,6 +188,7 @@ vector<int64_t> Afseal::decrypt(Ciphertext& cipher1) {
     vector<int64_t> valueVOut;
     decryptor->decrypt(cipher1, plain1);
     crtBuilder->decompose(plain1, valueVOut);
+	return valueVOut;
     }
 void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1) {
     decryptor->decrypt(cipher1, plain1);}

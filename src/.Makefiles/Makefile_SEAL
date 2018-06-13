@@ -52,11 +52,11 @@ $(info                     Afpalisade -> PALISADE -> NTL & GMP)
 $(info                     Afseal     -> SEAL)
 
 
-##############################################################################################
-#                                   MAKEFILE VARIABLES                                       #
-##############################################################################################
+###############################################################################
+#                            MAKEFILE VARIABLES                               #
+###############################################################################
 
-#.................................. LIBRARY ATTRIBUTES .......................................
+#........................... LIBRARY ATTRIBUTES ...............................
 LIBNAME = seal
 	                                # Prefix 'lib' and extension '.la' are added later on
 VERSION = 2:3:0
@@ -73,14 +73,13 @@ LDLIBS = -L$(LIBDIR) -lm
 #.............................. LIBRARY DOWNLOAD  .............................
 SEAL_DIR=SEAL_v2.3.0-4_Linux
 
-SEAL_URL=https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C\
--751EF194CBE7/$(SEAL_DIR).tar.gz
+SEAL_URL="https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/$(SEAL_DIR).tar.gz"
 
 
 #............................. COMPILER & LINKER ..............................
 CC = g++
 CFLAGS = -g -O2 -std=c++11 -march=native -I/usr/local/include \
-	        -pthread -Wfatal-errors -Wshadow -Wall -fmax-errors=2 \
+	        -pthread -Wfatal-errors -Wshadow -fmax-errors=2 \
 
 #.................................  LIBTOOL  ..................................
 LIBTOOL=libtool
@@ -99,14 +98,15 @@ RPATH=-rpath $(LIBDIR)
 
 
 #.................................. HEADER FILES ..............................
-HEADER = $(wildcard SEAL/seal/*.h) $(wildcard SEAL/seal/util/*.h)
+HEADER = $(wildcard SEAL/seal/*.h) 
+HEADER_UTIL = $(wildcard SEAL/seal/util/*.h)
 
 #.................................. SOURCE FILES ..............................
 SRC = $(wildcard SEAL/seal/*.cpp) $(wildcard SEAL/seal/util/*.cpp)
 TESTPROGS = Test_General_x
 
 #........................... LIBRARY INTERMEDIATE FILES .......................
-LOBJ = $(SRC:%.cpp=%.lo)
+LOBJ = $(wildcard ./*.lo)
 
 #.............................. LIBRARY FINAL FILES ...........................
 LIB_LA = lib$(LIBNAME).la
@@ -116,19 +116,25 @@ LIB_LA = lib$(LIBNAME).la
 #                                  OBTAIN LIBRARY                             #
 ###############################################################################
 
-download:
-	wget $(SEAL_URL)
-	tar xvf $(SEAL_DIR).tar.gz -C .
 
 
 ###############################################################################
 #                               BUILD FHE LIBRARY                             #
 ###############################################################################
 
-all: $(LIB_LA)
+all: download $(LIB_LA)
+
+# OBTAINING LIBRARY: download and extract
+download:
+	wget $(SEAL_URL)
+	tar xvf $(SEAL_DIR).tar.gz -C ..
+	rm $(SEAL_DIR).tar.gz
+	find ./SEAL/seal/util -name '*.*' -exec sed -i 's-"seal/-"../-g' {} \;
+	find ./SEAL/seal/util -name '*.*' -exec sed -i 's-"../util/-"-g' {} \;
+	find ./SEAL/seal -name '*.*' -exec sed -i 's-"seal/-"-g' {} \;
 
 # COMPILATION: Create each .lo object from the cpp source code and all headers
-%.lo: %.cpp $(HEADER)
+%.lo: %.cpp $(HEADER) $(HEADER_UTIL)
 	$(LIBTOOL) $(LIBTOOL_COMPILE) $(CC) $(CFLAGS) -fpic -c $< 
 
 # LINKING: Merging all .lo objs into a single .la to use for static/shared libs
@@ -143,13 +149,17 @@ $(LIB_LA): $(LOBJ)
 ###############################################################################
 
 install: $(LIB_LA)
+	@-mkdir $(LIBDIR)
+	@-mkdir $(INCLUDE_DIR)/$(LIBNAME)
+	@-mkdir $(INCLUDE_DIR)/$(LIBNAME)/util
 	$(LIBTOOL) $(LIBTOOL_INSTALL) cp $(LIB_LA) $(LIBDIR)
 	ldconfig
 	cp -t $(INCLUDE_DIR)/$(LIBNAME) $(HEADER)
-	find $(INCLUDE_DIR)/$(LIBNAME) -name '*.h' -exec sed -i 's-"seal/-"-g' {} \
+	cp -t $(INCLUDE_DIR)/$(LIBNAME)/util $(HEADER_UTIL)
+
 
 linking:
-	$(eval $LIBLINK:=$(shell cd /usr/local/lib && ls libseal.so.??))
+	$(eval $LIBLINK:=$(shell cd /usr/local/lib && ls libseal.so.?))
 	sudo ln -sf /usr/local/lib/$($LIBLINK) /usr/lib/$($LIBLINK)
 
 
@@ -175,7 +185,7 @@ test: $(TESTPROGS)
 uninstall: 
 	$(LIBTOOL) $(LIBTOOL_UNINSTALL) rm -f $(LIBDIR)/$(LIB_LA)
 	ldconfig
-	rm -rf $(INCLUDE_DIR)/$(HEADER)
+	rm -rf $(INCLUDE_DIR)/$(LIBNAME)
 
 clean:
 	$(LIBTOOL) $(LIBTOOL_CLEAN) rm -f $(LIB_LA)
