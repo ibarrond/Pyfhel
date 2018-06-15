@@ -57,90 +57,80 @@ $(info                     Afseal     -> SEAL)
 ###############################################################################
 
 #........................... LIBRARY ATTRIBUTES ...............................
-LIBNAME = seal
-						# Prefix 'lib' and extension '.la' are added later on
+LIB_NAME = seal
+	                  # Prefix 'lib' and extension '.la' are added later on
 VERSION = 2:3:0
-						# Library version, independent from packet/repo version
+	                  # Library version, independent from packet/repo version
 PREFIX = /usr/local
 
-LIBDIR = $(PREFIX)/lib
-						# Directory where library will be installed
+LIB_DIR = $(PREFIX)/lib
+	                  # Directory where library will be installed
 INCLUDE_DIR = $(PREFIX)/include
-						# Directory where headers will be installed
-LDLIBS = -L$(LIBDIR) -lm
-
+	                  # Directory where headers will be installed
+SRC_DIR = SEAL/seal
 
 #.............................. LIBRARY DOWNLOAD  .............................
-SEAL_DIR=SEAL_v2.3.0-4_Linux
-
-SEAL_URL="https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/$(SEAL_DIR).tar.gz"
+SEAL_URL = "https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_v2.3.0-4_Linux.tar.gz"
+SEAL_ROOT_DIR = SEAL_v2.3.0-4_Linux
 
 
 #............................. COMPILER & LINKER ..............................
 CC = g++
-CFLAGS = -g -O2 -std=c++11 -march=native -I/usr/local/include \
-	        -pthread -Wfatal-errors -Wshadow -fmax-errors=2 \
-
-#.................................  LIBTOOL  ..................................
-LIBTOOL=libtool
-	                # May not be installed(e.g.: sudo apt install libtool-bin)
-LIBTOOL_COMPILE =--mode=compile
-	                # Mode for prog/lib compilation. It uses $(CC) as compiler
-LIBTOOL_LINK=--mode=link
-	                # Mode for prog/lib linking. It uses $(CC) as linker
-LIBTOOL_INSTALL=--mode=install
-	                # Mode to install. It uses 'cp', recipe 'make install'
-LIBTOOL_UNINSTALL=--mode=uninstall
-	                # Mode to uninstall. It uses 'rm', recipe 'make uninstall'
-LIBTOOL_CLEAN=--mode=clean
-	                # Mode for cleaning. It uses 'rm', recipe 'make clean'
-RPATH=-rpath $(LIBDIR)
-
-
-#.................................. HEADER FILES ..............................
-HEADER = $(wildcard SEAL/seal/*.h) 
-HEADER_UTIL = $(wildcard SEAL/seal/util/*.h)
+CFLAGS = -g -O2 -std=c++11 -march=native -I$(SRC_DIR) -I$(INCLUDE_DIR) \
+	        -pthread -Wfatal-errors -Wshadow -fmax-errors=2
+LFLAGS = -L$(LIB_DIR) -lm
 
 #.................................. SOURCE FILES ..............................
-SRC = $(wildcard SEAL/seal/*.cpp) $(wildcard SEAL/seal/util/*.cpp)
-TESTPROGS = Test_General_x
+SRC = $(wildcard $(SRC_DIR)/*.cpp)
+
+TESTPROG = SEALExamples/main_x
+
+#.................................. HEADER FILES ..............................
+HEADER = $(wildcard $(SRC_DIR)/*.h) 
 
 #........................... LIBRARY INTERMEDIATE FILES .......................
-LOBJ = $(wildcard ./*.lo)
+LOBJ = $(patsubst $(SRC_DIR)/%,%, $(SRC:%.cpp=%.lo))
 
 #.............................. LIBRARY FINAL FILES ...........................
-LIB_LA = lib$(LIBNAME).la
+LIB_LA = lib$(LIB_NAME).la
 
 
+
+
+
+all: $(LIB_LA)
 ###############################################################################
-#                                  OBTAIN LIBRARY                             #
+#                               BUILD FHE LIBRARY                             #
 ###############################################################################
 
+# OBTAINING LIBRARY: download and extract
+download:
+	wget $(SEAL_URL)
+	tar xf $(SEAL_ROOT_DIR).tar.gz -C ..
+	@rm $(SEAL_ROOT_DIR).tar.gz
+
+fixoriginal:
+	# Fixing errors in relative paths wrt. imports
+	@-cp $(SRC_DIR)/util/* $(SRC_DIR)
+	@find ./$(SRC_DIR) -name '*.*' -exec sed -i 's-"seal/-"-g' {} \;
+	@find ./$(SRC_DIR) -name '*.*' -exec sed -i 's-"util/-"-g' {} \;
+	# Creating config.h and copying it to src dir
+	@cd SEAL && ./configure >/dev/null
+	@cp ./SEAL/config.h ./$(SRC_DIR)/config.h
 
 
 ###############################################################################
 #                               BUILD FHE LIBRARY                             #
 ###############################################################################
 
-all: download $(LIB_LA)
-
-# OBTAINING LIBRARY: download and extract
-download:
-	wget $(SEAL_URL)
-	tar xvf $(SEAL_DIR).tar.gz -C ..
-	rm $(SEAL_DIR).tar.gz
-	find ./SEAL/seal/util -name '*.*' -exec sed -i 's-"seal/-"../-g' {} \;
-	find ./SEAL/seal/util -name '*.*' -exec sed -i 's-"../util/-"-g' {} \;
-	find ./SEAL/seal -name '*.*' -exec sed -i 's-"seal/-"-g' {} \;
-
 # COMPILATION: Create each .lo object from the cpp source code and all headers
-%.lo: %.cpp $(HEADER) $(HEADER_UTIL)
-	$(LIBTOOL) $(LIBTOOL_COMPILE) $(CC) $(CFLAGS) -fpic -c $< 
+%.lo: $(SRC_DIR)/%.cpp $(HEADER)
+	@libtool --mode=compile $(CC) $(CFLAGS) -shared -DHAVE_CONFIG_H -c $<
 
 # LINKING: Merging all .lo objs into a single .la to use for static/shared libs
 $(LIB_LA): $(LOBJ)
-	$(LIBTOOL) $(LIBTOOL_LINK) $(CC) $(CFLAGS) -c -o $@ $^ $(RPATH) $(LDLIBS) \
-	-version-info $(VERSION)
+	@libtool --mode=link $(CC) $(CFLAGS) -o $@ $^ -rpath $(LIB_DIR) \
+	 -version-info $(VERSION)
 
 
 
@@ -149,14 +139,13 @@ $(LIB_LA): $(LOBJ)
 ###############################################################################
 
 install: $(LIB_LA)
-	@-mkdir $(LIBDIR)
-	@-mkdir $(INCLUDE_DIR)/$(LIBNAME)
-	@-mkdir $(INCLUDE_DIR)/$(LIBNAME)/util
-	$(LIBTOOL) $(LIBTOOL_INSTALL) cp $(LIB_LA) $(LIBDIR)
+	# Installin library in $(LIB_DIR)
+	@libtool --mode=install cp $(LIB_LA) $(LIB_DIR)
 	ldconfig
-	cp -t $(INCLUDE_DIR)/$(LIBNAME) $(HEADER)
-	cp -t $(INCLUDE_DIR)/$(LIBNAME)/util $(HEADER_UTIL)
-
+	# Creating folders for header files
+	@-mkdir -p $(INCLUDE_DIR)/$(LIB_NAME)
+	# Copying Header files to $(INCLUDE_DIR)
+	@-cp -t $(INCLUDE_DIR)/$(LIB_NAME) $(HEADER)
 
 linking:
 	$(eval $LIBLINK:=$(shell cd /usr/local/lib && ls libseal.so.?))
@@ -168,35 +157,35 @@ linking:
 ###############################################################################
 
 %_x: %.cpp
-	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS) $(SEAL)
+	$(CC) $(CFLAGS) -o $@ $< $(LFLAGS) -l$(LIB_NAME)
 
 
 ###############################################################################
 #                                TEST PROGRAMS                                #
 ###############################################################################
 
-test: $(TESTPROGS)
-
+test: $(TESTPROG)
+	mv $(TESTPROG) ../Demos_Tests/Demo_SEAL_x
 
 ###############################################################################
 #                               UNINSTALL & CLEAN                             #
 ###############################################################################
 
 uninstall: 
-	$(LIBTOOL) $(LIBTOOL_UNINSTALL) rm -f $(LIBDIR)/$(LIB_LA)
+	libtool --mode=uninstall rm -f $(LIB_DIR)/$(LIB_LA)
 	ldconfig
-	rm -rf $(INCLUDE_DIR)/$(LIBNAME)
+	rm -rf $(INCLUDE_DIR)/$(LIB_NAME)
 
 clean:
-	$(LIBTOOL) $(LIBTOOL_CLEAN) rm -f $(LIB_LA)
+	libtool --mode=clean rm -f $(LIB_LA)
 	rm -rf .libs/ .deps/
 	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so
 
 
 
-##############################################################################################
-#                                        ADDITIONAL INFO                                     #
-##############################################################################################
+###############################################################################
+#                                ADDITIONAL INFO                              #
+###############################################################################
 
 
 info:
