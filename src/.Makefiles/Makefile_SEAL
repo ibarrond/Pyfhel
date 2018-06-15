@@ -58,15 +58,15 @@ $(info                     Afseal     -> SEAL)
 
 #........................... LIBRARY ATTRIBUTES ...............................
 LIBNAME = seal
-	                                # Prefix 'lib' and extension '.la' are added later on
+						# Prefix 'lib' and extension '.la' are added later on
 VERSION = 2:3:0
-	                                # Library version, independent from packet/repo version
+						# Library version, independent from packet/repo version
 PREFIX = /usr/local
 
 LIBDIR = $(PREFIX)/lib
-	                                # Directory where library will be installed
+						# Directory where library will be installed
 INCLUDE_DIR = $(PREFIX)/include
-	                                # Directory where headers will be installed
+						# Directory where headers will be installed
 LDLIBS = -L$(LIBDIR) -lm
 
 

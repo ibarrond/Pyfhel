@@ -1,27 +1,29 @@
-##############################################################################################
-##############################################################################################
-###########################                                     ##############################
-###########################            Afhel Makefile           ##############################
-###########################                                     ##############################
-##############################################################################################
-##############################################################################################
+###############################################################################
+###############################################################################
+#####################                                     #####################
+#####################            Afhel Makefile           #####################
+#####################                                     #####################
+###############################################################################
+###############################################################################
 # 
-# DESCRIPTION: Makefile for Afhel project. Allows installation of this library as static and
-#              shared library, greatly simplifying its usage: this library can now be linked
-#              when compiling a program using the flag [-lafhel]. In addition, header Afhel.h 
-#              is installed in a public directory.
-#              In order to use Afhel library in your own .cpp code, use this formula:
+# DESCRIPTION: Makefile for Afhel. Allows installation of this library as both
+#			   static and shared library, greatly simplifying its usage: this 
+#              library can now be linked when compiling a program using the 
+#              flag [-lafhel]. In addition, header Afhel.h is installed in a 
+#			   public directory. In order to use Afhel library in your own .cpp 
+#			   code, use this formula:
 #                        #include <Afhel.h>
 #
-#              This makefile also allows the compilation&linking of .cpp files. A file called
-#              fname.cpp can be target if this recipe in order to create an executable:
+#              This makefile also allows the compilation&linking of .cpp files. 
+#              A file calledfname.cpp can be target if this recipe in order 
+#			   to create an executable:
 #                        make fname_x
 #
-#              Some configuration may be required in the Makefile Variables to accomodate the
-#              settings to a given OS.
+#              Some configuration may be required in the Makefile Variables to 
+#              accomodate the settings to a given OS.
 #
 # AUTHOR: Alberto Ibarrondo (github @ibarrond)
-# DATE: 16/10/2017
+# DATE: 15/06/2018
 #    
 #    
 # LICENSE: GNU GPL v3
@@ -47,12 +49,12 @@ $(info For a list if all the available commands, run >make info)
 
 
 
-##############################################################################################
-#                                   MAKEFILE VARIABLES                                       #
-##############################################################################################
+###############################################################################
+#                           MAKEFILE VARIABLES                                #
+###############################################################################
 
 
-#.................................. COMPILER & LINKER ........................................
+#........................... COMPILER & LINKER ................................
 CC = g++
 CFLAGS = -g -O2 -std=c++11 -march=native -I/usr/local/include \
 	        -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
@@ -88,7 +90,7 @@ CFLAGS = -g -O2 -std=c++11 -march=native -I/usr/local/include \
 
 
 #.................................. LIBRARY ATTRIBUTES .......................................
-LIBNAME = seal
+LIBNAME = afseal
 	                                # Prefix 'lib' and extension '.la' are added later on
 VERSION = 2:0:0
 	                                # Library version, independent from packet/repo version
