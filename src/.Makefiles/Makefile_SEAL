@@ -123,23 +123,23 @@ fixoriginal:
 #                               BUILD FHE LIBRARY                             #
 ###############################################################################
 
-# COMPILATION: Create each .lo object from the cpp source code and all headers
 %.lo: $(SRC_DIR)/%.cpp $(HEADER)
+	# COMPILATION: Create $@ object from the $< source
 	@libtool --mode=compile $(CC) $(CFLAGS) -shared -DHAVE_CONFIG_H -c $<
 
-# LINKING: Merging all .lo objs into a single .la to use for static/shared libs
 $(LIB_LA): $(LOBJ)
+	# LINKING: Using Libtool to create the library (all .lo into one)
 	@libtool --mode=link $(CC) $(CFLAGS) -o $@ $^ -rpath $(LIB_DIR) \
 	 -version-info $(VERSION)
 
 
 
 ###############################################################################
-#                             INSTALL FHE LIBRARY                             #
+#                             INSTALL THE LIBRARY                             #
 ###############################################################################
 
 install: $(LIB_LA)
-	# Installin library in $(LIB_DIR)
+	# Installing library in $(LIB_DIR)
 	@libtool --mode=install cp $(LIB_LA) $(LIB_DIR)
 	ldconfig
 	# Creating folders for header files
