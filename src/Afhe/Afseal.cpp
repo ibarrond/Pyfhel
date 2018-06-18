@@ -95,11 +95,6 @@ void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatching,
 	this->intDigits = new_intDigits; 
 	this->fracDigits = new_fracDigits;
 	this->flagBatching = new_flagBatching;
-    // m - cyclotomic polynomial exponent, must be power 2 in FV scheme
-    bool m_is_pow2 = false;
-    for (double i = 10; i < 30; i++) {
-      if((double)(m)==pow(2, i)){m_is_pow2 = true;}}
-    if(!m_is_pow2){throw invalid_argument("m must be power of 2 in SEAL");}
 
     // Context generation
     parms.set_poly_modulus("1x^"+to_string(m)+" + 1");
