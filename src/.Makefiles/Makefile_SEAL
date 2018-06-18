@@ -148,9 +148,8 @@ install: $(LIB_LA)
 	@-cp -t $(INCLUDE_DIR)/$(LIB_NAME) $(HEADER)
 
 linking:
-	$(eval $LIBLINK:=$(shell cd /usr/local/lib && ls libseal.so.?))
-	sudo ln -sf /usr/local/lib/$($LIBLINK) /usr/lib/$($LIBLINK)
-
+	$(eval $LIBLINK:=$(shell cd  && ls lib$(LIB_NAME.so))
+	sudo ln -sf $(LIB_DIR)/$($LIBLINK) /usr/lib/$($LIBLINK)
 
 ###############################################################################
 #                           CREATE BINARIES WITH SEAL                         #

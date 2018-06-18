@@ -112,10 +112,15 @@ $(LIB_LA): $(LOBJ)
 
 install: $(LIB_LA)
 	# Installing $(LIB_NAME) library in $(LIB_DIR)
-	$(LIBTOOL) $(LIBTOOL_INSTALL) cp $(LIB_LA) $(LIBDIR)
 	ldconfig
-	cp -t $(INCLUDE_DIR) $(HEADER)
+	# Creating folders for header files
+	@-mkdir -p $(INCLUDE_DIR)/$(LIB_NAME)
+	# Copying Header files to $(INCLUDE_DIR)
+	@-cp -t $(INCLUDE_DIR)/$(LIB_NAME) $(HEADER)
 
+linking:
+	$(eval $LIBLINK:=$(shell cd  && ls lib$(LIB_NAME.so))
+	sudo ln -sf $(LIB_DIR)/$($LIBLINK) /usr/lib/$($LIBLINK)
 
 
 ###############################################################################
@@ -140,9 +145,9 @@ test: $(TESTPROG)
 ###############################################################################
 
 uninstall: 
-	$(LIBTOOL) $(LIBTOOL_UNINSTALL) rm -f $(LIBDIR)/$(LIB_LA) 
+	libtool --mode=uninstall rm -f $(LIB_DIR)/$(LIB_LA)
 	ldconfig
-	rm -rf $(INCLUDE_DIR)/$(HEADER)
+	rm -rf $(INCLUDE_DIR)/$(LIB_NAME)
 
 
 clean:
