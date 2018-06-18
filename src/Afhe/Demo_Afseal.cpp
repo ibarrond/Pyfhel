@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     //   - 257 (Byte)
     //   - 65537 (Word)
     //   - 4294967311 (Long) 
-    long p = 2;
+    long p = 65537;
     long m = 16384;
     long base = 2;
     long sec = 192;

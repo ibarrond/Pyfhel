@@ -32,16 +32,11 @@
 #ifndef AFSEAL_H
 #define AFSEAL_H
  
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <string>
-#include <chrono>
-#include <random>
-#include <thread>
-#include <mutex>
-#include <random>
-#include <limits>
+#include <iostream>	/* Print in std::cout */
+#include <string>	/* String class */
+#include <vector>	/* Vectorizing all operations */
+#include <thread>	/* memory pools, multithread*/
+#include <memory>	/* Smart Pointers*/
 
 #include "seal/seal.h"
 
