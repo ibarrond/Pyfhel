@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 	bool flagBatching=true;
 
 	std::cout << " Afseal - Creating Context" << endl;
-	he.ContextGen(p, m, base, sec);
+	he.ContextGen(p, m, flagBatching, base, sec);
 	std::cout << " Afseal - Context CREATED" << endl;
 
 
@@ -40,15 +40,19 @@ int main(int argc, char **argv)
 	  std::cout << i << ' ';
 	for (auto i: v2)
 	  std::cout << i << ' ';
-    // Sum
     Ciphertext k1 = he.encrypt(v1);
     Ciphertext k2 = he.encrypt(v2);
-    he.add(k1, k2);
+    
+	
+	// Sum
+    std::cout << " Afseal - SUM" << endl;
+	he.add(k1, k2);
     vector<int64_t> vRes = he.decrypt(k1);
  	for (auto i: vRes)
 	  std::cout << i << ' ';
 
     // Multiplication
+    std::cout << " Afseal - MULT" << endl;
     k1 = he.encrypt(v1);
     k2 = he.encrypt(v2);
     he.multiply(k1, k2);
@@ -56,15 +60,18 @@ int main(int argc, char **argv)
 	for (auto i: vRes2)
 	  std::cout << i << ' ';
 	
-    // Scalar product
+    // Substraction
+    std::cout << " Afseal - SUB" << endl;
     k1 = he.encrypt(v1);
     k2 = he.encrypt(v2);
     he.sub(k1, k2);
     vector<int64_t> vRes3 = he.decrypt(k1);
 	for (auto i: vRes3)
 	  std::cout << i << ' ';
+
     // Square
-    k1 = he.encrypt(v1);
+    std::cout << " Afseal - SQUARE" << endl;
+	k1 = he.encrypt(v1);
     he.square(k1);
     vector<int64_t> vRes4 = he.decrypt(k1);
 	for (auto i: vRes4)

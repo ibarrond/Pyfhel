@@ -43,7 +43,7 @@
 #include <random>
 #include <limits>
 
-#include "SEAL/seal.h"
+#include "seal/seal.h"
 
 using namespace std;
 using namespace seal;
@@ -166,9 +166,9 @@ class Afseal{
          * @param[in] 
          * @return Void.
          */
-        void ContextGen(long p, long m = 2048, long base = 2, long sec=128,
-                        int intDigits = 64, int fracDigits = 32,
-                        bool flagBatching=false);
+        void ContextGen(long p, long m = 2048, bool flagBatching=false,
+						long base = 2, long sec=128, int intDigits = 64,
+						int fracDigits = 32);
 
         // KEY GENERATION
         /**

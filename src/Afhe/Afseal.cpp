@@ -85,8 +85,9 @@ Afseal::~Afseal(){
 
 // ------------------------------ CRYPTOGRAPHY --------------------------------
 // CONTEXT GENERATION
-void Afseal::ContextGen(long new_p, long new_m, long new_base, long new_sec,
-						int new_intDigits, int new_fracDigits, bool new_flagBatching){
+void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatching, 
+						long new_base, long new_sec, int new_intDigits, 
+						int new_fracDigits){
 	
     EncryptionParameters parms;
 	this->p = new_p;    	this->m = new_m;
