@@ -63,22 +63,22 @@ class Afseal{
         /** @defgroup ATTRIBUTES Afseal member objects;
          *  @{
          */
-        SEALContext* context;           /**< Context object. Used for init*/
+        shared_ptr<SEALContext> context;           /**< Context object. Used for init*/
   
-        IntegerEncoder* intEncoder;     /**< Integer Encoding.*/
-        FractionalEncoder* fracEncoder; /**< Fractional Encoding.*/
+        shared_ptr<IntegerEncoder> intEncoder;     /**< Integer Encoding.*/
+        shared_ptr<FractionalEncoder> fracEncoder; /**< Fractional Encoding.*/
 
-        KeyGenerator* keyGenObj;        /**< Key Generator Object.*/
-        SecretKey* secretKey;           /**< Secret key.*/
-        PublicKey* publicKey;           /**< Public key.*/
-        EvaluationKeys* relinKey;       /**< Relinearization object*/
-        GaloisKeys* galKeys;            /**< Galois key for batching*/
+        shared_ptr<KeyGenerator> keyGenObj;        /**< Key Generator Object.*/
+        shared_ptr<SecretKey> secretKey;           /**< Secret key.*/
+        shared_ptr<PublicKey> publicKey;           /**< Public key.*/
+        shared_ptr<EvaluationKeys> relinKey;       /**< Relinearization object*/
+        shared_ptr<GaloisKeys> galKeys;            /**< Galois key for batching*/
 
-        Encryptor* encryptor;           /**< Requires a Public Key.*/
-        Evaluator* evaluator;           /**< Requires a context.*/
-        Decryptor* decryptor;           /**< Requires a Secret Key.*/
+        shared_ptr<Encryptor> encryptor;           /**< Requires a Public Key.*/
+        shared_ptr<Evaluator> evaluator;           /**< Requires a context.*/
+        shared_ptr<Decryptor> decryptor;           /**< Requires a Secret Key.*/
 
-        PolyCRTBuilder* crtBuilder;     /**< used for Batching. */
+        shared_ptr<PolyCRTBuilder> crtBuilder;     /**< used for Batching. */
 
         int p;                          /**< All operations are modulo p^r */
         int m;                          /**< Cyclotomic index */
