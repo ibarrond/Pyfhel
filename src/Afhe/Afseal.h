@@ -58,6 +58,7 @@ class Afseal{
         /** @defgroup ATTRIBUTES Afseal member objects;
          *  @{
          */
+        
         shared_ptr<SEALContext> context;           /**< Context object. Used for init*/
   
         shared_ptr<IntegerEncoder> intEncoder;     /**< Integer Encoding.*/
@@ -74,6 +75,7 @@ class Afseal{
         shared_ptr<Decryptor> decryptor;           /**< Requires a Secret Key.*/
 
         shared_ptr<PolyCRTBuilder> crtBuilder;     /**< used for Batching. */
+
 
         int p;                          /**< All operations are modulo p^r */
         int m;                          /**< Cyclotomic index */
