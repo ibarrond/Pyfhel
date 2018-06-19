@@ -42,22 +42,22 @@ typedef vector<Ciphertext> vCipher_t;
 Afseal::Afseal(){}
 
 Afseal::Afseal(const Afseal &otherAfseal){
-    this->context =      new SEALContext(*(otherAfseal.context));
+    this->context = make_shared<SEALContext>(*(otherAfseal.context));
 
-    this->intEncoder =   new IntegerEncoder(*(otherAfseal.intEncoder));
-    this->fracEncoder =  new FractionalEncoder(*(otherAfseal.fracEncoder));
+    this->intEncoder =   make_shared<IntegerEncoder>(*(otherAfseal.intEncoder));
+    this->fracEncoder =  make_shared<FractionalEncoder>(*(otherAfseal.fracEncoder));
 
-    this->keyGenObj =    new KeyGenerator(*(this->context));
-    this->secretKey =    new SecretKey(*(otherAfseal.secretKey));
-    this->publicKey =    new PublicKey(*(otherAfseal.publicKey));
-    this->relinKey =     new EvaluationKeys(*(otherAfseal.relinKey));
-    this->galKeys =      new GaloisKeys(*(otherAfseal.galKeys));
+    this->keyGenObj =    make_shared<KeyGenerator>(*(this->context));
+    this->secretKey =    make_shared<SecretKey>(*(otherAfseal.secretKey));
+    this->publicKey =    make_shared<PublicKey>(*(otherAfseal.publicKey));
+    this->relinKey =     make_shared<EvaluationKeys>(*(otherAfseal.relinKey));
+    this->galKeys =      make_shared<GaloisKeys>(*(otherAfseal.galKeys));
     
-    this->encryptor =    new Encryptor(*(otherAfseal.encryptor));
-    this->evaluator =    new Evaluator(*(otherAfseal.evaluator));
-    this->decryptor =    new Decryptor(*(otherAfseal.decryptor));
+    this->encryptor =    make_shared<Encryptor>(*(otherAfseal.encryptor));
+    this->evaluator =    make_shared<Evaluator>(*(otherAfseal.evaluator));
+    this->decryptor =    make_shared<Decryptor>(*(otherAfseal.decryptor));
     
-    this->crtBuilder =   new PolyCRTBuilder(*(otherAfseal.crtBuilder));
+    this->crtBuilder =   make_shared<PolyCRTBuilder>(*(otherAfseal.crtBuilder));
 
     this->m =            otherAfseal.m;
     this->p =            otherAfseal.p;
@@ -68,20 +68,7 @@ Afseal::Afseal(const Afseal &otherAfseal){
     this->flagBatching = otherAfseal.flagBatching;
 }
 
-Afseal::~Afseal(){
-    delete context;
-    delete intEncoder;
-    delete fracEncoder;
-    delete keyGenObj;
-    delete secretKey;
-    delete publicKey;
-    delete relinKey;
-    delete galKeys;
-    delete encryptor;
-    delete evaluator;
-    delete decryptor;
-    delete crtBuilder; 
-}
+Afseal::~Afseal(){}
 
 // ------------------------------ CRYPTOGRAPHY --------------------------------
 // CONTEXT GENERATION
@@ -102,32 +89,32 @@ void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatching,
     else if (sec==192)  {parms.set_coeff_modulus(coeff_modulus_192(m));}
     else {throw invalid_argument("sec must be 128 or 192 bits.");}
     parms.set_plain_modulus(p);
-    this->context = new SEALContext(parms);
+    this->context = shared_ptr<SEALContext>(new SEALContext(parms));
 
     // Codec
-    this->intEncoder = new IntegerEncoder((*context).plain_modulus(), base);
-    this->fracEncoder = new FractionalEncoder((*context).plain_modulus(),
+    this->intEncoder = make_shared<IntegerEncoder>((*context).plain_modulus(), base);
+    this->fracEncoder = make_shared<FractionalEncoder>((*context).plain_modulus(),
               (*context).poly_modulus(), intDigits, fracDigits, base);
 
     // Create Evaluator Key
-    this->evaluator=new Evaluator(*context);
+    this->evaluator=make_shared<Evaluator>(*context);
     if(flagBatching){
         if(!(*context).qualifiers().enable_batching){
             throw invalid_argument("p not prime | p-1 not multiple 2*m");
         }
-        this->crtBuilder=new PolyCRTBuilder(*context);
+        this->crtBuilder=make_shared<PolyCRTBuilder>(*context);
     }
 }
  
 
 // KEY GENERATION
 void Afseal::KeyGen(){
-    this->keyGenObj = new KeyGenerator(*context);
-    this->publicKey = new PublicKey(keyGenObj->public_key());   // Extract keys
-    this->secretKey = new SecretKey(keyGenObj->secret_key());
+    this->keyGenObj = make_shared<KeyGenerator>(*context);
+    this->publicKey = make_shared<PublicKey>(keyGenObj->public_key());   // Extract keys
+    this->secretKey = make_shared<SecretKey>(keyGenObj->secret_key());
 
-    this->encryptor=new Encryptor(*context, *publicKey); // encr/decr objects
-    this->decryptor=new Decryptor(*context, *secretKey);
+    this->encryptor= make_shared<Encryptor>(*context, *publicKey); // encr/decr objects
+    this->decryptor= make_shared<Decryptor>(*context, *secretKey);
 }
 
 
@@ -266,7 +253,7 @@ int Afseal::noiseLevel(Ciphertext& cipher1) {
 void Afseal::relinKeyGen(int& bitCount){
   if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
   if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
-  relinKey = new EvaluationKeys();
+  relinKey = make_shared<EvaluationKeys>();
   keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
 }
 void Afseal::relinearize(Ciphertext& cipher1){
@@ -275,7 +262,7 @@ void Afseal::relinearize(Ciphertext& cipher1){
 void Afseal::galoisKeyGen(int& bitCount){
   if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
   if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
-  galKeys = new GaloisKeys();
+  galKeys = make_shared<GaloisKeys>();
   keyGenObj->generate_galois_keys(bitCount, *galKeys);
 }
 
@@ -409,17 +396,17 @@ bool Afseal::restoreContext(string fileName){
         contextFile >> flagBatching;
         contextFile.close();
 
-        this->context = new SEALContext(parms);
-        this->intEncoder = new IntegerEncoder((*context).plain_modulus(), base);
-        this->fracEncoder = new FractionalEncoder((*context).plain_modulus(),
+        this->context = make_shared<SEALContext>(parms);
+        this->intEncoder = make_shared<IntegerEncoder>((*context).plain_modulus(), base);
+        this->fracEncoder = make_shared<FractionalEncoder>((*context).plain_modulus(),
                 (*context).poly_modulus(), intDigits, fracDigits, base);
-        this->evaluator=new Evaluator(*context);
+        this->evaluator=make_shared<Evaluator>(*context);
         if(flagBatching){
             if(!(*context).qualifiers().enable_batching){
                 throw invalid_argument("p not prime | p-1 not multiple 2*m");
             }
             this->flagBatching=true;
-            this->crtBuilder=new PolyCRTBuilder(*context);
+            this->crtBuilder=make_shared<PolyCRTBuilder>(*context);
         }
     }
     catch(exception& e){
@@ -449,9 +436,9 @@ bool Afseal::restorepublicKey(string fileName){
     try{        
         fstream keyFile(fileName+".apk", fstream::in);
         assert(keyFile.is_open());
-        this->publicKey = new PublicKey();
+        this->publicKey = make_shared<PublicKey>();
         this->publicKey->load(keyFile);
-        this->encryptor=new Encryptor(*context, *publicKey);
+        this->encryptor=make_shared<Encryptor>(*context, *publicKey);
         keyFile.close();
     }
     catch(exception& e){
@@ -481,9 +468,9 @@ bool Afseal::restoresecretKey(string fileName){
     try{        
         fstream keyFile(fileName+".ask", fstream::in);
         assert(keyFile.is_open());
-        this->secretKey = new SecretKey();
+        this->secretKey = make_shared<SecretKey>();
         this->secretKey->load(keyFile);
-        this->decryptor=new Decryptor(*context, *secretKey);
+        this->decryptor=make_shared<Decryptor>(*context, *secretKey);
         keyFile.close();
     }
     catch(exception& e){
@@ -513,7 +500,7 @@ bool Afseal::restorerelinKey(string fileName){
     try{        
         fstream keyFile(fileName+".ark", fstream::in);
         assert(keyFile.is_open());
-        this->relinKey = new EvaluationKeys();
+        this->relinKey = make_shared<EvaluationKeys>();
         this->relinKey->load(keyFile);
         keyFile.close();
     }
@@ -544,7 +531,7 @@ bool Afseal::restoregalKey(string fileName){
     try{        
         fstream keyFile(fileName+".agk", fstream::in);
         assert(keyFile.is_open());
-        this->galKeys = new GaloisKeys();
+        this->galKeys = make_shared<GaloisKeys>();
         this->galKeys->load(keyFile);
         keyFile.close();
     }
@@ -569,8 +556,8 @@ int Afseal::getp()          {return this->p;}
 int Afseal::getnSlots()     {return this->crtBuilder->slot_count();}
 // SETTERS
 void Afseal::setpublicKey(PublicKey& pubKey)
-    {this->publicKey = new PublicKey (pubKey);}
+    {this->publicKey = make_shared<PublicKey> (pubKey);}
 void Afseal::setsecretKey(SecretKey& secKey)
-    {this->secretKey = new SecretKey (secKey);}
+    {this->secretKey = make_shared<SecretKey> (secKey);}
 void Afseal::setrelinKey(EvaluationKeys& evKey)
-    {this->relinKey = new EvaluationKeys(evKey);}
+    {this->relinKey = make_shared<EvaluationKeys>(evKey);}
