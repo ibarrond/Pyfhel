@@ -6,8 +6,8 @@
 #   preserving the same keyGen-encryption-decryption from Afhel. Pyfhel
 #   works with PyPtxt as plaintext class and PyCtxt as cyphertext class.
 #   --------------------------------------------------------------------
-#   Author: Alberto Ibarrondo and Remy AUDA
-#   Date: 23/11/2017 
+#   Author: Alberto Ibarrondo
+#   Date: 28/06/2018
 #   --------------------------------------------------------------------
 #   License: GNU GPL v3
 #
@@ -32,9 +32,11 @@ from libcpp.string cimport string
 from libcpp cimport bool
 
 # Using Ctypes to define the Afhel class
-cdef extern from "Afhel.h":
-    cdef cppclass Afhel:
-        Afhel() except +
+cdef extern from "Afseal.h" namespace "std":
+    cdef cppclass Afseal:
+        Afseal() except +
+        Afseal(const Afseal &otherAfseal) except +
+        Afseal(Afseal &&source) except +
         void keyGen(long p, long r, long c, long d, long sec, long w,
             long L, long m, long R, long s,
             const vector[long]& gens,
