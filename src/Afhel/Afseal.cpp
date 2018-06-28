@@ -36,8 +36,6 @@
 
 #include "Afseal.h"
 
-typedef vector<Ciphertext> vCipher_t;
-
 // ----------------------------- CLASS MANAGEMENT -----------------------------
 Afseal::Afseal(){}
 
@@ -51,7 +49,7 @@ Afseal::Afseal(const Afseal &otherAfseal){
     this->secretKey =    make_shared<SecretKey>(*(otherAfseal.secretKey));
     this->publicKey =    make_shared<PublicKey>(*(otherAfseal.publicKey));
     this->relinKey =     make_shared<EvaluationKeys>(*(otherAfseal.relinKey));
-    this->galKeys =      make_shared<GaloisKeys>(*(otherAfseal.galKeys));
+    this->rotateKeys =      make_shared<GaloisKeys>(*(otherAfseal.rotateKeys));
     
     this->encryptor =    make_shared<Encryptor>(*(otherAfseal.encryptor));
     this->evaluator =    make_shared<Evaluator>(*(otherAfseal.evaluator));
@@ -259,11 +257,11 @@ void Afseal::relinKeyGen(int& bitCount){
 void Afseal::relinearize(Ciphertext& cipher1){
   evaluator->relinearize(cipher1, *relinKey);
 }
-void Afseal::galoisKeyGen(int& bitCount){
+void Afseal::rotateKeyGen(int& bitCount){
   if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
   if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
-  galKeys = make_shared<GaloisKeys>();
-  keyGenObj->generate_galois_keys(bitCount, *galKeys);
+  rotateKeys = make_shared<GaloisKeys>();
+  keyGenObj->generate_galois_keys(bitCount, *rotateKeys);
 }
 
 // --------------------------------- OPERATIONS -------------------------------
@@ -331,9 +329,9 @@ void Afseal::multiply(vector<Ciphertext>& cipherV, Ciphertext& cipherOut){
 
 // ROTATION
 void Afseal::rotate(Ciphertext& cipher1, int& k){
-    evaluator->rotate_rows(cipher1, k, *galKeys);}
+    evaluator->rotate_rows(cipher1, k, *rotateKeys);}
 void Afseal::rotate(vector<Ciphertext>& cipherV, int& k){
-    for (Ciphertext& c:cipherV){evaluator->rotate_rows(c, k, *galKeys);}}
+    for (Ciphertext& c:cipherV){evaluator->rotate_rows(c, k, *rotateKeys);}}
 
 
 // POLYNOMIALS
@@ -511,11 +509,11 @@ bool Afseal::restorerelinKey(string fileName){
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::savegalKey(string fileName){
+bool Afseal::saverotateKey(string fileName){
     bool res=1;
     try{fstream keyFile(fileName+".agk", fstream::in);
         assert(keyFile.is_open());
-        galKeys->save(keyFile);
+        rotateKeys->save(keyFile);
         
         keyFile.close();
     }
@@ -526,13 +524,13 @@ bool Afseal::savegalKey(string fileName){
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::restoregalKey(string fileName){
+bool Afseal::restorerotateKey(string fileName){
     bool res=1;
     try{        
         fstream keyFile(fileName+".agk", fstream::in);
         assert(keyFile.is_open());
-        this->galKeys = make_shared<GaloisKeys>();
-        this->galKeys->load(keyFile);
+        this->rotateKeys = make_shared<GaloisKeys>();
+        this->rotateKeys->load(keyFile);
         keyFile.close();
     }
     catch(exception& e){
@@ -541,23 +539,3 @@ bool Afseal::restoregalKey(string fileName){
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
-
-
-// --------------------------------- AUXILIARY --------------------------------
-bool Afseal::batchEnabled(){return (*context).qualifiers().enable_batching;}
-long Afseal::relinBitCount(){return this->relinKey->decomposition_bit_count();}
-
-// GETTERS
-SecretKey Afseal::getsecretKey()	 {return *(this->secretKey);}
-PublicKey Afseal::getpublicKey()	 {return *(this->publicKey);}
-EvaluationKeys Afseal::getrelinKey() {return *(this->relinKey);}
-int Afseal::getm()          {return this->m;}
-int Afseal::getp()          {return this->p;}
-int Afseal::getnSlots()     {return this->crtBuilder->slot_count();}
-// SETTERS
-void Afseal::setpublicKey(PublicKey& pubKey)
-    {this->publicKey = make_shared<PublicKey> (pubKey);}
-void Afseal::setsecretKey(SecretKey& secKey)
-    {this->secretKey = make_shared<SecretKey> (secKey);}
-void Afseal::setrelinKey(EvaluationKeys& evKey)
-    {this->relinKey = make_shared<EvaluationKeys>(evKey);}

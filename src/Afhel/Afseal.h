@@ -68,13 +68,13 @@ class Afseal{
         shared_ptr<SecretKey> secretKey;           /**< Secret key.*/
         shared_ptr<PublicKey> publicKey;           /**< Public key.*/
         shared_ptr<EvaluationKeys> relinKey;       /**< Relinearization object*/
-        shared_ptr<GaloisKeys> galKeys;            /**< Galois key for batching*/
+        shared_ptr<GaloisKeys> rotateKeys;         /**< Galois key for batching*/
 
         shared_ptr<Encryptor> encryptor;           /**< Requires a Public Key.*/
         shared_ptr<Evaluator> evaluator;           /**< Requires a context.*/
         shared_ptr<Decryptor> decryptor;           /**< Requires a Secret Key.*/
 
-        shared_ptr<PolyCRTBuilder> crtBuilder;     /**< used for Batching. */
+        shared_ptr<PolyCRTBuilder> crtBuilder;     /**< Rotation in Batching. */
 
 
         int p;                          /**< All operations are modulo p^r */
@@ -258,7 +258,7 @@ class Afseal{
 
 
         // -------------------------- RELINEARIZATION -------------------------
-        void galoisKeyGen(int& bitCount);
+        void rotateKeyGen(int& bitCount);
         void relinKeyGen(int& bitCount);
         void relinearize(Ciphertext& cipher1);
 
@@ -396,37 +396,38 @@ class Afseal{
 
 
         bool saverelinKey(string fileName);
-
         bool restorerelinKey(string fileName);
 
-        bool savegalKey(string fileName);
-        bool restoregalKey(string fileName);
-        /**
-         * @brief Fills a vector with random values up to nSlots
-         * @param[in] array vector to be filled with random values.
-         * @return Void.
-         */
-        void random(vector<long>& array) const;
+        bool saverotateKey(string fileName);
+        bool restorerotateKey(string fileName);
+
 
 
         // ----------------------------- AUXILIARY ----------------------------
-        bool batchEnabled();
-        long relinBitCount();
+        bool batchEnabled() {return this->context->qualifiers().enable_batching;}
+        long relinBitCount(){return this->relinKey->decomposition_bit_count();}
 
         // GETTERS
-        SecretKey getsecretKey();
-        PublicKey getpublicKey();
-        EvaluationKeys getrelinKey(); 
-        int getnSlots();
-        int getp();
-        int getm();
-        bool getflagBatching();
+        SecretKey getsecretKey()    {return *(this->secretKey);}
+        PublicKey getpublicKey()    {return *(this->publicKey);}
+        EvaluationKeys getrelinKey(){return *(this->relinKey);} 
+        GaloisKeys getrotateKeys()  {return *(this->rotateKeys);} 
+        int getnSlots()        {return this->crtBuilder->slot_count();}   
+        int getp()             {return this->p;}
+        int getm()             {return this->m;}
+        int getbase()          {return this->base;}
+        int getsec()           {return this->sec;}
+        int getintDigits()     {return this->intDigits;}
+        int getfracDigits()    {return this->fracDigits;}
+        bool getflagBatching() {return this->flagBatching;}
 
         //SETTERS
-        void setpublicKey(PublicKey& pubKey);
-        void setsecretKey(SecretKey& secKey);
-        void setrelinKey(EvaluationKeys& relKey);
-        void setflagBatching(bool f_batch);
+        void setpublicKey(PublicKey& pubKey)
+            {this->publicKey = make_shared<PublicKey> (pubKey);}
+        void setsecretKey(SecretKey& secKey)
+            {this->secretKey = make_shared<SecretKey> (secKey);}
+        void setrelinKey(EvaluationKeys& relKey)
+            {this->relinKey = make_shared<EvaluationKeys>(relKey);}
 
 };
 #endif
