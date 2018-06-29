@@ -31,41 +31,6 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp cimport bool
 
-# Using Ctypes to define the Afhel class
-cdef extern from "Afseal.h" namespace "std":
-    cdef cppclass Afseal:
-        Afseal() except +
-        Afseal(const Afseal &otherAfseal) except +
-        Afseal(Afseal &&source) except +
-        void keyGen(long p, long r, long c, long d, long sec, long w,
-            long L, long m, long R, long s,
-            const vector[long]& gens,
-            const vector[long]& ords) except +
-        string encrypt(vector[long] ptxt_vect) except +
-        vector[long] decrypt(string id1) except +
-
-        void add(string id1, string id2, bool negative) except +
-        void mult(string id1, string id2) except +
-        void mult3(string id1, string id2, string id3) except +
-        void scalarProd(string id1, string id2, int partitionSize) except +
-        void cumSum(string id1) except +
-        void square(string id1) except +
-        void cube(string id1) except +
-        void negate(string id1) except +
-        bool equalsTo(string id1, string id2, bool comparePkeys) except +
-        void rotate(string id1, long c) except +
-        void shift(string id1, long c) except +
-
-        bool saveEnv(string fileName) except +
-        bool restoreEnv(string fileName) except +
-
-        long numSlots() except +
-        long getM() except +
-        long getP() except +
-        long getR() except +
-        string set(string key) except +
-        void erase(string key) except +
-
 # Import the Plaintext and Cyphertext classes for Python
 from PyPtxt import PyPtxt
 from PyCtxt import PyCtxt
