@@ -56,20 +56,20 @@ $(info                     Afseal     -> SEAL)
 
 #........................... LIBRARY ATTRIBUTES ...............................
 LIB_NAME = afseal
-						# Prefix 'lib' and extension '.la' are added later on
+			# Prefix 'lib' and extension '.la' are added later on
 VERSION = 2:0:0
-						# Library version, independent from packet/repo version
+			# Library version, independent from packet/repo version
 PREFIX = /usr/local
 
 LIB_DIR = $(PREFIX)/lib
-						# Directory where library will be installed
+			# Directory where library will be installed
 INCLUDE_DIR = $(PREFIX)/include
-						# Directory where headers will be installed
+			# Directory where headers will be installed
 SRC_DIR = .
 
 #............................. COMPILER & LINKER ..............................
 CC = g++
-CFLAGS = -g -O2 -std=c++11 -march=native -I$(SRC_DIR) -I$(INCLUDE_DIR) \
+CFLAGS = -g -O2 -std=c++17 -march=native -I$(SRC_DIR) -I$(INCLUDE_DIR) \
 	        -pthread -Wfatal-errors -Wshadow -fmax-errors=2
 LFLAGS = -L$(LIB_DIR) -lm -lgmp -lntl -lseal
 
@@ -85,6 +85,9 @@ HEADER = Afhel.h Afseal.h
 LOBJ = Afseal.lo
 #LOBJ = $(SRC:%.cpp=%.lo)
 
+#.................................. TEST FILES ...... .........................
+TESTS = Demo_Afseal_x
+
 
 #.............................. LIBRARY FINAL FILES ...........................
 LIB_LA = lib$(LIB_NAME).la
@@ -98,7 +101,7 @@ all: $(LIB_LA)
 
 %.lo: %.cpp $(HEADER)
 	# COMPILATION: Create $@ object from the $< source
-	@libtool --mode=compile $(CC) $(CFLAGS) -shared -c $<
+	@libtool --mode=compile $(CC) $(CFLAGS) -shared -c $< 
 
 $(LIB_LA): $(LOBJ)
 	# LINKING: Using Libtool to create the library (all .lo into one)
@@ -111,16 +114,15 @@ $(LIB_LA): $(LOBJ)
 ###############################################################################
 
 install: $(LIB_LA)
+	
 	# Installing $(LIB_NAME) library in $(LIB_DIR)
+	@libtool --mode=install cp $< $(LIB_DIR)
 	ldconfig
 	# Creating folders for header files
 	@-mkdir -p $(INCLUDE_DIR)/$(LIB_NAME)
 	# Copying Header files to $(INCLUDE_DIR)
 	@-cp -t $(INCLUDE_DIR)/$(LIB_NAME) $(HEADER)
 
-linking:
-	$(eval $LIBLINK:=$(shell cd  && ls lib$(LIB_NAME.so))
-	sudo ln -sf $(LIB_DIR)/$($LIBLINK) /usr/lib/$($LIBLINK)
 
 
 ###############################################################################
@@ -136,8 +138,8 @@ linking:
 #                                TEST PROGRAMS                                #
 ###############################################################################
 
-test: $(TESTPROG)
-	mv $(TESTPROG) ../Demos_Tests/Demo_SEAL_x
+test: $(TESTS)
+	cp $^ ../Demos_Tests
 
 
 ###############################################################################

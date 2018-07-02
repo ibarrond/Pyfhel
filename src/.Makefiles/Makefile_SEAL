@@ -7,7 +7,7 @@
 ###############################################################################
 #
 # DESCRIPTION: Makefile for SEAL encryption library from Microsoft. Installs 
-#			   this library as a shared library, and simplifying its usage: 
+#              this library as a shared library, and simplifying its usage: 
 #              the lib can now be linked when compiling a program using the 
 #              flag [-lseal]. Plus,all header files (.h) are installed in a 
 #              folder called 'seal/'.In order to use the library in your own
@@ -59,7 +59,7 @@ $(info                     Afseal     -> SEAL)
 #........................... LIBRARY ATTRIBUTES ...............................
 LIB_NAME = seal
 	                  # Prefix 'lib' and extension '.la' are added later on
-VERSION = 2:3:0
+VERSION = 2:3:1
 	                  # Library version, independent from packet/repo version
 PREFIX = /usr/local
 
@@ -70,13 +70,13 @@ INCLUDE_DIR = $(PREFIX)/include
 SRC_DIR = SEAL/seal
 
 #.............................. LIBRARY DOWNLOAD  .............................
-SEAL_URL = "https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_v2.3.0-4_Linux.tar.gz"
-SEAL_ROOT_DIR = SEAL_v2.3.0-4_Linux
+SEAL_URL = "https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz"
+SEAL_ROOT_DIR = SEAL_2.3.1
 
 
 #............................. COMPILER & LINKER ..............................
 CC = g++
-CFLAGS = -g -O2 -std=c++11 -march=native -I$(SRC_DIR) -I$(INCLUDE_DIR) \
+CFLAGS = -g -O2 -std=c++17 -march=native -I$(SRC_DIR) -I$(INCLUDE_DIR) \
 	        -pthread -Wfatal-errors -Wshadow -fmax-errors=2
 LFLAGS = -L$(LIB_DIR) -lm
 
@@ -106,7 +106,7 @@ all: $(LIB_LA)
 # OBTAINING LIBRARY: download and extract
 download:
 	wget $(SEAL_URL)
-	tar xf $(SEAL_ROOT_DIR).tar.gz -C ..
+	tar xf $(SEAL_ROOT_DIR).tar.gz --strip-components=1
 	@rm $(SEAL_ROOT_DIR).tar.gz
 
 fixoriginal:
