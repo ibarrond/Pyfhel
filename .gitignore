@@ -33,3 +33,6 @@ src/SEAL/*
 
 # Visual Studio Code
 **.vscode
+
+# ipython checkpoints
+**.ipynb_checkpoints
