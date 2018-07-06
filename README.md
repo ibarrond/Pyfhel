@@ -46,8 +46,8 @@ If you want to uninstall any particular component, navigate to HElib/src/, Afhel
 
 ## Authors & Acknowledgements
 
-- **Authors**: Alberto Ibarrondo [@ibarrond](https://github.com/ibarrond) & Remy Ayda [@remyauda](https://github.com/remyauda) in collaboration with EURECOM ([Melek Onen](http://www.eurecom.fr/~onen/)).
-- Latest release: 02/05/2018
+- **Authors**: Alberto Ibarrondo [@ibarrond](https://github.com/ibarrond) with Laurent Gomez (SAP) in collaboration with EURECOM ([Melek Onen](http://www.eurecom.fr/~onen/)).
+- Latest release: 06/07/2018
 
 This library was created originally for the project "Privacy for Big Data Analytics" in EURECOM. The SW is based on **[HElib](https://github.com/shaih/HElib) by Shai Halevi**, with touches from **[HEIDE](https://github.com/heide-support/HEIDE) by Grant Frame**, and performance improvements thanks to **[analysis of addition](https://mshcruz.wordpress.com/2017/05/13/sum-of-encrypted-vectors/) by Matheus S.H. Cruz**. In compliance with their respective Licenses, I name all of them in this section. This project could not be possible without them. For any legal disclaimer, please contact the owner of this repository. Also, the same type of license (GNU GPLv3) applies to Afhel & Pyfhel, as mandated.
 
@@ -55,5 +55,5 @@ This library was created originally for the project "Privacy for Big Data Analyt
 
 Pyfhel can be used modified, copied in any way you see fit. This project is Open Source under the GNU GPLv3 License (LICENSE file), therefore developers that use Pyfhel MUST comply with the following:
 
-   1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Ibarrondo, Auda and Onen (EURECOM)`.
+   1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Ibarrondo, Laurent (SAP) and Onen (EURECOM)`.
    2. Offer the exact same License, allowing legal permission to copy, distribute and/or modify any SW using Pyfhel. Hence, any software using Pyfhel must be Open Source.
