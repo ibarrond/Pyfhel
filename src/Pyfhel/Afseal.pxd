@@ -1,34 +1,37 @@
-
-# Importing the required C++ types for the Afhel API: vector, string & bool
+# Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.vector cimport vector
 from libcpp.string cimport string
-from libc.stdint cimport int64_t
 from libcpp cimport bool
+from libc.stdint cimport int64_t
+from libc.stdint cimport uint64_t
+        
 
-
-cdef extern from "plaintext.h" namespace "seal":
+# Import our own wrapper for iostream classes, used for I/O ops
+from iostream cimport istream, ostream, ifstream, ofstream       
+        
+# SEAL plaintext class        
+cdef extern from "seal/plaintext.h" namespace "seal":
     cdef cppclass Plaintext:
         Plaintext() except +
         Plaintext(const Plaintext &copy) except +
         Plaintext(Plaintext &&source) except +
         bool is_zero() except +
-        std::string to_string() except +
-        void save(std::ostream &stream) except +
-        void load(std::istream &stream) except +
-
-
-cdef extern from "ciphertext.h" namespace "seal":
+        void save(ostream &stream) except +
+        void load(istream &stream) except +
+        
+# SEAL ciphertext class        
+cdef extern from "seal/ciphertext.h" namespace "seal":
     cdef cppclass Ciphertext:
         Ciphertext() except +
         Ciphertext(const Ciphertext &copy) except +
         Ciphertext(Ciphertext &&source) except +
         int size_capacity() except +
         int size() except +
-        void save(std::ostream &stream) except +
-        void load(std::istream &stream) except +
+        void save(ostream &stream) except +
+        void load(istream &stream) except +
 
-# Using Ctypes to define the Afhel class
-cdef extern from "Afseal.h" namespace "std":
+# Afseal class to abstract SEAL
+cdef extern from "afseal/Afseal.h" namespace "std":
     cdef cppclass Afseal:
         # ----------------------- OBJECT MANAGEMENT ---------------------------
         Afseal() except +
@@ -37,9 +40,8 @@ cdef extern from "Afseal.h" namespace "std":
 
         # -------------------------- CRYPTOGRAPHY -----------------------------
         # CONTEXT & KEY GENERATION
-        void ContextGen(long p, long m, bool flagBatching,
-						long base, long sec, int intDigits,
-						int fracDigits) except +
+        void ContextGen(long p, long m, bool flagBatching, long base,
+                 long sec, int intDigits, int fracDigits) except +
         void KeyGen() except +
 
         # ENCRYPTION
@@ -101,16 +103,16 @@ cdef extern from "Afseal.h" namespace "std":
         void square(vector[Ciphertext]& cipherV) except +
         void negate(Ciphertext& cipher1) except +
         void negate(vector[Ciphertext]& cipherV) except +
-                void add(Ciphertext& cipher1, Ciphertext& cipher2) except +
+        void add(Ciphertext& cipher1, Ciphertext& cipher2) except +
         void add(Ciphertext& cipher1, Plaintext& plain2) except +
         void add(vector[Ciphertext]& cipherV, Ciphertext& cipherOut) except +
         void add(vector[Ciphertext]& cipherVInOut, vector[Ciphertext]& cipherV2) except +
         void add(vector[Ciphertext]& cipherVInOut, vector[Plaintext]& plainV2) except +
-                void sub(Ciphertext& cipher1, Ciphertext& cipher2) except +
+        void sub(Ciphertext& cipher1, Ciphertext& cipher2) except +
         void sub(Ciphertext& cipher1, Plaintext& plain2) except +
         void sub(vector[Ciphertext]& cipherVInOut, vector[Ciphertext]& cipherV2) except +
         void sub(vector[Ciphertext]& cipherVInOut, vector[Plaintext]& plainV2) except +
-                void multiply(Ciphertext& cipher1, Ciphertext& cipher2) except +
+        void multiply(Ciphertext& cipher1, Ciphertext& cipher2) except +
         void multiply(Ciphertext& cipher1, Plaintext& plain1) except +
         void multiply(vector[Ciphertext]& cipherV1, Ciphertext& cipherOut) except +
         void multiply(vector[Ciphertext]& cipherVInOut, vector[Ciphertext]& cipherV2) except +

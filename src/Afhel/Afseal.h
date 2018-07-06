@@ -55,11 +55,8 @@ class Afseal{
 
     private: 
         // --------------------------- ATTRIBUTES -----------------------------
-        /** @defgroup ATTRIBUTES Afseal member objects;
-         *  @{
-         */
         
-        shared_ptr<SEALContext> context;           /**< Context object. Used for init*/
+        shared_ptr<SEALContext> context;           /**< Context. Used for init*/
   
         shared_ptr<IntegerEncoder> intEncoder;     /**< Integer Encoding.*/
         shared_ptr<FractionalEncoder> fracEncoder; /**< Fractional Encoding.*/
@@ -87,14 +84,9 @@ class Afseal{
         
         bool flagBatching = false;      /**< Whether to use batching or not */
 
-        /** @} ATTRIBUTES*/
 
 
-        // ------------------ STREAM OPERATORS OVERLOAD ----------------------
-        /** @defgroup STREAM_OPERATORS_OVERLOAD
-         * import/export to string streams
-         *  @{
-         */
+        // ------------------ STREAM OPERATORS OVERLOAD -----------------------
         /**
          * @brief An output stream operator, parsing the object into a string.
          * @param[out] outs output stream where to bulk the Afseal object
@@ -104,22 +96,18 @@ class Afseal{
         friend ostream& operator<< (ostream& outs, Afseal const& af);
 
         /**
-         * @brief An input stream operator, reading the parsed Afseal object from
-         *        a string stream.
+         * @brief An input stream operator, reading the parsed Afseal object 
+         *        from a string stream.
          * @param[in] ins input stream where to extract the Afseal object
          * @param[out] af Afseal object to contain the parsed one
          * @see operator<<
          */
         friend istream& operator>> (istream& ins, Afseal const& af);
-        /** @} STREAM_OPERATORS_OVERLOAD*/
 
 
 
     public:
         // ----------------------- CLASS MANAGEMENT ---------------------------
-        /** @defgroup CLASS_MANAGEMENT Constructor, Copy and Destructor.
-         *  @{
-         */
         /**
          * @brief Default constructor.
          */
@@ -145,8 +133,6 @@ class Afseal{
         * @brief Default destructor.
         */
         virtual ~Afseal();
-        /** @} CLASS_MANAGEMENT*/
-
 
 
         // -------------------------- CRYPTOGRAPHY ---------------------------
@@ -164,24 +150,21 @@ class Afseal{
          * @return Void.
          */
         void ContextGen(long p, long m = 2048, bool flagBatching=false,
-						long base = 2, long sec=128, int intDigits = 64,
-						int fracDigits = 32);
+                        long base = 2, long sec=128, int intDigits = 64,
+                        int fracDigits = 32);
 
         // KEY GENERATION
         /**
          * @brief Performs Key generation using SEAL functions vased on current context.
-         *          As a result, a pair of Private/Public Keys are initialized and stored.
+         *        As a result, a pair of Private/Public Keys are initialized and stored.
          * @return Void.
          */
         void KeyGen();
 
         // ENCRYPTION
-        /** @defgroup ENCRYPTION
-         *  @{
-         */
         /**
          * @brief Enctypts a provided plaintext vector using pubKey as public key.
-         *      The encryption is carried out with SEAL.
+         *        The encryption is carried out with SEAL.
          * @param[in] plain1 plaintext vector to encrypt.
          * @return ciphertext the SEAL encrypted ciphertext.
          */
@@ -206,9 +189,6 @@ class Afseal{
         void encrypt(vector<double>& valueV, vector<Ciphertext>& cipherOut);
 
         // DECRYPTION
-        /** @defgroup DECRYPTION
-         *  @{
-         */
         /**
          * @brief Decrypts the ciphertext using secKey as secret key.
          * The decryption is carried out with SEAL.
