@@ -1,8 +1,13 @@
-# Pyfhel
+# Pyfhel <img width="10%" height="10%" align="right"  src="/docs/logo/logo.png">
 
-* **_Description_**: Homomorphic Encryption Library for Python. Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR, SHIFT & ROTATE) over encrypted vectors of integers/binaries. EXTRA: Documentation and Tests for Helib, as well as a Makefile to turn Helib into a shared library.
-* **_Language_**: Python2.7 on top of C++ (with Cython).
-* **_Dependencies_**: [HElib](https://github.com/shaih/HElib), [GMP](http://www.gmplib.org), [NTL](http://www.shoup.net/ntl/download.html)
+* **_Description_**: **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries  . Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR, SHIFT & ROTATE) over encrypted vectors|scalars of integers|binaries. This library acts as a common Python API for the most advanced C++ HE libraries.
+* **_Language_**: Python (3.4+) on top of C++ (with Cython).
+* **_Dependencies_**: There are three possible backends, all of them HE libraries in C++:
+   
+   1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies)
+   2. [HElib](https://github.com/shaih/HElib) (depends on [GMP](http://www.gmplib.org) & [NTL](http://www.shoup.net/ntl/download.html))
+   3. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies)
+   
 * **_License_**: [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Summary
@@ -46,7 +51,7 @@ If you want to uninstall any particular component, navigate to HElib/src/, Afhel
 
 ## Authors & Acknowledgements
 
-- **Authors**: Alberto Ibarrondo [@ibarrond](https://github.com/ibarrond) & Remy Ayda [@remyauda](https://github.com/remyauda) in collaboration with EURECOM ([Melek Onen](http://www.eurecom.fr/~onen/)).
+- **Authors**: Alberto Ibarrondo [@ibarrond](https://github.com/ibarrond) in collaboration with EURECOM ([Melek Onen](http://www.eurecom.fr/~onen/)).
 - Latest release: 02/05/2018
 
 This library was created originally for the project "Privacy for Big Data Analytics" in EURECOM. The SW is based on **[HElib](https://github.com/shaih/HElib) by Shai Halevi**, with touches from **[HEIDE](https://github.com/heide-support/HEIDE) by Grant Frame**, and performance improvements thanks to **[analysis of addition](https://mshcruz.wordpress.com/2017/05/13/sum-of-encrypted-vectors/) by Matheus S.H. Cruz**. In compliance with their respective Licenses, I name all of them in this section. This project could not be possible without them. For any legal disclaimer, please contact the owner of this repository. Also, the same type of license (GNU GPLv3) applies to Afhel & Pyfhel, as mandated.
@@ -55,5 +60,5 @@ This library was created originally for the project "Privacy for Big Data Analyt
 
 Pyfhel can be used modified, copied in any way you see fit. This project is Open Source under the GNU GPLv3 License (LICENSE file), therefore developers that use Pyfhel MUST comply with the following:
 
-   1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Ibarrondo, Auda and Onen (EURECOM)`.
+   1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Ibarrondo and Onen (EURECOM)`.
    2. Offer the exact same License, allowing legal permission to copy, distribute and/or modify any SW using Pyfhel. Hence, any software using Pyfhel must be Open Source.
