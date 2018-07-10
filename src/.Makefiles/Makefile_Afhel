@@ -70,8 +70,8 @@ SRC_DIR = .
 #............................. COMPILER & LINKER ..............................
 CC = g++
 CFLAGS = -g -O2 -std=c++17 -march=native -I$(SRC_DIR) -I$(INCLUDE_DIR) \
-	        -pthread -Wfatal-errors -Wshadow -fmax-errors=2
-LFLAGS = -L$(LIB_DIR) -lm -lgmp -lntl -lseal
+	        -Wfatal-errors -Wshadow -fmax-errors=2
+LFLAGS = -L$(LIB_DIR) -lseal -lntl -lgmp -lm -pthread
 
 #.................................. SOURCE FILES ..............................
 SRC = Afseal.cpp
@@ -130,7 +130,7 @@ install: $(LIB_LA)
 ###############################################################################
 
 %_x: %.cpp
-	$(CC) $(CFLAGS) -o $@ $< $(LFLAFS) -l$(LIB_NAME)
+	$(CC) $(CFLAGS) -o $@ $< $(LFLAGS) -l$(LIB_NAME)
 
 
 

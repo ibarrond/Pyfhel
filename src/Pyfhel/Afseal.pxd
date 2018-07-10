@@ -14,7 +14,6 @@ cdef extern from "seal/plaintext.h" namespace "seal":
     cdef cppclass Plaintext:
         Plaintext() except +
         Plaintext(const Plaintext &copy) except +
-        Plaintext(Plaintext &&source) except +
         bool is_zero() except +
         void save(ostream &stream) except +
         void load(istream &stream) except +
@@ -24,7 +23,6 @@ cdef extern from "seal/ciphertext.h" namespace "seal":
     cdef cppclass Ciphertext:
         Ciphertext() except +
         Ciphertext(const Ciphertext &copy) except +
-        Ciphertext(Ciphertext &&source) except +
         int size_capacity() except +
         int size() except +
         void save(ostream &stream) except +

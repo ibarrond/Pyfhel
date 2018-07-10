@@ -71,8 +71,13 @@ int main(int argc, char **argv)
 	for (auto i: v2)
 	  std::cout << i << ' ';
     
-	// Encryption
-	{timer t(ctx, "encr11");k1 = he.encrypt(v1);}
+    Plaintext p1, p2;
+    p1 = he.encode(v1);
+    p2 = he.encode(v2);
+    Plaintext p3 = p1 ;
+
+    // Encryption
+    {timer t(ctx, "encr11");k1 = he.encrypt(v1);}
     {timer t(ctx, "encr12");k2 = he.encrypt(v2);}
     
 	

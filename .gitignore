@@ -36,3 +36,4 @@ src/SEAL/*
 
 # ipython checkpoints
 **.ipynb_checkpoints
+**/__pycache__

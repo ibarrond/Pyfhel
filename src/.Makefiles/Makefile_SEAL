@@ -78,7 +78,7 @@ SEAL_ROOT_DIR = SEAL_2.3.1
 CC = g++
 CFLAGS = -g -O2 -std=c++17 -march=native -I$(SRC_DIR) -I$(INCLUDE_DIR) \
 	        -pthread -Wfatal-errors -Wshadow -fmax-errors=2
-LFLAGS = -L$(LIB_DIR) -lm
+LFLAGS = -lm -L$(LIB_DIR) -L$(LIB_DIR)
 
 #.................................. SOURCE FILES ..............................
 SRC = $(wildcard $(SRC_DIR)/*.cpp)
@@ -114,10 +114,6 @@ fixoriginal:
 	@-cp $(SRC_DIR)/util/* $(SRC_DIR)
 	@find ./$(SRC_DIR) -name '*.*' -exec sed -i 's-"seal/-"-g' {} \;
 	@find ./$(SRC_DIR) -name '*.*' -exec sed -i 's-"util/-"-g' {} \;
-	# Creating config.h and copying it to src dir
-	@cd SEAL && ./configure >/dev/null
-	@cp ./SEAL/config.h ./$(SRC_DIR)/config.h
-
 
 ###############################################################################
 #                               BUILD FHE LIBRARY                             #
@@ -125,12 +121,12 @@ fixoriginal:
 
 %.lo: $(SRC_DIR)/%.cpp $(HEADER)
 	# COMPILATION: Create $@ object from the $< source
-	@libtool --mode=compile $(CC) $(CFLAGS) -shared -DHAVE_CONFIG_H -c $<
+	@libtool --mode=compile $(CC) $(CFLAGS) -shared -c $<
 
 $(LIB_LA): $(LOBJ)
 	# LINKING: Using Libtool to create the library (all .lo into one)
 	@libtool --mode=link $(CC) $(CFLAGS) -o $@ $^ -rpath $(LIB_DIR) \
-	 -version-info $(VERSION)
+	-pthread -lpthread $(LFLAGS) -version-info  $(VERSION)
 
 
 
