@@ -98,7 +98,7 @@ LIB_LA = lib$(LIB_NAME).la
 
 
 
-all: $(LIB_LA)
+all: download fixoriginal $(LIB_LA)
 ###############################################################################
 #                               BUILD FHE LIBRARY                             #
 ###############################################################################
@@ -111,9 +111,12 @@ download:
 
 fixoriginal:
 	# Fixing errors in relative paths wrt. imports
-	@-cp $(SRC_DIR)/util/* $(SRC_DIR)
+	@cp $(SRC_DIR)/util/* $(SRC_DIR)
 	@find ./$(SRC_DIR) -name '*.*' -exec sed -i 's-"seal/-"-g' {} \;
 	@find ./$(SRC_DIR) -name '*.*' -exec sed -i 's-"util/-"-g' {} \;
+	# Including precompiled config.h
+	@cp config.h ./$(SRC_DIR)
+
 
 ###############################################################################
 #                               BUILD FHE LIBRARY                             #
@@ -121,7 +124,7 @@ fixoriginal:
 
 %.lo: $(SRC_DIR)/%.cpp $(HEADER)
 	# COMPILATION: Create $@ object from the $< source
-	@libtool --mode=compile $(CC) $(CFLAGS) -shared -c $<
+	@libtool --mode=compile $(CC) $(CFLAGS) -shared -DHAVE_CONFIG_H -c $<
 
 $(LIB_LA): $(LOBJ)
 	# LINKING: Using Libtool to create the library (all .lo into one)
@@ -144,8 +147,8 @@ install: $(LIB_LA)
 	@-cp -t $(INCLUDE_DIR)/$(LIB_NAME) $(HEADER)
 
 linking:
-	$(eval $LIBLINK:=$(shell cd  && ls lib$(LIB_NAME.so))
-	sudo ln -sf $(LIB_DIR)/$($LIBLINK) /usr/lib/$($LIBLINK)
+	# Installing library in /usr/lib
+	sudo ln -sf $(LIB_DIR)/$(LIB_NAME).so /usr/lib/$($LIBLINK)
 
 ###############################################################################
 #                           CREATE BINARIES WITH SEAL                         #

@@ -84,7 +84,7 @@ CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
 
 
 #.................................. LIBRARY ATTRIBUTES .......................................
-LDLIBS = -lntl -lgmp -lm -lfhe -lafhel
+LDLIBS =  -lgmp -lntl -lm -lfhe -lafhel
 
 
 
@@ -103,24 +103,18 @@ all: requirements install
 ##############################################################################################
 
 
-requirements: packages libdownloads pypackages submodules
+requirements: packages libdownloads submodules
 
 packages:
-	sudo apt-get install python-dev
-	sudo apt-get install libboost-all-dev
-	sudo apt-get install python-pip
-	sudo apt-get install libtool-bin
-	sudo apt-get install m4
+	sudo apt-get install python3-dev wget libboost-all-dev python3-pip libtool-bin m4
 	sudo pip install --upgrade pip
+	sudo pip install --upgrade cython
 
 libdownloads:
 	mkdir -p .installers
 	cp .Makefiles/Makefile_Inst_GMP_NTL .installers/Makefile
 	$(MAKE) -C .installers
 	rm -rf .installers
-
-pypackages:
-	sudo pip install --upgrade cython
 
 submodules:
 	git submodule foreach --recursive git pull
