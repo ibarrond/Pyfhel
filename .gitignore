@@ -27,6 +27,7 @@ src/Pyfhel/build
 # SEAL - They don't allow redistribution
 src/SEAL/*
 !src/SEAL/.gitkeep
+!src/SEAL/config.h
 
 # Afhel environments
 **.aenv

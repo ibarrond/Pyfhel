@@ -1,3 +1,5 @@
+# distutils: language = c++
+
 # Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.string cimport string
 from libcpp cimport bool
@@ -5,14 +7,14 @@ from libcpp cimport bool
 # Import our own wrapper for iostream classes, used for I/O ops
 from iostream cimport ifstream, ofstream   
 
-from Afseal cimport Plaintext
+# Import the Plaintext from Afseal
 from Afseal cimport Ciphertext
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
 
-cdef class PyCtxt(object):
-    cdef Ciphertext* _ptr_ctxt
+cdef class PyCtxt:
+    
     def __cinit__(self, PyCtxt other=None):
         if other:
             self._ptr_ctxt = new Ciphertext(deref(other._ptr_ctxt))
@@ -22,13 +24,13 @@ cdef class PyCtxt(object):
         if self._ptr_ctxt != NULL:
             del self._ptr_ctxt
             
-    cpdef size_capacity(self):
+    cpdef int size_capacity(self):
         return self._ptr_ctxt.size_capacity()
     
-    cpdef size(self):
+    cpdef int size(self):
         return self._ptr_ctxt.size()
     
-    cpdef save(self, string fileName):
+    cpdef void save(self, string fileName):
         cdef ofstream outputter
         outputter.open(fileName)
         try:
@@ -36,7 +38,7 @@ cdef class PyCtxt(object):
         finally:
             outputter.close()
 
-    cpdef load(self, string fileName):
+    cpdef void load(self, string fileName):
         cdef ifstream inputter
         inputter.open(fileName)
         try:

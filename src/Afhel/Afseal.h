@@ -38,7 +38,7 @@
 #include <thread>	/* memory pools, multithread*/
 #include <memory>	/* Smart Pointers*/
 
-#include "seal/seal.h"
+#include <seal/seal.h>
 
 using namespace std;
 using namespace seal;
