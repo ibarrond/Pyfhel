@@ -52,7 +52,7 @@ PY_PACKAGE_MGT=pip
 #                                   BUILD&INSTALL MODULE                                     #
 ##############################################################################################
 
-all: Pyfhel.pyx PyPtxt.py PyCtxt.py
+all: Pyfhel.pyx PyPtxt.pyx PyCtxt.pyx
 	sudo $(PY_PACKAGE_MGT) install .
 
 upgrade: 
@@ -66,7 +66,7 @@ uninstall:
 	sudo $(PY_PACKAGE_MGT) uninstall Pyfhel
 
 clean:
-	sudo rm -rf *.pyc *.c *.cpp build
+	sudo rm -rf *.pyc *.c *.cpp *.so *.egg-info build dist 
 
 
 ##############################################################################################

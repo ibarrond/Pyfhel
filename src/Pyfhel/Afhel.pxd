@@ -10,7 +10,7 @@ from libc.stdint cimport uint64_t
 from iostream cimport istream, ostream, ifstream, ofstream       
         
 # SEAL plaintext class        
-cdef extern from "seal/plaintext.h" namespace "seal":
+cdef extern from "seal/plaintext.h" namespace "seal" nogil:
     cdef cppclass Plaintext:
         Plaintext() except +
         Plaintext(const Plaintext &copy) except +
@@ -19,7 +19,7 @@ cdef extern from "seal/plaintext.h" namespace "seal":
         void load(istream &stream) except +
         
 # SEAL ciphertext class        
-cdef extern from "seal/ciphertext.h" namespace "seal":
+cdef extern from "seal/ciphertext.h" namespace "seal" nogil:
     cdef cppclass Ciphertext:
         Ciphertext() except +
         Ciphertext(const Ciphertext &copy) except +
@@ -29,7 +29,7 @@ cdef extern from "seal/ciphertext.h" namespace "seal":
         void load(istream &stream) except +
 
 # Afseal class to abstract SEAL
-cdef extern from "afseal/Afseal.h" namespace "std":
+cdef extern from "afseal/Afseal.h" nogil:
     cdef cppclass Afseal:
         # ----------------------- OBJECT MANAGEMENT ---------------------------
         Afseal() except +

@@ -7,7 +7,7 @@ from libcpp cimport bool
 # Import our own wrapper for iostream classes, used for I/O ops
 from iostream cimport ifstream, ofstream   
 
-from Afseal cimport Plaintext
+from Afhel cimport Plaintext
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
