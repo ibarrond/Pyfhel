@@ -1,5 +1,7 @@
 # distutils: language = c++
-
+"""PyCtxt. Ciphertext of Pyfhel, Python For Homomorphic Encryption Libraries.
+"""
+# -------------------------------- IMPORTS ------------------------------------
 # Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.string cimport string
 from libcpp cimport bool
@@ -13,6 +15,7 @@ from Afhel cimport Ciphertext
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
 
+# ----------------------------- IMPLEMENTATION --------------------------------
 cdef class PyCtxt:
     """Ciphertext of Pyfhel. Contains a value/vector of encrypted ints/doubles.
 
@@ -20,7 +23,7 @@ cdef class PyCtxt:
     corresponding to the backend selected in Pyfhel. By default, it is SEAL.
 
     Attributes:
-        other (:obj:`PyCtxt`, optional): Object to deep copy
+        other (:obj:`PyCtxt`, optional): Other PyCtxt to deep copy
     
     """
     
@@ -32,13 +35,11 @@ cdef class PyCtxt:
     def __dealloc__(self):
         if self._ptr_ctxt != NULL:
             del self._ptr_ctxt
-    
-    @property        
+           
     cpdef int size_capacity(self):
         """int: Maximum size the ciphertext can hold."""
         return self._ptr_ctxt.size_capacity()
-    
-    @property   
+     
     cpdef int size(self):
         """int: Actual size of the ciphertext."""
         return self._ptr_ctxt.size()

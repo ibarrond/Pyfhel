@@ -16,6 +16,6 @@ cdef class PyPtxt:
     cdef Plaintext* _ptr_ptxt
     
     cpdef bool is_zero(self)
-#    cpdef string to_string(self)
+    cpdef string to_string(self)
     cpdef void save(self, string fileName)
     cpdef void load(self, string fileName)

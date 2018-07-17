@@ -15,6 +15,7 @@ cdef extern from "seal/plaintext.h" namespace "seal" nogil:
         Plaintext() except +
         Plaintext(const Plaintext &copy) except +
         bool is_zero() except +
+        string to_string() except +
         void save(ostream &stream) except +
         void load(istream &stream) except +
         
