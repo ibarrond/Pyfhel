@@ -1,3 +1,6 @@
+# distutils: language = c++
+
+# -------------------------------- IMPORTS ------------------------------------
 # Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -5,10 +8,11 @@ from libcpp cimport bool
 from libc.stdint cimport int64_t
 from libc.stdint cimport uint64_t
         
-
 # Import our own wrapper for iostream classes, used for I/O ops
 from iostream cimport istream, ostream, ifstream, ofstream       
-        
+
+
+# --------------------------- EXTERN DECLARATION ------------------------------
 # SEAL plaintext class        
 cdef extern from "seal/plaintext.h" namespace "seal" nogil:
     cdef cppclass Plaintext:
@@ -126,14 +130,16 @@ cdef extern from "afseal/Afseal.h" nogil:
         # -------------------------------- I/O --------------------------------
         bool saveContext(string fileName) except +
         bool restoreContext(string fileName) except +
+        
         bool savepublicKey(string fileName) except +
         bool restorepublicKey(string fileName) except +
+        
         bool savesecretKey(string fileName) except +
         bool restoresecretKey(string fileName) except +
+        
         bool saverelinKey(string fileName) except +
-
         bool restorerelinKey(string fileName) except +
-
+        
         bool saverotateKey(string fileName) except +
         bool restoregalKey(string fileName) except +
 

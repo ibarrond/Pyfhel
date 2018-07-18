@@ -1,6 +1,7 @@
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
+import numpy
 
 # Compile flags for extensions
 extra_compile_flags = [ "-std=c++17", "-O3", "-DNDEBUG", "-Wall",\
@@ -22,7 +23,7 @@ setup(
     author_email    = "ibarrond@eurecom.fr",
     description     = "Python for Homomorphic Encryption Libraries",
     long_description = long_description,
-    long_description_content_type="text/markdown",
+   # long_description_content_type="text/markdown",
     keywords        = "homomorphic encryption python cryptography",
     license         = "GNU GPLv3",
     url             = "https://github.com/ibarrond/Pyfhel",     
@@ -39,8 +40,8 @@ setup(
              name="Pyfhel",
              sources=["Pyfhel.pyx"],
              libraries=["seal", "afhel"],
-             include_dirs=[],
-       #      library_dirs=["/usr/include/python3.6"],
+             include_dirs=[numpy.get_include()],
+             library_dirs=["/usr/include/python3.6"],
              language="c++17",
              extra_compile_args=extra_compile_flags,
          ),
@@ -49,7 +50,7 @@ setup(
              sources=["PyPtxt.pyx"],
              libraries=["seal", "afhel"],
              include_dirs=[],
-      #       library_dirs=["/usr/include/python3.6"],
+             library_dirs=["/usr/include/python3.6"],
              language="c++17",
              extra_compile_args=extra_compile_flags,
          ),
@@ -58,7 +59,7 @@ setup(
              sources=["PyCtxt.pyx"],
              libraries=["seal", "afhel"],
              include_dirs=[],
-      #       library_dirs=["/usr/include/python3.6"],
+             library_dirs=["/usr/include/python3.6"],
              language="c++17",
              extra_compile_args=extra_compile_flags,
          ),

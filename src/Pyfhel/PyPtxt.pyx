@@ -2,15 +2,8 @@
 """PyPtxt. Plaintext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
-# Import from Cython libs required C/C++ types for the Afhel API
-from libcpp.string cimport string
-from libcpp cimport bool
-
-# Import our own wrapper for iostream classes, used for I/O ops
-from iostream cimport ifstream, ofstream   
-
-# Import the Plaintext from Afhel
-from Afhel cimport Plaintext
+# Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
+from util import ENCODING_T
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
@@ -27,6 +20,7 @@ cdef class PyPtxt:
     
     """
     def __cinit__(self, PyPtxt other=None):
+        self._encoding = ENCODING_T.UNDEFINED
         if other:
             self._ptr_ptxt = new Plaintext(deref(other._ptr_ptxt))
         else:
@@ -36,6 +30,23 @@ cdef class PyPtxt:
         if self._ptr_ptxt != NULL:
             del self._ptr_ptxt
             
+    @property
+    def _encoding(self):
+        """returns the encoding type"""
+        return self.encoding
+    
+    @_encoding.setter
+    def _encoding(self, newEncoding):
+        """Sets Encoding type: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH""" 
+        if not isinstance(newEncoding, ENCODING_T):
+            raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be a valid ENCODING_T Enum")        
+        self.encoding = newEncoding
+        
+    @_encoding.deleter
+    def _encoding(self):
+        """Sets Encoding to 1-UNDEFINED""" 
+        self.encoding = ENCODING_T.UNDEFINED
+        
     cpdef bool is_zero(self):
         """bool: Flag to quickly check if it is empty"""
         return self._ptr_ptxt.is_zero()

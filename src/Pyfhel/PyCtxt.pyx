@@ -2,15 +2,8 @@
 """PyCtxt. Ciphertext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
-# Import from Cython libs required C/C++ types for the Afhel API
-from libcpp.string cimport string
-from libcpp cimport bool
-
-# Import our own wrapper for iostream classes, used for I/O ops
-from iostream cimport ifstream, ofstream   
-
-# Import the Plaintext from Afhel
-from Afhel cimport Ciphertext
+# Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
+from util import ENCODING_T
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
@@ -26,16 +19,34 @@ cdef class PyCtxt:
         other (:obj:`PyCtxt`, optional): Other PyCtxt to deep copy
     
     """
-    
     def __cinit__(self, PyCtxt other=None):
+        self._encoding = ENCODING_T.UNDEFINED
         if other:
             self._ptr_ctxt = new Ciphertext(deref(other._ptr_ctxt))
         else:
             self._ptr_ctxt = new Ciphertext()
+            
     def __dealloc__(self):
         if self._ptr_ctxt != NULL:
             del self._ptr_ctxt
            
+    @property
+    def _encoding(self):
+        """returns the encoding type"""
+        return self.encoding
+    
+    @_encoding.setter
+    def _encoding(self, newEncoding):
+        """Sets Encoding type: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH""" 
+        if not isinstance(newEncoding, ENCODING_T):
+            raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be a valid ENCODING_T Enum")       
+        self.encoding = newEncoding
+        
+    @_encoding.deleter
+    def _encoding(self):
+        """Sets Encoding to 1-UNDEFINED""" 
+        self.encoding = ENCODING_T.UNDEFINED
+        
     cpdef int size_capacity(self):
         """int: Maximum size the ciphertext can hold."""
         return self._ptr_ctxt.size_capacity()
