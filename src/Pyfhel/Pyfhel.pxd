@@ -24,11 +24,21 @@ from PyCtxt cimport PyCtxt
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class Pyfhel:
     cdef Afseal* afseal           # The C++ methods are accessed via a pointer
-    cpdef void ContextGen(self, long p, long m, bool flagBatching,
-                  long base, long sec, int intDigits, int fracDigits) except +
-    cpdef void KeyGen(self)
-    cpdef PyCtxt encryptInt(self, int64_t value, PyCtxt ctxt)
-    cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt)
-    cpdef PyCtxt encryptBatch(self, vector[int64_t] vec, PyCtxt ctxt)
-    cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt)
-    cpdef decrypt(self, PyCtxt ctxt, PyPtxt ptxt)
+    
+    # =========================== CRYPTOGRAPHY =================================
+    cpdef ContextGen(self, long p, long m=*, bool flagBatching=*, long base=*,
+                     long sec=*, int intDigits=*, int fracDigits=*) except +
+    cpdef void KeyGen(self) except +
+    cpdef PyCtxt encryptInt(self, int64_t value, PyCtxt ctxt=*) except +
+    cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=*) except +
+    cpdef PyCtxt encryptBatch(self, vector[int64_t] vec, PyCtxt ctxt=*) except +
+    cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=*) except +
+    
+    cpdef int64_t decryptInt(self, PyCtxt ctxt, int64_t output_value=*) except +
+    cpdef double decryptFrac(self, PyCtxt ctxt, double output_value=*) except +
+    cpdef vector[int64_t] decryptBatch(self, PyCtxt ctxt, vector[int64_t] output_vector=*) except +
+    cpdef PyPtxt decryptPtxt(self, PyCtxt ctxt, PyPtxt ptxt=*) except +
+    
+    cpdef int noiseLevel(PyCtxt ctxt) except +
+    
+    # ============================= ENCODING ===================================
