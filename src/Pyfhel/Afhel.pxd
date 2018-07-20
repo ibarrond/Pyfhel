@@ -141,7 +141,7 @@ cdef extern from "afseal/Afseal.h" nogil:
         bool restorerelinKey(string fileName) except +
         
         bool saverotateKey(string fileName) except +
-        bool restoregalKey(string fileName) except +
+        bool restorerotateKey(string fileName) except +
 
         # ----------------------------- AUXILIARY -----------------------------
         bool batchEnabled() except +
