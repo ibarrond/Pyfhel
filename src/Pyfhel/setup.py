@@ -1,7 +1,7 @@
 # --------------------------------- IMPORTS -----------------------------------
 # Create Extension modules written in C for Python
-from distutils.core import setup
-from distutils.extension import Extension
+from setuptools import setup
+from setuptools import Extension
 
 # Convert Cython code into C code
 from Cython.Build import cythonize
@@ -33,7 +33,7 @@ setup(
     author_email    = "ibarrond@eurecom.fr",
     description     = "Python for Homomorphic Encryption Libraries",
     long_description= long_description,
-   # long_description_content_type="text/markdown",
+    long_description_content_type="text/markdown",
     keywords        = "homomorphic encryption cython cryptography",
     license         = "GNU GPLv3",
     url             = "https://github.com/ibarrond/Pyfhel",     

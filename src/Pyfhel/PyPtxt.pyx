@@ -1,4 +1,7 @@
 # distutils: language = c++
+# cython: boundscheck = False
+# cython: wraparound = False
+
 """PyPtxt. Plaintext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------

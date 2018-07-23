@@ -1,3 +1,5 @@
+# cython: boundscheck = False
+
 #   --------------------------------------------------------------------
 #   Pyfhel.pyx
 #   Author: Alberto Ibarrondo
@@ -22,8 +24,8 @@
 
 Encrypted addition, multiplication, substraction, exponentiation of 
 integers/doubles. Implementation of homomorphic encryption using 
-SEAL/PALISADE/HELIB as backend. Pyfhel works with PyPtxt as plaintext 
-class and PyCtxt as cyphertext class.
+SEAL/PALISADE/HELIB as backend. Pyfhel works with PyPtxt as  
+plaintext class and PyCtxt as cyphertext class.
 
 Example:
     >>> he = Pyfhel()
@@ -57,7 +59,25 @@ VALUE_T = FLOAT_T + (int, np.ndarray)
 
 # ------------------------- PYTHON IMPLEMENTATION -----------------------------
 cdef class Pyfhel:
+    """PYFHEL, PYthon For Homomorphic Encryption Libraries.
 
+    Encrypted addition, multiplication, substraction, exponentiation of 
+    integers/doubles. Implementation of homomorphic encryption using 
+    SEAL/PALISADE/HELIB as backend. Pyfhel works with PyPtxt as  
+    plaintext class and PyCtxt as cyphertext class.
+    
+    Example:
+    >>> he = Pyfhel()
+    >>> he.ContextGen(p=65537)
+    >>> he.KeyGen(p=65537)
+    >>> p1 = he.encode(4)
+    >>> p2 = he.encode(2)
+    >>> c1 = he.encrypt(p1)
+    >>> c2 = he.encrypt(p2)
+    >>> c1 = c1 + c2
+    >>> p_res = he.decrypt(c1)
+    6
+    """
     def __cinit__(self):
         self.afseal = new Afseal()
     def __dealloc__(self):
@@ -99,7 +119,8 @@ cdef class Pyfhel:
         Return:
             None
         """
-        self.afseal.ContextGen(p, m, flagBatching, base, sec,intDigits, fracDigits)
+        self.afseal.ContextGen(p, m, flagBatching, base,
+                               sec,intDigits, fracDigits)
         
         
     cpdef void KeyGen(self) except +:
@@ -158,7 +179,19 @@ cdef class Pyfhel:
         ctxt._encoding = ENCODING_T.FRACTIONAL
         return ctxt
     
-    cpdef PyCtxt encryptBatch(self, vector[int64_t] vec, PyCtxt ctxt=None) except +: 
+    
+    cpdef PyCtxt encryptArray(self, int[::1] arr,
+                              PyCtxt ctxt=None) except +:
+        if (ctxt._ptr_ctxt == NULL):
+            ctxt = PyCtxt()
+        cdef vector[int64_t] vec;
+        vec.assign(&arr[0], &arr[-1])
+        self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
+        ctxt._encoding = ENCODING_T.BATCH
+        return ctxt  
+        
+    cpdef PyCtxt encryptBatch(self, vector[int64_t] vec,
+                              PyCtxt ctxt=None) except +: 
         """Encrypts a 1D vector of integers into a PyCtxt ciphertext.
         
         Encrypts a 1D vector of integers using the current private key,
@@ -173,7 +206,7 @@ cdef class Pyfhel:
         Return:
             PyCtxt: the ciphertext containing the encrypted plaintext
         """
-        if (ctxt._ptr_ctxt == NULL):
+        if (ctxt._ptr_ctxt):
             ctxt = PyCtxt()
         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
         ctxt._encoding = ENCODING_T.BATCH

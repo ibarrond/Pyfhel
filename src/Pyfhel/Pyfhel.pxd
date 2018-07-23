@@ -32,6 +32,7 @@ cdef class Pyfhel:
     cpdef void KeyGen(self) except +
     cpdef PyCtxt encryptInt(self, int64_t value, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=*) except +
+    cpdef PyCtxt encryptArray(self, int[::1] arr, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptBatch(self, vector[int64_t] vec, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=*) except +
     
