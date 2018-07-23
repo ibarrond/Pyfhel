@@ -2,6 +2,9 @@
 """PyCtxt. Ciphertext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
+# Import Pyfhel for operations
+from Pyfhel import Pyfhel
+
 # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
 from util import ENCODING_T
 
@@ -16,13 +19,18 @@ cdef class PyCtxt:
     corresponding to the backend selected in Pyfhel. By default, it is SEAL.
 
     Attributes:
-        other (:obj:`PyCtxt`, optional): Other PyCtxt to deep copy
+        pyfhel (Pyfhel, optional): Other PyCtxt to deep copy.
+        other (PyCtxt, optional): Other PyCtxt to deep copy.
     
     """
-    def __cinit__(self, PyCtxt other=None):
+    def __cinit__(self, Pyfhel pyfhel=None, PyCtxt other=None):
         self._encoding = ENCODING_T.UNDEFINED
+        if pyfhel:
+            self._pyfhel = pyfhel
         if other:
             self._ptr_ctxt = new Ciphertext(deref(other._ptr_ctxt))
+            self._encoding = other._encoding
+            self._pyfhel   = other._pyfhel
         else:
             self._ptr_ctxt = new Ciphertext()
             
@@ -33,19 +41,28 @@ cdef class PyCtxt:
     @property
     def _encoding(self):
         """returns the encoding type"""
-        return self.encoding
-    
+        return self._encoding
     @_encoding.setter
-    def _encoding(self, newEncoding):
+    def _encoding(self, new_encoding):
         """Sets Encoding type: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH""" 
-        if not isinstance(newEncoding, ENCODING_T):
+        if not isinstance(new_encoding, ENCODING_T):
             raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be a valid ENCODING_T Enum")       
-        self.encoding = newEncoding
-        
+        self._encoding = new_encoding
     @_encoding.deleter
     def _encoding(self):
         """Sets Encoding to 1-UNDEFINED""" 
-        self.encoding = ENCODING_T.UNDEFINED
+        self._encoding = ENCODING_T.UNDEFINED
+        
+    @property
+    def _pyfhel(self):
+        """A pyfhel instance, used for operations"""
+        return self._pyfhel
+    @_pyfhel.setter
+    def _pyfhel(self, Pyfhel new_pyfhel):
+        """Sets the pyfhel instance, used for operations""" 
+        if not isinstance(new_pyfhel, Pyfhel):
+            raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
+        self._pyfhel = new_pyfhel 
         
     cpdef int size_capacity(self):
         """int: Maximum size the ciphertext can hold."""
@@ -82,3 +99,88 @@ cdef class PyCtxt:
             self._ptr_ctxt.load(inputter)
         finally:
             inputter.close()
+            
+            
+    def __neg__(self):
+        """Negates this ciphertext.
+        """
+        self._pyfhel.negate(self)
+        
+    def __add__(self, other):
+        """Sums this ciphertext with either another PyCtx or a PyPtxt plaintext.
+        
+        Sums with a PyPtxt/PyCtxt, storing the result in this ciphertext.
+
+        Args:
+            other (PyCtxt|PyPtxt): Second summand.
+            
+        Raise:
+            TypeError: if other doesn't have a valid type.
+        """
+        if isinstance(other, PyCtxt):
+            self._pyfhel.add_encr(self, other)
+        elif isinstance(other, PyPtxt):
+            self._pyfhel.add_plain(self, other)
+        else:
+            raise TypeError("<Pyfhel ERROR> other summand must be either PyCtxt or PyPtxt")
+            
+            
+    def __sub__(self, other):
+        """Substracts this ciphertext with either another PyCtx or a PyPtxt plaintext.
+        
+        Substracts with a PyPtxt/PyCtxt, storing the result in this ciphertext.
+
+        Args:
+            other (PyCtxt|PyPtxt): Substrahend, to be substracted from this ciphertext.
+            
+        Raise:
+            TypeError: if other doesn't have a valid type.
+        """
+        if isinstance(other, PyCtxt):
+            self._pyfhel.sub_encr(self, other)
+        elif isinstance(other, PyPtxt):
+            self._pyfhel.sub_plain(self, other)
+        else:
+            raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
+            
+                        
+    def __mul__(self, other):
+        """Multiplies this ciphertext with either another PyCtx or a PyPtxt plaintext.
+        
+        Multiplies with a PyPtxt/PyCtxt, storing the result in this ciphertext.
+
+        Args:
+            other (PyCtxt|PyPtxt): Multiplier, to be multiplied with this ciphertext.
+            
+        Raise:
+            TypeError: if other doesn't have a valid type.
+        """
+        if isinstance(other, PyCtxt):
+            self._pyfhel.mult_encr(self, other)
+        elif isinstance(other, PyPtxt):
+            self._pyfhel.mult_plain(self, other)
+        else:
+            raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
+            
+                                    
+    def __pow__(self, exponent, modulo):
+        """Exponentiates this ciphertext to the desired exponent.
+        
+        Exponentiates to the desired exponent.
+
+        Args:
+            exponent (int): Exponent for the power.
+        """
+        if(exponent==2):
+            self._pyfhel.square(exponent)  
+        else:
+            self._pyfhel.exponentiate(exponent)     
+                
+                
+    def __rshift__(self, k):
+        """Rotates this ciphertext k positions.
+
+        Args:
+            k (int): Number of positions to rotate.
+        """
+        self._pyfhel.rotate(self, k)

@@ -648,12 +648,12 @@ cdef class Pyfhel:
         """
         self.afseal.negate(deref(ctxt._ptr_ctxt))
         
-    def add(self, ctxt not None, ctxt_or_ptxt not None) except +:
+    def add(self, ctxt not None, ctxt_or_ptxt not None):
         """Add PyCtxt ciphertext by either a PyCtxt ciphertext or a PyPtxt plaintext.
         
         Encrypted addition. Encoding must be the same. Requires same
         context and encryption with same public key. The result is applied
-        to the first ciphertext.
+        to the first ciphertext.i
     
         Args:
             ctxt (PyCtxt): ciphertext whose values are added with ctxt_or_ptxt.  
@@ -664,14 +664,14 @@ cdef class Pyfhel:
         """
         if not isinstance(ctxt, PyCtxt):
             raise TypeError('<Pyfhel ERROR> ctxt is not a PyCtxt cyphertext, but type '
-                            +type(ptxt))
+                            +type(ctxt))
         if isinstance(ctxt_or_ptxt, PyCtxt):
             self.add_encr(ctxt, ctxt_or_ptxt)
         elif isinstance(ctxt_or_ptxt, PyPtxt):
             self.add_plain(ctxt, ctxt_or_ptxt)
         else:
             raise TypeError('<Pyfhel ERROR> ctxt_or_ptxt is neither a PyCtxt cyphertext,'
-                            ' nor a PyPtxt plaintext, but type '+type(ptxt))   
+                            ' nor a PyPtxt plaintext, but type '+type(ctxt_or_ptxt))   
         
     cpdef void add_encr(self, PyCtxt ctxt, PyCtxt ctxt_other) except +:
         """Sum two PyCtxt ciphertexts.
@@ -709,7 +709,7 @@ cdef class Pyfhel:
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms")
         self.afseal.add(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
 
-    def sub(self, ctxt not None, ctxt_or_ptxt not None) except +:
+    def sub(self, ctxt not None, ctxt_or_ptxt not None):
         """Substract PyCtxt ciphertext by either a PyCtxt ciphertext or a PyPtxt plaintext.
         
         Encrypted substraction. Encoding must be the same. Requires same
@@ -725,14 +725,14 @@ cdef class Pyfhel:
         """
         if not isinstance(ctxt, PyCtxt):
             raise TypeError('<Pyfhel ERROR> ctxt is not a PyCtxt cyphertext, but type '
-                            +type(ptxt))
+                            +type(ctxt))
         if isinstance(ctxt_or_ptxt, PyCtxt):
             self.sub_encr(ctxt, ctxt_or_ptxt)
         elif isinstance(ctxt_or_ptxt, PyPtxt):
             self.sub_plain(ctxt, ctxt_or_ptxt)
         else:
             raise TypeError('<Pyfhel ERROR> ctxt_or_ptxt is neither a PyCtxt cyphertext,'
-                            ' nor a PyPtxt plaintext, but type '+type(ptxt))
+                            ' nor a PyPtxt plaintext, but type '+type(ctxt_or_ptxt))
             
     cpdef void sub_encr(self, PyCtxt ctxt, PyCtxt ctxt_other) except +:
         """Substracts one PyCtxt ciphertext from another.
@@ -772,7 +772,7 @@ cdef class Pyfhel:
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms")
         self.afseal.sub(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
     
-    def multiply(self, ctxt not None, ctxt_or_ptxt not None) except +:
+    def multiply(self, ctxt not None, ctxt_or_ptxt not None):
         """Multiply PyCtxt ciphertext by either a PyCtxt ciphertext or a PyPtxt plaintext.
         
         Encrypted multiplication. Encoding must be the same. Requires same
@@ -788,14 +788,14 @@ cdef class Pyfhel:
         """
         if not isinstance(ctxt, PyCtxt):
             raise TypeError('<Pyfhel ERROR> ctxt is not a PyCtxt cyphertext, but type '
-                            +type(ptxt))
+                            +type(ctxt))
         if isinstance(ctxt_or_ptxt, PyCtxt):
             self.multiply_encr(ctxt, ctxt_or_ptxt)
         elif isinstance(ctxt_or_ptxt, PyPtxt):
             self.multiply_plain(ctxt, ctxt_or_ptxt)
         else:
             raise TypeError('<Pyfhel ERROR> ctxt_or_ptxt is neither a PyCtxt cyphertext,'
-                            ' nor a PyPtxt plaintext, but type '+type(ptxt))
+                            ' nor a PyPtxt plaintext, but type '+type(ctxt_or_ptxt))
 
         
     cpdef void multiply_encr(self, PyCtxt ctxt, PyCtxt ctxt_other) except +:
