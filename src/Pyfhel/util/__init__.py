@@ -1,1 +1,3 @@
-from .ENCODING_T import ENCODING_T
+__all__ = ["ENCODING_t"]
+
+from .ENCODING_t import ENCODING_t

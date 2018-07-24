@@ -11,14 +11,10 @@ from iostream cimport ifstream, ofstream
 # Import Ciphertext class, original for SEAL
 from Afhel cimport Ciphertext
 
-# Import Pyfhel for operations
-from Pyfhel cimport Pyfhel
-from PyPtxt cimport PyPtxt
 
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class PyCtxt:
     cdef Ciphertext* _ptr_ctxt
-    cdef Pyfhel _pyfhel
     cpdef int size_capacity(self)
     cpdef int size(self)
     cpdef void save(self, string fileName)

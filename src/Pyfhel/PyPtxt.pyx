@@ -5,8 +5,8 @@
 """PyPtxt. Plaintext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
-# Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
-from util import ENCODING_T
+# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
+from util.ENCODING_t import ENCODING_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
@@ -22,12 +22,10 @@ cdef class PyPtxt:
         other (:obj:`PyPtxt`, optional): Other PyPtxt to deep copy
     
     """
+    
     def __cinit__(self, PyPtxt other=None):
         self._encoding = ENCODING_T.UNDEFINED
-        if other:
-            self._ptr_ptxt = new Plaintext(deref(other._ptr_ptxt))
-        else:
-            self._ptr_ptxt = new Plaintext()
+        self._ptr_ptxt = new Plaintext()
             
     def __dealloc__(self):
         if self._ptr_ptxt != NULL:
@@ -36,19 +34,21 @@ cdef class PyPtxt:
     @property
     def _encoding(self):
         """returns the encoding type"""
-        return self.encoding
+        return ENCODING_t(self._encoding)
     
     @_encoding.setter
-    def _encoding(self, newEncoding):
-        """Sets Encoding type: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH""" 
-        if not isinstance(newEncoding, ENCODING_T):
-            raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be a valid ENCODING_T Enum")        
-        self.encoding = newEncoding
+    def _encoding(self, new_encoding):
+        """Sets Encoding type: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH""" 
+        if not isinstance(new_encoding, ENCODING_t):
+            raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be ENCODING_t")        
+        self._encoding = new_encoding.value
         
     @_encoding.deleter
     def _encoding(self):
         """Sets Encoding to 1-UNDEFINED""" 
-        self.encoding = ENCODING_T.UNDEFINED
+        self._encoding = ENCODING_t.UNDEFINED.value
+              
+
         
     cpdef bool is_zero(self):
         """bool: Flag to quickly check if it is empty"""

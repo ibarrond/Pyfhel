@@ -46,14 +46,7 @@ setup(
         "Topic :: Security :: Cryptography",
     ),
     ext_modules = cythonize([
-         Extension(
-             name="Pyfhel",
-             sources=["Pyfhel.pyx"],
-             libraries=libraries,
-             include_dirs=include_dirs,
-             language=language,
-             extra_compile_args=extra_compile_flags,
-         ),
+
          Extension(
              name="PyPtxt",
              sources=["PyPtxt.pyx"],
@@ -71,6 +64,7 @@ setup(
              library_dirs=[],
              language=language,
              extra_compile_args=extra_compile_flags,
-         ),
-    ])
+         ),      
+    ]),
+    test_suite="test",
 )

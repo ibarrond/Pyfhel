@@ -265,9 +265,9 @@ cdef class Pyfhel:
                                 '1D vector of int values, cannot encrypt.')
             return self.encryptBatch(ptxt, ctxt)  
         elif isinstance(ptxt, float):
-            return self.encryptValue(<float>ptxt, ctxt)   
+            return self.encryptFrac(<float>ptxt, ctxt)   
         elif isinstance(ptxt, Number):
-            return self.encryptValue(<int>ptxt, ctxt)  
+            return self.encryptInt(<int>ptxt, ctxt)  
         else:
             raise TypeError('<Pyfhel ERROR> Plaintext type \['+type(ptxt)+
                             '\] not supported for encryption')

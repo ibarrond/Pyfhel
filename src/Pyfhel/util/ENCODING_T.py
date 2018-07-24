@@ -1,2 +1,0 @@
-from enum import Enum
-ENCODING_T = Enum('ENCODING_T', 'UNDEFINED INTEGER FRACTIONAL BATCH')

@@ -5,8 +5,9 @@
 """PyCtxt. Ciphertext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
-# Import Pyfhel for operations
+# Import Pyfhel and PyPtxt for operations
 from Pyfhel import Pyfhel
+from PyPtxt import PyPtxt
 
 # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
 from util import ENCODING_T
@@ -26,14 +27,11 @@ cdef class PyCtxt:
         other (PyCtxt, optional): Other PyCtxt to deep copy.
     
     """
-    def __cinit__(self, Pyfhel pyfhel=None, PyCtxt other=None):
+    def __cinit__(self, PyCtxt other=None):
         self._encoding = ENCODING_T.UNDEFINED
-        if pyfhel:
-            self._pyfhel = pyfhel
         if other:
             self._ptr_ctxt = new Ciphertext(deref(other._ptr_ctxt))
             self._encoding = other._encoding
-            self._pyfhel   = other._pyfhel
         else:
             self._ptr_ctxt = new Ciphertext()
             
@@ -61,7 +59,7 @@ cdef class PyCtxt:
         """A pyfhel instance, used for operations"""
         return self._pyfhel
     @_pyfhel.setter
-    def _pyfhel(self, Pyfhel new_pyfhel):
+    def _pyfhel(self, new_pyfhel):
         """Sets the pyfhel instance, used for operations""" 
         if not isinstance(new_pyfhel, Pyfhel):
             raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       

@@ -8,12 +8,16 @@ from libcpp cimport bool
 # Import our own wrapper for iostream classes, used for I/O ops
 from iostream cimport ifstream, ofstream   
 
+# Import Plaintext class, original from SEAL
 from Afhel cimport Plaintext
 
+# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
+from util.ENCODING_T cimport ENCODING_T
 # ------------------------------- DECLARATION ---------------------------------
 
 cdef class PyPtxt:
     cdef Plaintext* _ptr_ptxt
+    cdef ENCODING_T _encoding
     cpdef bool is_zero(self)
     cpdef string to_string(self)
     cpdef void save(self, string fileName)
