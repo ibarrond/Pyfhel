@@ -70,7 +70,7 @@ Afseal::~Afseal(){}
 
 // ------------------------------ CRYPTOGRAPHY --------------------------------
 // CONTEXT GENERATION
-void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatching, 
+void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatch, 
                         long new_base, long new_sec, int new_intDigits, 
                         int new_fracDigits){
 	
@@ -79,7 +79,7 @@ void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatching,
 	this->base = new_base;	this->sec = new_sec;
 	this->intDigits = new_intDigits; 
 	this->fracDigits = new_fracDigits;
-	this->flagBatching = new_flagBatching;
+	this->flagBatch = new_flagBatch;
 
     // Context generation
     parms.set_poly_modulus("1x^"+to_string(m)+" + 1");
@@ -96,7 +96,7 @@ void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatching,
 
     // Create Evaluator Key
     this->evaluator=make_shared<Evaluator>(*context);
-    if(this->flagBatching){
+    if(this->flagBatch){
         if(!(*context).qualifiers().enable_batching){
             throw invalid_argument("p not prime | p-1 not multiple 2*m");
         }
@@ -107,6 +107,8 @@ void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatching,
 
 // KEY GENERATION
 void Afseal::KeyGen(){
+    if(context==NULL){throw std::logic_error("Context not initialized");}
+
     this->keyGenObj = make_shared<KeyGenerator>(*context);
     this->publicKey = make_shared<PublicKey>(keyGenObj->public_key());   // Extract keys
     this->secretKey = make_shared<SecretKey>(keyGenObj->secret_key());
@@ -118,25 +120,37 @@ void Afseal::KeyGen(){
 
 // ENCRYPTION
 Ciphertext Afseal::encrypt(Plaintext& plain1) {
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     Ciphertext cipher1; encryptor->encrypt(plain1, cipher1);
     return cipher1;}
 Ciphertext Afseal::encrypt(double& value1) {
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     Ciphertext cipher1; encryptor->encrypt(fracEncoder->encode(value1),cipher1);
     return cipher1;}
 Ciphertext Afseal::encrypt(int64_t& value1) {
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     Ciphertext cipher1; encryptor->encrypt(intEncoder->encode(value1),cipher1);
     return cipher1;}
 Ciphertext Afseal::encrypt(vector<int64_t>& valueV) {
-	if(
-    Ciphertext cipher1; Plaintext plain1; crtBuilder->compose(valueV, plain1);
-    encryptor->encrypt(plain1, cipher1);  return cipher1;}
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
+    if(crtBuilder==NULL){throw std::logic_error("Context not initialized with BATCH support");}
+    Ciphertext cipher1; Plaintext plain1;
+    crtBuilder->compose(valueV, plain1);
+    encryptor->encrypt(plain1, cipher1); 
+    return cipher1;}
 vector<Ciphertext> Afseal::encrypt(vector<int64_t>& valueV, bool& dummy_NoBatch){
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     vector<Ciphertext> cipherV; Ciphertext cipher1;
     for(int64_t& v:valueV){
         encryptor->encrypt(intEncoder->encode(v), cipher1);
         cipherV.emplace_back(cipher1);}
     return cipherV;}
 vector<Ciphertext> Afseal::encrypt(vector<double>& valueV) {
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     vector<Ciphertext> cipherV; Ciphertext cipher1;
     for(double& v:valueV){
         encryptor->encrypt(fracEncoder->encode(v), cipher1);
@@ -144,20 +158,31 @@ vector<Ciphertext> Afseal::encrypt(vector<double>& valueV) {
     return cipherV;}
 
 void Afseal::encrypt(Plaintext& plain1, Ciphertext& cipher1) {
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     encryptor->encrypt(plain1, cipher1);}
 void Afseal::encrypt(double& value1, Ciphertext& cipher1) {
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     encryptor->encrypt(fracEncoder->encode(value1), cipher1);}
 void Afseal::encrypt(int64_t& value1, Ciphertext& cipher1) {
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     encryptor->encrypt(intEncoder->encode(value1), cipher1);}
 void Afseal::encrypt(vector<int64_t>& valueV, Ciphertext& cipherOut){
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
+    if(crtBuilder==NULL){throw std::logic_error("Context not initialized with BATCH support");}
     Plaintext plain1; crtBuilder->compose(valueV, plain1);
     encryptor->encrypt(plain1, cipherOut);}
 void Afseal::encrypt(vector<int64_t>& valueV, vector<Ciphertext>& cipherOut){
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     Ciphertext cipher1;
     for(int64_t& v:valueV){
         encryptor->encrypt(intEncoder->encode(v), cipher1);
         cipherOut.emplace_back(cipher1);}}
 void Afseal::encrypt(vector<double>& valueV, vector<Ciphertext>& cipherOut){
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(encryptor==NULL){throw std::logic_error("Missing a Public Key");}
     Ciphertext cipher1;
     for(double& v:valueV){
         encryptor->encrypt(fracEncoder->encode(v), cipher1);
@@ -166,6 +191,8 @@ void Afseal::encrypt(vector<double>& valueV, vector<Ciphertext>& cipherOut){
 
 //DECRYPTION
 vector<int64_t> Afseal::decrypt(Ciphertext& cipher1) {
+    if(decryptor==NULL){throw std::logic_error("Missing a Private Key");}
+    if(crtBuilder==NULL){throw std::logic_error("Context not initialized with BATCH support");}
     Plaintext plain1;
     vector<int64_t> valueVOut;
     decryptor->decrypt(cipher1, plain1);
@@ -173,24 +200,35 @@ vector<int64_t> Afseal::decrypt(Ciphertext& cipher1) {
 	return valueVOut;
     }
 void Afseal::decrypt(Ciphertext& cipher1, Plaintext& plain1) {
+    if(decryptor==NULL){throw std::logic_error("Missing a Private Key");}
     decryptor->decrypt(cipher1, plain1);}
 void Afseal::decrypt(Ciphertext& cipher1, int64_t& valueOut) {
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(decryptor==NULL){throw std::logic_error("Missing a Private Key");}
     Plaintext plain1; decryptor->decrypt(cipher1, plain1);
     valueOut = intEncoder->decode_int64(plain1);}
 void Afseal::decrypt(Ciphertext& cipher1, double& valueOut) {
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(decryptor==NULL){throw std::logic_error("Missing a Private Key");}
     Plaintext plain1; decryptor->decrypt(cipher1, plain1);
     valueOut = fracEncoder->decode(plain1);}
 void Afseal::decrypt(vector<Ciphertext>& cipherV, vector<int64_t>& valueVOut) {
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(decryptor==NULL){throw std::logic_error("Missing a Private Key");}
     Plaintext plain1;
     for(Ciphertext& c:cipherV){
         decryptor->decrypt(c, plain1);
         valueVOut.emplace_back(intEncoder->decode_int64(plain1));}}
 void Afseal::decrypt(vector<Ciphertext>& cipherV, vector<double>& valueVOut) {
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
+    if(decryptor==NULL){throw std::logic_error("Missing a Private Key");}
     Plaintext plain1;
     for(Ciphertext& c:cipherV){
         decryptor->decrypt(c, plain1);
         valueVOut.emplace_back(fracEncoder->decode(plain1));}}
 void Afseal::decrypt(Ciphertext& cipher1, vector<int64_t>& valueVOut){
+    if(decryptor==NULL){throw std::logic_error("Missing a Private Key");}
+    if(crtBuilder==NULL){throw std::logic_error("Context not initialized with BATCH support");}
     Plaintext plain1;
     decryptor->decrypt(cipher1, plain1);
     crtBuilder->decompose(plain1, valueVOut);
@@ -199,111 +237,145 @@ void Afseal::decrypt(Ciphertext& cipher1, vector<int64_t>& valueVOut){
 // ---------------------------------- CODEC -----------------------------------
 // ENCODE
 Plaintext Afseal::encode(int64_t& value1) {
-    Plaintext plain1 = intEncoder->encode(value1);  return plain1;}
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
+    return intEncoder->encode(value1); }
 Plaintext Afseal::encode(double& value1) {
-    Plaintext plain1 = fracEncoder->encode(value1); return plain1;}
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
+    return fracEncoder->encode(value1); }
 Plaintext Afseal::encode(vector<int64_t> &values) { // Batching
+    if(crtBuilder==NULL){throw std::logic_error("Context not initialized with BATCH support");}
     Plaintext plain1; crtBuilder->compose(values, plain1); return plain1;}
 vector<Plaintext> Afseal::encode(vector<int64_t> &values, bool dummy_notUsed){
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
     vector<Plaintext> plainVOut;
     for(int64_t& val:values){plainVOut.emplace_back(intEncoder->encode(val));}
     return plainVOut;}
 vector<Plaintext> Afseal::encode(vector<double> &values) {
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
     vector<Plaintext> plainVOut;
     for(double& val:values){plainVOut.emplace_back(fracEncoder->encode(val));}
     return plainVOut;}
 
 
 void Afseal::encode(int64_t& value1, Plaintext& plainOut){
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
     plainOut = intEncoder->encode(value1);}
 void Afseal::encode(double& value1, Plaintext& plainOut){
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
     plainOut = fracEncoder->encode(value1);}
 void Afseal::encode(vector<int64_t> &values, Plaintext& plainOut){
+    if(crtBuilder==NULL){throw std::logic_error("Context not initialized with BATCH support");}
     if(values.size()>this->crtBuilder->slot_count()){
         throw range_error("Data vector size is bigger than nSlots");}
     crtBuilder->compose(values, plainOut);}
 void Afseal::encode(vector<int64_t> &values, vector<Plaintext>& plainVOut){
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
     for(int64_t& val:values){
         plainVOut.emplace_back(intEncoder->encode(val));}}
 void Afseal::encode(vector<double> &values, vector<Plaintext>& plainVOut){
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
     for(double& val:values){
         plainVOut.emplace_back(fracEncoder->encode(val));}}
 
 // DECODE
 void Afseal::decode(Plaintext& plain1, int64_t& valueOut) {
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
     valueOut = intEncoder->decode_int64(plain1);}
 void Afseal::decode(Plaintext& plain1, double& valueOut) {
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
     valueOut = fracEncoder->decode(plain1);}
 void Afseal::decode(Plaintext& plain1, vector<int64_t> &valueVOut) {
+    if(crtBuilder==NULL){throw std::logic_error("Context not initialized with BATCH support");}
     crtBuilder->decompose(plain1, valueVOut);}
 void Afseal::decode(vector<Plaintext>& plainV, vector<int64_t> &valueVOut) {
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
     for(Plaintext& pl:plainV){
         valueVOut.emplace_back(intEncoder->decode_int64(pl));}}
 void Afseal::decode(vector<Plaintext>& plainV, vector<double> &valueVOut) {
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
     for(Plaintext& pl:plainV){
         valueVOut.emplace_back(fracEncoder->decode(pl));}}
 
 // NOISE MEASUREMENT
 int Afseal::noiseLevel(Ciphertext& cipher1) {
-    int noiseLevel = decryptor->invariant_noise_budget(cipher1);
-    return noiseLevel;}
+    if(decryptor==NULL){throw std::logic_error("Missing a Private Key");}
+    return decryptor->invariant_noise_budget(cipher1);}
 
 // ------------------------------ RELINEARIZATION -----------------------------
 void Afseal::relinKeyGen(int& bitCount){
-  if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
-  if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
-  relinKey = make_shared<EvaluationKeys>();
-  keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
+    if(keyGenObj==NULL){throw std::logic_error("Context not initialized");}
+    if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
+    if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
+    relinKey = make_shared<EvaluationKeys>();
+    keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
 }
 void Afseal::relinearize(Ciphertext& cipher1){
-  evaluator->relinearize(cipher1, *relinKey);
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
+    if(relinKey==NULL){throw std::logic_error("Relinearization key not initialized");}
+    evaluator->relinearize(cipher1, *relinKey);
 }
 void Afseal::rotateKeyGen(int& bitCount){
-  if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
-  if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
-  rotateKeys = make_shared<GaloisKeys>();
-  keyGenObj->generate_galois_keys(bitCount, *rotateKeys);
+    if(keyGenObj==NULL){throw std::logic_error("Context not initialized");}
+    if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
+    if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
+    rotateKeys = make_shared<GaloisKeys>();
+    keyGenObj->generate_galois_keys(bitCount, *rotateKeys);
 }
 
 // --------------------------------- OPERATIONS -------------------------------
 // NOT
-void Afseal::negate(Ciphertext& cipher1){ evaluator->negate(cipher1);}
+void Afseal::negate(Ciphertext& cipher1){ 
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
+    evaluator->negate(cipher1);}
 void Afseal::negate(vector<Ciphertext>& cipherV){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     for (Ciphertext& c:cipherV){evaluator->negate(c);}}
 // SQUARE
-void Afseal::square(Ciphertext& cipher1){ evaluator->square(cipher1);}
+void Afseal::square(Ciphertext& cipher1){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
+     evaluator->square(cipher1);}
 void Afseal::square(vector<Ciphertext>& cipherV){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     for (Ciphertext& c:cipherV){evaluator->square(c);}}
 
 // ADDITION
 void Afseal::add(Ciphertext& cipherInOut, Ciphertext& cipher2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     evaluator->add(cipherInOut, cipher2);}
 void Afseal::add(Ciphertext& cipherInOut, Plaintext& plain2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     evaluator->add_plain(cipherInOut, plain2);}
 void Afseal::add(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
     vector<Ciphertext>::iterator c2 = cipherV2.begin();
     for(; c1 != cipherVInOut.end(), c2 != cipherV2.end(); c1++, c2++){
             evaluator->add(*c1, *c2);}}
 void Afseal::add(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
     vector<Plaintext>::iterator p2 = plainV2.begin();
     for(; c1 != cipherVInOut.end(), p2 != plainV2.end(); c1++, p2++){
         evaluator->add_plain(*c1, *p2);}}
 void Afseal::add(vector<Ciphertext>& cipherV, Ciphertext& cipherOut){
-  evaluator->add_many(cipherV, cipherOut);}
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
+    evaluator->add_many(cipherV, cipherOut);}
 
 // SUBSTRACTION
 void Afseal::sub(Ciphertext& cipherInOut, Ciphertext& cipher2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     evaluator->sub(cipherInOut, cipher2);}
 void Afseal::sub(Ciphertext& cipherInOut, Plaintext& plain2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     evaluator->sub_plain(cipherInOut, plain2);}
 void Afseal::sub(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
     vector<Ciphertext>::iterator c2 = cipherV2.begin();
     for(; c1 != cipherVInOut.end(), c2 != cipherV2.end(); c1++, c2++){
-            evaluator->sub(*c1, *c2);}}
+        evaluator->sub(*c1, *c2);}}
 void Afseal::sub(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
     vector<Plaintext>::iterator p2 = plainV2.begin();
     for(; c1 != cipherVInOut.end(), p2 != plainV2.end(); c1++, p2++){
@@ -311,37 +383,53 @@ void Afseal::sub(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2){
 
 // MULTIPLICATION
 void Afseal::multiply(Ciphertext& cipherInOut, Ciphertext& cipher2){
-  evaluator->multiply(cipherInOut, cipher2);}
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
+    evaluator->multiply(cipherInOut, cipher2);}
 void Afseal::multiply(Ciphertext& cipherInOut, Plaintext& plain1){
-  evaluator->multiply_plain(cipherInOut, plain1);}
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
+    evaluator->multiply_plain(cipherInOut, plain1);}
 void Afseal::multiply(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
     vector<Ciphertext>::iterator c2 = cipherV2.begin();
     for(; c1 != cipherVInOut.end(), c2 != cipherV2.end(); c1++, c2++){
             evaluator->multiply(*c1, *c2);}}
 void Afseal::multiply(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     vector<Ciphertext>::iterator c1 = cipherVInOut.begin();
     vector<Plaintext>::iterator p2 = plainV2.begin();
     for(; c1 != cipherVInOut.end(), p2 != plainV2.end(); c1++, p2++){
         evaluator->multiply_plain(*c1, *p2);}}
 void Afseal::multiply(vector<Ciphertext>& cipherV, Ciphertext& cipherOut){
-  evaluator->multiply_many(cipherV, *relinKey, cipherOut);}
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
+    if(relinKey==NULL){throw std::logic_error("Relinearization key not initialized");}
+    evaluator->multiply_many(cipherV, *relinKey, cipherOut);}
 
 
 // ROTATION
 void Afseal::rotate(Ciphertext& cipher1, int& k){
+    if(rotateKeys==NULL){throw std::logic_error("Rotation keys not initialized");}
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     evaluator->rotate_rows(cipher1, k, *rotateKeys);}
 void Afseal::rotate(vector<Ciphertext>& cipherV, int& k){
+    if(rotateKeys==NULL){throw std::logic_error("Rotation keys not initialized");}
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     for (Ciphertext& c:cipherV){evaluator->rotate_rows(c, k, *rotateKeys);}}
 
 
 // POLYNOMIALS
 void Afseal::exponentiate(Ciphertext& cipher1, uint64_t& expon){
+    if(relinKey==NULL){throw std::logic_error("Relinearization key not initialized");}
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     evaluator->exponentiate(cipher1, expon, *relinKey);}
 void Afseal::exponentiate(vector<Ciphertext>& cipherV, uint64_t& expon){
+    if(relinKey==NULL){throw std::logic_error("Relinearization key not initialized");}
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     for (Ciphertext& c:cipherV){evaluator->exponentiate(c, expon, *relinKey);}}
 
 void Afseal::polyEval(Ciphertext& cipher1, vector<int64_t>& coeffPoly){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
+    if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
     Ciphertext res;
     evaluator->multiply_plain(cipher1, intEncoder->encode(coeffPoly[0]), res);
     evaluator->add_plain(cipher1, intEncoder->encode(coeffPoly[1]));
@@ -351,48 +439,52 @@ void Afseal::polyEval(Ciphertext& cipher1, vector<int64_t>& coeffPoly){
         evaluator->add_plain(cipher1, intEncoder->encode(coeff));}}
 
 void Afseal::polyEval(Ciphertext& cipher1, vector<double>& coeffPoly){
+    if(evaluator==NULL){throw std::logic_error("Context not initialized");}
+    if(fracEncoder==NULL){throw std::logic_error("Context not initialized");}
     Ciphertext res;
     evaluator->multiply_plain(cipher1, fracEncoder->encode(coeffPoly[0]), res);
     evaluator->add_plain(cipher1, fracEncoder->encode(coeffPoly[1]));
     coeffPoly.erase(coeffPoly.begin(), coeffPoly.begin()+1);
-    for (int64_t coeff: coeffPoly){
+    for (double coeff: coeffPoly){
         evaluator->multiply(res, cipher1);
-        evaluator->add_plain(cipher1, intEncoder->encode(coeff));}}
+        evaluator->add_plain(cipher1, fracEncoder->encode(coeff));}}
 
 // ------------------------------------- I/O ----------------------------------
 // SAVE/RESTORE CONTEXT
 bool Afseal::saveContext(string fileName){
-    bool res=1;
+    if(context==NULL){throw std::logic_error("Context not initialized");}
+    bool res=true;
     try{
-        fstream contextFile(fileName+".aenv", fstream::in);
+        fstream contextFile(fileName, fstream::in);
         assert(contextFile.is_open());
         context->parms().save(contextFile);
         contextFile << base;
         contextFile << sec;
         contextFile << intDigits;
         contextFile << fracDigits;
-        contextFile << flagBatching;
+        contextFile << flagBatch;
         
         contextFile.close();
     }
     catch(exception& e){
-        res=0;
+        std::cout << "Afseal ERROR: context could not be saved";
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
 bool Afseal::restoreContext(string fileName){
     EncryptionParameters parms;
-    bool res=1;
+    bool res=true;
     try{        
-        fstream contextFile(fileName+".aenv", fstream::in);
+        fstream contextFile(fileName, fstream::in);
         assert(contextFile.is_open());
         parms.load(contextFile);
         contextFile >> base;
         contextFile >> sec;
         contextFile >> intDigits;
         contextFile >> fracDigits;
-        contextFile >> flagBatching;
+        contextFile >> flagBatch;
         contextFile.close();
 
         this->context = make_shared<SEALContext>(parms);
@@ -400,24 +492,26 @@ bool Afseal::restoreContext(string fileName){
         this->fracEncoder = make_shared<FractionalEncoder>((*context).plain_modulus(),
                 (*context).poly_modulus(), intDigits, fracDigits, base);
         this->evaluator=make_shared<Evaluator>(*context);
-        if(flagBatching){
+        if(flagBatch){
             if(!(*context).qualifiers().enable_batching){
                 throw invalid_argument("p not prime | p-1 not multiple 2*m");
             }
-            this->flagBatching=true;
+            this->flagBatch=true;
             this->crtBuilder=make_shared<PolyCRTBuilder>(*context);
         }
     }
     catch(exception& e){
-        res=0;
+        std::cout << "Afseal ERROR: context could not be loaded";
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
 // SAVE/RESTORE KEYS
 bool Afseal::savepublicKey(string fileName){
-    bool res=1;
-    try{fstream keyFile(fileName+".apk", fstream::in);
+    if(publicKey==NULL){throw std::logic_error("Public Key not initialized");}
+    bool res=true;
+    try{fstream keyFile(fileName, fstream::in);
         assert(keyFile.is_open());
         publicKey->save(keyFile);
         
@@ -425,15 +519,16 @@ bool Afseal::savepublicKey(string fileName){
     }
     catch(exception& e){
         std::cout << "Afseal ERROR: public key could not be saved";
-        res=0;
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
 bool Afseal::restorepublicKey(string fileName){
-    bool res=1;
+    if(publicKey==NULL){throw std::logic_error("Public Key not initialized");}
+    bool res=true;
     try{        
-        fstream keyFile(fileName+".apk", fstream::in);
+        fstream keyFile(fileName, fstream::in);
         assert(keyFile.is_open());
         this->publicKey = make_shared<PublicKey>();
         this->publicKey->load(keyFile);
@@ -442,14 +537,15 @@ bool Afseal::restorepublicKey(string fileName){
     }
     catch(exception& e){
         std::cout << "Afseal ERROR: public key could not be loaded";
-        res=0;
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
 bool Afseal::savesecretKey(string fileName){
-    bool res=1;
-    try{fstream keyFile(fileName+".ask", fstream::in);
+    if(publicKey==NULL){throw std::logic_error("Secret Key not initialized");}
+    bool res=true;
+    try{fstream keyFile(fileName, fstream::in);
         assert(keyFile.is_open());
         secretKey->save(keyFile);
         
@@ -457,15 +553,15 @@ bool Afseal::savesecretKey(string fileName){
     }
     catch(exception& e){
         std::cout << "Afseal ERROR: secret key could not be saved";
-        res=0;
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
 bool Afseal::restoresecretKey(string fileName){
-    bool res=1;
+    bool res=true;
     try{        
-        fstream keyFile(fileName+".ask", fstream::in);
+        fstream keyFile(fileName, fstream::in);
         assert(keyFile.is_open());
         this->secretKey = make_shared<SecretKey>();
         this->secretKey->load(keyFile);
@@ -474,14 +570,15 @@ bool Afseal::restoresecretKey(string fileName){
     }
     catch(exception& e){
         std::cout << "Afseal ERROR: secret key could not be saved";
-        res=0;
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
 bool Afseal::saverelinKey(string fileName){
-    bool res=1;
-    try{fstream keyFile(fileName+".ark", fstream::in);
+    if(relinKey==NULL){throw std::logic_error("Relinearization Key not initialized");}
+    bool res=true;
+    try{fstream keyFile(fileName, fstream::in);
         assert(keyFile.is_open());
         relinKey->save(keyFile);
         
@@ -489,15 +586,15 @@ bool Afseal::saverelinKey(string fileName){
     }
     catch(exception& e){
         std::cout << "Afseal ERROR: relinearization key could not be saved";
-        res=0;
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
 bool Afseal::restorerelinKey(string fileName){
-    bool res=1;
+    bool res=true;
     try{        
-        fstream keyFile(fileName+".ark", fstream::in);
+        fstream keyFile(fileName, fstream::in);
         assert(keyFile.is_open());
         this->relinKey = make_shared<EvaluationKeys>();
         this->relinKey->load(keyFile);
@@ -505,14 +602,15 @@ bool Afseal::restorerelinKey(string fileName){
     }
     catch(exception& e){
         std::cout << "Afseal ERROR: relinearization key could not be loaded";
-        res=0;
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
 bool Afseal::saverotateKey(string fileName){
-    bool res=1;
-    try{fstream keyFile(fileName+".agk", fstream::in);
+    if(rotateKeys==NULL){throw std::logic_error("Rotation Key not initialized");}
+    bool res=true;
+    try{fstream keyFile(fileName, fstream::in);
         assert(keyFile.is_open());
         rotateKeys->save(keyFile);
         
@@ -520,15 +618,15 @@ bool Afseal::saverotateKey(string fileName){
     }
     catch(exception& e){
         std::cout << "Afseal ERROR: Galois could not be saved";
-        res=0;
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
 
 bool Afseal::restorerotateKey(string fileName){
-    bool res=1;
+    bool res=true;
     try{        
-        fstream keyFile(fileName+".agk", fstream::in);
+        fstream keyFile(fileName, fstream::in);
         assert(keyFile.is_open());
         this->rotateKeys = make_shared<GaloisKeys>();
         this->rotateKeys->load(keyFile);
@@ -536,7 +634,7 @@ bool Afseal::restorerotateKey(string fileName){
     }
     catch(exception& e){
         std::cout << "Afseal ERROR: Galois could not be loaded";
-        res=0;
+        res=false;
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }

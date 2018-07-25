@@ -56,22 +56,22 @@ class Afseal{
     private: 
         // --------------------------- ATTRIBUTES -----------------------------
         
-        shared_ptr<SEALContext> context;           /**< Context. Used for init*/
+        shared_ptr<SEALContext> context=NULL;           /**< Context. Used for init*/
   
-        shared_ptr<IntegerEncoder> intEncoder;     /**< Integer Encoding.*/
-        shared_ptr<FractionalEncoder> fracEncoder; /**< Fractional Encoding.*/
+        shared_ptr<IntegerEncoder> intEncoder=NULL;     /**< Integer Encoding.*/
+        shared_ptr<FractionalEncoder> fracEncoder=NULL; /**< Fractional Encoding.*/
 
-        shared_ptr<KeyGenerator> keyGenObj;        /**< Key Generator Object.*/
-        shared_ptr<SecretKey> secretKey;           /**< Secret key.*/
-        shared_ptr<PublicKey> publicKey;           /**< Public key.*/
-        shared_ptr<EvaluationKeys> relinKey;       /**< Relinearization object*/
-        shared_ptr<GaloisKeys> rotateKeys;         /**< Galois key for batching*/
+        shared_ptr<KeyGenerator> keyGenObj=NULL;        /**< Key Generator Object.*/
+        shared_ptr<SecretKey> secretKey=NULL;           /**< Secret key.*/
+        shared_ptr<PublicKey> publicKey=NULL;           /**< Public key.*/
+        shared_ptr<EvaluationKeys> relinKey=NULL;       /**< Relinearization object*/
+        shared_ptr<GaloisKeys> rotateKeys=NULL;         /**< Galois key for batching*/
 
-        shared_ptr<Encryptor> encryptor;           /**< Requires a Public Key.*/
-        shared_ptr<Evaluator> evaluator;           /**< Requires a context.*/
-        shared_ptr<Decryptor> decryptor;           /**< Requires a Secret Key.*/
+        shared_ptr<Encryptor> encryptor=NULL;           /**< Requires a Public Key.*/
+        shared_ptr<Evaluator> evaluator=NULL;           /**< Requires a context.*/
+        shared_ptr<Decryptor> decryptor=NULL;           /**< Requires a Secret Key.*/
 
-        shared_ptr<PolyCRTBuilder> crtBuilder;     /**< Rotation in Batching. */
+        shared_ptr<PolyCRTBuilder> crtBuilder=NULL;     /**< Rotation in Batching. */
 
 
         int p;                          /**< All operations are modulo p^r */
@@ -82,7 +82,7 @@ class Afseal{
         int intDigits;
         int fracDigits;
         
-        bool flagBatching = false;      /**< Whether to use batching or not */
+        bool flagBatch = false;         /**< Whether to use batching or not */
 
 
 
@@ -136,13 +136,9 @@ class Afseal{
 
 
         // -------------------------- CRYPTOGRAPHY ---------------------------
-        /** @defgroup CRYPTOGRAPHY ContextGen, KeyGen, Encrypt and Decrypt
-         *  @{
-         */
         // CONTEXT GENERATION
         /**
          * @brief Performs generation of FHE context using SEAL functions.
-         *          As a result, context, ea and nSlots are initialized.
          * @param[in] p ciphertext space base.
          * @param[in] r ciphertext space lifting .
          * @param[in] m m'th cyclotomic polynomial. Power of 2. Default 2048
@@ -399,7 +395,7 @@ class Afseal{
         int getsec()           {return this->sec;}
         int getintDigits()     {return this->intDigits;}
         int getfracDigits()    {return this->fracDigits;}
-        bool getflagBatching() {return this->flagBatching;}
+        bool getflagBatch()    {return this->flagBatch;}
 
         //SETTERS
         void setpublicKey(PublicKey& pubKey)
