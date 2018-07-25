@@ -96,7 +96,7 @@ void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatching,
 
     // Create Evaluator Key
     this->evaluator=make_shared<Evaluator>(*context);
-    if(flagBatching){
+    if(this->flagBatching){
         if(!(*context).qualifiers().enable_batching){
             throw invalid_argument("p not prime | p-1 not multiple 2*m");
         }
@@ -127,6 +127,7 @@ Ciphertext Afseal::encrypt(int64_t& value1) {
     Ciphertext cipher1; encryptor->encrypt(intEncoder->encode(value1),cipher1);
     return cipher1;}
 Ciphertext Afseal::encrypt(vector<int64_t>& valueV) {
+	if(
     Ciphertext cipher1; Plaintext plain1; crtBuilder->compose(valueV, plain1);
     encryptor->encrypt(plain1, cipher1);  return cipher1;}
 vector<Ciphertext> Afseal::encrypt(vector<int64_t>& valueV, bool& dummy_NoBatch){
