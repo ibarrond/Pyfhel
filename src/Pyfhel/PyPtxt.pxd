@@ -1,6 +1,6 @@
-# distutils: language = c++
+# distutils: language = c++17
 
-# -------------------------------- IMPORTS ------------------------------------
+# -------------------------------- CIMPORTS ------------------------------------
 # Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.string cimport string
 from libcpp cimport bool

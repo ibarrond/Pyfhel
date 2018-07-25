@@ -6,7 +6,7 @@
 """
 # -------------------------------- IMPORTS ------------------------------------
 # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from util.ENCODING_t import ENCODING_t
+from util import ENCODING_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref

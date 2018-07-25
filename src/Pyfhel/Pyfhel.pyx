@@ -51,7 +51,7 @@ from numbers import Number
 from cython.operator cimport dereference as deref
 
 # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
-from util import ENCODING_T
+from util import ENCODING_t
 
 # Define Plaintext types
 FLOAT_T = (float, np.float16, np.float32, np.float64)
@@ -154,7 +154,7 @@ cdef class Pyfhel:
         if (ctxt._ptr_ctxt == NULL):
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
-        ctxt._encoding = ENCODING_T.INTEGER
+        ctxt._encoding = ENCODING_t.INTEGER
         return ctxt
     
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=None) except +:
@@ -176,20 +176,20 @@ cdef class Pyfhel:
         if (ctxt._ptr_ctxt == NULL):
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
-        ctxt._encoding = ENCODING_T.FRACTIONAL
+        ctxt._encoding = ENCODING_t.FRACTIONAL
         return ctxt
     
     
-    cpdef PyCtxt encryptArray(self, int[::1] arr,
+    cpdef PyCtxt encryptArray(self, int64_t[::1] arr,
                               PyCtxt ctxt=None) except +:
         if (ctxt._ptr_ctxt == NULL):
             ctxt = PyCtxt()
         cdef vector[int64_t] vec;
         vec.assign(&arr[0], &arr[-1])
         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
-        ctxt._encoding = ENCODING_T.BATCH
+        ctxt._encoding = ENCODING_t.BATCH.value
         return ctxt  
-        
+
     cpdef PyCtxt encryptBatch(self, vector[int64_t] vec,
                               PyCtxt ctxt=None) except +: 
         """Encrypts a 1D vector of integers into a PyCtxt ciphertext.
@@ -209,7 +209,7 @@ cdef class Pyfhel:
         if (ctxt._ptr_ctxt):
             ctxt = PyCtxt()
         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
-        ctxt._encoding = ENCODING_T.BATCH
+        ctxt._encoding = ENCODING_t.BATCH
         return ctxt  
         
     cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=None) except +:
@@ -286,9 +286,9 @@ cdef class Pyfhel:
             int: the decrypted integer value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_T.INTEGER.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.INTEGER.
         """
-        if (ctxt._encoding == ENCODING_T.INTEGER):
+        if (ctxt._encoding == ENCODING_t.INTEGER):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_value)
         return output_value
@@ -306,9 +306,9 @@ cdef class Pyfhel:
             float: the decrypted float value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_T.FRACTIONAL.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.FRACTIONAL.
         """
-        if (ctxt._encoding == ENCODING_T.FRACTIONAL):
+        if (ctxt._encoding == ENCODING_t.FRACTIONAL):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_value)
         return output_value
@@ -330,9 +330,9 @@ cdef class Pyfhel:
             PyCtxt: the ciphertext containing the encrypted plaintext
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_T.BATCH.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.BATCH.
         """
-        if (ctxt._encoding == ENCODING_T.BATCH):
+        if (ctxt._encoding == ENCODING_t.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         if (output_vector!= [0]):
             self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_vector)
@@ -383,13 +383,13 @@ cdef class Pyfhel:
             TypeError: if the plaintext doesn't have a valid type.
         """
         if (decrypt_value):
-            if (ctxt._encoding == ENCODING_T.BATCH):
+            if (ctxt._encoding == ENCODING_t.BATCH):
                 return self.decryptBatch(ctxt)
-            elif (ctxt._encoding == ENCODING_T.FRACTIONAL):
+            elif (ctxt._encoding == ENCODING_t.FRACTIONAL):
                 return self.decryptFrac(ctxt)
-            elif (ctxt._encoding == ENCODING_T.INTEGER):
+            elif (ctxt._encoding == ENCODING_t.INTEGER):
                 return self.decryptInt(ctxt)
-            elif (ctxt._encoding == ENCODING_T.UNDEFINED):
+            elif (ctxt._encoding == ENCODING_t.UNDEFINED):
                 raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         else: # Decrypt to plaintext        
             if (ptxt._ptr_ptxt == NULL):
@@ -469,6 +469,18 @@ cdef class Pyfhel:
     # ============================== ENCODING =================================
     # =========================================================================
     # ............................... ENCODE ..................................
+    cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=None) except +:
+        if (ptxt._ptr_ptxt == NULL):
+            ptxt = PyPtxt()
+        cdef vector[int64_t] vec;
+        vec.assign(&arr[0], &arr[-1])
+        self.afseal.encode(vec, deref(ptxt._ptr_ptxt)) 
+        ptxt._encoding = ENCODING_t.BATCH.value
+        return ptxt  
+    
+    
+    
+    
     cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=None) except +:
         """Encodes a single int value into a PyPtxt plaintext.
         
@@ -485,7 +497,7 @@ cdef class Pyfhel:
         if (ptxt._ptr_ptxt == NULL):
             ptxt = PyPtxt()
         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ENCODING_T.INTEGER
+        ptxt._encoding = ENCODING_t.INTEGER.value
         return ptxt
     
     cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=None) except +:
@@ -504,7 +516,7 @@ cdef class Pyfhel:
         if (ptxt._ptr_ptxt == NULL):
             ptxt = PyPtxt()
         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ENCODING_T.INTEGER
+        ptxt._encoding = ENCODING_t.FRACTIONAL.value
         return ptxt
     
     cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=None) except +: 
@@ -525,8 +537,10 @@ cdef class Pyfhel:
         """
         if (ptxt._ptr_ptxt == NULL):
             ptxt = PyPtxt()
+        print(ptxt)
         self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ENCODING_T.BATCH
+        print("reached encoding")
+        ptxt._encoding = ENCODING_t.BATCH.value
         return ptxt  
 
     def encode(self, val_vec not None, PyPtxt ptxt=None):
@@ -576,7 +590,7 @@ cdef class Pyfhel:
             int64_t: the decoded integer value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_T.INTEGER.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.INTEGER.
         """
         if (ptxt._encoding == ENCODING_T.INTEGER):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
@@ -597,7 +611,7 @@ cdef class Pyfhel:
             double: the decoded float value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_T.FRACTIONAL.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.FRACTIONAL.
         """
         if (ptxt._encoding == ENCODING_T.FRACTIONAL):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
@@ -621,7 +635,7 @@ cdef class Pyfhel:
             vector[int64_t]: the vectort containing the decoded values
             
         Raise:
-            RuntimeError: if the plaintext encoding isn't ENCODING_T.BATCH.
+            RuntimeError: if the plaintext encoding isn't ENCODING_t.BATCH.
         """
         if (ptxt._encoding == ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
@@ -880,7 +894,7 @@ cdef class Pyfhel:
         Return:
             None
         """
-        if (ctxt._encoding != ENCODING_T.BATCH):
+        if (ctxt._encoding != ENCODING_t.BATCH):
             raise RuntimeError("<Pyfhel ERROR> BATCH encoding required for rotation")
         self.afseal.rotate(deref(ctxt._ptr_ctxt), k)
         

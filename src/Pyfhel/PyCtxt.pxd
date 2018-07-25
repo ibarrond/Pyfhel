@@ -11,10 +11,12 @@ from iostream cimport ifstream, ofstream
 # Import Ciphertext class, original for SEAL
 from Afhel cimport Ciphertext
 
-
+# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
+from util.ENCODING_T cimport ENCODING_T
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class PyCtxt:
     cdef Ciphertext* _ptr_ctxt
+    cdef ENCODING_T _encoding
     cpdef int size_capacity(self)
     cpdef int size(self)
     cpdef void save(self, string fileName)

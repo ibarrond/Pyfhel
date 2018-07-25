@@ -10,7 +10,7 @@ from Pyfhel import Pyfhel
 from PyPtxt import PyPtxt
 
 # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
-from util import ENCODING_T
+from util import ENCODING_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
@@ -38,21 +38,23 @@ cdef class PyCtxt:
     def __dealloc__(self):
         if self._ptr_ctxt != NULL:
             del self._ptr_ctxt
-           
+            
     @property
     def _encoding(self):
         """returns the encoding type"""
-        return self._encoding
+        return ENCODING_t(self._encoding)
+    
     @_encoding.setter
     def _encoding(self, new_encoding):
-        """Sets Encoding type: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH""" 
-        if not isinstance(new_encoding, ENCODING_T):
-            raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be a valid ENCODING_T Enum")       
-        self._encoding = new_encoding
+        """Sets Encoding type: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH""" 
+        if not isinstance(new_encoding, ENCODING_t):
+            raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be ENCODING_t")        
+        self._encoding = new_encoding.value
+        
     @_encoding.deleter
     def _encoding(self):
         """Sets Encoding to 1-UNDEFINED""" 
-        self._encoding = ENCODING_T.UNDEFINED
+        self._encoding = ENCODING_t.UNDEFINED.value
         
     @property
     def _pyfhel(self):

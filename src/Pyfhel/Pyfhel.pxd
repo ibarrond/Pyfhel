@@ -22,6 +22,10 @@ from Afhel cimport Afseal
 from PyPtxt cimport PyPtxt
 from PyCtxt cimport PyCtxt
 
+# Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
+from util cimport ENCODING_T
+
+
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class Pyfhel:
     cdef Afseal* afseal           # The C++ methods are accessed via a pointer
@@ -32,7 +36,7 @@ cdef class Pyfhel:
     cpdef void KeyGen(self) except +
     cpdef PyCtxt encryptInt(self, int64_t value, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=*) except +
-    cpdef PyCtxt encryptArray(self, int[::1] arr, PyCtxt ctxt=*) except +
+    cpdef PyCtxt encryptArray(self, int64_t[::1] arr, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptBatch(self, vector[int64_t] vec, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=*) except +
     
@@ -50,6 +54,7 @@ cdef class Pyfhel:
     cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=*) except +
     cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=*) except +
     cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=*) except +
+    cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=*) except +
     
     cpdef int64_t decodeInt(self, PyPtxt ptxt, int64_t output_value=*) except +
     cpdef double decodeFrac(self, PyPtxt ptxt, double output_value=*) except +

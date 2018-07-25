@@ -1,9 +1,0 @@
-PyCtxt.cpp
-PyPtxt.cpp
-README.md
-setup.py
-Pyfhel.egg-info/PKG-INFO
-Pyfhel.egg-info/SOURCES.txt
-Pyfhel.egg-info/dependency_links.txt
-Pyfhel.egg-info/requires.txt
-Pyfhel.egg-info/top_level.txt
