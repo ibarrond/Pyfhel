@@ -380,22 +380,21 @@ class Afseal{
 
 
         // ----------------------------- AUXILIARY ----------------------------
-        bool batchEnabled() {return this->context->qualifiers().enable_batching;}
-        long relinBitCount(){return this->relinKey->decomposition_bit_count();}
-
+        bool batchEnabled();
+        long relinBitCount();
         // GETTERS
-        SecretKey getsecretKey()    {return *(this->secretKey);}
-        PublicKey getpublicKey()    {return *(this->publicKey);}
-        EvaluationKeys getrelinKey(){return *(this->relinKey);} 
-        GaloisKeys getrotateKeys()  {return *(this->rotateKeys);} 
-        int getnSlots()        {return this->crtBuilder->slot_count();}   
-        int getp()             {return this->p;}
-        int getm()             {return this->m;}
-        int getbase()          {return this->base;}
-        int getsec()           {return this->sec;}
-        int getintDigits()     {return this->intDigits;}
-        int getfracDigits()    {return this->fracDigits;}
-        bool getflagBatch()    {return this->flagBatch;}
+        SecretKey getsecretKey(); 
+        PublicKey getpublicKey();
+        EvaluationKeys getrelinKey(); 
+        GaloisKeys getrotateKeys();  
+        int getnSlots();  
+        int getp();
+        int getm();
+        int getbase();
+        int getsec();
+        int getintDigits();  
+        int getfracDigits();  
+        bool getflagBatch();   
 
         //SETTERS
         void setpublicKey(PublicKey& pubKey)

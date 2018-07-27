@@ -90,7 +90,6 @@ cdef extern from "afseal/Afseal.h" nogil:
         void encode(vector[double] &values, vector[Plaintext]& plainVOut) except +
         
         # DECODE 
-        void decode(Plaintext& plain1, int64_t& valOut) except +
         void decode(Plaintext& plain1, double& valOut) except +
         void decode(Plaintext& plain1, vector[int64_t] &valueVOut) except +
         void decode(vector[Plaintext]& plain1, vector[int64_t] &valueVOut) except +

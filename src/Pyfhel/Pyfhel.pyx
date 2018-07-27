@@ -124,9 +124,9 @@ cdef class Pyfhel:
         
         
     cpdef void KeyGen(self) except +:
-        """Generates a pair of Private/Public Keys.
+        """Generates a pair of secret/Public Keys.
         
-        Based on the current context, initializes one public and one private key. 
+        Based on the current context, initializes one public and one secret key. 
         Args:
             None
                       
@@ -154,13 +154,13 @@ cdef class Pyfhel:
         if (ctxt._ptr_ctxt == NULL):
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
-        ctxt._encoding = ENCODING_t.INTEGER
+        ctxt._encoding = ENCODING_t.INTEGER.value
         return ctxt
     
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=None) except +:
         """Encrypts a single float value into a PyCtxt ciphertext.
         based on the 
-        Encrypts a single value using the current private key, based on the
+        Encrypts a single value using the current secret key, based on the
         current context. Value must a decimal (float, double) that will get
         truncated both in the integer part (base^intDigits) and in the 
         decimal part (base^fracDigits).
@@ -176,25 +176,15 @@ cdef class Pyfhel:
         if (ctxt._ptr_ctxt == NULL):
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
-        ctxt._encoding = ENCODING_t.FRACTIONAL
+        ctxt._encoding = ENCODING_t.FRACTIONAL.value
         return ctxt
-    
-    
-    cpdef PyCtxt encryptArray(self, int64_t[::1] arr,
-                              PyCtxt ctxt=None) except +:
-        if (ctxt._ptr_ctxt == NULL):
-            ctxt = PyCtxt()
-        cdef vector[int64_t] vec;
-        vec.assign(&arr[0], &arr[-1])
-        self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
-        ctxt._encoding = ENCODING_t.BATCH.value
-        return ctxt  
+
 
     cpdef PyCtxt encryptBatch(self, vector[int64_t] vec,
                               PyCtxt ctxt=None) except +: 
         """Encrypts a 1D vector of integers into a PyCtxt ciphertext.
         
-        Encrypts a 1D vector of integers using the current private key,
+        Encrypts a 1D vector of integers using the current secret key,
         based on the current context. Plaintext must be a 1D numpy vector of integers.
         Requires batch mode. The vector needs to be in 'contiguous' or 'c' mode.
         If provided a ciphertext, encrypts the plaintext inside it. 
@@ -209,13 +199,37 @@ cdef class Pyfhel:
         if (ctxt._ptr_ctxt):
             ctxt = PyCtxt()
         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
-        ctxt._encoding = ENCODING_t.BATCH
+        ctxt._encoding = ENCODING_t.BATCH.value
         return ctxt  
         
+    cpdef PyCtxt encryptArray(self, int64_t[::1] arr,
+                              PyCtxt ctxt=None) except +:
+        """Encrypts a 1D numpy array of integers into a PyCtxt ciphertext.
+        
+        Encrypts a 1D numpy array of integers using the current secret key,
+        based on the current context. Plaintext must be a 1D numpy vector of integers.
+        Requires batch mode. The vector needs to be in 'contiguous' or 'c' mode.
+        If provided a ciphertext, encrypts the plaintext inside it. 
+        
+        Args:
+            ptxt (np.ndarray[int, ndim=1, mode="c"]): plaintext to encrypt.
+            ctxt (PyCtxt=None): Optional destination ciphertext.  
+            
+        Return:
+            PyCtxt: the ciphertext containing the encrypted plaintext
+        """
+        if (ctxt._ptr_ctxt == NULL):
+            ctxt = PyCtxt()
+        cdef vector[int64_t] vec;
+        vec.assign(&arr[0], &arr[-1]+1)
+        self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
+        ctxt._encoding = ENCODING_t.BATCH.value
+        return ctxt  
+    
     cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=None) except +:
         """Encrypts an already encoded PyPtxt plaintext into a PyCtxt ciphertext.
         
-        Encrypts an already encoded PyPtxt plaintext using the current private key,
+        Encrypts an already encoded PyPtxt plaintext using the current secret key,
         based on the current context. Plaintext must be a PyPtxt.
         If provided a ciphertext, encrypts the plaintext inside it. 
         
@@ -240,7 +254,7 @@ cdef class Pyfhel:
     def encrypt(self, ptxt not None, PyCtxt ctxt=None):
         """Encrypts any valid plaintext into a PyCtxt ciphertext.
         
-        Encrypts a plaintext using the current private key, based on the current context.
+        Encrypts a plaintext using the current secret key, based on the current context.
         Plaintext must be an integer (int), a decimal that will get truncated (double),
         a PyPtxt encoded plaintext, or in Batch mode a 1D numpy vector of integers.
         Selects the encryption function based on type.
@@ -273,10 +287,10 @@ cdef class Pyfhel:
                             '\] not supported for encryption')
     
     # .............................. DECRYPTION ...............................
-    cpdef int64_t decryptInt(self, PyCtxt ctxt, int64_t output_value = 0) except +:
+    cpdef int64_t decryptInt(self, PyCtxt ctxt) except +:
         """Decrypts a PyCtxt ciphertext into a single int value.
         
-        Decrypts a PyCtxt ciphertext using the current private key, based on
+        Decrypts a PyCtxt ciphertext using the current secret key, based on
         the current context. PyCtxt encoding must be INTEGER.
         
         Args:
@@ -288,15 +302,16 @@ cdef class Pyfhel:
         Raise:
             RuntimeError: if the ciphertext encoding isn't ENCODING_t.INTEGER.
         """
-        if (ctxt._encoding == ENCODING_t.INTEGER):
+        if (ctxt._encoding != ENCODING_t.INTEGER.value):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
+        cdef int64_t output_value = 0
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_value)
         return output_value
     
-    cpdef double decryptFrac(self, PyCtxt ctxt, double output_value = 0) except +:
+    cpdef double decryptFrac(self, PyCtxt ctxt) except +:
         """Decrypts a PyCtxt ciphertext into a single float value.
         
-        Decrypts a PyCtxt ciphertext using the current private key, based on
+        Decrypts a PyCtxt ciphertext using the current secret key, based on
         the current context. PyCtxt encoding must be FRACTIONAL.
         
         Args:
@@ -308,23 +323,22 @@ cdef class Pyfhel:
         Raise:
             RuntimeError: if the ciphertext encoding isn't ENCODING_t.FRACTIONAL.
         """
-        if (ctxt._encoding == ENCODING_t.FRACTIONAL):
+        if (ctxt._encoding != ENCODING_t.FRACTIONAL.value):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
+        cdef double output_value = 0
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_value)
         return output_value
     
-    cpdef vector[int64_t] decryptBatch(self, PyCtxt ctxt,
-                   vector[int64_t] output_vector=[0]) except +:
+    cpdef vector[int64_t] decryptBatch(self, PyCtxt ctxt) except +:
                 
         """Decrypts a PyCtxt ciphertext into a 1D numpy vector of integers.
         
-        Decrypts a PyCtxt ciphertext  using the current private key, based on
+        Decrypts a PyCtxt ciphertext  using the current secret key, based on
         the current context. If provided an output vector, decrypts the
         ciphertext inside it. 
         
         Args:
             ctxt (PyCtxt): ciphertext to decrypt. 
-            output_vector (vector[int]): Optional output vector
             
         Return:
             PyCtxt: the ciphertext containing the encrypted plaintext
@@ -332,18 +346,37 @@ cdef class Pyfhel:
         Raise:
             RuntimeError: if the ciphertext encoding isn't ENCODING_t.BATCH.
         """
-        if (ctxt._encoding == ENCODING_t.BATCH):
+        if (ctxt._encoding != ENCODING_t.BATCH.value):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
-        if (output_vector!= [0]):
-            self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_vector)
-            return ctxt
-        else:
-            return self.afseal.decrypt(deref(ctxt._ptr_ctxt))
+        return self.afseal.decrypt(deref(ctxt._ptr_ctxt))
         
+    cpdef int64_t[::1] decryptArray(self, PyCtxt ctxt) except +:
+                
+        """Decrypts a PyCtxt ciphertext into a 1D numpy vector of integers.
+        
+        Decrypts a PyCtxt ciphertext  using the current secret key, based on
+        the current context. If provided an output vector, decrypts the
+        ciphertext inside it. 
+        
+        Args:
+            ctxt (PyCtxt): ciphertext to decrypt. 
+            
+        Return:
+            PyCtxt: the ciphertext containing the encrypted plaintext
+            
+        Raise:
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.BATCH.
+        """
+        if (ctxt._encoding != ENCODING_t.BATCH.value):
+            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
+        cdef vector[int64_t] output_vector=self.afseal.decrypt(deref(ctxt._ptr_ctxt))  
+        cdef int64_t[::1] output_array = <int64_t [:output_vector.size()]>output_vector.data()
+        return output_array
+    
     cpdef PyPtxt decryptPtxt(self, PyCtxt ctxt, PyPtxt ptxt=None) except +:
         """Decrypts a PyCtxt ciphertext into a PyPtxt plaintext.
         
-        Decrypts a PyCtxt ciphertext using the current private key, based on
+        Decrypts a PyCtxt ciphertext using the current secret key, based on
         the current context. No regard to encoding (decode PyPtxt to obtain 
         value).
         
@@ -360,10 +393,10 @@ cdef class Pyfhel:
         ptxt._encoding = ctxt._encoding
         return ptxt
     
-    def decrypt(self, PyCtxt ctxt, bool decrypt_value=False, PyPtxt ptxt=None):
+    def decrypt(self, PyCtxt ctxt, bool decode_value=False, PyPtxt ptxt=None):
         """Decrypts any valid PyCtxt into either a PyPtxt ciphertext or a value.
         
-        Decrypts a PyCtxt ciphertext using the current private key, based on the
+        Decrypts a PyCtxt ciphertext using the current secret key, based on the
         current context. Outputs an integer (int), a truncated decimal (float),
         a PyPtxt encoded plaintext, or in Batch mode a 1D numpy vector of integers.
         Selects the encryption function based on type.
@@ -382,14 +415,14 @@ cdef class Pyfhel:
         Raise:
             TypeError: if the plaintext doesn't have a valid type.
         """
-        if (decrypt_value):
-            if (ctxt._encoding == ENCODING_t.BATCH):
+        if (decode_value):
+            if (ctxt._encoding == ENCODING_t.BATCH.value):
                 return self.decryptBatch(ctxt)
-            elif (ctxt._encoding == ENCODING_t.FRACTIONAL):
+            elif (ctxt._encoding == ENCODING_t.FRACTIONAL.value):
                 return self.decryptFrac(ctxt)
-            elif (ctxt._encoding == ENCODING_t.INTEGER):
+            elif (ctxt._encoding == ENCODING_t.INTEGER.value):
                 return self.decryptInt(ctxt)
-            elif (ctxt._encoding == ENCODING_t.UNDEFINED):
+            elif (ctxt._encoding == ENCODING_t.UNDEFINED.value):
                 raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         else: # Decrypt to plaintext        
             if (ptxt._ptr_ptxt == NULL):
@@ -403,7 +436,7 @@ cdef class Pyfhel:
         
         The invariant noise budget measures the amount of room there is for the
         noise to grow while ensuring correct decryptions.
-        Decrypts a PyCtxt ciphertext using the current private key, based on the
+        Decrypts a PyCtxt ciphertext using the current secret key, based on the
         current context.
         
         Args:
@@ -469,19 +502,7 @@ cdef class Pyfhel:
     # ============================== ENCODING =================================
     # =========================================================================
     # ............................... ENCODE ..................................
-    cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=None) except +:
-        if (ptxt._ptr_ptxt == NULL):
-            ptxt = PyPtxt()
-        cdef vector[int64_t] vec;
-        vec.assign(&arr[0], &arr[-1])
-        self.afseal.encode(vec, deref(ptxt._ptr_ptxt)) 
-        ptxt._encoding = ENCODING_t.BATCH.value
-        return ptxt  
-    
-    
-    
-    
-    cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=None) except +:
+    cpdef PyPtxt encodeInt(self, int64_t &value, PyPtxt ptxt=None) except +:
         """Encodes a single int value into a PyPtxt plaintext.
         
         Encodes a single intvalue based on the current context.
@@ -500,7 +521,7 @@ cdef class Pyfhel:
         ptxt._encoding = ENCODING_t.INTEGER.value
         return ptxt
     
-    cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=None) except +:
+    cpdef PyPtxt encodeFrac(self, double &value, PyPtxt ptxt=None) except +:
         """Encodes a single float value into a PyPtxt plaintext.
         
         Encodes a single float value based on the current context.
@@ -519,8 +540,30 @@ cdef class Pyfhel:
         ptxt._encoding = ENCODING_t.FRACTIONAL.value
         return ptxt
     
-    cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=None) except +: 
-        """Encodes a 1D vector of integers into a PyPtxt plaintext.
+    cpdef PyPtxt encodeBatch(self, vector[int64_t]& vec, PyPtxt ptxt=None) except +: 
+        """Encodes a 1D list of integers into a PyPtxt plaintext.
+        
+        Encodes a 1D vector of integers based on the current context.
+        Plaintext must be a 1D vector of integers. Requires batch mode.
+        In Numpy the vector needs to be in 'contiguous' or 'c' mode.
+        If provided a plaintext, encodes the vector inside it. 
+        Maximum size of the vector defined by parameter 'm' from context.
+        
+        Args:
+            vec (vector[int64_t]): vector to encode.
+            ptxt (PyPtxt=None): Optional destination plaintext.  
+            
+        Return:
+            PyPtxt: the plaintext containing the encoded vector.
+        """
+        if (ptxt._ptr_ptxt == NULL):
+            ptxt = PyPtxt()
+        self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
+        ptxt._encoding = ENCODING_t.BATCH.value
+        return ptxt  
+    
+    cpdef PyPtxt encodeArray(self, int64_t[::1] &arr, PyPtxt ptxt=None) except +:
+        """Encodes a 1D numpy array of integers into a PyPtxt plaintext.
         
         Encodes a 1D numpy vector of integers based on the current context.
         Plaintext must be a 1D vector of integers. Requires batch mode.
@@ -537,12 +580,12 @@ cdef class Pyfhel:
         """
         if (ptxt._ptr_ptxt == NULL):
             ptxt = PyPtxt()
-        print(ptxt)
-        self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
-        print("reached encoding")
+        cdef vector[int64_t] vec=[0];
+        vec.assign(&arr[0], &arr[-1]+1)
+        self.afseal.encode(vec, deref(ptxt._ptr_ptxt)) 
         ptxt._encoding = ENCODING_t.BATCH.value
         return ptxt  
-
+    
     def encode(self, val_vec not None, PyPtxt ptxt=None):
         """Encodes any valid value/vector into a PyPtxt plaintext.
         
@@ -576,7 +619,7 @@ cdef class Pyfhel:
                             '\] not supported for encoding')      
 
     # ................................ DECODE .................................
-    cpdef int64_t decodeInt(self, PyPtxt ptxt, int64_t output_value = 0) except +:
+    cpdef int64_t decodeInt(self, PyPtxt ptxt) except +:
         """Decodes a PyPtxt plaintext into a single int value.
         
         Decodes a PyPtxt plaintext into a single int value based on
@@ -584,7 +627,6 @@ cdef class Pyfhel:
         
         Args:
             ptxt (PyPtxt=None): plaintext to decode. 
-            output_value (int64_t): optional output value
             
         Return:
             int64_t: the decoded integer value
@@ -592,12 +634,13 @@ cdef class Pyfhel:
         Raise:
             RuntimeError: if the ciphertext encoding isn't ENCODING_t.INTEGER.
         """
-        if (ptxt._encoding == ENCODING_T.INTEGER):
+        if (ptxt._encoding != ENCODING_T.INTEGER):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
+        cdef int64_t output_value=0
         self.afseal.decode(deref(ptxt._ptr_ptxt), output_value)
         return output_value
     
-    cpdef double decodeFrac(self, PyPtxt ptxt, double output_value = 0) except +:
+    cpdef double decodeFrac(self, PyPtxt ptxt) except +:
         """Decodes a PyPtxt plaintext into a single float value.
         
         Decodes a PyPtxt plaintext into a single float value based on
@@ -605,7 +648,6 @@ cdef class Pyfhel:
         
         Args:
             ptxt (PyPtxt): plaintext to decode.
-            output_value (double): optional output value
             
         Return:
             double: the decoded float value
@@ -613,23 +655,20 @@ cdef class Pyfhel:
         Raise:
             RuntimeError: if the ciphertext encoding isn't ENCODING_t.FRACTIONAL.
         """
-        if (ptxt._encoding == ENCODING_T.FRACTIONAL):
+        if (ptxt._encoding != ENCODING_T.FRACTIONAL):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
+        cdef double output_value=0
         self.afseal.decode(deref(ptxt._ptr_ptxt), output_value)
         return output_value
     
-    cpdef vector[int64_t] decodeBatch(self, PyPtxt ptxt,
-                   vector[int64_t] output_vector=[0]) except +:
-                
+    cpdef vector[int64_t] decodeBatch(self, PyPtxt ptxt) except +:
         """Decodes a PyPtxt plaintext into a 1D vector of integers.
         
         Decodes a PyPtxt plaintext into a 1D vector of integers based on
         the current context. PyPtxt encoding must be BATCH.
-        If provided an output vector, decodes the plaintext inside it. 
         
         Args:
             ptxt (PyPtxt): plaintext to decode.
-            output_vector (vector[int]): Optional output vector
             
         Return:
             vector[int64_t]: the vectort containing the decoded values
@@ -637,10 +676,34 @@ cdef class Pyfhel:
         Raise:
             RuntimeError: if the plaintext encoding isn't ENCODING_t.BATCH.
         """
-        if (ptxt._encoding == ENCODING_T.BATCH):
+        if (ptxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
+        cdef vector[int64_t] output_vector=[0]
         self.afseal.decode(deref(ptxt._ptr_ptxt), output_vector)
         return output_vector
+    
+    cpdef int64_t[::1] decodeArray(self, PyPtxt ptxt) except +:
+                
+        """Decodes a PyPtxt plaintext into a 1D numpy numpy  of integers.
+        
+        Decodes a PyPtxt plaintext into a 1D numpy array of integers based on
+        the current context. PyPtxt encoding must be BATCH.
+        
+        Args:
+            ptxt (PyPtxt): plaintext to decode.
+            
+        Return:
+            vector[int64_t]: the vectort containing the decoded values
+            
+        Raise:
+            RuntimeError: if the plaintext encoding isn't ENCODING_t.BATCH.
+        """
+        if (ptxt._encoding != ENCODING_T.BATCH):
+            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
+        cdef vector[int64_t] output_vector=[0]
+        self.afseal.decode(deref(ptxt._ptr_ptxt), output_vector)
+        cdef int64_t[::1] output_array = <int64_t [:output_vector.size()]>output_vector.data()
+        return output_array
         
     def decode(self, PyPtxt ptxt):
         """Decodes any valid PyPtxt into a value or vector.

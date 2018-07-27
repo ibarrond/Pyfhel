@@ -63,7 +63,7 @@ Afseal::Afseal(const Afseal &otherAfseal){
     this->sec =          otherAfseal.sec;
     this->intDigits =    otherAfseal.intDigits;
     this->fracDigits =   otherAfseal.fracDigits;
-    this->flagBatch = otherAfseal.flagBatch;
+    this->flagBatch    = otherAfseal.flagBatch;
 }
 
 Afseal::~Afseal(){}
@@ -638,3 +638,50 @@ bool Afseal::restorerotateKey(string fileName){
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
+
+
+// ----------------------------- AUXILIARY ----------------------------
+bool Afseal::batchEnabled() { 
+	if(this->context==NULL){throw std::logic_error("Context not initialized");}
+	return this->context->qualifiers().enable_batching;}
+long Afseal::relinBitCount(){
+	if(this->relinKey==NULL){throw std::logic_error("Relinearization Key not initialized");}
+	return this->relinKey->decomposition_bit_count();}
+
+// GETTERS
+SecretKey Afseal::getsecretKey()    {
+	if(this->secretKey==NULL){throw std::logic_error("Secret Key not initialized");}
+	return *(this->secretKey);}
+PublicKey Afseal::getpublicKey()    {
+	if(this->publicKey==NULL){throw std::logic_error("Public Key not initialized");}
+	return *(this->publicKey);}
+EvaluationKeys Afseal::getrelinKey(){
+	if(this->relinKey==NULL){throw std::logic_error("Relinearization Key not initialized");}
+	return *(this->relinKey);} 
+GaloisKeys Afseal::getrotateKeys()  {
+	if(this->rotateKeys==NULL){throw std::logic_error("Rotation Key not initialized");}
+	return *(this->rotateKeys);} 
+int Afseal::getnSlots()        {
+	if(this->crtBuilder==NULL){throw std::logic_error("Context not initialized with BATCH support");}
+	return this->crtBuilder->slot_count();}   
+int Afseal::getp()             {
+	if(this->context==NULL){throw std::logic_error("Context not initialized");}
+	return this->p;}
+int Afseal::getm()             {
+	if(this->context==NULL){throw std::logic_error("Context not initialized");}
+	return this->m;}
+int Afseal::getbase()          {
+	if(this->context==NULL){throw std::logic_error("Context not initialized");}
+	return this->base;}
+int Afseal::getsec()           {
+	if(this->context==NULL){throw std::logic_error("Context not initialized");}
+	return this->sec;}
+int Afseal::getintDigits()     {
+	if(this->context==NULL){throw std::logic_error("Context not initialized");}
+	return this->intDigits;}
+int Afseal::getfracDigits()    {
+	if(this->context==NULL){throw std::logic_error("Context not initialized");}
+	return this->fracDigits;}
+bool Afseal::getflagBatch()    {
+	if(this->context==NULL){throw std::logic_error("Context not initialized");}
+	return this->flagBatch;}

@@ -34,15 +34,17 @@ cdef class Pyfhel:
     cpdef ContextGen(self, long p, long m=*, bool flagBatching=*, long base=*,
                      long sec=*, int intDigits=*, int fracDigits=*) except +
     cpdef void KeyGen(self) except +
+    
     cpdef PyCtxt encryptInt(self, int64_t value, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=*) except +
-    cpdef PyCtxt encryptArray(self, int64_t[::1] arr, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptBatch(self, vector[int64_t] vec, PyCtxt ctxt=*) except +
+    cpdef PyCtxt encryptArray(self, int64_t[::1] arr, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=*) except +
     
-    cpdef int64_t decryptInt(self, PyCtxt ctxt, int64_t output_value=*) except +
-    cpdef double decryptFrac(self, PyCtxt ctxt, double output_value=*) except +
-    cpdef vector[int64_t] decryptBatch(self, PyCtxt ctxt, vector[int64_t] output_vector=*) except +
+    cpdef int64_t decryptInt(self, PyCtxt ctxt) except +
+    cpdef double decryptFrac(self, PyCtxt ctxt) except +
+    cpdef vector[int64_t] decryptBatch(self, PyCtxt ctxt) except +
+    cpdef int64_t[::1] decryptArray(self, PyCtxt ctxt) except +
     cpdef PyPtxt decryptPtxt(self, PyCtxt ctxt, PyPtxt ptxt=*) except +
     
     cpdef int noiseLevel(self, PyCtxt ctxt) except +
@@ -51,14 +53,15 @@ cdef class Pyfhel:
     cpdef void relinearize(self, PyCtxt ctxt) except +
     
     # ============================= ENCODING ===================================
-    cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=*) except +
-    cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=*) except +
-    cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=*) except +
-    cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=*) except +
+    cpdef PyPtxt encodeInt(self, int64_t& value, PyPtxt ptxt=*) except +
+    cpdef PyPtxt encodeFrac(self, double& value, PyPtxt ptxt=*) except +
+    cpdef PyPtxt encodeBatch(self, vector[int64_t]& vec, PyPtxt ptxt=*) except +
+    cpdef PyPtxt encodeArray(self, int64_t[::1]& arr, PyPtxt ptxt=*) except +
     
-    cpdef int64_t decodeInt(self, PyPtxt ptxt, int64_t output_value=*) except +
-    cpdef double decodeFrac(self, PyPtxt ptxt, double output_value=*) except +
-    cpdef vector[int64_t] decodeBatch(self, PyPtxt ptxt, vector[int64_t] output_vector=*) except +
+    cpdef int64_t decodeInt(self, PyPtxt ptxt) except +
+    cpdef double decodeFrac(self, PyPtxt ptxt) except +
+    cpdef vector[int64_t] decodeBatch(self, PyPtxt ptxt) except +
+    cpdef int64_t[::1] decodeArray(self, PyPtxt ptxt) except +
     
     # ============================ OPERATIONS ==================================
     cpdef void square(self, PyCtxt ctxt) except +
