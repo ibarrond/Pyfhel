@@ -23,17 +23,20 @@ cdef class PyCtxt:
     corresponding to the backend selected in Pyfhel. By default, it is SEAL.
 
     Attributes:
-        pyfhel (Pyfhel, optional): Other PyCtxt to deep copy.
         other (PyCtxt, optional): Other PyCtxt to deep copy.
     
     """
-    def __cinit__(self, PyCtxt other=None):
-        self._encoding = ENCODING_T.UNDEFINED
-        if other:
-            self._ptr_ctxt = new Ciphertext(deref(other._ptr_ctxt))
-            self._encoding = other._encoding
+    def __cinit__(self, PyCtxt other_ctxt=None, Pyfhel pyfhel=None):
+        if (other_ctxt):
+            self._ptr_ctxt = new Ciphertext(deref(other_ctxt._ptr_ctxt))
+            self._encoding = other_ctxt._encoding
+            if (other_ctxt._pyfhel):
+                self._pyfhel = other_ctxt._pyfhel
         else:
             self._ptr_ctxt = new Ciphertext()
+            self._encoding = ENCODING_T.UNDEFINED
+            if (pyfhel):
+                self._pyfhel = pyfhel
             
     def __dealloc__(self):
         if self._ptr_ctxt != NULL:

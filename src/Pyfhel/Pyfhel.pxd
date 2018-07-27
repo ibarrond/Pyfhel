@@ -31,9 +31,11 @@ cdef class Pyfhel:
     cdef Afseal* afseal           # The C++ methods are accessed via a pointer
     
     # =========================== CRYPTOGRAPHY =================================
-    cpdef ContextGen(self, long p, long m=*, bool flagBatching=*, long base=*,
+    cpdef contextGen(self, long p, long m=*, bool flagBatching=*, long base=*,
                      long sec=*, int intDigits=*, int fracDigits=*) except +
-    cpdef void KeyGen(self) except +
+    cpdef void keyGen(self) except +
+    cpdef void rotateKeyGen(self, int bitCount) except +
+    cpdef void relinKeyGen(self, int bitCount) except +
     
     cpdef PyCtxt encryptInt(self, int64_t value, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=*) except +
@@ -47,10 +49,9 @@ cdef class Pyfhel:
     cpdef int64_t[::1] decryptArray(self, PyCtxt ctxt) except +
     cpdef PyPtxt decryptPtxt(self, PyCtxt ctxt, PyPtxt ptxt=*) except +
     
-    cpdef int noiseLevel(self, PyCtxt ctxt) except +
-    cpdef void rotateKeyGen(self, int bitCount) except +
-    cpdef void relinKeyGen(self, int bitCount) except +
     cpdef void relinearize(self, PyCtxt ctxt) except +
+    
+    cpdef int noiseLevel(self, PyCtxt ctxt) except +
     
     # ============================= ENCODING ===================================
     cpdef PyPtxt encodeInt(self, int64_t& value, PyPtxt ptxt=*) except +
@@ -64,18 +65,18 @@ cdef class Pyfhel:
     cpdef int64_t[::1] decodeArray(self, PyPtxt ptxt) except +
     
     # ============================ OPERATIONS ==================================
-    cpdef void square(self, PyCtxt ctxt) except +
-    cpdef void negate(self, PyCtxt ctxt) except +
-    cpdef void add_encr(self, PyCtxt ctxt, PyCtxt ctxt_other) except +
-    cpdef void add_plain(self, PyCtxt ctxt, PyPtxt ptxt) except +
-    cpdef void sub_encr(self, PyCtxt ctxt, PyCtxt ctxt_other) except +
-    cpdef void sub_plain(self, PyCtxt ctxt, PyPtxt ptxt) except +
-    cpdef void multiply_encr(self, PyCtxt ctxt, PyCtxt ctxt_other) except +
-    cpdef void multiply_plain(self, PyCtxt ctxt, PyPtxt ptxt) except +
-    cpdef void rotate(self, PyCtxt ctxt, int k) except +
-    cpdef void exponentiate(self, PyCtxt ctxt, uint64_t expon) except +
-    cpdef void polyEval(self, PyCtxt ctxt, vector[int64_t] coeffPoly) except +
-    cpdef void polyEval_double (self, PyCtxt ctxt, vector[double] coeffPoly) except +
+    cpdef PyCtxt square(self, PyCtxt ctxt, bool in_new_ctxt=*) except +
+    cpdef PyCtxt negate(self, PyCtxt ctxt, bool in_new_ctxt=*) except +
+    cpdef PyCtxt add(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=*) except +
+    cpdef PyCtxt add_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=*) except +
+    cpdef PyCtxt sub(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=*) except +
+    cpdef PyCtxt sub_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=*) except +
+    cpdef PyCtxt multiply(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=*) except +
+    cpdef PyCtxt multiply_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=*) except +
+    cpdef PyCtxt rotate(self, PyCtxt ctxt, int k, bool in_new_ctxt=*) except +
+    cpdef PyCtxt power(self, PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=*) except +
+    cpdef PyCtxt polyEval(self, PyCtxt ctxt, vector[int64_t] coeffPoly, bool in_new_ctxt=*) except +
+    cpdef PyCtxt polyEval_double (self, PyCtxt ctxt, vector[double] coeffPoly, bool in_new_ctxt=*) except +
 
     
     # ================================ I/O =====================================

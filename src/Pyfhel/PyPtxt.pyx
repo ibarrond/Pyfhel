@@ -19,14 +19,22 @@ cdef class PyPtxt:
     corresponding to the backend selected in Pyfhel (SEAL by default).
 
     Attributes:
-        other (:obj:`PyPtxt`, optional): Other PyPtxt to deep copy
+        other_ptxt (PyPtxt, optional): Other PyPtxt to deep copy
     
     """
     
-    def __cinit__(self, PyPtxt other=None):
-        self._encoding = ENCODING_T.UNDEFINED
-        self._ptr_ptxt = new Plaintext()
-            
+    def __cinit__(self, PyPtxt other_ptxt=None, Pyfhel pyfhel=None):
+        if (other_ptxt):
+            self._ptr_ptxt = new Plaintext(deref(other_ptxt._ptr_ptxt))
+            self._encoding = other_ptxt._encoding
+            if (other_ptxt._pyfhel):
+                self._pyfhel = other_ptxt._pyfhel
+        else:
+            self._ptr_ptxt = new Plaintext()  
+            self._encoding = ENCODING_T.UNDEFINED 
+            if (pyfhel):
+                self._pyfhel = pyfhel  
+                
     def __dealloc__(self):
         if self._ptr_ptxt != NULL:
             del self._ptr_ptxt
@@ -48,7 +56,18 @@ cdef class PyPtxt:
         """Sets Encoding to 1-UNDEFINED""" 
         self._encoding = ENCODING_t.UNDEFINED.value
               
-
+        
+    @property
+    def _pyfhel(self):
+        """A pyfhel instance, used for operations"""
+        return self._pyfhel
+    @_pyfhel.setter
+    def _pyfhel(self, new_pyfhel):
+        """Sets the pyfhel instance, used for operations""" 
+        if not isinstance(new_pyfhel, Pyfhel):
+            raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
+        self._pyfhel = new_pyfhel 
+        
         
     cpdef bool is_zero(self):
         """bool: Flag to quickly check if it is empty"""

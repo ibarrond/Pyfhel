@@ -5,6 +5,9 @@
 from libcpp.string cimport string
 from libcpp cimport bool
 
+# Used for all kinds of operations
+from Pyfhel cimport Pyfhel
+
 # Import our own wrapper for iostream classes, used for I/O ops
 from iostream cimport ifstream, ofstream   
 
@@ -16,6 +19,7 @@ from util.ENCODING_T cimport ENCODING_T
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class PyCtxt:
     cdef Ciphertext* _ptr_ctxt
+    cdef Pyfhel _pyfhel
     cdef ENCODING_T _encoding
     cpdef int size_capacity(self)
     cpdef int size(self)

@@ -90,7 +90,7 @@ cdef class Pyfhel:
     # ============================ CRYPTOGRAPHY ===============================
     # =========================================================================
     
-    cpdef ContextGen(self, long p, long m=2048, bool flagBatching=False,
+    cpdef contextGen(self, long p, long m=2048, bool flagBatching=False,
                      long base=2, long sec=128, int intDigits=64,
                      int fracDigits = 32) except +:
         """Generates Homomorphic Encryption context based on parameters.
@@ -123,7 +123,7 @@ cdef class Pyfhel:
                                sec,intDigits, fracDigits)
         
         
-    cpdef void KeyGen(self) except +:
+    cpdef void keyGen(self) except +:
         """Generates a pair of secret/Public Keys.
         
         Based on the current context, initializes one public and one secret key. 
@@ -154,7 +154,7 @@ cdef class Pyfhel:
         if (ctxt._ptr_ctxt == NULL):
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
-        ctxt._encoding = ENCODING_t.INTEGER.value
+        ctxt._encoding = ENCODING_T.INTEGER
         return ctxt
     
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=None) except +:
@@ -176,7 +176,7 @@ cdef class Pyfhel:
         if (ctxt._ptr_ctxt == NULL):
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
-        ctxt._encoding = ENCODING_t.FRACTIONAL.value
+        ctxt._encoding = ENCODING_T.FRACTIONAL
         return ctxt
 
 
@@ -196,10 +196,10 @@ cdef class Pyfhel:
         Return:
             PyCtxt: the ciphertext containing the encrypted plaintext
         """
-        if (ctxt._ptr_ctxt):
+        if (ctxt._ptr_ctxt == NULL):
             ctxt = PyCtxt()
         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
-        ctxt._encoding = ENCODING_t.BATCH.value
+        ctxt._encoding = ENCODING_T.BATCH
         return ctxt  
         
     cpdef PyCtxt encryptArray(self, int64_t[::1] arr,
@@ -223,7 +223,7 @@ cdef class Pyfhel:
         cdef vector[int64_t] vec;
         vec.assign(&arr[0], &arr[-1]+1)
         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
-        ctxt._encoding = ENCODING_t.BATCH.value
+        ctxt._encoding = ENCODING_T.BATCH
         return ctxt  
     
     cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=None) except +:
@@ -300,9 +300,9 @@ cdef class Pyfhel:
             int: the decrypted integer value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.INTEGER.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_T.INTEGER.
         """
-        if (ctxt._encoding != ENCODING_t.INTEGER.value):
+        if (ctxt._encoding != ENCODING_T.INTEGER):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         cdef int64_t output_value = 0
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_value)
@@ -321,9 +321,9 @@ cdef class Pyfhel:
             float: the decrypted float value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.FRACTIONAL.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_T.FRACTIONAL.
         """
-        if (ctxt._encoding != ENCODING_t.FRACTIONAL.value):
+        if (ctxt._encoding != ENCODING_T.FRACTIONAL):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         cdef double output_value = 0
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_value)
@@ -344,9 +344,9 @@ cdef class Pyfhel:
             PyCtxt: the ciphertext containing the encrypted plaintext
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.BATCH.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_T.BATCH.
         """
-        if (ctxt._encoding != ENCODING_t.BATCH.value):
+        if (ctxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         return self.afseal.decrypt(deref(ctxt._ptr_ctxt))
         
@@ -365,9 +365,9 @@ cdef class Pyfhel:
             PyCtxt: the ciphertext containing the encrypted plaintext
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.BATCH.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_T.BATCH.
         """
-        if (ctxt._encoding != ENCODING_t.BATCH.value):
+        if (ctxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         cdef vector[int64_t] output_vector=self.afseal.decrypt(deref(ctxt._ptr_ctxt))  
         cdef int64_t[::1] output_array = <int64_t [:output_vector.size()]>output_vector.data()
@@ -416,13 +416,13 @@ cdef class Pyfhel:
             TypeError: if the plaintext doesn't have a valid type.
         """
         if (decode_value):
-            if (ctxt._encoding == ENCODING_t.BATCH.value):
+            if (ctxt._encoding == ENCODING_T.BATCH):
                 return self.decryptBatch(ctxt)
-            elif (ctxt._encoding == ENCODING_t.FRACTIONAL.value):
+            elif (ctxt._encoding == ENCODING_T.FRACTIONAL):
                 return self.decryptFrac(ctxt)
-            elif (ctxt._encoding == ENCODING_t.INTEGER.value):
+            elif (ctxt._encoding == ENCODING_T.INTEGER):
                 return self.decryptInt(ctxt)
-            elif (ctxt._encoding == ENCODING_t.UNDEFINED.value):
+            elif (ctxt._encoding == ENCODING_T.UNDEFINED):
                 raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         else: # Decrypt to plaintext        
             if (ptxt._ptr_ptxt == NULL):
@@ -518,7 +518,7 @@ cdef class Pyfhel:
         if (ptxt._ptr_ptxt == NULL):
             ptxt = PyPtxt()
         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ENCODING_t.INTEGER.value
+        ptxt._encoding = ENCODING_T.INTEGER
         return ptxt
     
     cpdef PyPtxt encodeFrac(self, double &value, PyPtxt ptxt=None) except +:
@@ -537,7 +537,7 @@ cdef class Pyfhel:
         if (ptxt._ptr_ptxt == NULL):
             ptxt = PyPtxt()
         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ENCODING_t.FRACTIONAL.value
+        ptxt._encoding = ENCODING_T.FRACTIONAL
         return ptxt
     
     cpdef PyPtxt encodeBatch(self, vector[int64_t]& vec, PyPtxt ptxt=None) except +: 
@@ -559,7 +559,7 @@ cdef class Pyfhel:
         if (ptxt._ptr_ptxt == NULL):
             ptxt = PyPtxt()
         self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ENCODING_t.BATCH.value
+        ptxt._encoding = ENCODING_T.BATCH
         return ptxt  
     
     cpdef PyPtxt encodeArray(self, int64_t[::1] &arr, PyPtxt ptxt=None) except +:
@@ -583,7 +583,7 @@ cdef class Pyfhel:
         cdef vector[int64_t] vec=[0];
         vec.assign(&arr[0], &arr[-1]+1)
         self.afseal.encode(vec, deref(ptxt._ptr_ptxt)) 
-        ptxt._encoding = ENCODING_t.BATCH.value
+        ptxt._encoding = ENCODING_T.BATCH
         return ptxt  
     
     def encode(self, val_vec not None, PyPtxt ptxt=None):
@@ -632,7 +632,7 @@ cdef class Pyfhel:
             int64_t: the decoded integer value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.INTEGER.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_T.INTEGER.
         """
         if (ptxt._encoding != ENCODING_T.INTEGER):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
@@ -653,7 +653,7 @@ cdef class Pyfhel:
             double: the decoded float value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.FRACTIONAL.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_T.FRACTIONAL.
         """
         if (ptxt._encoding != ENCODING_T.FRACTIONAL):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
@@ -674,7 +674,7 @@ cdef class Pyfhel:
             vector[int64_t]: the vectort containing the decoded values
             
         Raise:
-            RuntimeError: if the plaintext encoding isn't ENCODING_t.BATCH.
+            RuntimeError: if the plaintext encoding isn't ENCODING_T.BATCH.
         """
         if (ptxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
@@ -696,7 +696,7 @@ cdef class Pyfhel:
             vector[int64_t]: the vectort containing the decoded values
             
         Raise:
-            RuntimeError: if the plaintext encoding isn't ENCODING_t.BATCH.
+            RuntimeError: if the plaintext encoding isn't ENCODING_T.BATCH.
         """
         if (ptxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
@@ -736,54 +736,45 @@ cdef class Pyfhel:
     # =========================================================================
     # ============================= OPERATIONS ================================
     # =========================================================================
-    cpdef void square(self, PyCtxt ctxt) except +:
+    cpdef PyCtxt square(self, PyCtxt ctxt, bool in_new_ctxt=False) except +:
         """Square PyCtxt ciphertext value/s.
     
         Args:
             ctxt (PyCtxt): ciphertext whose values are squared.  
-            
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
-        self.afseal.square(deref(ctxt._ptr_ctxt))
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.square(deref(new_ctxt._ptr_ctxt))
+            return new_ctxt
+        else:
+            self.afseal.square(deref(ctxt._ptr_ctxt))
+            return ctxt
         
-    cpdef void negate(self, PyCtxt ctxt) except +:
+    cpdef PyCtxt negate(self, PyCtxt ctxt, bool in_new_ctxt=False) except +:
         """Negate PyCtxt ciphertext value/s.
     
         Args:
             ctxt (PyCtxt): ciphertext whose values are negated.   
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
-        self.afseal.negate(deref(ctxt._ptr_ctxt))
-        
-    def add(self, ctxt not None, ctxt_or_ptxt not None):
-        """Add PyCtxt ciphertext by either a PyCtxt ciphertext or a PyPtxt plaintext.
-        
-        Encrypted addition. Encoding must be the same. Requires same
-        context and encryption with same public key. The result is applied
-        to the first ciphertext.i
-    
-        Args:
-            ctxt (PyCtxt): ciphertext whose values are added with ctxt_or_ptxt.  
-            ctxt_or_ptxt (PyCtxt|PyPtxt): ciphertext/Plaintext left untouched.  
-            
-        Return:
-            None
-        """
-        if not isinstance(ctxt, PyCtxt):
-            raise TypeError('<Pyfhel ERROR> ctxt is not a PyCtxt cyphertext, but type '
-                            +type(ctxt))
-        if isinstance(ctxt_or_ptxt, PyCtxt):
-            self.add_encr(ctxt, ctxt_or_ptxt)
-        elif isinstance(ctxt_or_ptxt, PyPtxt):
-            self.add_plain(ctxt, ctxt_or_ptxt)
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.negate(deref(new_ctxt._ptr_ctxt))
+            return new_ctxt
         else:
-            raise TypeError('<Pyfhel ERROR> ctxt_or_ptxt is neither a PyCtxt cyphertext,'
-                            ' nor a PyPtxt plaintext, but type '+type(ctxt_or_ptxt))   
+            self.afseal.negate(deref(ctxt._ptr_ctxt))
+            return ctxt
+
         
-    cpdef void add_encr(self, PyCtxt ctxt, PyCtxt ctxt_other) except +:
+    cpdef PyCtxt add(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False) except +:
         """Sum two PyCtxt ciphertexts.
         
         Sums two ciphertexts. Encoding must be the same. Requires same
@@ -793,15 +784,24 @@ cdef class Pyfhel:
         Args:
             ctxt (PyCtxt): ciphertext whose values are added with ctxt_other.  
             ctxt_other (PyCtxt): ciphertext left untouched.  
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms")
-        self.afseal.add(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.add(deref(new_ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+            return new_ctxt
+        else:
+            self.afseal.add(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+            return ctxt
         
-    cpdef void add_plain (self, PyCtxt ctxt, PyPtxt ptxt) except +:
+        
+    cpdef PyCtxt add_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False) except +:
         """Sum a PyCtxt ciphertext and a PyPtxt plaintext.
         
         Sums a ciphertext and a plaintext. Encoding must be the same. Requires
@@ -811,40 +811,24 @@ cdef class Pyfhel:
         Args:
             ctxt (PyCtxt): ciphertext whose values are added with ptxt.  
             ptxt (PyPtxt): plaintext left untouched.  
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
         if (ctxt._encoding != ptxt._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms")
-        self.afseal.add(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
-
-    def sub(self, ctxt not None, ctxt_or_ptxt not None):
-        """Substract PyCtxt ciphertext by either a PyCtxt ciphertext or a PyPtxt plaintext.
-        
-        Encrypted substraction. Encoding must be the same. Requires same
-        context and encryption with same public key. The result is applied
-        to the first ciphertext.
-    
-        Args:
-            ctxt (PyCtxt): ciphertext whose values are substracted with ctxt_or_ptxt.  
-            ctxt_or_ptxt (PyCtxt|PyPtxt): ciphertext/Plaintext left untouched.  
-            
-        Return:
-            None
-        """
-        if not isinstance(ctxt, PyCtxt):
-            raise TypeError('<Pyfhel ERROR> ctxt is not a PyCtxt cyphertext, but type '
-                            +type(ctxt))
-        if isinstance(ctxt_or_ptxt, PyCtxt):
-            self.sub_encr(ctxt, ctxt_or_ptxt)
-        elif isinstance(ctxt_or_ptxt, PyPtxt):
-            self.sub_plain(ctxt, ctxt_or_ptxt)
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.add(deref(new_ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
+            return new_ctxt
         else:
-            raise TypeError('<Pyfhel ERROR> ctxt_or_ptxt is neither a PyCtxt cyphertext,'
-                            ' nor a PyPtxt plaintext, but type '+type(ctxt_or_ptxt))
+            self.afseal.add(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
+            return ctxt
+
             
-    cpdef void sub_encr(self, PyCtxt ctxt, PyCtxt ctxt_other) except +:
+    cpdef PyCtxt sub (self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False) except +:
         """Substracts one PyCtxt ciphertext from another.
         
         Substracts one ciphertext from another. Encoding must be the same.
@@ -855,15 +839,23 @@ cdef class Pyfhel:
             ctxt (PyCtxt): ciphertext whose values get substracted by ctxt_other.  
             ctxt_other (PyCtxt): ciphertext left untouched, whose values are
                                 substracted from ctxt.
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms")
-        self.afseal.sub(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.sub(deref(new_ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+            return new_ctxt
+        else:
+            self.afseal.sub(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+            return ctxt
         
-    cpdef void sub_plain(self, PyCtxt ctxt, PyPtxt ptxt) except +:
+    cpdef PyCtxt sub_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False) except +:
         """Substracts a PyCtxt ciphertext and a plaintext.
         
         Performs ctxt = ctxt - ptxt. Encoding must be the same. Requires same
@@ -874,41 +866,25 @@ cdef class Pyfhel:
             ctxt (PyCtxt): ciphertext whose values get substracted by ctxt_other.  
             ptxt (PyPtxt): plaintext left untouched, whose values are
                                 substracted from ctxt.
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
         if (ctxt._encoding != ptxt._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms")
-        self.afseal.sub(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
-    
-    def multiply(self, ctxt not None, ctxt_or_ptxt not None):
-        """Multiply PyCtxt ciphertext by either a PyCtxt ciphertext or a PyPtxt plaintext.
         
-        Encrypted multiplication. Encoding must be the same. Requires same
-        context and encryption with same public key. The result is applied
-        to the first ciphertext.
-    
-        Args:
-            ctxt (PyCtxt): ciphertext whose values are multiplied with ctxt_or_ptxt.  
-            ctxt_or_ptxt (PyCtxt|PyPtxt): ciphertext/Plaintext left untouched.  
-            
-        Return:
-            None
-        """
-        if not isinstance(ctxt, PyCtxt):
-            raise TypeError('<Pyfhel ERROR> ctxt is not a PyCtxt cyphertext, but type '
-                            +type(ctxt))
-        if isinstance(ctxt_or_ptxt, PyCtxt):
-            self.multiply_encr(ctxt, ctxt_or_ptxt)
-        elif isinstance(ctxt_or_ptxt, PyPtxt):
-            self.multiply_plain(ctxt, ctxt_or_ptxt)
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.sub(deref(new_ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
+            return new_ctxt
         else:
-            raise TypeError('<Pyfhel ERROR> ctxt_or_ptxt is neither a PyCtxt cyphertext,'
-                            ' nor a PyPtxt plaintext, but type '+type(ctxt_or_ptxt))
+            self.afseal.sub(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
+            return ctxt
 
         
-    cpdef void multiply_encr(self, PyCtxt ctxt, PyCtxt ctxt_other) except +:
+    cpdef PyCtxt multiply (self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False) except +:
         """Multiply first PyCtxt ciphertext by the second PyCtxt ciphertext.
         
         Multiplies two ciphertexts. Encoding must be the same. Requires same
@@ -918,15 +894,24 @@ cdef class Pyfhel:
         Args:
             ctxt (PyCtxt): ciphertext whose values are multiplied with ctxt_other.  
             ctxt_other (PyCtxt): ciphertext left untouched.  
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms")
-        self.afseal.multiply(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
         
-    cpdef void multiply_plain(self, PyCtxt ctxt, PyPtxt ptxt) except +:
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.multiply(deref(new_ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+            return new_ctxt
+        else:
+            self.afseal.multiply(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+            return ctxt
+        
+    cpdef PyCtxt multiply_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False) except +:
         """Multiply a PyCtxt ciphertext and a PyPtxt plaintext.
         
         Multiplies a ciphertext and a plaintext. Encoding must be the same. Requires
@@ -938,13 +923,19 @@ cdef class Pyfhel:
             ptxt (PyPtxt): plaintext left untouched.  
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
         if (ctxt._encoding != ptxt._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms")
-        self.afseal.multiply(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
+            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms")   
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.multiply(deref(new_ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))     
+            return new_ctxt
+        else:
+            self.afseal.multiply(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))     
+            return ctxt
         
-    cpdef void rotate(self, PyCtxt ctxt, int k) except +:
+    cpdef PyCtxt rotate(self, PyCtxt ctxt, int k, bool in_new_ctxt=False) except +:
         """Rotates cyclically PyCtxt ciphertext values k positions.
         
         Performs a cyclic rotation over a cyphertext encoded in BATCH mode. 
@@ -953,15 +944,24 @@ cdef class Pyfhel:
         Args:
             ctxt (PyCtxt): ciphertext whose values are rotated.
             k (int): number of positions to rotate.
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
-        if (ctxt._encoding != ENCODING_t.BATCH):
+        if (ctxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> BATCH encoding required for rotation")
-        self.afseal.rotate(deref(ctxt._ptr_ctxt), k)
         
-    cpdef void exponentiate(self, PyCtxt ctxt, uint64_t expon) except +:
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.rotate(deref(new_ctxt._ptr_ctxt), k)   
+            return new_ctxt
+        else:
+            self.afseal.rotate(deref(ctxt._ptr_ctxt), k)   
+            return ctxt
+        
+    cpdef PyCtxt power(self, PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=False) except +:
         """Exponentiates PyCtxt ciphertext value/s to expon power.
         
         Performs an exponentiation over a cyphertext. Requires previously
@@ -971,13 +971,22 @@ cdef class Pyfhel:
         Args:
             ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
             expon (uint64_t): exponent.
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
-        self.afseal.exponentiate(deref(ctxt._ptr_ctxt), expon)
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.exponentiate(deref(new_ctxt._ptr_ctxt), expon)  
+            return new_ctxt
+        else:
+            self.afseal.exponentiate(deref(ctxt._ptr_ctxt), expon) 
+            return ctxt
         
-    cpdef void polyEval(self, PyCtxt ctxt, vector[int64_t] coeffPoly) except +:
+    cpdef PyCtxt polyEval(self, PyCtxt ctxt,
+                        vector[int64_t] coeffPoly, bool in_new_ctxt=False) except +:
         """Evaluates polynomial in PyCtxt ciphertext value/s.
         
         Evaluates a polynomial given by integer coefficients. Requires 
@@ -988,13 +997,25 @@ cdef class Pyfhel:
             ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
             coeffPoly (vector[int64_t]): Polynomial coefficients:
                         coeffPoly[0]*ctxt^2 + coeffPoly[1]*ctxt + coeffPoly[2]   
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
+            PyCtxt resulting ciphertext, either the input transformed or a new one
         """
-        self.afseal.polyEval(deref(ctxt._ptr_ctxt), coeffPoly)
         
-    cpdef void polyEval_double "polyEval"(self, PyCtxt ctxt, vector[double] coeffPoly) except +:
+        if (ctxt._encoding != ENCODING_T.BATCH) and (ctxt._encoding != ENCODING_T.INTEGER) :
+            raise RuntimeError("<Pyfhel ERROR> encoding type must be INTEGER or BATCH")
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.polyEval(deref(new_ctxt._ptr_ctxt), coeffPoly)      
+            return new_ctxt
+        else:
+            self.afseal.polyEval(deref(ctxt._ptr_ctxt), coeffPoly)    
+            return ctxt
+        
+    cpdef PyCtxt polyEval_double (self, PyCtxt ctxt,
+                 vector[double] coeffPoly, bool in_new_ctxt=False) except +:
         """Evaluates polynomial in PyCtxt ciphertext value/s.
         
         Evaluates a polynomial given by float coefficients. Requires 
@@ -1005,11 +1026,21 @@ cdef class Pyfhel:
             ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
             coeffPoly (vector[float]): Polynomial coefficients:
                         coeffPoly[0]*ctxt^2 + coeffPoly[1]*ctxt + coeffPoly[2]   
+            in_new_ctxt (bool=False): apply operation to a newly
+                        created ciphertext instead of input cyphertext
             
         Return:
-            None
-        """
-        self.afseal.polyEval(deref(ctxt._ptr_ctxt), coeffPoly)
+            PyCtxt resulting ciphertext, either the input transformed or a new one
+        """        
+        if (ctxt._encoding != ENCODING_T.BATCH) or (ctxt._encoding != ENCODING_T.INTEGER) :
+            raise RuntimeError("<Pyfhel ERROR> encoding type must be INTEGER or BATCH")
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.polyEval(deref(new_ctxt._ptr_ctxt), coeffPoly)      
+            return new_ctxt
+        else:
+            self.afseal.polyEval(deref(ctxt._ptr_ctxt), coeffPoly)    
+            return ctxt
         
         
         

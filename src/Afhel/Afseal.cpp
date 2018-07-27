@@ -307,7 +307,7 @@ void Afseal::relinKeyGen(int& bitCount){
     if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
     if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
     this->relinKey = make_shared<EvaluationKeys>();
-    keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
+    this->keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
 }
 void Afseal::relinearize(Ciphertext& cipher1){
     if(evaluator==NULL){throw std::logic_error("Context not initialized");}
@@ -419,7 +419,7 @@ void Afseal::rotate(vector<Ciphertext>& cipherV, int& k){
 
 // POLYNOMIALS
 void Afseal::exponentiate(Ciphertext& cipher1, uint64_t& expon){
-    if(relinKey==NULL){throw std::logic_error("Relinearization key not initialized");}
+	if(relinKey==NULL){throw std::logic_error("Relinearization key not initialized");}
     if(evaluator==NULL){throw std::logic_error("Context not initialized");}
     evaluator->exponentiate(cipher1, expon, *relinKey);}
 void Afseal::exponentiate(vector<Ciphertext>& cipherV, uint64_t& expon){
@@ -488,6 +488,7 @@ bool Afseal::restoreContext(string fileName){
         contextFile.close();
 
         this->context = make_shared<SEALContext>(parms);
+		this->keyGenObj = make_shared<KeyGenerator>(*context);
         this->intEncoder = make_shared<IntegerEncoder>((*context).plain_modulus(), base);
         this->fracEncoder = make_shared<FractionalEncoder>((*context).plain_modulus(),
                 (*context).poly_modulus(), intDigits, fracDigits, base);
