@@ -63,7 +63,7 @@ Afseal::Afseal(const Afseal &otherAfseal){
     this->sec =          otherAfseal.sec;
     this->intDigits =    otherAfseal.intDigits;
     this->fracDigits =   otherAfseal.fracDigits;
-    this->flagBatching = otherAfseal.flagBatching;
+    this->flagBatch = otherAfseal.flagBatch;
 }
 
 Afseal::~Afseal(){}
@@ -306,7 +306,7 @@ void Afseal::relinKeyGen(int& bitCount){
     if(keyGenObj==NULL){throw std::logic_error("Context not initialized");}
     if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
     if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
-    relinKey = make_shared<EvaluationKeys>();
+    this->relinKey = make_shared<EvaluationKeys>();
     keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
 }
 void Afseal::relinearize(Ciphertext& cipher1){
