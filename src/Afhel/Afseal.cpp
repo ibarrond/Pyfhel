@@ -455,7 +455,7 @@ bool Afseal::saveContext(string fileName){
     if(context==NULL){throw std::logic_error("Context not initialized");}
     bool res=true;
     try{
-        fstream contextFile(fileName, fstream::in);
+        fstream contextFile(fileName, fstream::out|fstream::trunc);
         assert(contextFile.is_open());
         context->parms().save(contextFile);
         contextFile << base;
@@ -512,7 +512,7 @@ bool Afseal::restoreContext(string fileName){
 bool Afseal::savepublicKey(string fileName){
     if(publicKey==NULL){throw std::logic_error("Public Key not initialized");}
     bool res=true;
-    try{fstream keyFile(fileName, fstream::in);
+    try{fstream keyFile(fileName, fstream::out|fstream::trunc);
         assert(keyFile.is_open());
         publicKey->save(keyFile);
         
@@ -546,7 +546,7 @@ bool Afseal::restorepublicKey(string fileName){
 bool Afseal::savesecretKey(string fileName){
     if(publicKey==NULL){throw std::logic_error("Secret Key not initialized");}
     bool res=true;
-    try{fstream keyFile(fileName, fstream::in);
+    try{fstream keyFile(fileName, fstream::out|fstream::trunc);
         assert(keyFile.is_open());
         secretKey->save(keyFile);
         
@@ -579,7 +579,7 @@ bool Afseal::restoresecretKey(string fileName){
 bool Afseal::saverelinKey(string fileName){
     if(relinKey==NULL){throw std::logic_error("Relinearization Key not initialized");}
     bool res=true;
-    try{fstream keyFile(fileName, fstream::in);
+    try{fstream keyFile(fileName, fstream::out|fstream::trunc);
         assert(keyFile.is_open());
         relinKey->save(keyFile);
         
@@ -611,7 +611,7 @@ bool Afseal::restorerelinKey(string fileName){
 bool Afseal::saverotateKey(string fileName){
     if(rotateKeys==NULL){throw std::logic_error("Rotation Key not initialized");}
     bool res=true;
-    try{fstream keyFile(fileName, fstream::in);
+    try{fstream keyFile(fileName, fstream::out|fstream::trunc);
         assert(keyFile.is_open());
         rotateKeys->save(keyFile);
         
