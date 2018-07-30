@@ -95,7 +95,7 @@ LDLIBS =  -lgmp -lntl -lm -lfhe -lafhel
 
 
 all: requirements install
-.PHONY: packages libdownloads pypackages HElib Afhel Pyfhel
+.PHONY: packages libdownloads submodules HElib SEAL Afhel Pyfhel
 
 
 ##############################################################################################
@@ -103,12 +103,21 @@ all: requirements install
 ##############################################################################################
 
 
-requirements: packages libdownloads submodules
+requirements: packages cmake libdownloads submodules
 
 packages:
-	sudo apt-get install python3-dev wget libboost-all-dev python3-pip libtool-bin m4
+	sudo apt-get install wget libboost-all-dev \
+		libtool-bin m4
 	sudo pip install --upgrade pip
 	sudo pip install --upgrade cython
+
+cmake:
+	wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
+	tar -xvzf cmake-3.11.4.tar.gz 
+	cmake-3.11.4/configure
+	$(MAKE) -C cmake-3.11.4/
+	$(MAKE) install -C cmake-3.11.4/
+	rm -r cmake-3.11.4*
 
 libdownloads:
 	mkdir -p .installers
@@ -119,17 +128,22 @@ libdownloads:
 submodules:
 	git submodule foreach --recursive git pull
 
+
 ##############################################################################################
 #                                     INSTALL ALL LIBRARIES                                  #
 ##############################################################################################
 
-install: HElib Afhel Pyfhel
+install: SEAL Afhel Pyfhel
 
-Upgrade: submodules HElib Afhel PyfhelUpgrade
+upgrade: submodules HElib Afhel PyfhelUpgrade
 
 HElib:
 	$(MAKE) -C HElib/src/
 	$(MAKE) install -C HElib/src/
+
+SEAL:
+	$(MAKE) -C SEAL/
+	$(MAKE) install -C SEAL/
 
 Afhel:
 	$(MAKE) -C Afhel/
@@ -165,8 +179,8 @@ uninstall:
 	$(MAKE) uninstall -C Afhel/
 	$(MAKE) uninstall -C Pyfhel/
 
-cleanexe:
-	-rm -f *.aenv *_x
+cleanbuild:
+	-rm -rf *.aenv *_x *.so *.egg-info build dist
 
 
 

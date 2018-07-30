@@ -42,20 +42,18 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-$(info ---------------------- PYFHEL: AFHEL MAKEFILE -----------------------)
-$(info Afhel requires [HElib, SEAL, PALISADE], NTL <=10.0.0 and GMP <6.0.0)
+
+$(info ----------------------- Afhel Makefile ----------------------------)
+$(info Afhel requires [HElib, SEAL, PALISADE])
 $(info For a list if all the available commands, run >make info)
-$(info Dependencies:)
-$(info  Pyfhel -> Afhel -> Afhelib    -> HElib    -> NTL & GMP)
-$(info                     Afpalisade -> PALISADE -> NTL & GMP)
-$(info                     Afseal     -> SEAL)
+$(info Dependencies= info  Pyfhel -> Afhel ->  [HElib | SEAL | PALISADE])
 
 ###############################################################################
 #                           MAKEFILE VARIABLES                                #
 ###############################################################################
 
 #........................... LIBRARY ATTRIBUTES ...............................
-LIB_NAME = afseal
+LIB_NAME = afhel
 			# Prefix 'lib' and extension '.la' are added later on
 VERSION = 2:0:0
 			# Library version, independent from packet/repo version
@@ -162,16 +160,16 @@ clean:
 ###############################################################################
 #                                ADDITIONAL INFO                              #
 ###############################################################################
+.PHONY: info
 
-
-info: MAKEFILE FOR AFHEL <- [AFSEAL, AFPALISADE, AFHELIB]
-	: Compilation flags are 'CFLAGS=$(CFLAGS)'
-	: Linking flags are 'LFLAGS=$(LFLAGS)'
-	: Commands Available:
-	: * make - compile & link the library
-	: * make install - library available in the host. Requires root 
-	: * make fileName_x - Compile & Link binary filename.cpp with Afhel
-	: * make clean - remove all library files from the folder
-	: * make uninstall - remove library from host. Requires root
-	: If errors occur, try adding/removing '-std=c++11' in Makefile
+info: 
+	$(info MAKEFILE FOR AFHEL <- [AFSEAL, AFPALISADE, AFHELIB])
+	$(info Compilation flags are 'CFLAGS=$(CFLAGS)')
+	$(info Linking flags are 'LFLAGS=$(LFLAGS)')
+	$(info Commands Available:)
+	$(info * make - compile & link the library)
+	$(info * make install - library available in the host. Requires root )
+	$(info * make fileName_x - Compile & Link binary filename.cpp with Afhel)
+	$(info * make clean - remove all library files from the folder)
+	$(info * make uninstall - remove library from host. Requires root)
 	                                        
