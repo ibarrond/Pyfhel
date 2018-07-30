@@ -33,6 +33,13 @@ src/SEAL/*
 # Afhel environments
 **.aenv
 
+# Pyfhel saved objects
+**.pycon
+**.pypk
+**.pysk
+**.pyrok
+**.pyrlk
+
 # Visual Studio Code
 **.vscode
 

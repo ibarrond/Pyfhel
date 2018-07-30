@@ -35,7 +35,7 @@ cdef class Pyfhel:
                      long sec=*, int intDigits=*, int fracDigits=*) except +
     cpdef void keyGen(self) except +
     cpdef void rotateKeyGen(self, int bitCount) except +
-    cpdef void relinKeyGen(self, int bitCount) except +
+    cpdef void relinKeyGen(self, int bitCount, int size) except +
     
     cpdef PyCtxt encryptInt(self, int64_t value, PyCtxt ctxt=*) except +
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=*) except +
@@ -108,5 +108,5 @@ cdef class Pyfhel:
     cpdef int getsec(self) except + 
     cpdef int getintDigits(self) except +
     cpdef int getfracDigits(self) except +
-    cpdef bool getflagBatching(self) except +
+    cpdef bool getflagBatch(self) except +
     

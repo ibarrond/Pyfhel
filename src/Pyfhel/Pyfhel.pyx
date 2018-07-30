@@ -464,7 +464,7 @@ cdef class Pyfhel:
         """
         self.afseal.rotateKeyGen(bitCount)
         
-    cpdef void relinKeyGen(self, int bitCount) except +:
+    cpdef void relinKeyGen(self, int bitCount, int size) except +:
         """Generates a relinearization Key.
         
         Generates a relinearization Key, used to reduce size of the ciphertexts
@@ -488,6 +488,10 @@ cdef class Pyfhel:
         Relinearizes a ciphertext. This functions relinearizes ctxt, reducing
         its size down to 2. If the size of encrypted is K+1, the given evaluation
         keys need to have size at least K-1. 
+        
+        To relinearize a ciphertext of size M >= 2 back to size 2, we actually need
+        M-2 evaluation keys. Attempting to relinearize a too large ciphertext with
+        too few evaluation keys will result in an exception being thrown.
                 
         Args:
             bitCount (int): The bigger the faster but noisier (will require
@@ -1251,7 +1255,7 @@ cdef class Pyfhel:
         """
         return self.afseal.getfracDigits()
     
-    cpdef bool getflagBatching(self) except +:
+    cpdef bool getflagBatch(self) except +:
         """Flag for BATCH encoding mode.
         
         If True, allows operations over vectors encrypted in single PyCtxt 
@@ -1261,4 +1265,4 @@ cdef class Pyfhel:
         Return:
             bool: flag for enabled BATCH encoding and operating.
         """
-        return self.afseal.getflagBatching()
+        return self.afseal.getflagBatch()

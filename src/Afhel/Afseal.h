@@ -38,7 +38,7 @@
 #include <thread>	/* memory pools, multithread*/
 #include <memory>	/* Smart Pointers*/
 
-#include <seal/seal.h>
+#include <../SEAL/SEAL/seal/seal.h>
 
 using namespace std;
 using namespace seal;
@@ -235,7 +235,7 @@ class Afseal{
 
         // -------------------------- RELINEARIZATION -------------------------
         void rotateKeyGen(int& bitCount);
-        void relinKeyGen(int& bitCount);
+        void relinKeyGen(int& bitCount, int& size);
         void relinearize(Ciphertext& cipher1);
 
 

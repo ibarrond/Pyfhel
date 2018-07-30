@@ -302,12 +302,12 @@ int Afseal::noiseLevel(Ciphertext& cipher1) {
     return decryptor->invariant_noise_budget(cipher1);}
 
 // ------------------------------ RELINEARIZATION -----------------------------
-void Afseal::relinKeyGen(int& bitCount){
+void Afseal::relinKeyGen(int& bitCount, int& size){
     if(keyGenObj==NULL){throw std::logic_error("Context not initialized");}
     if(bitCount>dbc_max()){throw invalid_argument("bitCount must be =< 60");}
     if(bitCount<dbc_min()){throw invalid_argument("bitCount must be >= 1");}
     this->relinKey = make_shared<EvaluationKeys>();
-    this->keyGenObj->generate_evaluation_keys(bitCount, *relinKey);
+    this->keyGenObj->generate_evaluation_keys(bitCount, size, *relinKey);
 }
 void Afseal::relinearize(Ciphertext& cipher1){
     if(evaluator==NULL){throw std::logic_error("Context not initialized");}

@@ -292,21 +292,29 @@ class PyfhelTestCase(unittest.TestCase):
         
         
     def test_Pyfhel_5_IO_SAVE_RESTORE(self):
+        pass
+    
+    def test_Pyfhel_5a_save_objects(self):
         self.pyfhel = Pyfhel()
         self.pyfhel.contextGen(p=1964769281, m=8192, base=2, sec=192, flagBatching=True)
         self.pyfhel.keyGen() 
         self.pyfhel.rotateKeyGen(60)
+        #self.pyfhel.relinKeyGen(60)
         
         self.assertTrue(self.pyfhel.saveContext(b"context.pycon"))
-        self.assertTrue(self.pyfhel.restoreContext(b"context.pycon"))
         self.assertTrue(self.pyfhel.savepublicKey(b"public_k.pypk"))
-        self.assertTrue(self.pyfhel.restorepublicKey(b"public_k.pypk"))
         self.assertTrue(self.pyfhel.savesecretKey(b"secret_k.pysk"))
-        self.assertTrue(self.pyfhel.restoresecretKey(b"secret_k.pysk"))
-        
-        self.assertTrue(self.pyfhel.saverelinKey(b"relin_k.pyrlk"))
-        self.assertTrue(self.pyfhel.restorerelinKey(b"relin_k.pyrlk"))
+        #self.assertTrue(self.pyfhel.saverelinKey(b"relin_k.pyrlk"))
         self.assertTrue(self.pyfhel.saverotateKey(b"rotate_k.pyrok"))
+        
+    def test_Pyfhel_5_IO_SAVE_RESTORE(self):  
+        self.pyfhel = Pyfhel()  
+        self.assertTrue(self.pyfhel.restoreContext(b"context.pycon"))
+        self.assertTrue(self.pyfhel.restoresecretKey(b"secret_k.pysk"))
+        self.assertTrue(self.pyfhel.restorepublicKey(b"public_k.pypk"))
+        #self.assertTrue(self.pyfhel.restorerelinKey(b"relin_k.pyrlk"))
         self.assertTrue(self.pyfhel.restorerotateKey(b"rotate_k.pyrok"))
+        
+        # save/restore ciphertexts and plaintexts
 if __name__ == '__main__':
     unittest.main(verbosity=2)
