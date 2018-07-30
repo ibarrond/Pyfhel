@@ -19,8 +19,8 @@ src/.installers
 src/Pyfhel/*.pyc
 src/Pyfhel/*.cpp
 src/Pyfhel/*.c
-src/Pyfhel/build
-src/Pyfhel/*.egg-info
+**/build
+src/**.egg-info
 
 # Makefiles
 **/Makefile
