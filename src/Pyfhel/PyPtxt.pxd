@@ -1,4 +1,5 @@
-# distutils: language = c++17
+# distutils: language = c++
+#cython: language_level=3, boundscheck=False
 
 # -------------------------------- CIMPORTS ------------------------------------
 # Import from Cython libs required C/C++ types for the Afhel API
@@ -6,16 +7,16 @@ from libcpp.string cimport string
 from libcpp cimport bool
 
 # Used for all kinds of operations
-from Pyfhel cimport Pyfhel
+from Pyfhel.Pyfhel cimport Pyfhel
 
 # Import our own wrapper for iostream classes, used for I/O ops
-from iostream cimport ifstream, ofstream   
+from Pyfhel.iostream cimport ifstream, ofstream   
 
 # Import Plaintext class, original from SEAL
-from Afhel cimport Plaintext
+from Pyfhel.Afhel cimport Plaintext
 
 # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from util.ENCODING_T cimport ENCODING_T
+from Pyfhel.util.ENCODING_T cimport ENCODING_T
 # ------------------------------- DECLARATION ---------------------------------
 
 cdef class PyPtxt:

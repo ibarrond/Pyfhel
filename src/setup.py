@@ -1,78 +1,84 @@
 # --------------------------------- IMPORTS -----------------------------------
 # Create Extension modules written in C for Python
-from setuptools import setup
-from setuptools import Extension
+from setuptools import setup, Extension, find_packages
 
 # Get directories for includes of both Python and Numpy
 from distutils.sysconfig import get_python_inc
-from numpy import get_include as get_np_inc
+import numpy
 
+import sys
+
+# Scan a directory searching for all C++ files
 import os
-
-# from sys import prefix
-# include libpython.a only in windows  " -D MS_WIN64"
-def scandir(dir, files=[]):
+def scan(dir, files=[]):
     for file in os.listdir(dir):
         path = os.path.join(dir, file)
         if os.path.isfile(path) and path.endswith(".cpp"):
             files.append(path)
     return files
 
-# ---------------------------- COMPILATION CONFIG -----------------------------
-USE_CYTHON = True   
-USE_SHARED_LIBS = False
-
 # Including Readme in the module as long description.
 with open("../README.md", "r") as fh:
     long_description = fh.read()
 
-# Including shared libraries
-libraries = ["seal", "afhel"] if USE_SHARED_LIBS else []
-local_include_dirs = [] if USE_SHARED_LIBS else ["SEAL/SEAL/seal", "Afhel"]
+# ---------------------------------- OPTIONS ----------------------------------
+CYTHONIZE = True
+SOURCE = False
 
-local_sources = [] if USE_SHARED_LIBS else scandir("SEAL/SEAL/seal", ["Afhel/Afseal.cpp"])
+if "--CYTHONIZE" in sys.argv:
+    CYTHONIZE = True
+    del sys.argv[sys.argv.index("--CYTHONIZE")]
+
+if "--SOURCE" in sys.argv:
+    SOURCE = True
+    del sys.argv[sys.argv.index("--SOURCE")]
+
+# ---------------------------- COMPILATION CONFIG -----------------------------
+
+# Including shared libraries
+# TODO: include libpython.a only in windows  " -D MS_WIN64"
+libraries = [] if SOURCE else ["seal", "afhel"]
+local_sources = scan("SEAL/SEAL/seal", ["Afhel/Afseal.cpp"]) if SOURCE else []
 
 # Compile flags for extensions
 language            = "c++17"
-include_dirs        = [get_python_inc(), get_np_inc()] + local_include_dirs
-extra_compile_flags = ["-std=c++17", "-O3", "-march=native", "-DHAVE_CONFIG_H",
-                       "-DNDEBUG", "-Wall", "-pthread"]
-
+include_dirs        = [".",get_python_inc(),numpy.get_include(),"Afhel", "Pyfhel"]
+extra_compile_flags = ["-std=c++17", "-O3", "-march=native", 
+                       "-DHAVE_CONFIG_H","-DNDEBUG", "-Wall", "-pthread"]
 
 # -------------------------------- EXTENSIONS ---------------------------------
-ext = ".pyx" if USE_CYTHON else ".c"
+ext = ".pyx" if CYTHONIZE else ".c"
 
 ext_modules = [
          Extension(
-             name="Pyfhel.PyPtxt",
-             sources=["Pyfhel/PyPtxt"+ext]+local_sources,
+             name="Pyfhel.Pyfhel",
+             sources=["Pyfhel/Pyfhel"+ext],
              libraries=libraries,
              include_dirs=include_dirs,
-             library_dirs=[],
+             language=language,
+             extra_compile_args=extra_compile_flags,
+         ),
+         Extension(
+             name="Pyfhel.PyPtxt",
+             sources=["Pyfhel/PyPtxt"+ext],
+             libraries=libraries,
+             include_dirs=include_dirs,
              language=language,
              extra_compile_args=extra_compile_flags,
          ),
          Extension(
              name="Pyfhel.PyCtxt",
-             sources=["Pyfhel/PyCtxt"+ext]+local_sources,
+             sources=["Pyfhel/PyCtxt"+ext],
              libraries=libraries,
              include_dirs=include_dirs,
-             library_dirs=[],
              language=language,
              extra_compile_args=extra_compile_flags,
          ),   
-         Extension(
-             name="Pyfhel.Pyfhel",
-             sources=["Pyfhel/Pyfhel"+ext]+local_sources,
-             libraries=libraries,
-             include_dirs=include_dirs,
-             language=language,
-             extra_compile_args=extra_compile_flags,
-         ),
+
 ]
 
 # Convert Cython code into C code
-if USE_CYTHON:
+if CYTHONIZE:
     from Cython.Build import cythonize
     ext_modules = cythonize(ext_modules)
 
@@ -80,7 +86,7 @@ if USE_CYTHON:
 
 # -------------------------------- INSTALLER ----------------------------------
 setup(
-    name            = "pyfhel",
+    name            = "Pyfhel",
     version         = "0.0.1",
     author          = "Alberto Ibarrondo",
     author_email    = "ibarrond@eurecom.fr",
@@ -98,6 +104,9 @@ setup(
         "Operating System :: Linux",
         "Topic :: Security :: Cryptography",
     ),
+   # zip_safe=False,
+    packages=find_packages(),   
+    package_data={"Pyfhel": ["*.pxd"]},
     ext_modules = ext_modules,  
-    test_suite="test",
+    test_suite="Pyfhel/test.py",
 )

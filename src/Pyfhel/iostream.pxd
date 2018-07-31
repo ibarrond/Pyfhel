@@ -1,3 +1,5 @@
+# distutils: language = c++
+#cython: language_level=3, boundscheck=False
 # -------------------------------- CIMPORTS ------------------------------------
 from libcpp.string cimport string
 

@@ -1,4 +1,6 @@
 # distutils: language = c++
+# distutils: sources = ../SEAL/SEAL/seal/plaintext.cpp ../SEAL/SEAL/seal/ciphertext.cpp ../Afhel/Afseal.cpp
+#cython: language_level=3, boundscheck=False
 
 # -------------------------------- IMPORTS ------------------------------------
 # Import from Cython libs required C/C++ types for the Afhel API
@@ -9,7 +11,7 @@ from libc.stdint cimport int64_t
 from libc.stdint cimport uint64_t
         
 # Import our own wrapper for iostream classes, used for I/O ops
-from iostream cimport istream, ostream, ifstream, ofstream       
+from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream       
 
 
 # --------------------------- EXTERN DECLARATION ------------------------------
@@ -90,6 +92,8 @@ cdef extern from "../Afhel/Afseal.h" nogil:
         void encode(vector[double] &values, vector[Plaintext]& plainVOut) except +
         
         # DECODE 
+        vector[int64_t] decode(Plaintext& plain1) except +
+        
         void decode(Plaintext& plain1, double& valOut) except +
         void decode(Plaintext& plain1, vector[int64_t] &valueVOut) except +
         void decode(vector[Plaintext]& plain1, vector[int64_t] &valueVOut) except +

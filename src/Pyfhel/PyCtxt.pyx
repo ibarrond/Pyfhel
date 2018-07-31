@@ -1,16 +1,15 @@
 # distutils: language = c++
-# cython: boundscheck = False
-# cython: wraparound = False
+#cython: language_level=3, boundscheck=False
 
 """PyCtxt. Ciphertext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
 # Import Pyfhel and PyPtxt for operations
-from Pyfhel import Pyfhel
-from PyPtxt import PyPtxt
+from .Pyfhel import Pyfhel
+from .PyPtxt import PyPtxt
 
 # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
-from util import ENCODING_t
+from .util import ENCODING_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref

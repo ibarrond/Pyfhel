@@ -20,7 +20,7 @@ src/Pyfhel/*.pyc
 src/Pyfhel/*.cpp
 src/Pyfhel/*.c
 **/build
-src/**.egg-info
+**.egg-info
 
 # Makefiles
 **/Makefile

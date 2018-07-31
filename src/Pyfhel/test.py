@@ -10,7 +10,7 @@ from Pyfhel import Pyfhel
 from PyCtxt import PyCtxt
 from PyPtxt import PyPtxt
 
-from util import ENCODING_t
+from Pyfhel.util import ENCODING_t
 
 # Value of p for batching: p=1964769281
 
@@ -99,11 +99,11 @@ class PyfhelTestCase(unittest.TestCase):
         self.pyfhel = Pyfhel()
         self.pyfhel.contextGen(65537)
         self.pyfhel.keyGen() 
-        self.pyfhel.relinKeyGen(30)
-        self.pyfhel.relinKeyGen(1)  
-        self.pyfhel.relinKeyGen(60) 
-        self.assertRaises(SystemError, lambda: self.pyfhel.relinKeyGen(61))
-        self.assertRaises(SystemError, lambda: self.pyfhel.relinKeyGen(0))
+        self.pyfhel.relinKeyGen(30, 5)
+        self.pyfhel.relinKeyGen(1, 5)  
+        self.pyfhel.relinKeyGen(60, 5) 
+        self.assertRaises(SystemError, lambda: self.pyfhel.relinKeyGen(61, 5))
+        self.assertRaises(SystemError, lambda: self.pyfhel.relinKeyGen(0, 5))
         
     def test_Pyfhel_2_ENCODING(self):
         pass
@@ -307,7 +307,7 @@ class PyfhelTestCase(unittest.TestCase):
         #self.assertTrue(self.pyfhel.saverelinKey(b"relin_k.pyrlk"))
         self.assertTrue(self.pyfhel.saverotateKey(b"rotate_k.pyrok"))
         
-    def test_Pyfhel_5_IO_SAVE_RESTORE(self):  
+    def test_Pyfhel_5b_restore_objects(self):  
         self.pyfhel = Pyfhel()  
         self.assertTrue(self.pyfhel.restoreContext(b"context.pycon"))
         self.assertTrue(self.pyfhel.restoresecretKey(b"secret_k.pysk"))

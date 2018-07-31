@@ -278,6 +278,12 @@ void Afseal::encode(vector<double> &values, vector<Plaintext>& plainVOut){
         plainVOut.emplace_back(fracEncoder->encode(val));}}
 
 // DECODE
+vector<int64_t> Afseal::decode(Plaintext& plain1) {
+    if(crtBuilder==NULL){throw std::logic_error("Context not initialized with BATCH support");}
+    vector<int64_t> valueVOut;
+    crtBuilder->decompose(plain1, valueVOut);
+	return valueVOut;
+    }
 void Afseal::decode(Plaintext& plain1, int64_t& valueOut) {
     if(intEncoder==NULL){throw std::logic_error("Context not initialized");}
     valueOut = intEncoder->decode_int64(plain1);}

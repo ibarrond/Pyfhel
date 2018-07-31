@@ -226,7 +226,8 @@ class Afseal{
         void encode(vector<double> &values, vector<Plaintext>& plainVOut);
         
         // DECODE 
-        void decode(Plaintext& plain1, int64_t& valOut);
+        vector<int64_t> decode(Plaintext& plain1);
+		void decode(Plaintext& plain1, int64_t& valOut);
         void decode(Plaintext& plain1, double& valOut);
         void decode(Plaintext& plain1, vector<int64_t> &valueVOut);
         void decode(vector<Plaintext>& plain1, vector<int64_t> &valueVOut);

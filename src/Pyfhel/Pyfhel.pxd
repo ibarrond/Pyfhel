@@ -1,4 +1,5 @@
 # distutils: language = c++
+#cython: language_level=3, boundscheck=False
 
 # -------------------------------- CIMPORTS -----------------------------------
 # import both numpy and the Cython declarations for numpy
@@ -12,18 +13,18 @@ from libc.stdint cimport int64_t
 from libc.stdint cimport uint64_t
 
 # Import our own wrapper for iostream classes, used for I/O ops
-from iostream cimport istream, ostream, ifstream, ofstream   
+from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream   
 
-from Afhel cimport Plaintext
-from Afhel cimport Ciphertext
-from Afhel cimport Afseal
+from Pyfhel.Afhel cimport Plaintext
+from Pyfhel.Afhel cimport Ciphertext
+from Pyfhel.Afhel cimport Afseal
 
 # Import the Cython Plaintext and Cyphertext classes
-from PyPtxt cimport PyPtxt
-from PyCtxt cimport PyCtxt
+from Pyfhel.PyPtxt cimport PyPtxt
+from Pyfhel.PyCtxt cimport PyCtxt
 
 # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
-from util cimport ENCODING_T
+from Pyfhel.util cimport ENCODING_T
 
 
 # ---------------------------- CYTHON DECLARATION ------------------------------

@@ -1,4 +1,5 @@
-# cython: boundscheck = False
+# distutils: language = c++
+#cython: language_level=3, boundscheck=False
 
 #   --------------------------------------------------------------------
 #   Pyfhel.pyx
@@ -43,6 +44,7 @@ Example:
 # -------------------------------- IMPORTS ------------------------------------
 # Both numpy and the Cython declarations for numpy
 import numpy as np
+np.import_array()
 
 # Type checking for only numeric values
 from numbers import Number
@@ -51,7 +53,7 @@ from numbers import Number
 from cython.operator cimport dereference as deref
 
 # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
-from util import ENCODING_t
+from .util import ENCODING_t
 
 # Define Plaintext types
 FLOAT_T = (float, np.float16, np.float32, np.float64)
@@ -682,8 +684,7 @@ cdef class Pyfhel:
         """
         if (ptxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
-        cdef vector[int64_t] output_vector=[0]
-        self.afseal.decode(deref(ptxt._ptr_ptxt), output_vector)
+        cdef vector[int64_t] output_vector=self.afseal.decode(deref(ptxt._ptr_ptxt))
         return output_vector
     
     cpdef int64_t[::1] decodeArray(self, PyPtxt ptxt) except +:
@@ -704,8 +705,7 @@ cdef class Pyfhel:
         """
         if (ptxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
-        cdef vector[int64_t] output_vector=[0]
-        self.afseal.decode(deref(ptxt._ptr_ptxt), output_vector)
+        cdef vector[int64_t] output_vector = self.afseal.decode(deref(ptxt._ptr_ptxt))
         cdef int64_t[::1] output_array = <int64_t [:output_vector.size()]>output_vector.data()
         return output_array
         
