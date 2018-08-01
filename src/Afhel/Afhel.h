@@ -73,7 +73,7 @@ class Afhel{
          * An output stream operator, parsing the object into a string.
          * @param outs output stream where to bulk the Afhel object
          * @param af Afhel object ot be exported
-         *
+         */
         friend std::ostream& operator<< (std::ostream& outs, Afhel const& af);
         friend std::istream& operator>> (std::istream& ins, Afhel& af);
 
