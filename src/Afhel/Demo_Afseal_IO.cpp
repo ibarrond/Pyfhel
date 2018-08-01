@@ -44,50 +44,46 @@ int main(int argc, char **argv)
     long sec = 192;
 	bool flagBatching=false;
 
-	std::cout << " Afseal - Creating Context" << endl;
-	{timer t(ctx, "contextgen");he.ContextGen(p, m, flagBatching, base, sec);}
-	std::cout << " Afseal - Context CREATED" << endl;
-	std::cout << " Afseal - Generating Keys" << endl;
-    {timer t(ctx, "keygen"); he.KeyGen();}
+	he.ContextGen(p, m, flagBatching, base, sec);
+	std::cout << " Afseal - Contextcreated" << endl;
+    he.KeyGen();
 	std::cout << " Afseal - Keys Generated" << endl;
     
-	int64_t v1;
-    int64_t v2;
-    int64_t vRes;
-	Ciphertext k1, k2;
+	int64_t v1=3, v2=-2, vRes;
 
-    v1=3;
-    v2=-2;
-	vRes = 0;
-	std::cout << v1 << endl;
-	std::cout << v2 << endl;
-    
     Plaintext p1, p2;
     p1 = he.encode(v1);
     p2 = he.encode(v2);
-    Plaintext p3 = p1 ;
 
-    // Encryption
-    {timer t(ctx, "encr11");he.saveContext("obj_context.acon")}
-    {timer t(ctx, "encr12");he.savepublicKey("obj_pubkey.apk")}
-    {timer t(ctx, "encr13");he.savesecretKey("obj_seckey.ask")}
-    
-	// Timings and results
-	auto te =  (ctx.timings["encr11"] + ctx.timings["encr12"] + ctx.timings["encr21"] + ctx.timings["encr22"] + ctx.timings["encr31"] + ctx.timings["encr32"] + ctx.timings["encr41"])/7.0;
-	auto td =  (ctx.timings["decr1"] + ctx.timings["decr2"] + ctx.timings["decr3"] + ctx.timings["decr4"])/4.0;
-	auto tadd 	= ctx.timings["add"];
-	auto tmult 	= ctx.timings["mult"];
-	auto tsub  	= ctx.timings["sub"];
-	auto tsquare= ctx.timings["square"];
+	Ciphertext c1, c2;
+    c1 = he.encrypt(p1);
+    c2 = he.encrypt(p2);
 
-	std::cout << endl << endl << "RESULTS:" << endl;
-	std::cout << " Times: " << endl;
-	std::cout << "  - Encryption: " <<	te << endl;
-	std::cout << "  - Decryption: " <<	td << endl;
-	std::cout << "  - Add: " <<	tadd << endl;
-	std::cout << "  - Mult: " << tmult << endl;
-	std::cout << "  - Sub: " <<	tsub << endl;
-	std::cout << "  - Square: " <<	tsquare << endl;
+	std::cout << " Afseal - Encoding and encryption OK" << endl;
+
+    he.saveContext("obj_context.pycon"); 
+	std::cout << " Afseal - Context saved" << endl;
+	he.savepublicKey("obj_pubkey.pypk");
+	std::cout << " Afseal - Public Key Saved" << endl;
+    he.savesecretKey("obj_seckey.pysk");
+	std::cout << " Afseal - SecretKey Saved" << endl;
+
+	Afseal he2;
+    bool done = he2.restoreContext("obj_context.pycon"); 
+	std::cout << " Afseal - Context restored " << done << endl;
+	he2.restorepublicKey("obj_pubkey.pypk");
+	std::cout << " Afseal - Public Key restored " << endl;
+    he2.restoresecretKey("obj_seckey.pysk");
+	std::cout << " Afseal - SecretKey restored " << endl;
+
+    Plaintext p3, p4;
+    p3 = he2.encode(v1);
+    p4 = he2.encode(v2);
+
+	Ciphertext c3, c4;
+    c3 = he2.encrypt(p3);
+    c4 = he2.encrypt(p4);
+	std::cout << " Afseal - Encoding and encryption OK" << endl;
 
 };
 

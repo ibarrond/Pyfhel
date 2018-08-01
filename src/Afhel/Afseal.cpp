@@ -461,14 +461,14 @@ bool Afseal::saveContext(string fileName){
     if(context==NULL){throw std::logic_error("Context not initialized");}
     bool res=true;
     try{
-        fstream contextFile(fileName, fstream::out|fstream::trunc);
+        fstream contextFile(fileName, fstream::out|fstream::trunc|fstream::binary);
         assert(contextFile.is_open());
         context->parms().save(contextFile);
-        contextFile << base;
-        contextFile << sec;
-        contextFile << intDigits;
-        contextFile << fracDigits;
-        contextFile << flagBatch;
+        contextFile << base << endl;
+        contextFile << sec << endl;
+        contextFile << intDigits << endl;
+        contextFile << fracDigits << endl;
+        contextFile << flagBatch << endl;
         
         contextFile.close();
     }
@@ -482,8 +482,8 @@ bool Afseal::saveContext(string fileName){
 bool Afseal::restoreContext(string fileName){
     EncryptionParameters parms;
     bool res=true;
-    try{        
-        fstream contextFile(fileName, fstream::in);
+    try{    
+        fstream contextFile(fileName, fstream::in|fstream::binary);
         assert(contextFile.is_open());
         parms.load(contextFile);
         contextFile >> base;
@@ -518,7 +518,7 @@ bool Afseal::restoreContext(string fileName){
 bool Afseal::savepublicKey(string fileName){
     if(publicKey==NULL){throw std::logic_error("Public Key not initialized");}
     bool res=true;
-    try{fstream keyFile(fileName, fstream::out|fstream::trunc);
+    try{fstream keyFile(fileName, fstream::out|fstream::trunc|fstream::binary);
         assert(keyFile.is_open());
         publicKey->save(keyFile);
         
@@ -532,10 +532,9 @@ bool Afseal::savepublicKey(string fileName){
 }
 
 bool Afseal::restorepublicKey(string fileName){
-    if(publicKey==NULL){throw std::logic_error("Public Key not initialized");}
     bool res=true;
     try{        
-        fstream keyFile(fileName, fstream::in);
+        fstream keyFile(fileName, fstream::in|fstream::binary);
         assert(keyFile.is_open());
         this->publicKey = make_shared<PublicKey>();
         this->publicKey->load(keyFile);
@@ -552,7 +551,7 @@ bool Afseal::restorepublicKey(string fileName){
 bool Afseal::savesecretKey(string fileName){
     if(publicKey==NULL){throw std::logic_error("Secret Key not initialized");}
     bool res=true;
-    try{fstream keyFile(fileName, fstream::out|fstream::trunc);
+    try{fstream keyFile(fileName, fstream::out|fstream::trunc|fstream::binary);
         assert(keyFile.is_open());
         secretKey->save(keyFile);
         
@@ -568,7 +567,7 @@ bool Afseal::savesecretKey(string fileName){
 bool Afseal::restoresecretKey(string fileName){
     bool res=true;
     try{        
-        fstream keyFile(fileName, fstream::in);
+        fstream keyFile(fileName, fstream::in|fstream::binary);
         assert(keyFile.is_open());
         this->secretKey = make_shared<SecretKey>();
         this->secretKey->load(keyFile);
@@ -585,7 +584,7 @@ bool Afseal::restoresecretKey(string fileName){
 bool Afseal::saverelinKey(string fileName){
     if(relinKey==NULL){throw std::logic_error("Relinearization Key not initialized");}
     bool res=true;
-    try{fstream keyFile(fileName, fstream::out|fstream::trunc);
+    try{fstream keyFile(fileName, fstream::out|fstream::trunc|fstream::binary);
         assert(keyFile.is_open());
         relinKey->save(keyFile);
         
@@ -601,7 +600,7 @@ bool Afseal::saverelinKey(string fileName){
 bool Afseal::restorerelinKey(string fileName){
     bool res=true;
     try{        
-        fstream keyFile(fileName, fstream::in);
+        fstream keyFile(fileName, fstream::in|fstream::binary);
         assert(keyFile.is_open());
         this->relinKey = make_shared<EvaluationKeys>();
         this->relinKey->load(keyFile);
@@ -617,7 +616,7 @@ bool Afseal::restorerelinKey(string fileName){
 bool Afseal::saverotateKey(string fileName){
     if(rotateKeys==NULL){throw std::logic_error("Rotation Key not initialized");}
     bool res=true;
-    try{fstream keyFile(fileName, fstream::out|fstream::trunc);
+    try{fstream keyFile(fileName, fstream::out|fstream::trunc|fstream::binary);
         assert(keyFile.is_open());
         rotateKeys->save(keyFile);
         
@@ -633,7 +632,7 @@ bool Afseal::saverotateKey(string fileName){
 bool Afseal::restorerotateKey(string fileName){
     bool res=true;
     try{        
-        fstream keyFile(fileName, fstream::in);
+        fstream keyFile(fileName, fstream::in|fstream::binary);
         assert(keyFile.is_open());
         this->rotateKeys = make_shared<GaloisKeys>();
         this->rotateKeys->load(keyFile);
