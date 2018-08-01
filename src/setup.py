@@ -42,17 +42,17 @@ local_sources = scan("SEAL/SEAL/seal", ["Afhel/Afseal.cpp"]) if SOURCE else []
 
 # Compile flags for extensions
 language            = "c++17"
-include_dirs        = [".",get_python_inc(),numpy.get_include(),"Afhel", "Pyfhel"]
-extra_compile_flags = ["-std=c++17", "-O3", "-march=native", 
-                       "-DHAVE_CONFIG_H","-DNDEBUG", "-Wall", "-pthread"]
+include_dirs        = [get_python_inc(),numpy.get_include(),
+                       ".","Afhel", "Pyfhel","SEAL/SEAL/seal"]
+extra_compile_flags = ["-std=c++17", "-O3", "-DHAVE_CONFIG_H"]
 
 # -------------------------------- EXTENSIONS ---------------------------------
-ext = ".pyx" if CYTHONIZE else ".c"
+ext = ".pyx" if CYTHONIZE else ".cpp"
 
 ext_modules = [
          Extension(
              name="Pyfhel.Pyfhel",
-             sources=["Pyfhel/Pyfhel"+ext],
+             sources=["Pyfhel/Pyfhel"+ext]+local_sources,
              libraries=libraries,
              include_dirs=include_dirs,
              language=language,
@@ -60,7 +60,7 @@ ext_modules = [
          ),
          Extension(
              name="Pyfhel.PyPtxt",
-             sources=["Pyfhel/PyPtxt"+ext],
+             sources=["Pyfhel/PyPtxt"+ext]+local_sources,
              libraries=libraries,
              include_dirs=include_dirs,
              language=language,
@@ -68,7 +68,7 @@ ext_modules = [
          ),
          Extension(
              name="Pyfhel.PyCtxt",
-             sources=["Pyfhel/PyCtxt"+ext],
+             sources=["Pyfhel/PyCtxt"+ext]+local_sources,
              libraries=libraries,
              include_dirs=include_dirs,
              language=language,
@@ -104,9 +104,9 @@ setup(
         "Operating System :: Linux",
         "Topic :: Security :: Cryptography",
     ),
-   # zip_safe=False,
+    zip_safe=False,
     packages=find_packages(),   
-    package_data={"Pyfhel": ["*.pxd"]},
-    ext_modules = ext_modules,  
+    package_data={"Pyfhel": ["Pyfhel/*.pxd"]},
+    ext_modules=ext_modules,  
     test_suite="Pyfhel/test.py",
 )
