@@ -18,6 +18,7 @@ Pyfhel/*.cpp
 Pyfhel/*.c
 **/build
 **.egg-info
+**/dist
 
 # Makefiles
 **/Makefile
