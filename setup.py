@@ -6,7 +6,6 @@ from setuptools import setup, Extension, find_packages
 from distutils.sysconfig import get_python_inc
 import numpy
 
-import sys
 
 # Scan a directory searching for all C++ files
 import os
@@ -22,29 +21,51 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 # ---------------------------------- OPTIONS ----------------------------------
+import sys
+
 LIBS= False
 if "--LIBS" in sys.argv:
     LIBS= True
     del sys.argv[sys.argv.index("--LIBS")]
 
-# ---------------------------- COMPILATION CONFIG -----------------------------
+CYTHONIZE= False
+if "--CYTHONIZE" in sys.argv:
+    CYTHONIZE= True
+    del sys.argv[sys.argv.index("--CYTHONIZE")]
+    
+    
+    
+# ------------------------------- SETUP CONFIG --------------------------------
+# could run setup from anywhere
+SETUP_PATH = os.path.dirname(os.path.abspath(__file__))
 
+# cd to SETUP_PATH, run develop or install, then cd back
+CWD = os.getcwd()
+os.chdir(SETUP_PATH)
+
+PYFHEL_PATH = os.path.join(SETUP_PATH, 'Pyfhel')
+AFHEL_PATH = os.path.join(SETUP_PATH, 'Pyfhel', 'Afhel')
+SEAL_PATH = os.path.join(PYFHEL_PATH, 'SEAL', 'SEAL', 'seal')
+
+# ---------------------------- COMPILATION CONFIG -----------------------------
 # Including shared libraries
 # TODO: include libpython.a only in windows ? " -D MS_WIN64"
 libraries = ["seal", "afhel"] if LIBS else []
-local_sources = [] if LIBS else scan("Pyfhel/SEAL/SEAL/seal", ["Pyfhel/Afhel/Afseal.cpp"])
+local_sources = [] if LIBS else scan(SEAL_PATH,
+                                     [os.path.join(AFHEL_PATH, 'Afseal.cpp')])
 
 # Compile flags for extensions
 language            = "c++"
 include_dirs        = [get_python_inc(),numpy.get_include(),
-                       "Pyfhel/Afhel", "Pyfhel","Pyfhel/SEAL/SEAL/seal"]
+                       PYFHEL_PATH, AFHEL_PATH, SEAL_PATH]
 extra_compile_flags = ["-std=c++17", "-O3", "-DHAVE_CONFIG_H"]
 
 # -------------------------------- EXTENSIONS ---------------------------------
+ext = "*.pyx" if CYTHONIZE else ".cpp"
 ext_modules = [
          Extension(
              name="Pyfhel.Pyfhel",
-             sources=["Pyfhel/Pyfhel.pyx"]+local_sources,
+             sources=[os.path.join(PYFHEL_PATH,"Pyfhel"+ext)]+local_sources,
              libraries=libraries,
              include_dirs=include_dirs,
              language=language,
@@ -52,7 +73,7 @@ ext_modules = [
          ),
          Extension(
              name="Pyfhel.PyPtxt",
-             sources=["Pyfhel/PyPtxt.pyx"]+local_sources,
+             sources=[os.path.join(PYFHEL_PATH,"PyPtxt"+ext)]+local_sources,
              libraries=libraries,
              include_dirs=include_dirs,
              language=language,
@@ -60,19 +81,21 @@ ext_modules = [
          ),
          Extension(
              name="Pyfhel.PyCtxt",
-             sources=["Pyfhel/PyCtxt.pyx"]+local_sources,
+             sources=[os.path.join(PYFHEL_PATH,"PyCtxt"+ext)]+local_sources,
              libraries=libraries,
              include_dirs=include_dirs,
              language=language,
              extra_compile_args=extra_compile_flags,
          ),   
 ]
-
+if CYTHONIZE:
+    from Cython.Build import cythonize
+    ext_modules=cythonize(ext_modules)
 
 # -------------------------------- INSTALLER ----------------------------------
 setup(
     name            = "Pyfhel",
-    version         = "0.1.1a0",
+    version         = "0.2.0",
     author          = "Alberto Ibarrondo",
     author_email    = "ibarrond@eurecom.fr",
     description     = "Python for Homomorphic Encryption Libraries",
@@ -81,8 +104,7 @@ setup(
     keywords        = "homomorphic encryption cython cryptography",
     license         = "GNU GPLv3",
     url             = "https://github.com/ibarrond/Pyfhel",     
-    setup_requires  =["setuptools>=30.0",
-                      "cython>=0.25.1"],
+    setup_requires  =["setuptools>=30.0"],
     install_requires=["cython>=0.25.1",
                       "numpy>=1.14.0"],
     classifiers     =(
@@ -104,7 +126,9 @@ setup(
     ),
     zip_safe=False,
     packages=find_packages(),
-    package_data={"": ["README.md","*.pxd", "*.h"]},
     ext_modules=ext_modules,  
-    test_suite="Pyfhel/test.py",
+    test_suite=os.path.join(PYFHEL_PATH,"test.py"),
 )
+
+# Change current working directory back to what user originally had
+os.chdir(CWD)

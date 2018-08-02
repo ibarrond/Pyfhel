@@ -1,0 +1,5 @@
+include Pyfhel/*.pxd
+include Pyfhel/Afhel/*.h
+include Pyfhel/SEAL/SEAL/seal/*.h
+
+include README.md
