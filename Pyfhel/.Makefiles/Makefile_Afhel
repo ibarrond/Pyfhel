@@ -43,10 +43,6 @@
 #
 
 
-$(info ----------------------- Afhel Makefile ----------------------------)
-$(info Afhel requires [HElib, SEAL, PALISADE])
-$(info For a list if all the available commands, run >make info)
-$(info Dependencies= info  Pyfhel -> Afhel ->  [HElib | SEAL | PALISADE])
 
 ###############################################################################
 #                           MAKEFILE VARIABLES                                #
@@ -67,9 +63,9 @@ SRC_DIR = .
 
 #............................. COMPILER & LINKER ..............................
 CC = g++
-CFLAGS = -g -O2 -std=c++17 -march=native -I$(SRC_DIR) -I$(INCLUDE_DIR) \
+CFLAGS = -O3 -std=c++17 -I$(SRC_DIR) -I$(INCLUDE_DIR) \
 	        -Wfatal-errors -Wshadow -fmax-errors=2
-LFLAGS = -L$(LIB_DIR) -lseal -lntl -lgmp -lm -pthread
+LFLAGS = -L$(LIB_DIR) -lseal -pthread
 
 #.................................. SOURCE FILES ..............................
 SRC = Afseal.cpp
@@ -153,7 +149,7 @@ uninstall:
 clean:
 	libtool --mode=clean rm -f $(LIB_LA)
 	rm -rf .libs/ .deps/
-	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so
+	rm -f *.o *_x *_x.exe *.a *.lo *.la *.so *.pycon *.pypk *.pysk *.pyrok
 
 
 
@@ -163,13 +159,17 @@ clean:
 .PHONY: info
 
 info: 
-	$(info MAKEFILE FOR AFHEL <- [AFSEAL, AFPALISADE, AFHELIB])
+	$(info ----------------------- Afhel Makefile ----------------------------)
+	$(info Afhel requires [HElib, SEAL, PALISADE])
+	$(info For a list if all the available commands, run >make info)
+	$(info Dependencies= info  Pyfhel -> Afhel ->  [HElib | SEAL | PALISADE])
 	$(info Compilation flags are 'CFLAGS=$(CFLAGS)')
 	$(info Linking flags are 'LFLAGS=$(LFLAGS)')
 	$(info Commands Available:)
 	$(info * make - compile & link the library)
 	$(info * make install - library available in the host. Requires root )
 	$(info * make fileName_x - Compile & Link binary filename.cpp with Afhel)
+	$(info * make test - Compile & Link Demo_Afhel.cpp with Afhel)
 	$(info * make clean - remove all library files from the folder)
 	$(info * make uninstall - remove library from host. Requires root)
 	                                        

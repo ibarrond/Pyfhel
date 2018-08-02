@@ -7,8 +7,8 @@ import numpy as np
 
 # Local module
 from Pyfhel import Pyfhel
-from PyCtxt import PyCtxt
-from PyPtxt import PyPtxt
+from Pyfhel import PyCtxt
+from Pyfhel import PyPtxt
 
 from Pyfhel.util import ENCODING_t
 

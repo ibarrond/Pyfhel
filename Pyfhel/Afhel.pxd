@@ -16,7 +16,7 @@ from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream
 
 # --------------------------- EXTERN DECLARATION ------------------------------
 # SEAL plaintext class        
-cdef extern from "../SEAL/SEAL/seal/plaintext.h" namespace "seal" nogil:
+cdef extern from "SEAL/SEAL/seal/plaintext.h" namespace "seal" nogil:
     cdef cppclass Plaintext:
         Plaintext() except +
         Plaintext(const Plaintext &copy) except +
@@ -26,7 +26,7 @@ cdef extern from "../SEAL/SEAL/seal/plaintext.h" namespace "seal" nogil:
         void load(istream &stream) except +
         
 # SEAL ciphertext class        
-cdef extern from "../SEAL/SEAL/seal/ciphertext.h" namespace "seal" nogil:
+cdef extern from "SEAL/SEAL/seal/ciphertext.h" namespace "seal" nogil:
     cdef cppclass Ciphertext:
         Ciphertext() except +
         Ciphertext(const Ciphertext &copy) except +
@@ -36,7 +36,7 @@ cdef extern from "../SEAL/SEAL/seal/ciphertext.h" namespace "seal" nogil:
         void load(istream &stream) except +
 
 # Afseal class to abstract SEAL
-cdef extern from "../Afhel/Afseal.h" nogil:
+cdef extern from "Afhel/Afseal.h" nogil:
     cdef cppclass Afseal:
         # ----------------------- OBJECT MANAGEMENT ---------------------------
         Afseal() except +

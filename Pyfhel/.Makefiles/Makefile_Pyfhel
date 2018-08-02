@@ -102,13 +102,15 @@ HElib:
 	$(MAKE) -C HElib/src/
 
 SEAL:
+	$(MAKE) download -C SEAL/
+	$(MAKE) fix_original -C SEAL/
 	$(MAKE) -C SEAL/
 
 Afhel:
 	$(MAKE) -C Afhel/
 
 Pyfhel:
-	sudo pip install .
+	sudo pip install ..
 
 install:
 	$(MAKE) install -C HElib/src/

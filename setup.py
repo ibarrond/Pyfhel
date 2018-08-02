@@ -22,27 +22,25 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 # ---------------------------------- OPTIONS ----------------------------------
-SOURCE = False
-if "--SOURCE" in sys.argv:
-    SOURCE = True
-    del sys.argv[sys.argv.index("--SOURCE")]
+LIBS= False
+if "--LIBS" in sys.argv:
+    LIBS= True
+    del sys.argv[sys.argv.index("--LIBS")]
 
 # ---------------------------- COMPILATION CONFIG -----------------------------
 
 # Including shared libraries
 # TODO: include libpython.a only in windows ? " -D MS_WIN64"
-libraries = [] if SOURCE else ["seal", "afhel"]
-local_sources = scan("Pyfhel/SEAL/SEAL/seal", ["Pyfhel/Afhel/Afseal.cpp"]) if SOURCE else []
+libraries = ["seal", "afhel"] if LIBS else []
+local_sources = [] if LIBS else scan("Pyfhel/SEAL/SEAL/seal", ["Pyfhel/Afhel/Afseal.cpp"])
 
 # Compile flags for extensions
-language            = "c++17"
+language            = "c++"
 include_dirs        = [get_python_inc(),numpy.get_include(),
-                       ,"Pyfhel/Afhel", "Pyfhel","Pyfhel/SEAL/SEAL/seal"]
+                       "Pyfhel/Afhel", "Pyfhel","Pyfhel/SEAL/SEAL/seal"]
 extra_compile_flags = ["-std=c++17", "-O3", "-DHAVE_CONFIG_H"]
 
 # -------------------------------- EXTENSIONS ---------------------------------
-ext = "" if CYTHONIZE else ".cpp"
-
 ext_modules = [
          Extension(
              name="Pyfhel.Pyfhel",
@@ -68,20 +66,13 @@ ext_modules = [
              language=language,
              extra_compile_args=extra_compile_flags,
          ),   
-
 ]
-
-# Convert Cython code into C code
-if CYTHONIZE:
-    from Cython.Build import cythonize
-    ext_modules = cythonize(ext_modules)
-
 
 
 # -------------------------------- INSTALLER ----------------------------------
 setup(
     name            = "Pyfhel",
-    version         = "0.1.1a",
+    version         = "0.1.1a0",
     author          = "Alberto Ibarrondo",
     author_email    = "ibarrond@eurecom.fr",
     description     = "Python for Homomorphic Encryption Libraries",
@@ -113,7 +104,7 @@ setup(
     ),
     zip_safe=False,
     packages=find_packages(),
-    package_data={"Pyfhel": ["Pyfhel/*.pxd","README.md"]},
+    package_data={"": ["README.md","*.pxd", "*.h"]},
     ext_modules=ext_modules,  
     test_suite="Pyfhel/test.py",
 )
