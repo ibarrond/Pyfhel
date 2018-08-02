@@ -18,17 +18,11 @@ def scan(dir, files=[]):
     return files
 
 # Including Readme in the module as long description.
-with open("../README.md", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 # ---------------------------------- OPTIONS ----------------------------------
-CYTHONIZE = True
 SOURCE = False
-
-if "--CYTHONIZE" in sys.argv:
-    CYTHONIZE = True
-    del sys.argv[sys.argv.index("--CYTHONIZE")]
-
 if "--SOURCE" in sys.argv:
     SOURCE = True
     del sys.argv[sys.argv.index("--SOURCE")]
@@ -36,23 +30,23 @@ if "--SOURCE" in sys.argv:
 # ---------------------------- COMPILATION CONFIG -----------------------------
 
 # Including shared libraries
-# TODO: include libpython.a only in windows  " -D MS_WIN64"
+# TODO: include libpython.a only in windows ? " -D MS_WIN64"
 libraries = [] if SOURCE else ["seal", "afhel"]
-local_sources = scan("SEAL/SEAL/seal", ["Afhel/Afseal.cpp"]) if SOURCE else []
+local_sources = scan("Pyfhel/SEAL/SEAL/seal", ["Pyfhel/Afhel/Afseal.cpp"]) if SOURCE else []
 
 # Compile flags for extensions
 language            = "c++17"
 include_dirs        = [get_python_inc(),numpy.get_include(),
-                       ".","Afhel", "Pyfhel","SEAL/SEAL/seal"]
+                       ,"Pyfhel/Afhel", "Pyfhel","Pyfhel/SEAL/SEAL/seal"]
 extra_compile_flags = ["-std=c++17", "-O3", "-DHAVE_CONFIG_H"]
 
 # -------------------------------- EXTENSIONS ---------------------------------
-ext = ".pyx" if CYTHONIZE else ".cpp"
+ext = "" if CYTHONIZE else ".cpp"
 
 ext_modules = [
          Extension(
              name="Pyfhel.Pyfhel",
-             sources=["Pyfhel/Pyfhel"+ext]+local_sources,
+             sources=["Pyfhel/Pyfhel.pyx"]+local_sources,
              libraries=libraries,
              include_dirs=include_dirs,
              language=language,
@@ -60,7 +54,7 @@ ext_modules = [
          ),
          Extension(
              name="Pyfhel.PyPtxt",
-             sources=["Pyfhel/PyPtxt"+ext]+local_sources,
+             sources=["Pyfhel/PyPtxt.pyx"]+local_sources,
              libraries=libraries,
              include_dirs=include_dirs,
              language=language,
@@ -68,7 +62,7 @@ ext_modules = [
          ),
          Extension(
              name="Pyfhel.PyCtxt",
-             sources=["Pyfhel/PyCtxt"+ext]+local_sources,
+             sources=["Pyfhel/PyCtxt.pyx"]+local_sources,
              libraries=libraries,
              include_dirs=include_dirs,
              language=language,
@@ -87,7 +81,7 @@ if CYTHONIZE:
 # -------------------------------- INSTALLER ----------------------------------
 setup(
     name            = "Pyfhel",
-    version         = "0.0.1",
+    version         = "0.1.1a",
     author          = "Alberto Ibarrondo",
     author_email    = "ibarrond@eurecom.fr",
     description     = "Python for Homomorphic Encryption Libraries",
@@ -96,17 +90,30 @@ setup(
     keywords        = "homomorphic encryption cython cryptography",
     license         = "GNU GPLv3",
     url             = "https://github.com/ibarrond/Pyfhel",     
-    install_requires=["cython","numpy"],
+    setup_requires  =["setuptools>=30.0",
+                      "cython>=0.25.1"],
+    install_requires=["cython>=0.25.1",
+                      "numpy>=1.14.0"],
     classifiers     =(
+        "Programming Language :: C++",
+        "Programming Language :: Cython",
         "Programming Language :: Python :: 3",
-        "Development Status :: Alpha", 
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Operating System :: Linux",
+        "Operating System :: Unix",
+        "Operating System :: POSIX",
+        "Operating System :: Microsoft :: Windows",
+        "Topic :: Security",
         "Topic :: Security :: Cryptography",
     ),
     zip_safe=False,
-    packages=find_packages(),   
-    package_data={"Pyfhel": ["Pyfhel/*.pxd"]},
+    packages=find_packages(),
+    package_data={"Pyfhel": ["Pyfhel/*.pxd","README.md"]},
     ext_modules=ext_modules,  
     test_suite="Pyfhel/test.py",
 )

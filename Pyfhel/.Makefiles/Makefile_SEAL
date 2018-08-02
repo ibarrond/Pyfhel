@@ -12,7 +12,7 @@
 #              flag [-lseal]. Plus,all header files (.h) are installed in a 
 #              folder called 'seal/'.In order to use the library in your own
 #              .cpp code, append at the top of the file:
-#                       #include <fhe/FHE.h>
+#                       #include <seal/seal.h>
 #
 #              This makefile also allows the compilation&linking of .cpp files
 #              . A file fname.cpp can be target of this recipe in order to 
@@ -45,11 +45,6 @@
 #
 
 
-$(info ---------------------- PYFHEL: SEAL MAKEFILE -----------------------)
-$(info Dependencies:)
-$(info  Pyfhel -> Afhel -> Afhelib    -> HElib    -> NTL & GMP)
-$(info                     Afpalisade -> PALISADE -> NTL & GMP)
-$(info                     Afseal     -> SEAL)
 
 
 ###############################################################################
@@ -98,7 +93,7 @@ LIB_LA = lib$(LIB_NAME).la
 
 
 
-all: download fixoriginal $(LIB_LA)
+all: $(LIB_LA)
 ###############################################################################
 #                               BUILD FHE LIBRARY                             #
 ###############################################################################
@@ -146,9 +141,7 @@ install: $(LIB_LA)
 	# Copying Header files to $(INCLUDE_DIR)
 	@-cp -t $(INCLUDE_DIR)/$(LIB_NAME) $(HEADER)
 
-linking:
-	# Installing library in /usr/lib
-	sudo ln -sf $(LIB_DIR)/$(LIB_NAME).so /usr/lib/$($LIBLINK)
+
 
 ###############################################################################
 #                           CREATE BINARIES WITH SEAL                         #
@@ -187,12 +180,18 @@ clean:
 
 
 info:
+	: ---------------------- PYFHEL: SEAL MAKEFILE -----------------------)
+	: libtDependencies:)
+	:  Pyfhel -> Afhel -> Afhelib    -> HElib    -> NTL & GMP)
+	:                     Afpalisade -> PALISADE)
+	:                     Afseal     -> SEAL)
 	: SEAL has no external dependencies
 	: Compilation flags are 'CFLAGS=$(CFLAGS)'
-	: Commands Available:
-	: * make - compile & link the library
+	: Commands Available:	
+	: * make download: download latest source using wget
+	: * make fix_original: correct source code to have one single folder
+	: * make - download, fix, compile & link the library
 	: * make install - library available in the host. Requires root 
-	: * make check - test all functionalities
 	: * make fileName_x - Compile & Link binary filename.cpp with SEAL
 	: * make test - compile the tests for SEAL
 	: * make clean - remove all library files from the folder

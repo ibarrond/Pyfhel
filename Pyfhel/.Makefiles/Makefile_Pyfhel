@@ -1,0 +1,154 @@
+###############################################################################
+###############################################################################
+####################                                     ######################
+####################           Pyfhel Makefile           ######################
+####################                                     ######################
+###############################################################################
+###############################################################################
+# DESCRIPTION: Main Makefile that acts as installer for HElib|SEAL|PALISADE, 
+# 				 Afhel & Pyfhel. In order to install all the libraries at once
+# 				 by doing:
+# 
+#                        > sudo make
+#
+#                You can also select which library to build&install (e.g.:sudo
+#                make Afhel), and clean all the subdirectories all at once with
+#                'make clean'. Finally, 'make uninstall' allows the fast
+#                removal of libraries.
+#
+#
+# AUTHOR: Alberto Ibarrondo (github @ibarrond)
+# DATE: 02/08/2018
+#   
+#   
+# LICENSE: GNU GPL v3
+#  
+#  This file is part of Pyfhel.
+#
+#  Pyfhel is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Pyfhel is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+
+
+
+###############################################################################
+#                            MAKEFILE VARIABLES                               #
+###############################################################################
+#........................... COMPILER & LINKER ................................
+CC = g++
+CFLAGS = -g -O2 -std=c++11 -I/usr/local/include \
+	     -pthread -DFHE_THREADS -DFHE_DCRT_THREADS -DFHE_BOOT_THREADS \
+	     -Wfatal-errors -Wshadow -Wall -fmax-errors=2
+         
+#.......................... LIBRARY ATTRIBUTES ................................
+LDLIBS =  -lseal -lafhel
+
+
+
+
+
+
+
+
+
+
+all: requirements SEAL Afhel
+.PHONY: packages cmake gmp_ntl submodules HElib SEAL Afhel Pyfhel
+###############################################################################
+#                              INSTALL REQUIREMENTS                           #
+###############################################################################
+requirements: packages cmake gmp_ntl submodules
+
+packages:
+	sudo apt-get install wget libboost-all-dev \
+		libtool-bin m4
+	sudo pip install --upgrade pip
+	sudo pip install --upgrade cython
+
+cmake:
+	wget https://cmake.org/files/v3.11/cmake-3.11.4.tar.gz
+	tar -xvzf cmake-3.11.4.tar.gz 
+	cmake-3.11.4/configure
+	$(MAKE) -C cmake-3.11.4/
+	$(MAKE) install -C cmake-3.11.4/
+	rm -r cmake-3.11.4*
+
+gmp_ntl:
+	mkdir -p .installers
+	cp .Makefiles/Makefile_Inst_GMP_NTL .installers/Makefile
+	$(MAKE) -C .installers
+	rm -rf .installers
+
+submodules:
+	git submodule foreach --recursive git pull
+
+
+###############################################################################
+#                              INSTALL ALL LIBRARIES                          #
+###############################################################################
+
+HElib:
+	$(MAKE) -C HElib/src/
+
+SEAL:
+	$(MAKE) -C SEAL/
+
+Afhel:
+	$(MAKE) -C Afhel/
+
+Pyfhel:
+	sudo pip install .
+
+install:
+	$(MAKE) install -C HElib/src/
+	$(MAKE) install -C SEAL/
+	$(MAKE) install -C Afhel/
+	$(MAKE) Pyfhel
+    
+    
+    
+###############################################################################
+#                              UNINSTALL & CLEAN                              #
+###############################################################################
+
+uninstall: 
+	sudo pip uninstall Pyfhel
+
+uninstall_all: 
+	sudo pip uninstall Pyfhel
+	$(MAKE) uninstall -C HElib/src/
+	$(MAKE) uninstall -C Afhel/
+	$(MAKE) uninstall -C SEAL/
+
+clean:
+	sudo rm -rf *.pyc *.c *.cpp *.so *.egg-info build dist *_x *.so
+    
+
+###############################################################################
+#                                 ADDITIONAL INFO                             #
+###############################################################################
+
+
+$(info ----------------------------PYFHEL MAKEFILE----------------------------)
+info:
+	: Pyfhel requires Afhel, SEAL|Helib|PALISADE	: 
+	: Compilation flags are 'CFLAGS=$(CFLAGS)'
+	: Commands Available:
+	: * make - build SEAL & Afhel.
+	: * make install - install all three libraries. Requires root
+	: * make SEAL|Afhel|Pyfhel - build the selected library.
+	: * make clean - remove all library and executable files from the folder
+	: * make uninstall - remove Pyfhel library from host. Requires root
+	: * make uninstall_all - remove all librares from host. Requires root
+

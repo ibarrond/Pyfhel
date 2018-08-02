@@ -5,6 +5,5 @@ cp .Makefiles/Makefile_SEAL SEAL/Makefile
 cp .Makefiles/Makefile_HElib HElib/src/Makefile
 
 cp .Makefiles/Makefile_Afhel Afhel/Makefile
-cp .Makefiles/Makefile_Pyfhel Pyfhel/Makefile
-cp .Makefiles/Makefile_Main Makefile
+cp .Makefiles/Makefile_Pyfhel Makefile
 cp .Makefiles/Makefile_Demos Demos_Tests/Makefile

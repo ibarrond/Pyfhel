@@ -12,13 +12,10 @@
 # Executables
 **_x
 
-# Requirements
-src/.installers
-
 # Pyfhel building
-src/Pyfhel/*.pyc
-src/Pyfhel/*.cpp
-src/Pyfhel/*.c
+Pyfhel/*.pyc
+Pyfhel/*.cpp
+Pyfhel/*.c
 **/build
 **.egg-info
 
@@ -26,12 +23,9 @@ src/Pyfhel/*.c
 **/Makefile
 
 # SEAL - They don't allow redistribution
-src/SEAL/*
-!src/SEAL/.gitkeep
-!src/SEAL/config.h
-
-# Afhel environments
-**.aenv
+Pyfhel/SEAL/*
+!Pyfhel/SEAL/.gitkeep
+!Pyfhel/SEAL/config.h
 
 # Pyfhel saved objects
 **.pycon
@@ -44,5 +38,6 @@ src/SEAL/*
 **.vscode
 
 # ipython checkpoints
+Pyfhel/Scratchpad
 **.ipynb_checkpoints
 **/__pycache__
