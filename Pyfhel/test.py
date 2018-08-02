@@ -3,6 +3,7 @@
 import unittest
 import time
 import sys
+import os
 import numpy as np
 
 # Local module
@@ -314,6 +315,10 @@ class PyfhelTestCase(unittest.TestCase):
         self.assertTrue(self.pyfhel.restorepublicKey(b"public_k.pypk"))
         #self.assertTrue(self.pyfhel.restorerelinKey(b"relin_k.pyrlk"))
         self.assertTrue(self.pyfhel.restorerotateKey(b"rotate_k.pyrok"))
+        os.remove(b"context.pycon")
+        os.remove(b"secret_k.pysk")
+        os.remove(b"public_k.pypk")
+        os.remove(b"rotate_k.pyrok")
         
         # save/restore ciphertexts and plaintexts
 if __name__ == '__main__':
