@@ -6,4 +6,5 @@ include Pyfhel/Afhel/*.h
 include Pyfhel/SEAL/SEAL/seal/*.cpp
 include Pyfhel/SEAL/SEAL/seal/*.h
 
+include docs/*
 include README.md
