@@ -93,7 +93,7 @@ if CYTHONIZE:
 # -------------------------------- INSTALLER ----------------------------------
 setup(
     name            = "Pyfhel",
-    version         = "0.2.0",
+    version         = "2.0.0",
     author          = "Alberto Ibarrondo",
     author_email    = "ibarrond@eurecom.fr",
     description     = "Python for Homomorphic Encryption Libraries",

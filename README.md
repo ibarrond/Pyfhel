@@ -1,6 +1,6 @@
 # Pyfhel <img width="10%" height="10%" align="right"  src="/docs/logo/logo.png">
-
-* **_Description_**: **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries  . Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR, SHIFT & ROTATE) over encrypted vectors|scalars of integers|binaries. This library acts as a common Python API for the most advanced C++ HE libraries.
+* **_Version_**: 2
+* **_Description_**: **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries  . Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR) over encrypted vectors|scalars of integers|binaries. This library acts as a common Python API for the most advanced C++ HE libraries.
 * **_Language_**: Python (3.4+) & Cython on top of C++17. (NOTE: Python must have been compiled with C++17: g++>=6 | clang++>=5.0, Visual Studio 2017).
 * **_Dependencies_**: There are three possible backends, all of them HE libraries in C++:
    
