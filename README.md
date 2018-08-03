@@ -1,13 +1,12 @@
-# Pyfhel <img width="10%" height="10%" align="right"  src="/docs/logo/logo.png">
-* **_Version_**: 2
+# Pyfhel [v2]<img width="10%" height="10%" align="right"  src="/docs/logo/logo.png">
 * **_Description_**: **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries  . Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR) over encrypted vectors|scalars of integers|binaries. This library acts as a common Python API for the most advanced C++ HE libraries.
 * **_Language_**: Python (3.4+) & Cython on top of C++17. (NOTE: Python must have been compiled with C++17: g++>=6 | clang++>=5.0, Visual Studio 2017).
 * **_Dependencies_**: There are three possible backends, all of them HE libraries in C++:
    
-   1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies)
+   1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies). This version is currently only supporting SEAL.
    2. [HElib](https://github.com/shaih/HElib) (depends on [GMP](http://www.gmplib.org) & [NTL](http://www.shoup.net/ntl/download.html))
    3. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies)
-   This version is currently only supporting SEAL.
+  
 * **_License_**: [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Summary
@@ -18,7 +17,7 @@
 Last but not least, we include Makefiles to compile and install **HElib**, **SEAL** and **Afhel** as shared libraries in Ubuntu, which can then be linked to other C++ programs using the tags `-lhelib`, `-lseal` and `-lafhel`.
 
 ## Install & Unistall
-This project has been uploaded to PyPi. In order to install it from source (*WARNING! it takes several minutes to compile, be patient!*), run:
+This project has been uploaded to [PyPI](https://pypi.org/project/Pyfhel/). In order to install it from source (*WARNING! it takes several minutes to compile, be patient!*), run:
 
 	   > pip install Pyfhel
 
@@ -30,7 +29,7 @@ To uninstall, just run:
 	
 	   > pip uninstall Pyfhel
 
-Alternatively, and only for Ubuntu OS, you can install and compile all libraries as shared (.so) using the Makefiles on this project. To do so, run inside the `Pyfhel` directory:
+Alternatively, and only for Ubuntu OS, after cloning you can install and compile all libraries as shared (.so) using the Makefiles on this project. To do so, run inside the `Pyfhel` directory:
 
 	   > ./configure		# Just puts all makefiles in their correct directories
 	   > make
