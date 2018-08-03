@@ -37,15 +37,13 @@ if "--CYTHONIZE" in sys.argv:
     
 # ------------------------------- SETUP CONFIG --------------------------------
 # could run setup from anywhere
-SETUP_PATH = os.path.dirname(os.path.abspath(__file__))
 
-# cd to SETUP_PATH, run develop or install, then cd back
-CWD = os.getcwd()
-os.chdir(SETUP_PATH)
-
-PYFHEL_PATH = os.path.join(SETUP_PATH, 'Pyfhel')
-AFHEL_PATH = os.path.join(SETUP_PATH, 'Pyfhel', 'Afhel')
+PYFHEL_PATH = 'Pyfhel'
+print(PYFHEL_PATH)
+AFHEL_PATH = os.path.join(PYFHEL_PATH, 'Afhel')
+print(AFHEL_PATH)
 SEAL_PATH = os.path.join(PYFHEL_PATH, 'SEAL', 'SEAL', 'seal')
+print(SEAL_PATH)
 
 # ---------------------------- COMPILATION CONFIG -----------------------------
 # Including shared libraries
@@ -61,7 +59,7 @@ include_dirs        = [get_python_inc(),numpy.get_include(),
 extra_compile_flags = ["-std=c++17", "-O3", "-DHAVE_CONFIG_H"]
 
 # -------------------------------- EXTENSIONS ---------------------------------
-ext = "*.pyx" if CYTHONIZE else ".cpp"
+ext = ".pyx" if CYTHONIZE else ".cpp"
 ext_modules = [
          Extension(
              name="Pyfhel.Pyfhel",
@@ -129,6 +127,3 @@ setup(
     ext_modules=ext_modules,  
     test_suite=os.path.join(PYFHEL_PATH,"test.py"),
 )
-
-# Change current working directory back to what user originally had
-os.chdir(CWD)
