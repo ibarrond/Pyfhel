@@ -1,6 +1,6 @@
 [submodule "HElib"]
 	path = Pyfhel/HElib
-	url = https://github.com/shaih/helib
+	url = https://github.com/shaih/helib.git
 [submodule "Pyfhel/PALISADE"]
 	path = Pyfhel/PALISADE
 	url = https://git.njit.edu/palisade/PALISADE.git
