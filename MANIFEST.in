@@ -7,4 +7,7 @@ include Pyfhel/SEAL/SEAL/seal/*.cpp
 include Pyfhel/SEAL/SEAL/seal/*.h
 
 include docs/*
+include docs/HElib/*
+include docs/logo/*
+
 include README.md
