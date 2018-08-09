@@ -65,10 +65,8 @@ INCLUDE_DIR = $(PREFIX)/include
 SRC_DIR = SEAL/seal
 
 #.............................. LIBRARY DOWNLOAD  .............................
-SEAL_URL = "https://download.microsoft.com/download/B/3/7/B3720F6B-4F4A-4B54-9C6C-751EF194CBE7/SEAL_2.3.1.tar.gz"
-SEAL_ROOT_DIR = SEAL_2.3.1
-
-
+SEAL4PYFHEL_URL = "https://github.com/ibarrond/SEAL4Pyfhel"
+	
 #............................. COMPILER & LINKER ..............................
 CC = g++
 CFLAGS = -g -O2 -std=c++17 -march=native -I$(SRC_DIR) -I$(INCLUDE_DIR) \
@@ -94,24 +92,6 @@ LIB_LA = lib$(LIB_NAME).la
 
 
 all: $(LIB_LA)
-###############################################################################
-#                               BUILD FHE LIBRARY                             #
-###############################################################################
-
-# OBTAINING LIBRARY: download and extract
-download:
-	wget $(SEAL_URL)
-	tar xf $(SEAL_ROOT_DIR).tar.gz --strip-components=1
-	@rm $(SEAL_ROOT_DIR).tar.gz
-
-fixoriginal:
-	# Fixing errors in relative paths wrt. imports
-	@cp $(SRC_DIR)/util/* $(SRC_DIR)
-	@find ./$(SRC_DIR) -name '*.*' -exec sed -i 's-"seal/-"-g' {} \;
-	@find ./$(SRC_DIR) -name '*.*' -exec sed -i 's-"util/-"-g' {} \;
-	# Including precompiled config.h
-	@cp config.h ./$(SRC_DIR)
-
 
 ###############################################################################
 #                               BUILD FHE LIBRARY                             #
