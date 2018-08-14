@@ -814,7 +814,8 @@ cdef class Pyfhel:
             in_new_ctxt (bool=False): apply operation to a newly
                         created ciphertext instead of input cyphertext
         Return:
-            PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt resulting ciphertext, either the input transformed or
+            a new one
         """
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -835,7 +836,8 @@ cdef class Pyfhel:
                         created ciphertext instead of input cyphertext
             
         Return:
-            PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt resulting ciphertext, either the input transformed or
+            a new one
         """
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -862,7 +864,8 @@ cdef class Pyfhel:
                         created ciphertext instead of input cyphertext
             
         Return:
-            PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt resulting ciphertext, either the input transformed or
+            a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms")
@@ -891,7 +894,8 @@ cdef class Pyfhel:
                         created ciphertext instead of input cyphertext
             
         Return:
-            PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt resulting ciphertext, either the input transformed or
+            a new one
         """
         if (ctxt._encoding != ptxt._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms")
@@ -922,7 +926,8 @@ cdef class Pyfhel:
                         created ciphertext instead of input cyphertext
             
         Return:
-            PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt resulting ciphertext, either the input transformed
+            or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms")
@@ -935,7 +940,8 @@ cdef class Pyfhel:
             return ctxt
         
     cpdef PyCtxt sub_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False) except +:
-        """sub_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False)
+        """sub_plain (self, PyCtxt ctxt, PyPtxt ptxt,
+                            bool in_new_ctxt=False)
 
         Substracts a PyCtxt ciphertext and a plaintext.
         
@@ -952,7 +958,8 @@ cdef class Pyfhel:
                         created ciphertext instead of input cyphertext
             
         Return:
-            PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt resulting ciphertext, either the input transformed or
+            a new one
         """
         if (ctxt._encoding != ptxt._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms")
@@ -967,7 +974,8 @@ cdef class Pyfhel:
 
         
     cpdef PyCtxt multiply (self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False) except +:
-        """multiply (self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False)
+        """multiply (self, PyCtxt ctxt, PyCtxt ctxt_other,
+                           bool in_new_ctxt=False)
 
         Multiply first PyCtxt ciphertext by the second PyCtxt ciphertext.
         
@@ -983,7 +991,8 @@ cdef class Pyfhel:
                         created ciphertext instead of input cyphertext
             
         Return:
-            PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt resulting ciphertext, either the input transformed or
+            a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms")
@@ -1038,7 +1047,8 @@ cdef class Pyfhel:
                         created ciphertext instead of input cyphertext
             
         Return:
-            PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt resulting ciphertext, either the input transformed or
+            a new one
         """
         if (ctxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> BATCH encoding required for rotation")
@@ -1068,7 +1078,8 @@ cdef class Pyfhel:
                         created ciphertext instead of input cyphertext
             
         Return:
-            PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt resulting ciphertext, either the input transformed or
+            a new one
         """
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
