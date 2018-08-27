@@ -14,8 +14,6 @@
 
 # Pyfhel building
 Pyfhel/*.pyc
-Pyfhel/*.cpp
-Pyfhel/*.c
 **/build
 **.egg-info
 **/dist
