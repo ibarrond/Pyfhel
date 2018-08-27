@@ -13,7 +13,7 @@
 * **_License_**: [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Summary
-**PY**thon **F**or **H**momorphic **E**ncryption **L**ibraries, **Pyfhel** implements some basic functionalities of HElib as a Homomorphic Encryption library such as sum, mult, or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
+**PY**thon **F**or **H**momorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
 
 **Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**momorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all three backends. Additionally, this project contains a large series of Demos & Tests for **HElib**|**SEAL**, **Afhel** & **Pyfhel**.
 
