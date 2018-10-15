@@ -102,7 +102,8 @@ setup(
     keywords        = "homomorphic encryption cython cryptography",
     license         = "GNU GPLv3",
     url             = "https://github.com/ibarrond/Pyfhel",     
-    setup_requires  =["setuptools>=30.0"],
+    setup_requires  =["setuptools>=30.0",
+                      "numpy>=1.14.0"],
     install_requires=["cython>=0.25.1",
                       "numpy>=1.14.0"],
     classifiers     =(
