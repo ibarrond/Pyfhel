@@ -1,0 +1,32 @@
+language: python
+
+matrix:
+  include:
+    # works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+
+python:
+  - "3.4"
+  - "3.5"
+  - "3.5-dev"  # 3.5 development branch
+  - "3.6"
+  - "3.6-dev"  # 3.6 development branch
+  - "3.7-dev"  # 3.7 development branch
+  
+cache: pip
+  
+# command to install dependencies
+install:
+  - pip install -r requirements.txt
+  
+# command to run tests
+script:
+  - python Pyfhel/tests.py
