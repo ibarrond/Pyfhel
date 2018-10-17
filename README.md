@@ -8,7 +8,7 @@
 
 
 
-**PY**thon **F**or **H**omomorphic **E**ncryption **L**ibrary/ies
+**PY**thon **F**or **H**omomorphic **E**ncryption **L**ibrary/ies, __*VERSION 2*__.
 
 * **_Status_**: ALPHA. If you want to join/contribute to develop this library, just [write me!](mailto:ibarrond@eurecom.fr).
 * **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR) over encrypted vectors|scalars of integers|binaries. This library acts as a common Python API for the most advanced C++ HE libraries.
