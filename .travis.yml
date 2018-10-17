@@ -23,9 +23,8 @@ cache: pip
 # command to install dependencies
 install:
   - pip install -r requirements.txt
-  - pip install coverage
+  - python setup.py develop
   
 # command to run tests
 script:
-  - ls -la
-  - python -m unittest ./Pyfhel/tests.py
+  - python Pyfhel/test.py
