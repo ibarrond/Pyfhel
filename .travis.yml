@@ -27,4 +27,5 @@ install:
   
 # command to run tests
 script:
+  - ls -la
   - python -m unittest ./Pyfhel/tests.py
