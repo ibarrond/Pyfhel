@@ -14,12 +14,7 @@ matrix:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
 
 python:
-  - "3.4"
   - "3.5"
-  - "3.5-dev"  # 3.5 development branch
-  - "3.6"
-  - "3.6-dev"  # 3.6 development branch
-  - "3.7-dev"  # 3.7 development branch
   
 cache: pip
   
@@ -29,4 +24,4 @@ install:
   
 # command to run tests
 script:
-  - python Pyfhel/tests.py
+  - python ./Pyfhel/tests.py
