@@ -1,4 +1,4 @@
-# Pyfhel [v2]<img width="10%" height="10%" align="right"  src="/docs/logo/logo.png">
+# Pyfhel<img width="10%" height="10%" align="right"  src="/docs/logo/logo.png">
 [![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 [![Updates](https://pyup.io/repos/github/ibarrond/Pyfhel/shield.svg)](https://pyup.io/repos/github/ibarrond/Pyfhel/)
@@ -15,7 +15,7 @@
 * **_Language_**: Python (3.4+) & Cython on top of C++17. (NOTE: Python must have been compiled with C++17: g++>=6 | clang++>=5.0, Visual Studio 2017).
 * **_Dependencies_**: There are three possible backends, all of them HE libraries in C++:
    
-   1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies). This version is currently only supporting SEAL.
+   1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies). _Version 2 of Pyfhel is currently only supporting SEAL_.
    2. [HElib](https://github.com/shaih/HElib) (depends on [GMP](http://www.gmplib.org) & [NTL](http://www.shoup.net/ntl/download.html))
    3. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies)
   
