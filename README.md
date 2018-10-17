@@ -1,4 +1,13 @@
 # Pyfhel [v2]<img width="10%" height="10%" align="right"  src="/docs/logo/logo.png">
+[![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+[![Updates](https://pyup.io/repos/github/ibarrond/Pyfhel/shield.svg)](https://pyup.io/repos/github/ibarrond/Pyfhel/)
+[![Python 3](https://pyup.io/repos/github/ibarrond/Pyfhel/python-3-shield.svg)](https://pyup.io/repos/github/ibarrond/Pyfhel/)
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/ibarrond/Pyfhel.svg)](http://isitmaintained.com/project/ibarrond/Pyfhel "Percentage of issues still open")
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+
+
 **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibrary/ies
 
 * **_Status_**: ALPHA. If you want to join/contribute to develop this library, just [write me!](mailto:ibarrond@eurecom.fr).
