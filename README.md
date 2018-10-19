@@ -1,7 +1,6 @@
 # Pyfhel<img width="10%" height="10%" align="right"  src="/docs/logo/logo.png">
 [![Build Status](https://travis-ci.org/ibarrond/Pyfhel.svg?branch=master)](https://travis-ci.org/ibarrond/Pyfhel)
 [![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)
-
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://GitHub.com/ibarrond/Pyfhel/graphs/commit-activity)
 [![Python 3](https://pyup.io/repos/github/ibarrond/Pyfhel/python-3-shield.svg)](https://pyup.io/repos/github/ibarrond/Pyfhel/)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/ibarrond/Pyfhel.svg)](http://isitmaintained.com/project/ibarrond/Pyfhel "Percentage of issues still open")
@@ -20,8 +19,6 @@ _Note: If you have written any code using Pyfhel, please share it! (feel free to
    1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies). _Version 2 of Pyfhel is currently only supporting SEAL_.
    2. [HElib](https://github.com/shaih/HElib) (depends on [GMP](http://www.gmplib.org) & [NTL](http://www.shoup.net/ntl/download.html))
    3. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies)
-  
-* **_License_**: [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Summary
 **PY**thon **F**or **H**momorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
@@ -49,7 +46,7 @@ Alternatively, and only for Ubuntu OS, after cloning you can install and compile
 	   > make
 	   > sudo make install
 
-You can also install just SEAL and Afhel. Just run `make SEAL|Afhel` in the `Pyfhel` directory and `make install` inside `Pyfhel/Afhel` or `Pyfhel/SEAL` directory respectively. Makefiles also have `clean` and `uninstall` commands, as well as `make sourceFileName_x` command to compile and link a source file with them.
+You can also install just SEAL and Afhel. Just run `make SEAL|Afhel` in the `Pyfhel` directory and `make install` inside `Pyfhel/Afhel` or `Pyfhel/SEAL` directory respectively. Makefiles also have `clean` and `uninstall` commands, as well as `make sourceFileName_x` command to compile and link a source file (.cpp) with them.
        
  
 ## Project contents
@@ -61,7 +58,7 @@ You can also install just SEAL and Afhel. Just run `make SEAL|Afhel` in the `Pyf
 	 - *Doc_API.md*: Outdated comprehensive list of all classes & methods available in Pyfhel.
      - `Helib/`: Up to date docs and images explaining this otherwise undocumented library.
 
-- `Pyfhel/Demos_Tests`, a collection of Demos and Tests.
+- `Pyfhel/Demos_Tests`, a collection of Demos and Tests. Outdated as of today. Check the `test.py`!
 - `Pyfhel/.Makefiles/Makefile_HElib`, a makefile to compile and install HElib as a dynamic library (`-lhelib`).
 - `Pyfhel/.Makefiles/Makefile_SEAL`, a makefile to compile and install SEAL as a dynamic library (`-lseal`).
 
