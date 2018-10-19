@@ -21,8 +21,8 @@ cache: pip
 # command to install dependencies
 install:
   - pip install -r requirements.txt
-  - pip install Pyfhel
   
 # command to run tests
 script:
-  - python Pyfhel/test.py
+  - pip install Pyfhel
+# - python Pyfhel/test.py
