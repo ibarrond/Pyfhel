@@ -1,6 +1,6 @@
 # Pyfhel<img width="10%" height="10%" align="right"  src="/docs/logo/logo.png">
+[![Build Status](https://travis-ci.org/ibarrond/Pyfhel.svg?branch=master)](https://travis-ci.org/ibarrond/Pyfhel)
 [![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 [![Updates](https://pyup.io/repos/github/ibarrond/Pyfhel/shield.svg)](https://pyup.io/repos/github/ibarrond/Pyfhel/)
 [![Python 3](https://pyup.io/repos/github/ibarrond/Pyfhel/python-3-shield.svg)](https://pyup.io/repos/github/ibarrond/Pyfhel/)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/ibarrond/Pyfhel.svg)](http://isitmaintained.com/project/ibarrond/Pyfhel "Percentage of issues still open")
