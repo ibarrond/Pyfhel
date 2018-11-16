@@ -39,11 +39,8 @@ if "--CYTHONIZE" in sys.argv:
 # could run setup from anywhere
 
 PYFHEL_PATH = 'Pyfhel'
-print(PYFHEL_PATH)
 AFHEL_PATH = os.path.join(PYFHEL_PATH, 'Afhel')
-print(AFHEL_PATH)
 SEAL_PATH = os.path.join(PYFHEL_PATH, 'SEAL', 'SEAL', 'seal')
-print(SEAL_PATH)
 
 # ---------------------------- COMPILATION CONFIG -----------------------------
 # Including shared libraries
