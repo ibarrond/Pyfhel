@@ -41,6 +41,4 @@ Pyfhel/Scratchpad
 **.ipynb_checkpoints
 **/__pycache__
 
-docs/_build
-docs/_static
-docs/_templates
+!docs/**
