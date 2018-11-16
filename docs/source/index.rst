@@ -1,5 +1,5 @@
 .. Pyfhel documentation master file, created by
-   sphinx-quickstart on Fri Nov 16 17:24:04 2018.
+   sphinx-quickstart on Mon Aug 27 21:01:48 2018.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -10,7 +10,10 @@ Welcome to Pyfhel's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+.. automodule:: Pyfhel
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Indices and tables
 ==================
