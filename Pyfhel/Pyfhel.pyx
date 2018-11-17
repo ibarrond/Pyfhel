@@ -524,7 +524,7 @@ cdef class Pyfhel:
         Return:
             None
         """
-        self.afseal.relinKeyGen(bitCount)        
+        self.afseal.relinKeyGen(bitCount, size)        
         
     cpdef void relinearize(self, PyCtxt ctxt) except +:
         """relinearize(PyCtxt ctxt)
