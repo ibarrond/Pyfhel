@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
@@ -7,24 +8,23 @@
 # http://www.sphinx-doc.org/en/master/config
 
 # -- Path setup --------------------------------------------------------------
+import sys, os, os.path, re
+import datetime
 
+YEAR = datetime.date.today().strftime('%Y')
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
+sys.path.append(os.path.abspath('sphinxext'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'Pyfhel'
-copyright = '2018, Alberto Ibarrondo'
 author = 'Alberto Ibarrondo'
+copyright = '%s, %s' % (YEAR, author)
 
 # The short X.Y version
-version = ''
+version = '2.0.0a5'
 # The full version, including alpha/beta/rc tags
 release = '18/11/2018'
 
@@ -34,11 +34,14 @@ release = '18/11/2018'
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
+highlight_language = 'cython'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'cython_highlighting',
+
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
@@ -74,15 +77,21 @@ language = None
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
-
+pygments_style = 'sphinx'
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+
+html_theme = 'default'
+try:
+    import sphinx
+    if os.path.isdir(os.path.join(os.path.dirname(sphinx.__file__), 'themes', 'nature')):
+        html_theme = 'nature'
+except (ImportError, AttributeError):
+    pass# use default theme
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -105,6 +114,9 @@ html_static_path = ['_static']
 #
 # html_sidebars = {}
 
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+html_logo = "_static/logo.png"
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -185,8 +197,8 @@ epub_exclude_files = ['search.html']
 
 # -- Options for intersphinx extension ---------------------------------------
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+# intersphinx for standard :keyword:s (def, for, etc.)
+intersphinx_mapping = {'python': ('https://docs.python.org/3/', None)}
 
 # -- Options for todo extension ----------------------------------------------
 
