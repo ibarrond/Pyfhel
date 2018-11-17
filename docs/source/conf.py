@@ -26,7 +26,7 @@ author = 'Alberto Ibarrondo'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '16/11/2018'
+release = '18/11/2018'
 
 
 # -- General configuration ---------------------------------------------------
@@ -40,6 +40,7 @@ release = '16/11/2018'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
