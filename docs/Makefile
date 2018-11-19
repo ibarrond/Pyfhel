@@ -6,7 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = .
 PAPER         = a4
-BUILDDIR      = build
+BUILDDIR      = .
 
 # Put it first so that "make" without argument is like "make help".
 help:
