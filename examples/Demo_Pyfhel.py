@@ -1,34 +1,38 @@
-from Pyfhel import Pyfhel
-from PyPtxt import PyPtxt
-from PyCtxt import PyCtxt
-HE = Pyfhel()
-KEYGEN_PARAMS={ "p":257,      "r":1,
-                "d":1,        "c":2,
-                "sec":80,     "w":64,
-                "L":10,       "m":-1,
-                "R":3,        "s":0,
-                "gens":[],    "ords":[]}
 
-print("Pyfhel DEMO")
-print("   Running KeyGen with params:")
-print(KEYGEN_PARAMS)
-HE.keyGen(KEYGEN_PARAMS)
-print("  KeyGen completed")
+from Pyfhel import Pyfhel, PyPtxt, PyCtxt
+# Pyfhel class contains most of the functions.
+# PyPtxt is the plaintext class
+# PyCtxt is the ciphertext class
 
-v1 = [1,2,3,4,5]
-v2 = [2,2,2,2,2]
 
-ptxt1 = PyPtxt(v1, HE)
-ptxt2 = PyPtxt(v2, HE)
+print("==============================================================")
+print("========================= Pyfhel DEMO ========================")
+print("==============================================================")
 
-ctxt1 = HE.encrypt(ptxt1, fill=1)
-ctxt2 = HE.encrypt(ptxt2, fill=1)
 
-print("Encrypted v1: ", v1)
-print("Encrypted v2: ", v2)
+print("1. Creating Context and KeyGen in a Pyfhel Object ")
+HE = Pyfhel()           # Creating empty Pyfhel object
+HE.contextGen(p=65537)  # Generating context. The value of p is important.
+                        #  There are many configurable parameters on this step
+                        #  More info in Demo_Context.py, and in the docs of
+                        #  the function (link to docs in README).
+HE.keyGen()             # Key Generation.
 
-ctxt1 += ctxt2      # `ctxt1 = ctxt1 + ctxt2` would also be valid
-v3 = HE.decrypt(ctxt1)
+
+print("2. Encrypting integers 127 and -2")
+integer1 = 127
+integer2 = -2
+ctxt1 = HE.encryptInt(integer1) # Encryption makes use of the public key
+ctxt2 = HE.encryptInt(integer2) # For integers, encryptInt function is used.
+
+print("    int ",integer1,'->', type(ctxt1))
+print("    int ",integer2,'->', type(ctxt2))
+
+print("3. Operating with encrypted integers")
+ctxtSum = ctxt1 + ctxt2         # `ctxt1 += ctxt2` for quicker inplace operation
+ctxtSub = ctxt1 - ctxt2         # `ctxt1 -= ctxt2` for quicker inplace operation
+
+
 print("add: v1 + v2 -> ", v3)
 
 print("v3: ", v3)
