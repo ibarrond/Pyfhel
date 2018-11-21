@@ -1,7 +1,9 @@
 # Pyfhel<img width="10%" height="10%" align="right"  src="/docs/_static/logo.png">
 [![Build Status](https://travis-ci.org/ibarrond/Pyfhel.svg?branch=master)](https://travis-ci.org/ibarrond/Pyfhel)
+[![Documentation](https://img.shields.io/badge/docs-API-blue.svg)](https://ibarrond.github.io/Pyfhel)
 [![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://GitHub.com/ibarrond/Pyfhel/graphs/commit-activity)
+[![GitHub issues](https://img.shields.io/github/issues/ibarrond/Pyfhel.svg)](https://github.com/ibarrond/Pyfhel/issues)
 [![Python 3](https://pyup.io/repos/github/ibarrond/Pyfhel/python-3-shield.svg)](https://pyup.io/repos/github/ibarrond/Pyfhel/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -11,8 +13,9 @@
 
 _Note: If you have written any code using Pyfhel, please share it! (feel free to send me a message, I'll credit you for it). This repo is lacking demos, examples and tests. Besides, if you want to join/contribute to develop this library, just [write me!](mailto:ibarrond@eurecom.fr)_
 * **_Status_**: ALPHA.
-* **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR) over encrypted vectors|scalars of integers|binaries. This library acts as a common Python API for the most advanced C++ HE libraries.
-* **_Language_**: Python (3.4+) & Cython on top of C++17. (NOTE: Python must have been compiled with C++17: g++>=6 | clang++>=5.0, Visual Studio 2017).
+* **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR) over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
+* **_Language_**: Python (3.4+) & Cython on top of C++17. (_REQUIRED: Python must have been compiled with C++17: g++>=6 | clang++>=5.0, Visual Studio 2017._).
+* **_Docs_**: For now, only the API is documented [[link](https://ibarrond.github.io/Pyfhel)]. Examples are soon to follow.
 * **_Dependencies_**: There are three possible backends, all of them HE libraries in C++:
    
    1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies). _Version 2 of Pyfhel is currently only supporting SEAL_.
