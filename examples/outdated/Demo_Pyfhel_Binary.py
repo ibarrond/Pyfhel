@@ -1,6 +1,6 @@
 # Demo on the use of Binary operations (AND, XOR, NOT) using Pyfhel
 #    The key is to use p=2 and r=1, and compress directly the numbers
-#    in binary format (v1 would be equal to 3 and v2 would be equal to 5)
+#    in binary format.
 
 from Pyfhel import Pyfhel, PyPtxt, PyCtxt
 
@@ -18,10 +18,13 @@ HE.keyGen()             # Key Generation.
 
 
 print("2. Formatting integers in binary and encrypting them")
-v1 = [0,0,1,1]
-v2 = [0,1,0,1]
+# We create a quick function to turn an integer into its binary representation
+to_bin = lambda x,n=4: list(map(int,bin(x)[2:].rjust(n,'0')))
+integer1 = # [0,0,1,1]
+integer2 = # [0,1,0,1]
 ones = [1]
 
+# We now encrypt the binary vectors
 ptxt1 = PyPtxt(v1, HE)
 ptxt2 = PyPtxt(v2, HE)
 pones = PyPtxt(ones, HE)
