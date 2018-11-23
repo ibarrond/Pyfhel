@@ -1,23 +1,23 @@
 # Demo on the use of Binary operations (AND, XOR, NOT) using Pyfhel
 #    The key is to use p=2 and r=1, and compress directly the numbers
 #    in binary format (v1 would be equal to 3 and v2 would be equal to 5)
-from Pyfhel import Pyfhel
-from PyPtxt import PyPtxt
-from PyCtxt import PyCtxt
-HE = Pyfhel()
-KEYGEN_PARAMS={ "p":2,      "r":1,
-                "d":1,        "c":2,
-                "sec":80,     "w":64,
-                "L":10,       "m":-1,
-                "R":3,        "s":0,
-                "gens":[],    "ords":[]}
 
-print("Pyfhel DEMO for binary operations")
-print("   Running KeyGen with params:")
-print(KEYGEN_PARAMS)
-HE.keyGen(KEYGEN_PARAMS)
-print("  KeyGen completed")
+from Pyfhel import Pyfhel, PyPtxt, PyCtxt
 
+print("==============================================================")
+print("===================== Pyfhel for BINARY ======================")
+print("==============================================================")
+
+print("1. Creating Context and KeyGen in a Pyfhel Object ")
+HE = Pyfhel()           # Creating empty Pyfhel object
+HE.contextGen(p=65537)  # Generating context. The value of p is important.
+                        #  There are many configurable parameters on this step
+                        #  More info in Demo_Context.py, and in the docs of
+                        #  the function (link to docs in README).
+HE.keyGen()             # Key Generation.
+
+
+print("2. Formatting integers in binary and encrypting them")
 v1 = [0,0,1,1]
 v2 = [0,1,0,1]
 ones = [1]
