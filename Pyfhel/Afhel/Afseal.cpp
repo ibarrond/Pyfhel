@@ -98,7 +98,7 @@ void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatch,
     this->evaluator=make_shared<Evaluator>(*context);
     if(this->flagBatch){
         if(!(*context).qualifiers().enable_batching){
-            throw invalid_argument("p not prime | p-1 not multiple 2*m");
+            throw invalid_argument("p not prime or p-1 not multiple 2*m");
         }
         this->crtBuilder=make_shared<PolyCRTBuilder>(*context);
     }

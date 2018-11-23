@@ -167,6 +167,7 @@ cdef class Pyfhel:
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
         ctxt._encoding = ENCODING_T.INTEGER
+        ctxt._pyfhel = self
         return ctxt
     
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=None) except +:
@@ -191,6 +192,7 @@ cdef class Pyfhel:
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
         ctxt._encoding = ENCODING_T.FRACTIONAL
+        ctxt._pyfhel = self
         return ctxt
 
 
@@ -217,6 +219,7 @@ cdef class Pyfhel:
             ctxt = PyCtxt()
         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
         ctxt._encoding = ENCODING_T.BATCH
+        ctxt._pyfhel = self
         return ctxt  
         
     cpdef PyCtxt encryptArray(self, int64_t[::1] arr,
@@ -244,6 +247,7 @@ cdef class Pyfhel:
         vec.assign(&arr[0], &arr[-1]+1)
         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
         ctxt._encoding = ENCODING_T.BATCH
+        ctxt._pyfhel = self
         return ctxt  
     
     cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=None) except +:
@@ -271,6 +275,7 @@ cdef class Pyfhel:
             ctxt = PyCtxt()
         self.afseal.encrypt(deref(ptxt._ptr_ptxt), deref(ctxt._ptr_ctxt)) 
         ctxt._encoding = ptxt._encoding
+        ctxt._pyfhel = self
         return ctxt
 
     def encrypt(self, ptxt not None, PyCtxt ctxt=None):
