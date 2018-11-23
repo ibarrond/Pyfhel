@@ -116,7 +116,7 @@ cdef class Pyfhel:
 
         Args:
             * p (long): Plaintext modulus. All operations are modulo p.
-            * m (long=2048): Coefficient modulus. 
+            * m (long=2048): Polynomial coefficient modulus. (Poly: 1*x^m+1)
             * flagBatching (bool=false): Set to true to enable batching.
             * base (long=2): Polynomial base. 
             * sec (long=128): Security level equivalent in AES. 128 or 192.

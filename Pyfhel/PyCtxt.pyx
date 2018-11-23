@@ -105,6 +105,10 @@ cdef class PyCtxt:
         finally:
             inputter.close()
             
+    # =========================================================================
+    # ============================= OPERATIONS ================================
+    # =========================================================================
+
             
     def __neg__(self):
         """Negates this ciphertext.
@@ -112,6 +116,28 @@ cdef class PyCtxt:
         self._pyfhel.negate(self)
         
     def __add__(self, other):
+        """Sums this ciphertext with either another PyCtx or a PyPtxt plaintext.
+        
+        Sums with a PyPtxt/PyCtxt, storing the result a new ciphertext.
+
+        Args:
+            other (PyCtxt|PyPtxt): Second summand.
+
+        Returns:
+            (PyCtxt): Ciphertext resulting of substraction
+
+        Raise:
+            TypeError: if other doesn't have a valid type.
+        """
+        if isinstance(other, PyCtxt):
+            return self._pyfhel.add(self, other, in_new_ctxt=True)
+        elif isinstance(other, PyPtxt):
+            return self._pyfhel.add_plain(self, other, in_new_ctxt=True)
+        else:
+            raise TypeError("<Pyfhel ERROR> other summand must be either PyCtxt or PyPtxt")
+    
+    def __radd__(self, other): return self.__add__(other)
+    def __iadd__(self, other):
         """Sums this ciphertext with either another PyCtx or a PyPtxt plaintext.
         
         Sums with a PyPtxt/PyCtxt, storing the result in this ciphertext.
@@ -123,15 +149,35 @@ cdef class PyCtxt:
             TypeError: if other doesn't have a valid type.
         """
         if isinstance(other, PyCtxt):
-            self._pyfhel.add_encr(self, other)
+            self._pyfhel.add(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
-            self._pyfhel.add_plain(self, other)
+            self._pyfhel.add_plain(self, other, in_new_ctxt=False)
         else:
             raise TypeError("<Pyfhel ERROR> other summand must be either PyCtxt or PyPtxt")
             
-            
+
     def __sub__(self, other):
-        """Substracts this ciphertext with either another PyCtx or a PyPtxt plaintext.
+        """Substracts this ciphertext with either another PyCtxt or a PyPtxt plaintext.
+        
+        Substracts with a PyPtxt/PyCtxt, storing the result in a new ciphertext.
+
+        Args:
+            other (PyCtxt|PyPtxt): Substrahend, to be substracted from this ciphertext.
+        Returns:
+            (PyCtxt): Ciphertext resulting of substraction
+
+        Raise:
+            TypeError: if other doesn't have a valid type.
+        """
+        if isinstance(other, PyCtxt):
+            return self._pyfhel.sub(self, other, in_new_ctxt=True)
+        elif isinstance(other, PyPtxt):
+            return self._pyfhel.sub_plain(self, other, in_new_ctxt=True)
+        else:
+            raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
+    def __rsub__(self, other): return self.__sub__(other)
+    def __isub__(self, other): 
+        """Substracts this ciphertext with either another PyCtxt or a PyPtxt plaintext.
         
         Substracts with a PyPtxt/PyCtxt, storing the result in this ciphertext.
 
@@ -142,15 +188,37 @@ cdef class PyCtxt:
             TypeError: if other doesn't have a valid type.
         """
         if isinstance(other, PyCtxt):
-            self._pyfhel.sub_encr(self, other)
+            self._pyfhel.sub(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
-            self._pyfhel.sub_plain(self, other)
+            self._pyfhel.sub_plain(self, other, in_new_ctxt=False)
         else:
             raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
-            
+    
                         
     def __mul__(self, other):
-        """Multiplies this ciphertext with either another PyCtx or a PyPtxt plaintext.
+        """Multiplies this ciphertext with either another PyCtxt or a PyPtxt plaintext.
+        
+        Multiplies with a PyPtxt/PyCtxt, storing the result in a new ciphertext.
+
+        Args:
+            other (PyCtxt|PyPtxt): Multiplier, to be multiplied with this ciphertext.
+
+        Returns:
+            (PyCtxt): Ciphertext resulting of multiplication
+
+        Raise:
+            TypeError: if other doesn't have a valid type.
+        """
+        if isinstance(other, PyCtxt):
+            return self._pyfhel.multiply(self, other, in_new_ctxt=True)
+        elif isinstance(other, PyPtxt):
+            return self._pyfhel.multiply_plain(self, other, in_new_ctxt=True)
+        else:
+            raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
+     
+    def __rmul__(self, other): return self.__mul__(other)
+    def __imul__(self, other): 
+        """Multiplies this ciphertext with either another PyCtxt or a PyPtxt plaintext.
         
         Multiplies with a PyPtxt/PyCtxt, storing the result in this ciphertext.
 
@@ -161,12 +229,12 @@ cdef class PyCtxt:
             TypeError: if other doesn't have a valid type.
         """
         if isinstance(other, PyCtxt):
-            self._pyfhel.mult_encr(self, other)
+            return self._pyfhel.multiply(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
-            self._pyfhel.mult_plain(self, other)
+            return self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
         else:
             raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
-            
+           
                                     
     def __pow__(self, exponent, modulo):
         """Exponentiates this ciphertext to the desired exponent.
@@ -177,7 +245,7 @@ cdef class PyCtxt:
             exponent (int): Exponent for the power.
         """
         if(exponent==2):
-            self._pyfhel.square(exponent)  
+            self._pyfhel.square()  
         else:
             self._pyfhel.exponentiate(exponent)     
                 
@@ -189,3 +257,27 @@ cdef class PyCtxt:
             k (int): Number of positions to rotate.
         """
         self._pyfhel.rotate(self, k)
+
+
+    # =========================================================================
+    # ============================ ENCR/DECR/CMP ==============================
+    # =========================================================================
+
+    def __len__(self):
+        return self.size()
+
+    def __int__(self):
+        if (self._encoding != ENCODING_T.INTEGER):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not INTEGER)")
+        return self._pyfhel.decryptInt(self)
+
+    def __float__(self):
+        if (self._encoding != ENCODING_T.FRACTIONAL):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not FRACTIONAL)")
+        return self._pyfhel.decryptFrac(self)
+    
+    def __str__(self):
+        return "<Pyfhel Ciphertext, encoding={}, size={}>".format(
+                ENCODING_t(self._encoding).name, self.size())
+
+    
