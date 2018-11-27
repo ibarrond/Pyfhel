@@ -23,10 +23,12 @@ project = 'Pyfhel'
 author = 'Alberto Ibarrondo'
 copyright = '%s, %s' % (YEAR, author)
 
+import Pyfhel
+
 # The short X.Y version
-version = '2.0.0a5'
+version = Pyfhel.__version__
 # The full version, including alpha/beta/rc tags
-release = '18/11/2018'
+release = Pyfhel.__version__
 
 
 # -- General configuration ---------------------------------------------------
