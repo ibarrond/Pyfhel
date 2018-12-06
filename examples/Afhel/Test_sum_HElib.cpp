@@ -1,5 +1,4 @@
 #include <cstddef>
-#include "utils/Timer.h"
 #include "FHE.h"
 #include "EncryptedArray.h"
 #include <NTL/ZZX.h>
@@ -8,6 +7,25 @@
 #include <omp.h>
 
 #define VEC_SIZE 1000
+
+// Simple class to measure time for each method
+class Timer
+{
+public:
+    void start() { m_start = my_clock(); }
+    void stop() { m_stop = my_clock(); }
+    double elapsed_time() const {
+        return m_stop - m_start;
+    }
+
+private:
+    double m_start, m_stop;
+    double my_clock() const {
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        return tv.tv_sec + tv.tv_usec * 1e-6;
+    }
+};
 
 void noPackingSum(long u[], long v[], long result[], FHESecKey sk, FHEPubKey pk)
 {
