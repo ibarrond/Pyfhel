@@ -29,7 +29,7 @@ _Note: If you have written any code using Pyfhel, please share it! (feel free to
 
 Last but not least, we include Makefiles to compile and install **HElib**, **SEAL** and **Afhel** as shared libraries in Ubuntu, which can then be linked to other C++ programs using the tags `-lhelib`, `-lseal` and `-lafhel`.
 
-## Install & Unistall
+## Install & Uninstall
 This project has been uploaded to [PyPI](https://pypi.org/project/Pyfhel/). In order to install it from source (*WARNING! it takes several minutes to compile, be patient!*), run:
 
 	   > pip install Pyfhel
