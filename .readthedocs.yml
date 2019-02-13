@@ -13,3 +13,6 @@ python:
         path: .
       - method: setuptools
         path: .
+        
+submodules:
+   include: all
