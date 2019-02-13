@@ -16,6 +16,6 @@ python:
    system_packages: true
    
 submodules:
-  include:
+   include:
      - SEAL
-  recursive: true
+   recursive: true
