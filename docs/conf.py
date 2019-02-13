@@ -26,9 +26,9 @@ copyright = '%s, %s' % (YEAR, author)
 import Pyfhel
 
 # The short X.Y version
-version = Pyfhel.__version__
+# version = Pyfhel.__version__
 # The full version, including alpha/beta/rc tags
-release = Pyfhel.__version__
+# release = Pyfhel.__version__
 
 
 # -- General configuration ---------------------------------------------------
