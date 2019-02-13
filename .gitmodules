@@ -5,6 +5,6 @@
 	path = Pyfhel/PALISADE
 	url = https://git.njit.edu/palisade/PALISADE
 
-[submodule "Pyfhel/SEAL"]
+[submodule "SEAL"]
 	path = Pyfhel/SEAL
 	url = https://github.com/ibarrond/SEAL4Pyfhel
