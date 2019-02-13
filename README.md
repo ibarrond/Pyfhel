@@ -9,7 +9,7 @@
 
 
 
-**PY**thon **F**or **H**omomorphic **E**ncryption **L**ibrary/ies, __*VERSION 2*__.
+**PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries.
 
 _Note: If you have written any code using Pyfhel, please share it! (feel free to send me a message, I'll credit you for it). This repo is lacking demos, examples and tests. Besides, if you want to join/contribute to develop this library, just [write me!](mailto:ibarrond@eurecom.fr)_
 * **_Status_**: ALPHA.
