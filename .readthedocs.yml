@@ -13,9 +13,3 @@ python:
         path: .
       - method: setuptools
         path: .
-   system_packages: true
-   
-submodules:
-   include:
-     - SEAL
-   recursive: true
