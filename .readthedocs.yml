@@ -11,3 +11,6 @@ python:
       - requirements: requirements.txt
       - method: setuptools
         path: .
+        
+submodules:
+   include: all
