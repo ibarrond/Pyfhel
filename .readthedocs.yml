@@ -1,6 +1,21 @@
+# .readthedocs.yml
+
+version: 2
+
 build:
   image: latest
 
 python:
-  version: 3.6
-  setup_py_install: true
+   version: 3.6
+   install:
+      - requirements: requirements.txt
+      - method: pip
+        path: .
+      - method: setuptools
+        path: .
+   system_packages: true
+   
+submodules:
+  include:
+     - SEAL
+  recursive: true
