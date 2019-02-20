@@ -16,6 +16,9 @@ def scan(dir, files=[]):
             files.append(path)
     return files
 
+# Reading version info from Readme
+from VERSION import __version__
+
 # Including Readme in the module as long description.
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -90,7 +93,7 @@ if CYTHONIZE:
 # -------------------------------- INSTALLER ----------------------------------
 setup(
     name            = "Pyfhel",
-    version         = "2.0.0a5",
+    version         = __version__,
     author          = "Alberto Ibarrondo",
     author_email    = "ibarrond@eurecom.fr",
     description     = "Python for Homomorphic Encryption Libraries",
