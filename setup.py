@@ -16,8 +16,18 @@ def scan(dir, files=[]):
             files.append(path)
     return files
 
-# Reading version info from Readme
-from VERSION import __version__
+# Reading version info from Readme and hardcoding it in the __init__.py file
+import fileinput
+import re
+
+v_readme_regex = r'\[\_*v([0-9]+\.[0-9]+\.[0-9a-z]+)\_*\]'
+with open('README.md') as readme:
+    VERSION = re.findall(v_readme_regex,readme.read())[0]
+    
+v_init_regex   = r'\"([0-9]+\.[0-9]+\.[0-9a-z]+)\"'
+with fileinput.FileInput('Pyfhel/__init__.py', inplace=True) as file:
+    for line in file:
+        print(re.sub(v_init_regex, '"'+VERSION+'"', line), end='')
 
 # Including Readme in the module as long description.
 with open("README.md", "r") as fh:
@@ -93,7 +103,7 @@ if CYTHONIZE:
 # -------------------------------- INSTALLER ----------------------------------
 setup(
     name            = "Pyfhel",
-    version         = __version__,
+    version         = VERSION,
     author          = "Alberto Ibarrondo",
     author_email    = "ibarrond@eurecom.fr",
     description     = "Python for Homomorphic Encryption Libraries",
