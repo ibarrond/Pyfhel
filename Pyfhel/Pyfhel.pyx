@@ -30,8 +30,8 @@ plaintext class and PyCtxt as cyphertext class.
 
 Example:
     >>> he = Pyfhel()
-    >>> he.ContextGen(p=65537)
-    >>> he.KeyGen(p=65537)
+    >>> he.contextGen(p=65537)
+    >>> he.keyGen()
     >>> p1 = he.encode(4)
     >>> p2 = he.encode(2)
     >>> c1 = he.encrypt(p1)
