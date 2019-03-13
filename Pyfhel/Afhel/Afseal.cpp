@@ -85,7 +85,8 @@ void Afseal::ContextGen(long new_p, long new_m, bool new_flagBatch,
     parms.set_poly_modulus("1x^"+to_string(m)+" + 1");
     if      (sec==128)  {parms.set_coeff_modulus(coeff_modulus_128(m));}
     else if (sec==192)  {parms.set_coeff_modulus(coeff_modulus_192(m));}
-    else {throw invalid_argument("sec must be 128 or 192 bits.");}
+    else if (sec==256)  {parms.set_coeff_modulus(coeff_modulus_256(m));}
+    else {throw invalid_argument("sec must be 128 or 192 or 256 bits.");}
     parms.set_plain_modulus(p);
     this->context = shared_ptr<SEALContext>(new SEALContext(parms));
 
