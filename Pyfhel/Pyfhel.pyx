@@ -163,7 +163,7 @@ cdef class Pyfhel:
         Return:
             * PyCtxt: the ciphertext containing the encrypted plaintext
         """
-        if (ctxt._ptr_ctxt == NULL):
+        if ctxt is None:
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
         ctxt._encoding = ENCODING_T.INTEGER
@@ -188,7 +188,7 @@ cdef class Pyfhel:
         Return:
             * PyCtxt: the ciphertext containing the encrypted plaintext
         """
-        if (ctxt._ptr_ctxt == NULL):
+        if ctxt is None:
             ctxt = PyCtxt()
         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
         ctxt._encoding = ENCODING_T.FRACTIONAL
@@ -215,7 +215,7 @@ cdef class Pyfhel:
         Return:
             * PyCtxt: the ciphertext containing the encrypted plaintext
         """
-        if (ctxt._ptr_ctxt == NULL):
+        if ctxt is None:
             ctxt = PyCtxt()
         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
         ctxt._encoding = ENCODING_T.BATCH
@@ -241,7 +241,7 @@ cdef class Pyfhel:
         Return:
             * PyCtxt: the ciphertext containing the encrypted plaintext
         """
-        if (ctxt._ptr_ctxt == NULL):
+        if ctxt is None:
             ctxt = PyCtxt()
         cdef vector[int64_t] vec;
         vec.assign(&arr[0], &arr[-1]+1)
@@ -269,9 +269,9 @@ cdef class Pyfhel:
         Raise:
             TypeError: if the plaintext doesn't have a valid type.
         """
-        if (ptxt._ptr_ptxt == NULL):
+        if (ptxt._ptr_ptxt == NULL or ptxt is None):
             raise TypeError("<Pyfhel ERROR> PyPtxt Plaintext is empty")
-        if (ctxt._ptr_ctxt == NULL):
+        if ctxt is None:
             ctxt = PyCtxt()
         self.afseal.encrypt(deref(ptxt._ptr_ptxt), deref(ctxt._ptr_ctxt)) 
         ctxt._encoding = ptxt._encoding
@@ -425,7 +425,7 @@ cdef class Pyfhel:
         Return:
             * PyPtxt: the decrypted plaintext
         """
-        if (ptxt._ptr_ptxt == NULL):
+        if ptxt is None:
             ptxt = PyPtxt()
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
         ptxt._encoding = ctxt._encoding
@@ -467,7 +467,7 @@ cdef class Pyfhel:
             elif (ctxt._encoding == ENCODING_T.UNDEFINED):
                 raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
         else: # Decrypt to plaintext        
-            if (ptxt._ptr_ptxt == NULL):
+            if ptxt is None:
                 ptxt = PyPtxt()
             return self.decryptPtxt(ctxt, ptxt)
         
@@ -573,7 +573,7 @@ cdef class Pyfhel:
         Return:
             * PyPtxt: the plaintext containing the encoded value
         """
-        if (ptxt._ptr_ptxt == NULL):
+        if ptxt is None:
             ptxt = PyPtxt()
         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
         ptxt._encoding = ENCODING_T.INTEGER
@@ -594,7 +594,7 @@ cdef class Pyfhel:
         Return:
             * PyPtxt: the plaintext containing the encoded value
         """
-        if (ptxt._ptr_ptxt == NULL):
+        if ptxt is None:
             ptxt = PyPtxt()
         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
         ptxt._encoding = ENCODING_T.FRACTIONAL
@@ -618,7 +618,7 @@ cdef class Pyfhel:
         Return:
             * PyPtxt: the plaintext containing the encoded vector.
         """
-        if (ptxt._ptr_ptxt == NULL):
+        if ptxt is None:
             ptxt = PyPtxt()
         self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
         ptxt._encoding = ENCODING_T.BATCH
@@ -642,7 +642,7 @@ cdef class Pyfhel:
         Return:
             * PyPtxt: the plaintext containing the encoded vector.
         """
-        if (ptxt._ptr_ptxt == NULL):
+        if ptxt is None:
             ptxt = PyPtxt()
         cdef vector[int64_t] vec=[0];
         vec.assign(&arr[0], &arr[-1]+1)

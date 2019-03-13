@@ -4242,6 +4242,7 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   int __pyx_t_8;
+  int __pyx_t_9;
   __Pyx_RefNannySetupContext("encryptInt", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -4334,16 +4335,17 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":166
  *             * PyCtxt: the ciphertext containing the encrypted plaintext
  *         """
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
  */
-  __pyx_t_8 = ((__pyx_v_ctxt->_ptr_ctxt == NULL) != 0);
-  if (__pyx_t_8) {
+  __pyx_t_8 = (((PyObject *)__pyx_v_ctxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_8 != 0);
+  if (__pyx_t_9) {
 
     /* "Pyfhel/Pyfhel.pyx":167
  *         """
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()             # <<<<<<<<<<<<<<
  *         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
  *         ctxt._encoding = ENCODING_T.INTEGER
@@ -4356,14 +4358,14 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":166
  *             * PyCtxt: the ciphertext containing the encrypted plaintext
  *         """
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":168
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))             # <<<<<<<<<<<<<<
  *         ctxt._encoding = ENCODING_T.INTEGER
@@ -4559,6 +4561,7 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   int __pyx_t_8;
+  int __pyx_t_9;
   __Pyx_RefNannySetupContext("encryptFrac", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -4651,16 +4654,17 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":191
  *             * PyCtxt: the ciphertext containing the encrypted plaintext
  *         """
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
  */
-  __pyx_t_8 = ((__pyx_v_ctxt->_ptr_ctxt == NULL) != 0);
-  if (__pyx_t_8) {
+  __pyx_t_8 = (((PyObject *)__pyx_v_ctxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_8 != 0);
+  if (__pyx_t_9) {
 
     /* "Pyfhel/Pyfhel.pyx":192
  *         """
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()             # <<<<<<<<<<<<<<
  *         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
  *         ctxt._encoding = ENCODING_T.FRACTIONAL
@@ -4673,14 +4677,14 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":191
  *             * PyCtxt: the ciphertext containing the encrypted plaintext
  *         """
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":193
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))             # <<<<<<<<<<<<<<
  *         ctxt._encoding = ENCODING_T.FRACTIONAL
@@ -4884,6 +4888,7 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   int __pyx_t_8;
+  int __pyx_t_9;
   __Pyx_RefNannySetupContext("encryptBatch", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -4984,16 +4989,17 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":218
  *             * PyCtxt: the ciphertext containing the encrypted plaintext
  *         """
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt))
  */
-  __pyx_t_8 = ((__pyx_v_ctxt->_ptr_ctxt == NULL) != 0);
-  if (__pyx_t_8) {
+  __pyx_t_8 = (((PyObject *)__pyx_v_ctxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_8 != 0);
+  if (__pyx_t_9) {
 
     /* "Pyfhel/Pyfhel.pyx":219
  *         """
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()             # <<<<<<<<<<<<<<
  *         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt))
  *         ctxt._encoding = ENCODING_T.BATCH
@@ -5006,14 +5012,14 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":218
  *             * PyCtxt: the ciphertext containing the encrypted plaintext
  *         """
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt))
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":220
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt))             # <<<<<<<<<<<<<<
  *         ctxt._encoding = ENCODING_T.BATCH
@@ -5234,8 +5240,9 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   int __pyx_t_8;
-  Py_ssize_t __pyx_t_9;
+  int __pyx_t_9;
   Py_ssize_t __pyx_t_10;
+  Py_ssize_t __pyx_t_11;
   __Pyx_RefNannySetupContext("encryptArray", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -5337,16 +5344,17 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":244
  *             * PyCtxt: the ciphertext containing the encrypted plaintext
  *         """
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         cdef vector[int64_t] vec;
  */
-  __pyx_t_8 = ((__pyx_v_ctxt->_ptr_ctxt == NULL) != 0);
-  if (__pyx_t_8) {
+  __pyx_t_8 = (((PyObject *)__pyx_v_ctxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_8 != 0);
+  if (__pyx_t_9) {
 
     /* "Pyfhel/Pyfhel.pyx":245
  *         """
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()             # <<<<<<<<<<<<<<
  *         cdef vector[int64_t] vec;
  *         vec.assign(&arr[0], &arr[-1]+1)
@@ -5359,7 +5367,7 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":244
  *             * PyCtxt: the ciphertext containing the encrypted plaintext
  *         """
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         cdef vector[int64_t] vec;
  */
@@ -5372,12 +5380,12 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
  *         self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt))
  *         ctxt._encoding = ENCODING_T.BATCH
  */
-  __pyx_t_9 = 0;
-  if (__pyx_t_9 < 0) __pyx_t_9 += __pyx_v_arr.shape[0];
-  __pyx_t_10 = -1L;
+  __pyx_t_10 = 0;
   if (__pyx_t_10 < 0) __pyx_t_10 += __pyx_v_arr.shape[0];
+  __pyx_t_11 = -1L;
+  if (__pyx_t_11 < 0) __pyx_t_11 += __pyx_v_arr.shape[0];
   try {
-    __pyx_v_vec.assign((&(*((int64_t *) ( /* dim=0 */ ((char *) (((int64_t *) __pyx_v_arr.data) + __pyx_t_9)) )))), ((&(*((int64_t *) ( /* dim=0 */ ((char *) (((int64_t *) __pyx_v_arr.data) + __pyx_t_10)) )))) + 1));
+    __pyx_v_vec.assign((&(*((int64_t *) ( /* dim=0 */ ((char *) (((int64_t *) __pyx_v_arr.data) + __pyx_t_10)) )))), ((&(*((int64_t *) ( /* dim=0 */ ((char *) (((int64_t *) __pyx_v_arr.data) + __pyx_t_11)) )))) + 1));
   } catch(...) {
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 247, __pyx_L1_error)
@@ -5597,7 +5605,9 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   int __pyx_t_7;
-  __pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T __pyx_t_8;
+  int __pyx_t_8;
+  int __pyx_t_9;
+  __pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T __pyx_t_10;
   __Pyx_RefNannySetupContext("encryptPtxt", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -5686,18 +5696,27 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":272
  *             TypeError: if the plaintext doesn't have a valid type.
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if (ptxt._ptr_ptxt == NULL or ptxt is None):             # <<<<<<<<<<<<<<
  *             raise TypeError("<Pyfhel ERROR> PyPtxt Plaintext is empty")
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  */
-  __pyx_t_7 = ((__pyx_v_ptxt->_ptr_ptxt == NULL) != 0);
+  __pyx_t_8 = ((__pyx_v_ptxt->_ptr_ptxt == NULL) != 0);
+  if (!__pyx_t_8) {
+  } else {
+    __pyx_t_7 = __pyx_t_8;
+    goto __pyx_L4_bool_binop_done;
+  }
+  __pyx_t_8 = (((PyObject *)__pyx_v_ptxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_8 != 0);
+  __pyx_t_7 = __pyx_t_9;
+  __pyx_L4_bool_binop_done:;
   if (unlikely(__pyx_t_7)) {
 
     /* "Pyfhel/Pyfhel.pyx":273
  *         """
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if (ptxt._ptr_ptxt == NULL or ptxt is None):
  *             raise TypeError("<Pyfhel ERROR> PyPtxt Plaintext is empty")             # <<<<<<<<<<<<<<
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()
  */
     __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
@@ -5709,25 +5728,26 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":272
  *             TypeError: if the plaintext doesn't have a valid type.
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if (ptxt._ptr_ptxt == NULL or ptxt is None):             # <<<<<<<<<<<<<<
  *             raise TypeError("<Pyfhel ERROR> PyPtxt Plaintext is empty")
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":274
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if (ptxt._ptr_ptxt == NULL or ptxt is None):
  *             raise TypeError("<Pyfhel ERROR> PyPtxt Plaintext is empty")
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(deref(ptxt._ptr_ptxt), deref(ctxt._ptr_ctxt))
  */
-  __pyx_t_7 = ((__pyx_v_ctxt->_ptr_ctxt == NULL) != 0);
-  if (__pyx_t_7) {
+  __pyx_t_7 = (((PyObject *)__pyx_v_ctxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_7 != 0);
+  if (__pyx_t_9) {
 
     /* "Pyfhel/Pyfhel.pyx":275
  *             raise TypeError("<Pyfhel ERROR> PyPtxt Plaintext is empty")
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()             # <<<<<<<<<<<<<<
  *         self.afseal.encrypt(deref(ptxt._ptr_ptxt), deref(ctxt._ptr_ctxt))
  *         ctxt._encoding = ptxt._encoding
@@ -5738,16 +5758,16 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     __pyx_t_1 = 0;
 
     /* "Pyfhel/Pyfhel.pyx":274
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if (ptxt._ptr_ptxt == NULL or ptxt is None):
  *             raise TypeError("<Pyfhel ERROR> PyPtxt Plaintext is empty")
- *         if (ctxt._ptr_ctxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ctxt is None:             # <<<<<<<<<<<<<<
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(deref(ptxt._ptr_ptxt), deref(ctxt._ptr_ctxt))
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":276
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()
  *         self.afseal.encrypt(deref(ptxt._ptr_ptxt), deref(ctxt._ptr_ctxt))             # <<<<<<<<<<<<<<
  *         ctxt._encoding = ptxt._encoding
@@ -5767,8 +5787,8 @@ static struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
  *         ctxt._pyfhel = self
  *         return ctxt
  */
-  __pyx_t_8 = __pyx_v_ptxt->_encoding;
-  __pyx_v_ctxt->_encoding = __pyx_t_8;
+  __pyx_t_10 = __pyx_v_ptxt->_encoding;
+  __pyx_v_ctxt->_encoding = __pyx_t_10;
 
   /* "Pyfhel/Pyfhel.pyx":278
  *         self.afseal.encrypt(deref(ptxt._ptr_ptxt), deref(ctxt._ptr_ctxt))
@@ -7136,7 +7156,8 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   int __pyx_t_7;
-  __pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T __pyx_t_8;
+  int __pyx_t_8;
+  __pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T __pyx_t_9;
   __Pyx_RefNannySetupContext("decryptPtxt", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -7225,16 +7246,17 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":428
  *             * PyPtxt: the decrypted plaintext
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         self.afseal.decrypt(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
  */
-  __pyx_t_7 = ((__pyx_v_ptxt->_ptr_ptxt == NULL) != 0);
-  if (__pyx_t_7) {
+  __pyx_t_7 = (((PyObject *)__pyx_v_ptxt) == Py_None);
+  __pyx_t_8 = (__pyx_t_7 != 0);
+  if (__pyx_t_8) {
 
     /* "Pyfhel/Pyfhel.pyx":429
  *         """
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()             # <<<<<<<<<<<<<<
  *         self.afseal.decrypt(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
  *         ptxt._encoding = ctxt._encoding
@@ -7247,14 +7269,14 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":428
  *             * PyPtxt: the decrypted plaintext
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         self.afseal.decrypt(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":430
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()
  *         self.afseal.decrypt(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))             # <<<<<<<<<<<<<<
  *         ptxt._encoding = ctxt._encoding
@@ -7274,8 +7296,8 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
  *         return ptxt
  * 
  */
-  __pyx_t_8 = __pyx_v_ctxt->_encoding;
-  __pyx_v_ptxt->_encoding = __pyx_t_8;
+  __pyx_t_9 = __pyx_v_ctxt->_encoding;
+  __pyx_v_ptxt->_encoding = __pyx_t_9;
 
   /* "Pyfhel/Pyfhel.pyx":432
  *         self.afseal.decrypt(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
@@ -7521,7 +7543,8 @@ static PyObject *__pyx_pf_6Pyfhel_6Pyfhel_6Pyfhel_32decrypt(struct __pyx_obj_6Py
   PyObject *__pyx_t_3 = NULL;
   double __pyx_t_4;
   int64_t __pyx_t_5;
-  struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_decryptPtxt __pyx_t_6;
+  int __pyx_t_6;
+  struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_decryptPtxt __pyx_t_7;
   __Pyx_RefNannySetupContext("decrypt", 0);
   __Pyx_INCREF((PyObject *)__pyx_v_ptxt);
 
@@ -7640,7 +7663,7 @@ static PyObject *__pyx_pf_6Pyfhel_6Pyfhel_6Pyfhel_32decrypt(struct __pyx_obj_6Py
  *             elif (ctxt._encoding == ENCODING_T.UNDEFINED):
  *                 raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")             # <<<<<<<<<<<<<<
  *         else: # Decrypt to plaintext
- *             if (ptxt._ptr_ptxt == NULL):
+ *             if ptxt is None:
  */
       __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 468, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
@@ -7672,17 +7695,18 @@ static PyObject *__pyx_pf_6Pyfhel_6Pyfhel_6Pyfhel_32decrypt(struct __pyx_obj_6Py
   /* "Pyfhel/Pyfhel.pyx":470
  *                 raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
  *         else: # Decrypt to plaintext
- *             if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *             if ptxt is None:             # <<<<<<<<<<<<<<
  *                 ptxt = PyPtxt()
  *             return self.decryptPtxt(ctxt, ptxt)
  */
   /*else*/ {
-    __pyx_t_1 = ((__pyx_v_ptxt->_ptr_ptxt == NULL) != 0);
-    if (__pyx_t_1) {
+    __pyx_t_1 = (((PyObject *)__pyx_v_ptxt) == Py_None);
+    __pyx_t_6 = (__pyx_t_1 != 0);
+    if (__pyx_t_6) {
 
       /* "Pyfhel/Pyfhel.pyx":471
  *         else: # Decrypt to plaintext
- *             if (ptxt._ptr_ptxt == NULL):
+ *             if ptxt is None:
  *                 ptxt = PyPtxt()             # <<<<<<<<<<<<<<
  *             return self.decryptPtxt(ctxt, ptxt)
  * 
@@ -7695,24 +7719,24 @@ static PyObject *__pyx_pf_6Pyfhel_6Pyfhel_6Pyfhel_32decrypt(struct __pyx_obj_6Py
       /* "Pyfhel/Pyfhel.pyx":470
  *                 raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
  *         else: # Decrypt to plaintext
- *             if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *             if ptxt is None:             # <<<<<<<<<<<<<<
  *                 ptxt = PyPtxt()
  *             return self.decryptPtxt(ctxt, ptxt)
  */
     }
 
     /* "Pyfhel/Pyfhel.pyx":472
- *             if (ptxt._ptr_ptxt == NULL):
+ *             if ptxt is None:
  *                 ptxt = PyPtxt()
  *             return self.decryptPtxt(ctxt, ptxt)             # <<<<<<<<<<<<<<
  * 
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_6.__pyx_n = 1;
-    __pyx_t_6.ptxt = __pyx_v_ptxt;
+    __pyx_t_7.__pyx_n = 1;
+    __pyx_t_7.ptxt = __pyx_v_ptxt;
     try {
-      __pyx_t_3 = ((PyObject *)((struct __pyx_vtabstruct_6Pyfhel_6Pyfhel_Pyfhel *)__pyx_v_self->__pyx_vtab)->decryptPtxt(__pyx_v_self, __pyx_v_ctxt, 0, &__pyx_t_6));
+      __pyx_t_3 = ((PyObject *)((struct __pyx_vtabstruct_6Pyfhel_6Pyfhel_Pyfhel *)__pyx_v_self->__pyx_vtab)->decryptPtxt(__pyx_v_self, __pyx_v_ctxt, 0, &__pyx_t_7));
       if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 472, __pyx_L1_error)
     } catch(...) {
       __Pyx_CppExn2PyErr();
@@ -8446,6 +8470,7 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   int __pyx_t_8;
+  int __pyx_t_9;
   __Pyx_RefNannySetupContext("encodeInt", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -8538,16 +8563,17 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":576
  *             * PyPtxt: the plaintext containing the encoded value
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
  */
-  __pyx_t_8 = ((__pyx_v_ptxt->_ptr_ptxt == NULL) != 0);
-  if (__pyx_t_8) {
+  __pyx_t_8 = (((PyObject *)__pyx_v_ptxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_8 != 0);
+  if (__pyx_t_9) {
 
     /* "Pyfhel/Pyfhel.pyx":577
  *         """
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()             # <<<<<<<<<<<<<<
  *         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
  *         ptxt._encoding = ENCODING_T.INTEGER
@@ -8560,14 +8586,14 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":576
  *             * PyPtxt: the plaintext containing the encoded value
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":578
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()
  *         self.afseal.encode(value, deref(ptxt._ptr_ptxt))             # <<<<<<<<<<<<<<
  *         ptxt._encoding = ENCODING_T.INTEGER
@@ -8750,6 +8776,7 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   int __pyx_t_8;
+  int __pyx_t_9;
   __Pyx_RefNannySetupContext("encodeFrac", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -8842,16 +8869,17 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":597
  *             * PyPtxt: the plaintext containing the encoded value
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
  */
-  __pyx_t_8 = ((__pyx_v_ptxt->_ptr_ptxt == NULL) != 0);
-  if (__pyx_t_8) {
+  __pyx_t_8 = (((PyObject *)__pyx_v_ptxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_8 != 0);
+  if (__pyx_t_9) {
 
     /* "Pyfhel/Pyfhel.pyx":598
  *         """
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()             # <<<<<<<<<<<<<<
  *         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
  *         ptxt._encoding = ENCODING_T.FRACTIONAL
@@ -8864,14 +8892,14 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":597
  *             * PyPtxt: the plaintext containing the encoded value
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         self.afseal.encode(value, deref(ptxt._ptr_ptxt))
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":599
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()
  *         self.afseal.encode(value, deref(ptxt._ptr_ptxt))             # <<<<<<<<<<<<<<
  *         ptxt._encoding = ENCODING_T.FRACTIONAL
@@ -9054,6 +9082,7 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   int __pyx_t_8;
+  int __pyx_t_9;
   __Pyx_RefNannySetupContext("encodeBatch", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -9146,16 +9175,17 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":621
  *             * PyPtxt: the plaintext containing the encoded vector.
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
  */
-  __pyx_t_8 = ((__pyx_v_ptxt->_ptr_ptxt == NULL) != 0);
-  if (__pyx_t_8) {
+  __pyx_t_8 = (((PyObject *)__pyx_v_ptxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_8 != 0);
+  if (__pyx_t_9) {
 
     /* "Pyfhel/Pyfhel.pyx":622
  *         """
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()             # <<<<<<<<<<<<<<
  *         self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
  *         ptxt._encoding = ENCODING_T.BATCH
@@ -9168,14 +9198,14 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":621
  *             * PyPtxt: the plaintext containing the encoded vector.
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":623
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()
  *         self.afseal.encode(vec, deref(ptxt._ptr_ptxt))             # <<<<<<<<<<<<<<
  *         ptxt._encoding = ENCODING_T.BATCH
@@ -9359,9 +9389,10 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   int __pyx_t_8;
-  std::vector<int64_t>  __pyx_t_9;
-  Py_ssize_t __pyx_t_10;
+  int __pyx_t_9;
+  std::vector<int64_t>  __pyx_t_10;
   Py_ssize_t __pyx_t_11;
+  Py_ssize_t __pyx_t_12;
   __Pyx_RefNannySetupContext("encodeArray", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -9454,16 +9485,17 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   /* "Pyfhel/Pyfhel.pyx":645
  *             * PyPtxt: the plaintext containing the encoded vector.
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         cdef vector[int64_t] vec=[0];
  */
-  __pyx_t_8 = ((__pyx_v_ptxt->_ptr_ptxt == NULL) != 0);
-  if (__pyx_t_8) {
+  __pyx_t_8 = (((PyObject *)__pyx_v_ptxt) == Py_None);
+  __pyx_t_9 = (__pyx_t_8 != 0);
+  if (__pyx_t_9) {
 
     /* "Pyfhel/Pyfhel.pyx":646
  *         """
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()             # <<<<<<<<<<<<<<
  *         cdef vector[int64_t] vec=[0];
  *         vec.assign(&arr[0], &arr[-1]+1)
@@ -9476,14 +9508,14 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
     /* "Pyfhel/Pyfhel.pyx":645
  *             * PyPtxt: the plaintext containing the encoded vector.
  *         """
- *         if (ptxt._ptr_ptxt == NULL):             # <<<<<<<<<<<<<<
+ *         if ptxt is None:             # <<<<<<<<<<<<<<
  *             ptxt = PyPtxt()
  *         cdef vector[int64_t] vec=[0];
  */
   }
 
   /* "Pyfhel/Pyfhel.pyx":647
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if ptxt is None:
  *             ptxt = PyPtxt()
  *         cdef vector[int64_t] vec=[0];             # <<<<<<<<<<<<<<
  *         vec.assign(&arr[0], &arr[-1]+1)
@@ -9494,9 +9526,9 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_int_0);
-  __pyx_t_9 = __pyx_convert_vector_from_py_int64_t(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 647, __pyx_L1_error)
+  __pyx_t_10 = __pyx_convert_vector_from_py_int64_t(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 647, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_vec = __pyx_t_9;
+  __pyx_v_vec = __pyx_t_10;
 
   /* "Pyfhel/Pyfhel.pyx":648
  *             ptxt = PyPtxt()
@@ -9505,12 +9537,12 @@ static struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *__pyx_f_6Pyfhel_6Pyfhel_6Pyfhel_
  *         self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
  *         ptxt._encoding = ENCODING_T.BATCH
  */
-  __pyx_t_10 = 0;
-  if (__pyx_t_10 < 0) __pyx_t_10 += __pyx_v_arr.shape[0];
-  __pyx_t_11 = -1L;
+  __pyx_t_11 = 0;
   if (__pyx_t_11 < 0) __pyx_t_11 += __pyx_v_arr.shape[0];
+  __pyx_t_12 = -1L;
+  if (__pyx_t_12 < 0) __pyx_t_12 += __pyx_v_arr.shape[0];
   try {
-    __pyx_v_vec.assign((&(*((int64_t *) ( /* dim=0 */ ((char *) (((int64_t *) __pyx_v_arr.data) + __pyx_t_10)) )))), ((&(*((int64_t *) ( /* dim=0 */ ((char *) (((int64_t *) __pyx_v_arr.data) + __pyx_t_11)) )))) + 1));
+    __pyx_v_vec.assign((&(*((int64_t *) ( /* dim=0 */ ((char *) (((int64_t *) __pyx_v_arr.data) + __pyx_t_11)) )))), ((&(*((int64_t *) ( /* dim=0 */ ((char *) (((int64_t *) __pyx_v_arr.data) + __pyx_t_12)) )))) + 1));
   } catch(...) {
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 648, __pyx_L1_error)
@@ -36015,9 +36047,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
   /* "Pyfhel/Pyfhel.pyx":273
  *         """
- *         if (ptxt._ptr_ptxt == NULL):
+ *         if (ptxt._ptr_ptxt == NULL or ptxt is None):
  *             raise TypeError("<Pyfhel ERROR> PyPtxt Plaintext is empty")             # <<<<<<<<<<<<<<
- *         if (ctxt._ptr_ctxt == NULL):
+ *         if ctxt is None:
  *             ctxt = PyCtxt()
  */
   __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_Pyfhel_ERROR_PyPtxt_Plaintext_i); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 273, __pyx_L1_error)
