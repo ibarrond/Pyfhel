@@ -74,11 +74,11 @@ class Afseal{
         shared_ptr<PolyCRTBuilder> crtBuilder=NULL;     /**< Rotation in Batching. */
 
 
-        int p;                          /**< All operations are modulo p^r */
-        int m;                          /**< Cyclotomic index */
+        long p;                          /**< All operations are modulo p^r */
+        long m;                          /**< Cyclotomic index */
 
-        int base;
-        int sec;
+        long base;
+        long sec;
         int intDigits;
         int fracDigits;
         
