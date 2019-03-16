@@ -1,6 +1,7 @@
 # Global modules
 import os
 import sys
+import tempfile
 import time
 import unittest
 
@@ -176,7 +177,7 @@ class PyfhelTestCase(unittest.TestCase):
         pyfhel.keyGen()
         ctxt = pyfhel.encryptFrac(19.30)
         self.assertEqual(round(pyfhel.decryptFrac(ctxt), 2), 19.30)
-        self.pyfhel.encryptFrac(-2.25, ctxt)
+        pyfhel.encryptFrac(-2.25, ctxt)
         self.assertEqual(round(pyfhel.decryptFrac(ctxt), 2), -2.25)
 
     def test_Pyfhel_3c_encrypt_decrypt_batch(self):
@@ -275,24 +276,16 @@ class PyfhelTestCase(unittest.TestCase):
         ctxt_sub = pyfhel.sub(ctxti, ctxti2, in_new_ctxt=True)
         ctxt_sub2 = pyfhel.sub_plain(ctxti, ptxti, in_new_ctxt=True)
         ctxt_mult = pyfhel.multiply(ctxti, ctxti2, in_new_ctxt=True)
-        ctxt_mult2 = pyfhel.multiply_plain(
-            ctxti, ptxti, in_new_ctxt=True
-        )
+        ctxt_mult2 = pyfhel.multiply_plain(ctxti, ptxti, in_new_ctxt=True)
         ctxt_rotate = pyfhel.rotate(ctxti, -2, in_new_ctxt=True)
         ctxt_rotate2 = pyfhel.rotate(ctxti, 2, in_new_ctxt=True)
         # self.ctxt_expon = self.pyfhel.power(self.ctxti, 3)
         # self.ctxt_expon2 = self.pyfhel.power(self.ctxti2, 3)
         # self.ctxt_polyEval = self.pyfhel.polyEval(self.ctxti, [1, 2, 1], in_new_ctxt=True)
 
-        self.assertEqual(
-            pyfhel.decryptBatch(ctxt_add)[:6], [-5, -3, -1, 1, 3, 5]
-        )
-        self.assertEqual(
-            pyfhel.decryptBatch(ctxt_add2)[:6], [13, 17, 21, 25, 29, 33]
-        )
-        self.assertEqual(
-            pyfhel.decryptBatch(ctxt_sub)[:6], [7, 7, 7, 7, 7, 7]
-        )
+        self.assertEqual(pyfhel.decryptBatch(ctxt_add)[:6], [-5, -3, -1, 1, 3, 5])
+        self.assertEqual(pyfhel.decryptBatch(ctxt_add2)[:6], [13, 17, 21, 25, 29, 33])
+        self.assertEqual(pyfhel.decryptBatch(ctxt_sub)[:6], [7, 7, 7, 7, 7, 7])
         self.assertEqual(
             pyfhel.decryptBatch(ctxt_sub2)[:6], [-11, -13, -15, -17, -19, -21]
         )
@@ -302,12 +295,8 @@ class PyfhelTestCase(unittest.TestCase):
         self.assertEqual(
             pyfhel.decryptBatch(ctxt_mult2)[:6], [12, 30, 54, 84, 120, 162]
         )
-        self.assertEqual(
-            pyfhel.decryptBatch(ctxt_rotate)[:6], [0, 0, 1, 2, 3, 4]
-        )
-        self.assertEqual(
-            pyfhel.decryptBatch(ctxt_rotate2)[:6], [3, 4, 5, 6, 0, 0]
-        )
+        self.assertEqual(pyfhel.decryptBatch(ctxt_rotate)[:6], [0, 0, 1, 2, 3, 4])
+        self.assertEqual(pyfhel.decryptBatch(ctxt_rotate2)[:6], [3, 4, 5, 6, 0, 0])
 
     def test_Pyfhel_5_IO_SAVE_RESTORE(self):
         pass
@@ -337,7 +326,55 @@ class PyfhelTestCase(unittest.TestCase):
         os.remove(b"public_k.pypk")
         os.remove(b"rotate_k.pyrok")
 
-        # save/restore ciphertexts and plaintexts
+    def test_Pyfhel_5c_save_restore_all(self):
+        pyfhel = Pyfhel()
+        pyfhel.contextGen(p=1964769281, m=8192, base=2, sec=192, flagBatching=True)
+        pyfhel.keyGen()
+        pyfhel.rotateKeyGen(60)
+        pyfhel.relinKeyGen(60, 4)
+        # save all keys into temporary directory
+        tmp_dir = tempfile.TemporaryDirectory()
+        pyfhel.saveContext(tmp_dir.name + "/context")
+        pyfhel.savepublicKey(tmp_dir.name + "/pub.key")
+        pyfhel.savesecretKey(tmp_dir.name + "/sec.key")
+        pyfhel.saverelinKey(tmp_dir.name + "/relin.key")
+        pyfhel.saverotateKey(tmp_dir.name + "/rotate.key")
+        # restore all keys
+        pyfhel2 = Pyfhel()
+        pyfhel2.restoreContext(tmp_dir.name + "/context")
+        pyfhel2.restorepublicKey(tmp_dir.name + "/pub.key")
+        pyfhel2.restoresecretKey(tmp_dir.name + "/sec.key")
+        pyfhel2.restorerelinKey(tmp_dir.name + "/relin.key")
+        pyfhel2.restorerotateKey(tmp_dir.name + "/rotate.key")
+
+        # test encryption decryption
+        ctxt1 = pyfhel.encryptBatch([42])
+        self.assertEqual(
+            pyfhel2.decryptBatch(ctxt1)[0],
+            42,
+            "decrypting with restored keys should work",
+        )
+        try:
+            pyfhel2.rotate(ctxt1, -1)
+            self.assertEqual(
+                pyfhel2.decryptBatch(ctxt1)[1],
+                42,
+                "decrypting with restored keys should work",
+            )
+        except Exception as err:
+            self.fail("PyPtxt() creation failed unexpectedly: ", err)
+
+        # test ciphertext storing
+        ctxt2 = pyfhel.encryptInt(42)
+        ctxt2.save(tmp_dir.name + "/ctxt2")
+
+        ctxt_restored = PyCtxt()
+        ctxt_restored.load(tmp_dir.name + "/ctxt2")
+        self.assertEqual(pyfhel2.decryptInt(ctxt_restored, 42, "decrypting ciphertext should work"))
+
+# test save_restore_int
+# test save_restore_float
+# test save_restore_batch
 
 
 if __name__ == "__main__":
