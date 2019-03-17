@@ -1174,7 +1174,7 @@ cdef class Pyfhel:
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saveContext(fileName.encode())
+        return self.afseal.savepublicKey(fileName.encode())
     
     cpdef bool restorepublicKey(self, str fileName) except +:
         """restorepublicKey(str fileName)
@@ -1187,7 +1187,7 @@ cdef class Pyfhel:
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restoreContext(fileName.encode())
+        return self.afseal.restorepublicKey(fileName.encode())
 
     cpdef bool savesecretKey(self,str fileName) except +:
         """savesecretKey(str fileName)
@@ -1200,7 +1200,7 @@ cdef class Pyfhel:
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saveContext(fileName.encode())
+        return self.afseal.savesecretKey(fileName.encode())
     
     cpdef bool restoresecretKey(self, str fileName) except +:
         """restoresecretKey(str fileName)
@@ -1213,7 +1213,7 @@ cdef class Pyfhel:
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restoreContext(fileName.encode())
+        return self.afseal.restoresecretKey(fileName.encode())
     
     cpdef bool saverelinKey(self, str fileName) except +:
         """saverelinKey(str fileName)
