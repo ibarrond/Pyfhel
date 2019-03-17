@@ -76,7 +76,7 @@ cdef class PyPtxt:
         """string: Polynomial representation of the plaintext"""
         return self._ptr_ptxt.to_string()
     
-    cpdef void save(self, string fileName):
+    cpdef void save(self, str fileName):
         """Save the ciphertext into a file.
 
         Args:
@@ -84,13 +84,14 @@ cdef class PyPtxt:
 
         """
         cdef ofstream outputter
-        outputter.open(fileName)
+        cdef string bFileName = fileName.encode('utf8')
+        outputter.open(bFileName)
         try:
             self._ptr_ptxt.save(outputter)
         finally:
             outputter.close()
 
-    cpdef void load(self, string fileName):
+    cpdef void load(self, str fileName):
         """Load the plaintext from a file.
 
         Args:
@@ -98,7 +99,8 @@ cdef class PyPtxt:
 
         """
         cdef ifstream inputter
-        inputter.open(fileName)
+        cdef string bFileName = fileName.encode('utf8')
+        inputter.open(bFileName)
         try:
             self._ptr_ptxt.load(inputter)
         finally:

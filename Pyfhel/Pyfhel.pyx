@@ -1137,135 +1137,135 @@ cdef class Pyfhel:
     # =========================================================================
     # ================================ I/O ====================================
     # =========================================================================    
-    cpdef bool saveContext(self, string fileName) except +:
-        """saveContext(string fileName)
+    cpdef bool saveContext(self, str fileName) except +:
+        """saveContext(str fileName)
 
         Saves current context in a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saveContext(fileName)
+        return self.afseal.saveContext(fileName.encode())
     
-    cpdef bool restoreContext(self, string fileName) except +:
-        """restoreContext(string fileName)
+    cpdef bool restoreContext(self, str fileName) except +:
+        """restoreContext(str fileName)
 
         Restores current context from a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restoreContext(fileName)
+        return self.afseal.restoreContext(fileName.encode())
 
-    cpdef bool savepublicKey(self, string fileName) except +:
-        """savepublicKey(string fileName)
+    cpdef bool savepublicKey(self, str fileName) except +:
+        """savepublicKey(str fileName)
 
         Saves current public key in a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saveContext(fileName)
+        return self.afseal.saveContext(fileName.encode())
     
-    cpdef bool restorepublicKey(self, string fileName) except +:
-        """restorepublicKey(string fileName)
+    cpdef bool restorepublicKey(self, str fileName) except +:
+        """restorepublicKey(str fileName)
 
         Restores current public key from a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restoreContext(fileName)
+        return self.afseal.restoreContext(fileName.encode())
 
-    cpdef bool savesecretKey(self, string fileName) except +:
-        """savesecretKey(string fileName)
+    cpdef bool savesecretKey(self,str fileName) except +:
+        """savesecretKey(str fileName)
 
         Saves current secret key in a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saveContext(fileName)
+        return self.afseal.saveContext(fileName.encode())
     
-    cpdef bool restoresecretKey(self, string fileName) except +:
-        """restoresecretKey(string fileName)
+    cpdef bool restoresecretKey(self, str fileName) except +:
+        """restoresecretKey(str fileName)
 
         Restores current secret key from a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restoreContext(fileName)
+        return self.afseal.restoreContext(fileName.encode())
     
-    cpdef bool saverelinKey(self, string fileName) except +:
-        """saverelinKey(string fileName)
+    cpdef bool saverelinKey(self, str fileName) except +:
+        """saverelinKey(str fileName)
 
         Saves current relinearization keys in a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saverelinKey(fileName)
+        return self.afseal.saverelinKey(fileName.encode())
     
-    cpdef bool restorerelinKey(self, string fileName) except +:
-        """restorerelinKey(string fileName)
+    cpdef bool restorerelinKey(self, str fileName) except +:
+        """restorerelinKey(str fileName)
 
         Restores current relinearization keys from a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restorerelinKey(fileName)
+        return self.afseal.restorerelinKey(fileName.encode())
     
-    cpdef bool saverotateKey(self, string fileName) except +:
-        """saverotateKey(string fileName)
+    cpdef bool saverotateKey(self, str fileName) except +:
+        """saverotateKey(str fileName)
 
         Saves current rotation Keys from a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saverotateKey(fileName)
+        return self.afseal.saverotateKey(fileName.encode())
     
-    cpdef bool restorerotateKey(self, string fileName) except +:
-        """restorerotateKey(string fileName)
+    cpdef bool restorerotateKey(self, str fileName) except +:
+        """restorerotateKey(str fileName)
 
         Restores current rotation Keys from a file
         
         Args:
-            * fileName (string): Name of the file.   
+            * fileName (str): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restorerotateKey(fileName)
+        return self.afseal.restorerotateKey(fileName.encode())
     
     
     

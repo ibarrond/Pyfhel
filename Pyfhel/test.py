@@ -308,23 +308,23 @@ class PyfhelTestCase(unittest.TestCase):
         pyfhel.rotateKeyGen(60)
         # self.pyfhel.relinKeyGen(60)
 
-        self.assertTrue(pyfhel.saveContext(b"context.pycon"))
-        self.assertTrue(pyfhel.savepublicKey(b"public_k.pypk"))
-        self.assertTrue(pyfhel.savesecretKey(b"secret_k.pysk"))
-        # self.assertTrue(self.pyfhel.saverelinKey(b"relin_k.pyrlk"))
-        self.assertTrue(pyfhel.saverotateKey(b"rotate_k.pyrok"))
+        self.assertTrue(pyfhel.saveContext("context.pycon"))
+        self.assertTrue(pyfhel.savepublicKey("public_k.pypk"))
+        self.assertTrue(pyfhel.savesecretKey("secret_k.pysk"))
+        # self.assertTrue(self.pyfhel.saverelinKey("relin_k.pyrlk"))
+        self.assertTrue(pyfhel.saverotateKey("rotate_k.pyrok"))
 
     def test_Pyfhel_5b_restore_objects(self):
         pyfhel = Pyfhel()
-        self.assertTrue(pyfhel.restoreContext(b"context.pycon"))
-        self.assertTrue(pyfhel.restoresecretKey(b"secret_k.pysk"))
-        self.assertTrue(pyfhel.restorepublicKey(b"public_k.pypk"))
-        # self.assertTrue(self.pyfhel.restorerelinKey(b"relin_k.pyrlk"))
-        self.assertTrue(pyfhel.restorerotateKey(b"rotate_k.pyrok"))
-        os.remove(b"context.pycon")
-        os.remove(b"secret_k.pysk")
-        os.remove(b"public_k.pypk")
-        os.remove(b"rotate_k.pyrok")
+        self.assertTrue(pyfhel.restoreContext("context.pycon"))
+        self.assertTrue(pyfhel.restoresecretKey("secret_k.pysk"))
+        self.assertTrue(pyfhel.restorepublicKey("public_k.pypk"))
+        # self.assertTrue(self.pyfhel.restorerelinKey("relin_k.pyrlk"))
+        self.assertTrue(pyfhel.restorerotateKey("rotate_k.pyrok"))
+        os.remove("context.pycon")
+        os.remove("secret_k.pysk")
+        os.remove("public_k.pypk")
+        os.remove("rotate_k.pyrok")
 
     def test_Pyfhel_5c_save_restore_all(self):
         pyfhel = Pyfhel()
@@ -341,6 +341,7 @@ class PyfhelTestCase(unittest.TestCase):
         pyfhel.saverotateKey(tmp_dir.name + "/rotate.key")
         # restore all keys
         pyfhel2 = Pyfhel()
+        pyfhel.contextGen(p=1964769281, m=8192, base=2, sec=192, flagBatching=True)
         pyfhel2.restoreContext(tmp_dir.name + "/context")
         pyfhel2.restorepublicKey(tmp_dir.name + "/pub.key")
         pyfhel2.restoresecretKey(tmp_dir.name + "/sec.key")
@@ -370,7 +371,7 @@ class PyfhelTestCase(unittest.TestCase):
 
         ctxt_restored = PyCtxt()
         ctxt_restored.load(tmp_dir.name + "/ctxt2")
-        self.assertEqual(pyfhel2.decryptInt(ctxt_restored, 42, "decrypting ciphertext should work"))
+        self.assertEqual(pyfhel2.decryptInt(ctxt_restored), 42, "decrypting ciphertext should work")
 
 # test save_restore_int
 # test save_restore_float

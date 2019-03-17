@@ -77,7 +77,7 @@ cdef class PyCtxt:
         """int: Actual size of the ciphertext."""
         return self._ptr_ctxt.size()
     
-    cpdef void save(self, string fileName):
+    cpdef void save(self, str fileName):
         """Save the ciphertext into a file.
 
         Args:
@@ -85,23 +85,36 @@ cdef class PyCtxt:
 
         """
         cdef ofstream outputter
-        outputter.open(fileName)
+        cdef string bFileName = fileName.encode('utf8')
+        outputter.open(bFileName)
         try:
             self._ptr_ctxt.save(outputter)
         finally:
             outputter.close()
 
-    cpdef void load(self, string fileName):
+    cpdef void load(self, str fileName, str encoding='int'):
         """Load the ciphertext from a file.
 
         Args:
             fileName: (:obj:`str`) File where the ciphertext is retrieved from.
+            encoding: (:obj: `str`) String describing the encoding: 'int' for
+                IntegerEncoding (default), 'float'/'fractional'/'double' for
+                FractionalEncoding, 'array'/'batch'/'matrix' for BatchEncoding
 
         """
         cdef ifstream inputter
-        inputter.open(fileName)
+        cdef string bFileName = fileName.encode('utf8')
+        inputter.open(bFileName)
         try:
             self._ptr_ctxt.load(inputter)
+            if encoding.lower()[0] == 'i':
+                self._encoding = ENCODING_T.INTEGER
+            elif encoding.lower()[0] in 'fd':
+                self._encoding = ENCODING_T.FRACTIONAL
+            elif encoding.lower()[0] in 'abm':
+                self._encoding = ENCODING_T.BATCH
+            else:
+                raise ValueError('Given encoding is unknown')
         finally:
             inputter.close()
             

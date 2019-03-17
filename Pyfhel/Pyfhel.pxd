@@ -7,7 +7,6 @@ cimport numpy as np
 
 # Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.vector cimport vector
-from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport int64_t
 from libc.stdint cimport uint64_t
@@ -81,20 +80,20 @@ cdef class Pyfhel:
 
     
     # ================================ I/O =====================================
-    cpdef bool saveContext(self, string fileName) except +
-    cpdef bool restoreContext(self, string fileName) except +
+    cpdef bool saveContext(self, str fileName) except +
+    cpdef bool restoreContext(self, str fileName) except +
 
-    cpdef bool savepublicKey(self, string fileName) except +
-    cpdef bool restorepublicKey(self, string fileName) except +
+    cpdef bool savepublicKey(self, str fileName) except +
+    cpdef bool restorepublicKey(self, str fileName) except +
 
-    cpdef bool savesecretKey(self, string fileName) except +
-    cpdef bool restoresecretKey(self, string fileName) except +
+    cpdef bool savesecretKey(self, str fileName) except +
+    cpdef bool restoresecretKey(self, str fileName) except +
 
-    cpdef bool saverelinKey(self, string fileName) except +
-    cpdef bool restorerelinKey(self, string fileName) except +
+    cpdef bool saverelinKey(self, str fileName) except +
+    cpdef bool restorerelinKey(self, str fileName) except +
 
-    cpdef bool saverotateKey(self, string fileName) except +
-    cpdef bool restorerotateKey(self, string fileName) except +
+    cpdef bool saverotateKey(self, str fileName) except +
+    cpdef bool restorerotateKey(self, str fileName) except +
 
     
     # ============================== AUXILIARY =================================

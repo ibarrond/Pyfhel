@@ -25,5 +25,5 @@ cdef class PyPtxt:
     cdef ENCODING_T _encoding
     cpdef bool is_zero(self)
     cpdef string to_string(self)
-    cpdef void save(self, string fileName)
-    cpdef void load(self, string fileName)
+    cpdef void save(self, str fileName)
+    cpdef void load(self, str fileName)
