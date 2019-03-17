@@ -25,4 +25,4 @@ install:
 # command to run tests
 script:
   - pip install Pyfhel
-# - python Pyfhel/test.py
+  - python Pyfhel/test.py
