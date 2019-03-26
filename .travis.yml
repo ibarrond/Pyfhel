@@ -14,7 +14,7 @@ before_install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 90
 
 python:
-  - "3.7"
+  - "3.6"
   
 cache: pip
   
