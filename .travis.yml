@@ -14,7 +14,7 @@ before_install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 90
 
 python:
-  - "3.5"
+  - "3.7"
   
 cache: pip
   
@@ -25,4 +25,4 @@ install:
 # command to run tests
 script:
   - pip install Pyfhel
-  - python Pyfhel/test.py
+  - python setup.py test
