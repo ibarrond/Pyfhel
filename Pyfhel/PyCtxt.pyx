@@ -92,6 +92,14 @@ cdef class PyCtxt:
         finally:
             outputter.close()
 
+    cpdef string savem(self):
+
+        cdef ostringstream outputter
+
+        self._ptr_ctxt.save(outputter)
+
+        return outputter.str()
+
     cpdef void load(self, str fileName, str encoding='int'):
         """Load the ciphertext from a file.
 
@@ -117,6 +125,23 @@ cdef class PyCtxt:
                 raise ValueError('Given encoding is unknown')
         finally:
             inputter.close()
+
+    cpdef void loadm(self, bytes content, str encoding='int'):
+
+        cdef stringstream inputter;
+
+        inputter.write(content,len(content))
+
+        self._ptr_ctxt.load(inputter)
+        if encoding.lower()[0] == 'i':
+            self._encoding = ENCODING_T.INTEGER
+        elif encoding.lower()[0] in 'fd':
+            self._encoding = ENCODING_T.FRACTIONAL
+        elif encoding.lower()[0] in 'abm':
+            self._encoding = ENCODING_T.BATCH
+        else:
+            raise ValueError('Given encoding is unknown')
+
             
     # =========================================================================
     # ============================= OPERATIONS ================================
@@ -263,7 +288,7 @@ cdef class PyCtxt:
             self._pyfhel.exponentiate(exponent)     
                 
                 
-    def __rshift__(self, k):
+    def __rzt__(self, k):
         """Rotates this ciphertext k positions.
 
         Args:
