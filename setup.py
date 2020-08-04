@@ -102,7 +102,7 @@ if CYTHONIZE:
 
 # -------------------------------- INSTALLER ----------------------------------
 setup(
-    name            = "Pyfhelm",
+    name            = "Pyfhel",
     version         = VERSION,
     author          = "Alberto Ibarrondo",
     author_email    = "ibarrond@eurecom.fr",
