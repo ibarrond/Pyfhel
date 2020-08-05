@@ -20,7 +20,7 @@ def scan(dir, files=[]):
 import fileinput
 import re
 
-v_readme_regex = r'\[\_*v([0-9]+\.[0-9]+\.[0-9a-z\+]+)\_*\]'
+v_readme_regex = r'\[\_*v([0-9]+\.[0-9]+\.[0-9a-z]+)\_*\]'
 with open('README.md') as readme:
     VERSION = re.findall(v_readme_regex,readme.read())[0]
     

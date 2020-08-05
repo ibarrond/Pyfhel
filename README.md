@@ -1,4 +1,4 @@
-# Pyfhel [_v2.0.1_] <img width="10%" height="10%" align="right"  src="/docs/_static/logo.png">
+# Pyfhel [_v2.0.2_] <img width="10%" height="10%" align="right"  src="/docs/_static/logo.png">
 [![Build Status](https://travis-ci.org/ibarrond/Pyfhel.svg?branch=master)](https://travis-ci.org/ibarrond/Pyfhel)
 [![Documentation Status](https://readthedocs.org/projects/pyfhel/badge/?version=latest)](https://pyfhel.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)

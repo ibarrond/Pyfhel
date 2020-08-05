@@ -288,7 +288,7 @@ cdef class PyCtxt:
             self._pyfhel.exponentiate(exponent)     
                 
                 
-    def __rzt__(self, k):
+    def __rshift__(self, k):
         """Rotates this ciphertext k positions.
 
         Args:
