@@ -24,5 +24,4 @@ install:
   
 # command to run tests
 script:
-  - pip install Pyfhel
   - python setup.py test
