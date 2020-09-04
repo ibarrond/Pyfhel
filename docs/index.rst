@@ -19,11 +19,11 @@ Release v\ |version| (:ref:`Installation <install>`)
 .. image:: https://img.shields.io/pypi/pyversions/Pyfhel.svg
     :target: https://pypi.org/project/Pyfhel
 
-**Pyfhel** is the best Homomorphic Encryption library for Python, trully human friendly (aliens not yet supported).
+**Pyfhel** is the a Homomorphic Encryption library for Python.
 
-.. note:: This library is built on top of C++ libraries. The current version supports only `SEAL<https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/>`
+.. note:: This library is built on top of C++ libraries. The current version supports only `[SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/)`
 
-If you're interested in 
+If you're interested in contributing, please have a look at the Github repository.
 
 .. toctree::
    :maxdepth: 2

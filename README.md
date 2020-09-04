@@ -11,7 +11,6 @@
 
 **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries.
 
-_Note: If you have written any code using Pyfhel, please share it! (feel free to send me a message, I'll credit you for it). This repo is lacking demos, examples and tests. Besides, if you want to join/contribute to develop this library, just [write me!](mailto:ibarrond@eurecom.fr). For issues, questions and requests please use Github._
 * **_Status_**: BETA.
 * **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR) over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
 * **_Language_**: Python (3.5+) & Cython on top of C++17.

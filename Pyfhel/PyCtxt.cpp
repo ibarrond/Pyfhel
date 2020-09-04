@@ -25232,7 +25232,7 @@ if (!__Pyx_RefNanny) {
  * from .Pyfhel import Pyfhel
  * from .PyPtxt import PyPtxt             # <<<<<<<<<<<<<<
  * 
- * # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
+ * # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
  */
   __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -25250,7 +25250,7 @@ if (!__Pyx_RefNanny) {
 
   /* "Pyfhel/PyCtxt.pyx":12
  * 
- * # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
+ * # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
  * from .util import ENCODING_t             # <<<<<<<<<<<<<<
  * 
  * # Dereferencing pointers in Cython in a secure way

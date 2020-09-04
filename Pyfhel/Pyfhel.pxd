@@ -22,7 +22,7 @@ from Pyfhel.Afhel cimport Afseal
 from Pyfhel.PyPtxt cimport PyPtxt
 from Pyfhel.PyCtxt cimport PyCtxt
 
-# Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
+# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
 from Pyfhel.util cimport ENCODING_T
 
 

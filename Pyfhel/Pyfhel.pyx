@@ -52,7 +52,7 @@ from numbers import Number
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
 
-# Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
+# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
 from .util import ENCODING_t
 
 # Define Plaintext types

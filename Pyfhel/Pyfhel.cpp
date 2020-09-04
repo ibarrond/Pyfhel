@@ -37587,7 +37587,7 @@ if (!__Pyx_RefNanny) {
 
   /* "Pyfhel/Pyfhel.pyx":56
  * 
- * # Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
+ * # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
  * from .util import ENCODING_t             # <<<<<<<<<<<<<<
  * 
  * # Define Plaintext types

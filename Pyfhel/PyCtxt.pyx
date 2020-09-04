@@ -8,7 +8,7 @@
 from .Pyfhel import Pyfhel
 from .PyPtxt import PyPtxt
 
-# Encoding types: 1-UNDEFINED, 2-INTEGER, 3-FRACTIONAL, 4-BATCH
+# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
 from .util import ENCODING_t
 
 # Dereferencing pointers in Cython in a secure way
