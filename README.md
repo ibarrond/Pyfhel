@@ -20,7 +20,7 @@ _Note: If you have written any code using Pyfhel, please share it! (feel free to
    
    1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies).
    2. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies) __WIP__
-   3. ~~ [HElib](https://github.com/shaih/HElib) (depends on [GMP](http://www.gmplib.org) & [NTL](http://www.shoup.net/ntl/download.html)) DROPPED~~
+   3. ~~[HElib](https://github.com/shaih/HElib) (depends on [GMP](http://www.gmplib.org) & [NTL](http://www.shoup.net/ntl/download.html)) DROPPED~~
 
 ## Summary
 **PY**thon **F**or **H**momorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
