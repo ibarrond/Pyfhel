@@ -1121,7 +1121,7 @@ cdef class Pyfhel:
         Return:
             * PyCtxt resulting ciphertext, the input transformed or a new one
         """        
-        if (ctxt._encoding != ENCODING_T.BATCH) or (ctxt._encoding != ENCODING_T.INTEGER) :
+        if (ctxt._encoding != ENCODING_T.BATCH) and (ctxt._encoding != ENCODING_T.INTEGER) :
             raise RuntimeError("<Pyfhel ERROR> encoding type must be INTEGER or BATCH")
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
