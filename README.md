@@ -11,21 +11,21 @@
 
 **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries.
 
-_Note: If you have written any code using Pyfhel, please share it! (feel free to send me a message, I'll credit you for it). This repo is lacking demos, examples and tests. Besides, if you want to join/contribute to develop this library, just [write me!](mailto:ibarrond@eurecom.fr)_
-* **_Status_**: ALPHA.
+_Note: If you have written any code using Pyfhel, please share it! (feel free to send me a message, I'll credit you for it). This repo is lacking demos, examples and tests. Besides, if you want to join/contribute to develop this library, just [write me!](mailto:ibarrond@eurecom.fr). For issues, questions and requests please use Github._
+* **_Status_**: BETA.
 * **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR) over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
-* **_Language_**: Python (3.4+) & Cython on top of C++17. (_REQUIRED: Python must have been compiled with C++17: g++>=6 | clang++>=5.0, Visual Studio 2017._).
+* **_Language_**: Python (3.5+) & Cython on top of C++17. (_REQUIRED: Python must have been compiled with C++17: g++>=6 | clang++>=5.0, Visual Studio 2017._).
 * **_Docs_**: For now, only the API is documented [[link](https://ibarrond.github.io/Pyfhel)]. Examples are soon to follow.
-* **_Dependencies_**: There are three possible backends, all of them HE libraries in C++:
+* **_Dependencies_**: There are two possible backends, HE libraries in C++:
    
-   1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies). _Version 2 of Pyfhel is currently only supporting SEAL_.
-   2. [HElib](https://github.com/shaih/HElib) (depends on [GMP](http://www.gmplib.org) & [NTL](http://www.shoup.net/ntl/download.html))
-   3. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies)
+   1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies).
+   2. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies) __WIP__
+   3. ~~ [HElib](https://github.com/shaih/HElib) (depends on [GMP](http://www.gmplib.org) & [NTL](http://www.shoup.net/ntl/download.html)) DROPPED~~
 
 ## Summary
 **PY**thon **F**or **H**momorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
 
-**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**momorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all three backends. Additionally, this project contains a large series of Demos & Tests for **HElib**|**SEAL**, **Afhel** & **Pyfhel**.
+**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**momorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all three backends. Additionally, this project contains a large series of Demos & Tests for **HElib**(no longer in use), **SEAL**, **Afhel** & **Pyfhel**.
 
 Last but not least, we include Makefiles to compile and install **HElib**, **SEAL** and **Afhel** as shared libraries in Ubuntu, which can then be linked to other C++ programs using the tags `-lhelib`, `-lseal` and `-lafhel`.
 
@@ -34,39 +34,57 @@ This project has been uploaded to [PyPI](https://pypi.org/project/Pyfhel/). In o
 
 	   > pip install Pyfhel
 
-Locally, you can clone this repository and install it by running:
+Locally, you can clone this repository (use [`--recursive`](https://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) to download all submodules) and install it by running:
 
+	   > git clone --recursive https://github.com/ibarrond/Pyfhel.git
 	   > pip install .
 
 To uninstall, just run:
 	
 	   > pip uninstall Pyfhel
-
-Alternatively, and only for Ubuntu OS, after cloning you can install and compile all libraries as shared (.so) using the Makefiles on this project. To do so, run inside the `Pyfhel` directory:
-
-	   > ./configure		# Just puts all makefiles in their correct directories
-	   > make
-	   > sudo make install
-
-You can also install just SEAL and Afhel. Just run `make SEAL|Afhel` in the `Pyfhel` directory and `make install` inside `Pyfhel/Afhel` or `Pyfhel/SEAL` directory respectively. Makefiles also have `clean` and `uninstall` commands, as well as `make sourceFileName_x` command to compile and link a source file (.cpp) with them.
        
-### Development notice
+### Contribute/Development notice
+This is the process to develop/contribute to Pyfhel:
+1. _Code a new feature/fix a bug_. Since this project is built using Cython, please refer to [cython documentation](https://cython.readthedocs.io/en/latest/) if you want to help develop it.
+2. _Recompile the cython extensions_. After modifying any of the `.pyx`|`pxd` cython files (or the _Afhel_ `.cpp` files) you must recompile the cython files. To do so, run the following command:
+```bash
+# This will turn `Pyfhel/*.pyx` into the corresponding `Pyfhel/*.cpp` file.
+#  Do not edit the `Pyfhel/*.cpp` files directly!
+> python3 setup.py --CYTHONIZE --fullname
+	Compiling Pyfhel/Pyfhel.pyx because it changed.
+	Compiling Pyfhel/PyPtxt.pyx because it depends on ./Pyfhel/iostream.pxd.
+	[1/2] Cythonizing Pyfhel/Pyfhel.pyx
+	[2/2] Cythonizing Pyfhel/PyPtxt.pyx
+	Pyfhel-2.0.2
+```
 
-After changing Cython files they need to be compiled before re-installing Pyfhel.
-To do so run:
+3. _Reinstall Pyfhel locally_. Use either `pip install .` or `python3 setup.py build` (for verbose output and fine control. Run `python3 setup.py --help` for further options).
 
-        > python setup.py build --CYTHONIZE
+4. _Test changes locally_. Run the `test.py` file in your environment and make sure all tests are OK:
+
+```bash
+python3 Pyfhel/test.py
+	test_PyCtxt_creation_deletion (__main__.PyfhelTestCase) ... (0.0s) ...ok
+	test_PyPtxt_PyCtxt (__main__.PyfhelTestCase) ... (0.0s) ...ok
+	[...]
+	test_Pyfhel_5d_save_restore_int (__main__.PyfhelTestCase) ... (1.239s) ...ok
+
+	----------------------------------------------------------------------
+	Ran 29 tests in 11.907s
+
+	OK
+```
  
+5. _Update the version_. To update it, just change the version number on top of this README: Pyfhel [_vA.B.C_]. Bugfixes and minor corrections should increase _C_. New features should increase _B_. Backwards incompatible changes should increase _A_. 
+
+6. _Optional: Update the docs_. WIP (automatic generation with sphinx).
+
+You're ready to go! Just create a pull request to the original repo.
+
 ## Project contents
-- `Pyfhel/` contains the source code for Pyfhel, Afhel, SEAL, PALISADE & HElib.
-
-- `docs/` outdated documentation of the project:
-
-     - *Doc.md*: Outdated Essential documentation of the project.
-	 - *Doc_API.md*: Outdated comprehensive list of all classes & methods available in Pyfhel.
-     - `Helib/`: Up to date docs and images explaining this otherwise undocumented library.
-
-- `Pyfhel/Demos_Tests`, a collection of Demos and Tests. Outdated as of today. Check the `test.py`!
+- `docs/` Documentation, generated automatically using sphinx.
+- `examples/` Demos and small programs to showcase multiple functionalities. Check `Pyfhel/test.py` for further cases!
+- `Pyfhel/` contains the source code for Pyfhel, Afhel, SEAL & PALISADE. 
 - `Pyfhel/.Makefiles/Makefile_HElib`, a makefile to compile and install HElib as a dynamic library (`-lhelib`).
 - `Pyfhel/.Makefiles/Makefile_SEAL`, a makefile to compile and install SEAL as a dynamic library (`-lseal`).
 
@@ -76,7 +94,7 @@ To do so run:
 - **Authors**: Alberto Ibarrondo [@ibarrond](https://github.com/ibarrond) with Laurent Gomez (SAP) in collaboration with EURECOM ([Melek Onen](http://www.eurecom.fr/~onen/)).
 - Latest release: 03/08/2018
 
-This library was created originally for the project "Privacy for Big Data Analytics" in EURECOM. The SW is based on **[HElib](https://github.com/shaih/HElib) by Shai Halevi**, with touches from **[HEIDE](https://github.com/heide-support/HEIDE) by Grant Frame**, and performance improvements thanks to **[analysis of addition](https://mshcruz.wordpress.com/2017/05/13/sum-of-encrypted-vectors/) by Matheus S.H. Cruz**. In compliance with their respective Licenses, I name all of them in this section. This project could not be possible without them. For any legal disclaimer, please contact the owner of this repository. Also, the same type of license (GNU GPLv3) applies to Afhel & Pyfhel, as mandated.
+This library was created originally for the project "Privacy for Big Data Analytics" in EURECOM. The SW is originally based on **[HElib](https://github.com/shaih/HElib) by Shai Halevi**, with touches from **[HEIDE](https://github.com/heide-support/HEIDE) by Grant Frame**, and performance improvements thanks to **[analysis of addition](https://mshcruz.wordpress.com/2017/05/13/sum-of-encrypted-vectors/) by Matheus S.H. Cruz**. In compliance with their respective Licenses, I name all of them in this section. This project could not be possible without them. For any legal disclaimer, please contact the owner of this repository. Also, the same type of license (GNU GPLv3) applies to Afhel & Pyfhel, as mandated.
 
 ## Legal disclaimer
 
