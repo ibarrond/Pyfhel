@@ -1,6 +1,10 @@
 # =============================== SETUP.PY =====================================
-# This file installs Pyfhel in your Python3 distribution.
-# 
+# This file installs Pyfhel in your Python3 distribution. Use:
+#   > python3 setup.py install
+# PYPI -> https://packaging.python.org/tutorials/packaging-projects/
+#   > python3 setup.py sdist
+#   > twine upload dist/*
+#   > python3 setup.py clean --all
 
 import fileinput, re, os, sys
 from pathlib import Path
