@@ -18,7 +18,7 @@ _Note: If you have written any code using Pyfhel, please share it! (feel free to
 
 	:warning: _REQUIRED: Python must have been compiled with C++17: g++>=6 | clang++>=5.0, Visual Studio 2017._ :warning:
 	
-* **_Docs_**: For now, only the API is documented [[link](https://ibarrond.github.io/Pyfhel)]. Examples are soon to follow.
+* **_Docs_**: For now, only the API is documented [[link](https://pyfhel.readthedocs.io/en/latest/)]. Examples are soon to follow.
 * **_Dependencies_**: There are two possible backends, HE libraries in C++:
    
    1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies).
