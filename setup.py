@@ -9,6 +9,10 @@
 import fileinput, re, os, sys
 from pathlib import Path
 
+# Check that Python version is 3.5+
+v_maj, v_min = sys.version_info[:2]
+assert (v_maj, v_min) >= (3,5),\
+    f"Pyfhel doesn't support your Python version ({v_maj}.{v_min}). Required version 3.5+"
 
 # -------------------------------- OPTIONS -------------------------------------
 # Compile cython files (.pyx) into C++ (.cpp) files to ship with the library.
