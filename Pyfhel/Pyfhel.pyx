@@ -304,8 +304,8 @@ cdef class Pyfhel:
         Raise:
             * TypeError: if the plaintext doesn't have a valid type.
         """
--       if isinstance(ptxt, PyPtxt):
--           return self.encryptPtxt(ptxt, ctxt)
+        if isinstance(ptxt, PyPtxt):
+            return self.encryptPtxt(ptxt, ctxt)
         elif isinstance(ptxt, np.ndarray):
             if (ptxt.ndim is not 1) or \
                (ptxt.dtype not in INT_T):
@@ -563,7 +563,7 @@ cdef class Pyfhel:
     # ============================== ENCODING =================================
     # =========================================================================
     # ............................... ENCODE ..................................
-    cpdef PyPtxt encodeInt(self, int64_t &value, PyPtxt ptxt=None) except +:
+    cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=None) except +:
         """encodeInt(int64_t &value, PyPtxt ptxt=None)
 
         Encodes a single int value into a PyPtxt plaintext.
@@ -584,7 +584,7 @@ cdef class Pyfhel:
         ptxt._encoding = ENCODING_T.INTEGER
         return ptxt
     
-    cpdef PyPtxt encodeFrac(self, double &value, PyPtxt ptxt=None) except +:
+    cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=None) except +:
         """encodeFrac(double &value, PyPtxt ptxt=None)
 
         Encodes a single float value into a PyPtxt plaintext.
@@ -605,7 +605,7 @@ cdef class Pyfhel:
         ptxt._encoding = ENCODING_T.FRACTIONAL
         return ptxt
     
-    cpdef PyPtxt encodeBatch(self, vector[int64_t]& vec, PyPtxt ptxt=None) except +: 
+    cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=None) except +: 
         """encodeBatch(vector[int64_t]& vec, PyPtxt ptxt=None)
 
         Encodes a 1D list of integers into a PyPtxt plaintext.
@@ -629,7 +629,7 @@ cdef class Pyfhel:
         ptxt._encoding = ENCODING_T.BATCH
         return ptxt  
     
-    cpdef PyPtxt encodeArray(self, int64_t[::1] &arr, PyPtxt ptxt=None) except +:
+    cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=None) except +:
         """encodeArray(int64_t[::1] &arr, PyPtxt ptxt=None)
 
         Encodes a 1D numpy array of integers into a PyPtxt plaintext.

@@ -1394,9 +1394,9 @@ struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_decryptPtxt {
 /* "Pyfhel/Pyfhel.pxd":57
  * 
  *     # ============================= ENCODING ===================================
- *     cpdef PyPtxt encodeInt(self, int64_t& value, PyPtxt ptxt=*) except +             # <<<<<<<<<<<<<<
- *     cpdef PyPtxt encodeFrac(self, double& value, PyPtxt ptxt=*) except +
- *     cpdef PyPtxt encodeBatch(self, vector[int64_t]& vec, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=*) except +             # <<<<<<<<<<<<<<
+ *     cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=*) except +
  */
 struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeInt {
   int __pyx_n;
@@ -1405,10 +1405,10 @@ struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeInt {
 
 /* "Pyfhel/Pyfhel.pxd":58
  *     # ============================= ENCODING ===================================
- *     cpdef PyPtxt encodeInt(self, int64_t& value, PyPtxt ptxt=*) except +
- *     cpdef PyPtxt encodeFrac(self, double& value, PyPtxt ptxt=*) except +             # <<<<<<<<<<<<<<
- *     cpdef PyPtxt encodeBatch(self, vector[int64_t]& vec, PyPtxt ptxt=*) except +
- *     cpdef PyPtxt encodeArray(self, int64_t[::1]& arr, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=*) except +             # <<<<<<<<<<<<<<
+ *     cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=*) except +
  */
 struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeFrac {
   int __pyx_n;
@@ -1416,10 +1416,10 @@ struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeFrac {
 };
 
 /* "Pyfhel/Pyfhel.pxd":59
- *     cpdef PyPtxt encodeInt(self, int64_t& value, PyPtxt ptxt=*) except +
- *     cpdef PyPtxt encodeFrac(self, double& value, PyPtxt ptxt=*) except +
- *     cpdef PyPtxt encodeBatch(self, vector[int64_t]& vec, PyPtxt ptxt=*) except +             # <<<<<<<<<<<<<<
- *     cpdef PyPtxt encodeArray(self, int64_t[::1]& arr, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=*) except +             # <<<<<<<<<<<<<<
+ *     cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=*) except +
  * 
  */
 struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeBatch {
@@ -1428,9 +1428,9 @@ struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeBatch {
 };
 
 /* "Pyfhel/Pyfhel.pxd":60
- *     cpdef PyPtxt encodeFrac(self, double& value, PyPtxt ptxt=*) except +
- *     cpdef PyPtxt encodeBatch(self, vector[int64_t]& vec, PyPtxt ptxt=*) except +
- *     cpdef PyPtxt encodeArray(self, int64_t[::1]& arr, PyPtxt ptxt=*) except +             # <<<<<<<<<<<<<<
+ *     cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=*) except +
+ *     cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=*) except +             # <<<<<<<<<<<<<<
  * 
  *     cpdef int64_t decodeInt(self, PyPtxt ptxt) except +
  */
@@ -1751,10 +1751,10 @@ struct __pyx_vtabstruct_6Pyfhel_6Pyfhel_Pyfhel {
   struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *(*decryptPtxt)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *, int __pyx_skip_dispatch, struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_decryptPtxt *__pyx_optional_args);
   void (*relinearize)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *, int __pyx_skip_dispatch);
   int (*noiseLevel)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *, int __pyx_skip_dispatch);
-  struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *(*encodeInt)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, int64_t &, int __pyx_skip_dispatch, struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeInt *__pyx_optional_args);
-  struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *(*encodeFrac)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, double &, int __pyx_skip_dispatch, struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeFrac *__pyx_optional_args);
-  struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *(*encodeBatch)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, std::vector<int64_t>  &, int __pyx_skip_dispatch, struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeBatch *__pyx_optional_args);
-  struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *(*encodeArray)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, __Pyx_memviewslice &, int __pyx_skip_dispatch, struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeArray *__pyx_optional_args);
+  struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *(*encodeInt)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, int64_t, int __pyx_skip_dispatch, struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeInt *__pyx_optional_args);
+  struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *(*encodeFrac)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, double, int __pyx_skip_dispatch, struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeFrac *__pyx_optional_args);
+  struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *(*encodeBatch)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, std::vector<int64_t> , int __pyx_skip_dispatch, struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeBatch *__pyx_optional_args);
+  struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *(*encodeArray)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, __Pyx_memviewslice, int __pyx_skip_dispatch, struct __pyx_opt_args_6Pyfhel_6Pyfhel_6Pyfhel_encodeArray *__pyx_optional_args);
   int64_t (*decodeInt)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *, int __pyx_skip_dispatch);
   double (*decodeFrac)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *, int __pyx_skip_dispatch);
   std::vector<int64_t>  (*decodeBatch)(struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *, struct __pyx_obj_6Pyfhel_6PyPtxt_PyPtxt *, int __pyx_skip_dispatch);

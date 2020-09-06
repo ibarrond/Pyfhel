@@ -54,10 +54,10 @@ cdef class Pyfhel:
     cpdef int noiseLevel(self, PyCtxt ctxt) except +
     
     # ============================= ENCODING ===================================
-    cpdef PyPtxt encodeInt(self, int64_t& value, PyPtxt ptxt=*) except +
-    cpdef PyPtxt encodeFrac(self, double& value, PyPtxt ptxt=*) except +
-    cpdef PyPtxt encodeBatch(self, vector[int64_t]& vec, PyPtxt ptxt=*) except +
-    cpdef PyPtxt encodeArray(self, int64_t[::1]& arr, PyPtxt ptxt=*) except +
+    cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=*) except +
+    cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=*) except +
+    cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=*) except +
+    cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=*) except +
     
     cpdef int64_t decodeInt(self, PyPtxt ptxt) except +
     cpdef double decodeFrac(self, PyPtxt ptxt) except +
