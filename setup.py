@@ -150,7 +150,7 @@ setup(
     setup_requires  =["setuptools>=30.0",
                       "numpy>=1.14.0"],
     install_requires=requirements,
-    classifiers     =(
+    classifiers     =[
         "Programming Language :: C++",
         "Programming Language :: Cython",
         "Programming Language :: Python :: 3",
@@ -166,7 +166,7 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Topic :: Security",
         "Topic :: Security :: Cryptography",
-    ),
+    ],
     zip_safe=False,
     packages=find_packages(),
     ext_modules=ext_modules,  

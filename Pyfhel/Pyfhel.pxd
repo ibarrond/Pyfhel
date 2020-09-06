@@ -8,8 +8,7 @@ cimport numpy as np
 # Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.vector cimport vector
 from libcpp cimport bool
-from libc.stdint cimport int64_t
-from libc.stdint cimport uint64_t
+from numpy cimport int64_t, uint64_t
 
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream   

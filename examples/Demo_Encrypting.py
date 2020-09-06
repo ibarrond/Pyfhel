@@ -44,8 +44,8 @@ print("    list ",vector2,'-> ctxt_b2 ', str(ctxt_b2))
 
 print("5. Encrypting numpy 1D integer vectors using batching encryptArray")
 import numpy as np
-array1 = np.array([-6, -5, -4, -3, -2, -1])
-array2 = np.array([12, 15, 18, 21, 24, 27])
+array1 = np.array([-6, -5, -4, -3, -2, -1],dtype=np.int64)
+array2 = np.array([12, 15, 18, 21, 24, 27],dtype=np.int64)
 ctxt_a1 = HE.encryptArray(array1)   # Encrypting array1 in a new PyCtxt with encryptArray
 ctxt_a2 = PyCtxt()                
 HE.encryptArray(array2, ctxt_a2)    # Encrypting vector2 in an existing PyCtxt

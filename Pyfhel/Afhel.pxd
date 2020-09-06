@@ -7,8 +7,7 @@
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp cimport bool
-from libc.stdint cimport int64_t
-from libc.stdint cimport uint64_t
+from numpy cimport int64_t, uint64_t
         
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream       
