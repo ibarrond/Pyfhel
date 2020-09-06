@@ -27,7 +27,7 @@ print("    int ",integer2,'-> ptxt_i2 ', str(ptxt_i2))
 print("3. Encoding floating point values with encodeFrac")
 float1 = 3.5
 float2 = -7.8
-ptxt_f1 = HE.encodeInt(float1)     # Encoding float1 in a new PyPtxt with encodeFrac
+ptxt_f1 = HE.encodeFrac(float1)     # Encoding float1 in a new PyPtxt with encodeFrac
 ptxt_f2 = PyPtxt()
 HE.encodeFrac(float2, ptxt_f2)     # Encoding float2 in an existing PyPtxt
 print("    float ",float1,'-> ptxt_f1 ', str(ptxt_f1))
@@ -55,7 +55,7 @@ print("    array ",array2,'-> ptxt_a2 ', str(ptxt_a2))
 print("6. Encrypting/Decrypting all plaintexts using encryptPtxt/decryptPtxt")
 print("      HE.encrypt could also do, detecting PyPtxt as a valid type")
 print("      Just remember to operate only with ciphertexts with same encoding")
-print("     ATTENTION: HE.decrypt will directly decrypt AND decode!!!! ")
+print("     ATTENTION: HE.decrypt will directly decrypt AND decode if used with decode_value=True! ")
 ctxt1 = HE.encryptPtxt(ptxt_i1)
 ctxt2 = HE.encrypt(ptxt_f1)
 ctxt3 = HE.encryptPtxt(ptxt_b1)
@@ -78,20 +78,20 @@ print("    Float (encodeFrac, ENCODING_t.FRACTIONAL, decodeFrac)")
 print("     decode(ptxt_f1) =  ", res_f1)
 
 print("    Batched list (encodeBatch, ENCODING_t.BATCH, decodeBatch)")
-print("     decode(ptxt_b1) =  ", res_b1)
+print("     decode(ptxt_b1) =  ", res_b1[:len(vector2)])
 
 print("    NumPy 1D vector (encodeArray, ENCODING_t.BATCH, decodeArray)")
-print("     decode(ptxt_a1) =  ", res_a1)
+print("     decode(ptxt_a1) =  ", res_a1[:len(array2)])
 
-print("8. EXTRA: you can encode/decode function to guess type")
+print("8. EXTRA: you can use encode/decode function to guess type")
 print("    HE.encode(integer1|float1|vector1|array1)")
 print("       delegates into encodeInt|encodeFrac|encodeBatch|encodeArray depending on type")
 print("    HE.decode(PyPtxt)")
 print("       uses recorded ENCODING_t type to correctly decode")
-ptxt1 = HE.encode(integer1)
-ptxt2 = HE.encode(float1)
-ptxt3 = HE.encode(array1)
+ptxt1 = HE.encode(integer2)
+ptxt2 = HE.encode(float2)
+ptxt3 = HE.encode(array2)
 
-integer1 = HE.decode(ptxt1)
-float1 =   HE.decode(ptxt2)
-array1 =   HE.decode(ptxt3)
+integer2 = HE.decode(ptxt1)
+float2 =   HE.decode(ptxt2)
+array2 =   HE.decode(ptxt3)

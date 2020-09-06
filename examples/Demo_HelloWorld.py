@@ -14,9 +14,10 @@ print("===================== Pyfhel HELLO WORLD =====================")
 print("==============================================================")
 
 
-print("1. Creating Context and KeyGen in a Pyfhel Object ")
+print("1. Creating Context and KeyGen in a Pyfhel Object. ")
 HE = Pyfhel()           # Creating empty Pyfhel object
 HE.contextGen(p=65537)  # Generating context. The value of p is important.
+                        # Generating context. The value of p is important.
                         #  There are many configurable parameters on this step
                         #  More info in Demo_ContextParameters.py, and
                         #  in the docs of the function (link to docs in README)
@@ -28,8 +29,8 @@ integer1 = 127
 integer2 = -2
 ctxt1 = HE.encryptInt(integer1) # Encryption makes use of the public key
 ctxt2 = HE.encryptInt(integer2) # For integers, encryptInt function is used.
-print("    int ",integer1,'-> ctxt1 ', type(ctxt1))
-print("    int ",integer2,'-> ctxt2 ', type(ctxt2))
+print("    int ",integer1,'-> ctxt1 ', type(ctxt1), str(ctxt1))
+print("    int ",integer2,'-> ctxt2 ', type(ctxt2), str(ctxt2))
 
 print("3. Operating with encrypted integers")
 ctxtSum = ctxt1 + ctxt2         # `ctxt1 += ctxt2` for quicker inplace operation
@@ -45,3 +46,5 @@ resMul = HE.decryptInt(ctxtMul)
 print("     addition:       decrypt(ctxt1 + ctxt2) =  ", resSum)
 print("     substraction:   decrypt(ctxt1 - ctxt2) =  ", resSub)
 print("     multiplication: decrypt(ctxt1 + ctxt2) =  ", resMul)
+
+
