@@ -7,12 +7,14 @@
 #   > python3 setup.py clean --all
 
 import fileinput, re, os, sys
-from pathlib import Path
 
 # Check that Python version is 3.5+
 v_maj, v_min = sys.version_info[:2]
 assert (v_maj, v_min) >= (3,5),\
-    f"Pyfhel doesn't support your Python version ({v_maj}.{v_min}). Required version 3.5+"
+    "Pyfhel requires Python 3.5+ (your version is {}.{}).".format(v_maj, v_min)
+
+from pathlib import Path
+
 
 # -------------------------------- OPTIONS -------------------------------------
 # Compile cython files (.pyx) into C++ (.cpp) files to ship with the library.
@@ -20,13 +22,13 @@ CYTHONIZE= False
 if "--CYTHONIZE" in sys.argv:
     CYTHONIZE= True
     del sys.argv[sys.argv.index("--CYTHONIZE")]
-    
+
 # Use shared libraries only if installed. Disabled by default. Experimental.
 LIBS= False
 if "--LIBS" in sys.argv:
     LIBS= True
     del sys.argv[sys.argv.index("--LIBS")]
-    
+
 
 # -------------------------- INSTALL REQUIREMENTS ------------------------------
 # We must install requirements before `setup` because the Cython compilation
@@ -46,8 +48,8 @@ except (DistributionNotFound, VersionConflict) as e:
     try:
         subprocess.check_call([sys.executable,"-m","pip","install", str(e.req)])
     except subprocess.CalledProcessError as e:
-        raise Exception(f"Couldn't install {str(e.req)}, a Pyfhel requirement."+
-                         " Try to update pip (for conda, install it manually)")
+        raise Exception("Couldn't install required lib {}."%(str(e.req))+\
+                        " Try to update pip (for conda, install it manually)")
 
 
 # --------------------------- REQUIREMENT IMPORTS ------------------------------
@@ -64,16 +66,17 @@ import numpy
 v_readme_regex = r'\[\_*v([0-9]+\.[0-9]+\.[0-9a-z]+)\_*\]'
 with open('README.md') as readme:
     VERSION = re.findall(v_readme_regex,readme.read())[0]
-    
-v_init_regex   = r'\"([0-9]+\.[0-9]+\.[0-9a-z]+)\"'
-with fileinput.FileInput('Pyfhel/__init__.py', inplace=True) as file:
-    for line in file:
-        print(re.sub(v_init_regex, '"'+VERSION+'"', line), end='')
+
+v_init_regex = r'\"([0-9]+\.[0-9]+\.[0-9a-z]+)\"'
+with open('Pyfhel/__init__.py') as f:
+    s = f.read()
+with open('Pyfhel/__init__.py', 'w') as f:
+    f.write(re.sub(v_init_regex, '"'+VERSION+'"', s))
 
 # Including Readme in the module as long description.
 with open("README.md", "r") as fh:
     long_description = fh.read()
-    
+
 
 # ---------------------------- COMPILATION CONFIG ------------------------------
 PYFHEL_PATH = Path('Pyfhel')
