@@ -52,12 +52,15 @@ from numbers import Number
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
 
+# Importing it for the fused types
+cimport cython
+
 # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
 from .util import ENCODING_t
 
 # Define Plaintext types
 FLOAT_T = (float, np.float16, np.float32, np.float64)
-VALUE_T = FLOAT_T + (int, np.ndarray)
+INT_T =   (int, np.int16, np.int32, np.int64, np.int_, np.intc)
 
 # ------------------------- PYTHON IMPLEMENTATION -----------------------------
 cdef class Pyfhel:
@@ -300,13 +303,15 @@ cdef class Pyfhel:
             
         Raise:
             * TypeError: if the plaintext doesn't have a valid type.
-        """            
-        if isinstance(ptxt, PyPtxt):
-            return self.encryptPtxt(ptxt, ctxt)
+        """
+-       if isinstance(ptxt, PyPtxt):
+-           return self.encryptPtxt(ptxt, ctxt)
         elif isinstance(ptxt, np.ndarray):
-            if (ptxt.ndim is not 1) or (ptxt.dtype is not int):
+            if (ptxt.ndim is not 1) or \
+               (ptxt.dtype not in INT_T):
                 raise TypeError('<Pyfhel ERROR> Plaintext numpy array is not'
-                                '1D vector of int values, cannot encrypt.')
+                                '1D vector of int values, cannot encrypt.  Allowed'
+                                'types: (int, np.int32, np.int64, np.intc, np.int_)')
             return self.encryptBatch(ptxt, ctxt)  
         elif isinstance(ptxt, float):
             return self.encryptFrac(<float>ptxt, ctxt)   
@@ -672,17 +677,19 @@ cdef class Pyfhel:
             * TypeError: if the val_vec doesn't have a valid type.
         """            
         if isinstance(val_vec, np.ndarray):
-            if (val_vec.ndim is not 1) or (val_vec.dtype is not int):
+            if (val_vec.ndim is not 1) or \
+               (val_vec.dtype not in (int, np.int32, np.int64, np.intc, np.int_)):
                 raise TypeError('<Pyfhel ERROR> Plaintext numpy array is not'
-                                '1D vector of int values, cannot encode.')
-            return self.encodeBatch(val_vec, ptxt)  
+                                '1D vector of int values, cannot encode. Allowed'
+                                'types: (int, np.int32, np.int64, np.intc, np.int_)')
+            return self.encodeBatch(val_vec, ptxt)
         elif isinstance(val_vec, FLOAT_T):
-            return self.encodeValue(<float>val_vec, ptxt)   
+            return self.encodeFrac(<float>val_vec, ptxt) 
         elif isinstance(val_vec, Number):
-            return self.encodeValue(<int>val_vec, ptxt)  
+            return self.encodeInt(<int>val_vec, ptxt)
         else:
             raise TypeError('<Pyfhel ERROR> Value/Vector type \['+type(val_vec)+
-                            '\] not supported for encoding')      
+                            '\] not supported for encoding')
 
     # ................................ DECODE .................................
     cpdef int64_t decodeInt(self, PyPtxt ptxt) except +:
@@ -867,7 +874,8 @@ cdef class Pyfhel:
             * PyCtxt resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms")
+            raise RuntimeError(f"<Pyfhel ERROR> encoding type mistmatch in add terms"
+                                " ({ctxt._encoding} VS {ctxt_other._encoding})")
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.add(deref(new_ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
@@ -895,7 +903,8 @@ cdef class Pyfhel:
             * PyCtxt resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ptxt._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms")
+            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms"
+                                " ({ctxt._encoding} VS {ptxt._encoding})")
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.add(deref(new_ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
@@ -923,7 +932,8 @@ cdef class Pyfhel:
             * PyCtxt resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms")
+            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms"
+                                " ({ctxt._encoding} VS {ctxt_other._encoding})")
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.sub(deref(new_ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
@@ -950,7 +960,8 @@ cdef class Pyfhel:
             * PyCtxt resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ptxt._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms")
+            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms"
+                                " ({ctxt._encoding} VS {ptxt._encoding})")
         
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -979,7 +990,8 @@ cdef class Pyfhel:
             * PyCtxt resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms")
+            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms"
+                                " ({ctxt._encoding} VS {ctxt_other._encoding})")
         
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -1006,7 +1018,8 @@ cdef class Pyfhel:
             * PyCtxt resulting ciphertext, either the input transformed or a new one
         """
         if (ctxt._encoding != ptxt._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms")   
+            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms"
+                                " ({ctxt._encoding} VS {ptxt._encoding})")   
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.multiply(deref(new_ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))     
