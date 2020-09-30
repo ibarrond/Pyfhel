@@ -370,7 +370,7 @@ class PyfhelTestCase(unittest.TestCase):
         ctxt2.save(tmp_dir.name + "/ctxt2")
 
         ctxt_restored = PyCtxt()
-        ctxt_restored.load(tmp_dir.name + "/ctxt2")
+        ctxt_restored.load(tmp_dir.name + "/ctxt2", "int")
         self.assertEqual(
             pyfhel2.decryptInt(ctxt_restored), 42, "decrypting ciphertext should work"
         )
@@ -388,7 +388,7 @@ class PyfhelTestCase(unittest.TestCase):
         ctxt.save(tmp.name)
         # load from temporary file
         loaded = PyCtxt()
-        loaded.load(tmp.name)
+        loaded.load(tmp.name, "int")
         self.assertEqual(pyfhel.decryptInt(loaded), 42)
 
     def test_Pyfhel_5d_save_restore_float(self):

@@ -11,12 +11,19 @@ cdef extern from "<iostream>" namespace "std":
     cdef cppclass istream:
         istream& read(char*, int) except +
 
+cdef extern from "<iostream>" namespace "std::ios_base":
+    cdef cppclass open_mode:
+        pass
+    cdef open_mode binary
+
 cdef extern from "<fstream>" namespace "std":
     cdef cppclass ofstream(ostream):
         # constructors
         ofstream()except +
         ofstream(const char*) except +
+        ofstream(const char*, open_mode) except+
         ofstream(const string&) except +
+        ofstream(const string&, open_mode) except+
         void open(const char*) except +
         void open(const string&) except +
         void close() except +
@@ -24,7 +31,9 @@ cdef extern from "<fstream>" namespace "std":
         # constructors
         ifstream()except +
         ifstream(const char*) except +
+        ifstream(const char*, open_mode) except+
         ifstream(const string&) except +
+        ifstream(const string&, open_mode) except+
         void open(const char&) except +
         void open(const string&) except +
         void close() except +
