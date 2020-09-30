@@ -22,9 +22,9 @@ cdef class PyCtxt:
     cdef Ciphertext* _ptr_ctxt
     cdef Pyfhel _pyfhel
     cdef ENCODING_T _encoding
-    cpdef int size_capacity(self)
-    cpdef int size(self)
-    cpdef void save(self, str fileName)
-    cpdef string savem(self)
-    cpdef void load(self, str fileName, str encoding=*)
-    cpdef void loadm(self, bytes content, str encoding=*)
+    cpdef int size_capacity(self) except +
+    cpdef int size(self) except +
+    cpdef void save(self, str fileName) except +
+    cpdef string savem(self) except +
+    cpdef void load(self, str fileName, str encoding=*) except +
+    cpdef void loadm(self, bytes content, str encoding=*) except +

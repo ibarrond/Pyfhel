@@ -69,15 +69,15 @@ cdef class PyCtxt:
             raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
         self._pyfhel = new_pyfhel 
         
-    cpdef int size_capacity(self):
+    cpdef int size_capacity(self) except +:
         """int: Maximum size the ciphertext can hold."""
         return self._ptr_ctxt.size_capacity()
      
-    cpdef int size(self):
+    cpdef int size(self) except +:
         """int: Actual size of the ciphertext."""
         return self._ptr_ctxt.size()
     
-    cpdef void save(self, str fileName):
+    cpdef void save(self, str fileName) except +:
         """Save the ciphertext into a file.
 
         Args:
@@ -92,7 +92,7 @@ cdef class PyCtxt:
         finally:
             outputter.close()
 
-    cpdef string savem(self):
+    cpdef string savem(self) except +:
 
         cdef ostringstream outputter
 
@@ -100,7 +100,7 @@ cdef class PyCtxt:
 
         return outputter.str()
 
-    cpdef void load(self, str fileName, str encoding='int'):
+    cpdef void load(self, str fileName, str encoding='int') except +:
         """Load the ciphertext from a file.
 
         Args:
@@ -126,7 +126,7 @@ cdef class PyCtxt:
         finally:
             inputter.close()
 
-    cpdef void loadm(self, bytes content, str encoding='int'):
+    cpdef void loadm(self, bytes content, str encoding='int') except +:
 
         cdef stringstream inputter;
 

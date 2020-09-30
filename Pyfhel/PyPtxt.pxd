@@ -23,7 +23,7 @@ cdef class PyPtxt:
     cdef Plaintext* _ptr_ptxt
     cdef Pyfhel _pyfhel
     cdef ENCODING_T _encoding
-    cpdef bool is_zero(self)
-    cpdef string to_string(self)
-    cpdef void save(self, str fileName)
-    cpdef void load(self, str fileName)
+    cpdef bool is_zero(self) except +
+    cpdef string to_string(self) except +
+    cpdef void save(self, str fileName) except +
+    cpdef void load(self, str fileName) except +
