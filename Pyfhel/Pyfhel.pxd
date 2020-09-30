@@ -11,7 +11,7 @@ from libcpp cimport bool
 from numpy cimport int64_t, uint64_t
 
 # Import our own wrapper for iostream classes, used for I/O ops
-from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream   
+from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream, binary
 
 from Pyfhel.Afhel cimport Plaintext
 from Pyfhel.Afhel cimport Ciphertext

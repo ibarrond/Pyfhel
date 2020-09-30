@@ -10,7 +10,7 @@ from libcpp cimport bool
 from Pyfhel.Pyfhel cimport Pyfhel
 
 # Import our own wrapper for iostream classes, used for I/O ops
-from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream
+from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, binary
 
 # Import Ciphertext class, original for SEAL
 from Pyfhel.Afhel cimport Ciphertext
@@ -24,7 +24,11 @@ cdef class PyCtxt:
     cdef ENCODING_T _encoding
     cpdef int size_capacity(self)
     cpdef int size(self)
+    cpdef void to_file(self, str fileName)
+    cpdef void from_file(self, str fileName, encoding)
     cpdef void save(self, str fileName)
-    cpdef string savem(self)
-    cpdef void load(self, str fileName, str encoding=*)
-    cpdef void loadm(self, bytes content, str encoding=*)
+    cpdef void load(self, str fileName, encoding)
+    cpdef bytes to_bytes(self)
+    cpdef void from_bytes(self, bytes content, encoding)
+
+cpdef to_ENCODING_t(encoding)

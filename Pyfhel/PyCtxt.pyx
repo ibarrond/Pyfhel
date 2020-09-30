@@ -76,32 +76,53 @@ cdef class PyCtxt:
     cpdef int size(self):
         """int: Actual size of the ciphertext."""
         return self._ptr_ctxt.size()
-    
+
+    cpdef void to_file(self, str fileName):
+        """to_file(str fileName)
+        
+        Alias of `save`.
+        """
+        self.save(fileName)
+
     cpdef void save(self, str fileName):
-        """Save the ciphertext into a file.
+        """save(str fileName)
+        
+        Save the ciphertext into a file.
 
         Args:
             fileName: (:obj:`str`) File where the ciphertext will be stored.
-
         """
-        cdef ofstream outputter
+        cdef ofstream* outputter
         cdef string bFileName = fileName.encode('utf8')
-        outputter.open(bFileName)
+        outputter = new ofstream(bFileName, binary)
         try:
-            self._ptr_ctxt.save(outputter)
+            self._ptr_ctxt.save(deref(outputter))
         finally:
-            outputter.close()
+            del outputter
 
-    cpdef string savem(self):
+    cpdef bytes to_bytes(self):
+        """to_bytes()
 
+        Serialize the ciphertext into a binary/bytes string.
+
+        Return:
+            * bytes: serialized ciphertext
+        """
         cdef ostringstream outputter
-
         self._ptr_ctxt.save(outputter)
-
         return outputter.str()
 
-    cpdef void load(self, str fileName, str encoding='int'):
-        """Load the ciphertext from a file.
+    cpdef void from_file(self, str fileName, encoding):
+        """from_file(str fileName)
+        
+        Alias of `load`.
+        """
+        self.load(fileName, encoding)
+
+    cpdef void load(self, str fileName, encoding):
+        """load(self, str fileName)
+        
+        Load the ciphertext from a file.
 
         Args:
             fileName: (:obj:`str`) File where the ciphertext is retrieved from.
@@ -110,11 +131,11 @@ cdef class PyCtxt:
                 FractionalEncoding, 'array'/'batch'/'matrix' for BatchEncoding
 
         """
-        cdef ifstream inputter
+        cdef ifstream* inputter
         cdef string bFileName = fileName.encode('utf8')
-        inputter.open(bFileName)
+        inputter = new ifstream(bFileName,binary)
         try:
-            self._ptr_ctxt.load(inputter)
+            self._ptr_ctxt.load(deref(inputter))
             if encoding.lower()[0] == 'i':
                 self._encoding = ENCODING_T.INTEGER
             elif encoding.lower()[0] in 'fd':
@@ -124,9 +145,9 @@ cdef class PyCtxt:
             else:
                 raise ValueError('Given encoding is unknown')
         finally:
-            inputter.close()
+            del inputter
 
-    cpdef void loadm(self, bytes content, str encoding='int'):
+    cpdef void from_bytes(self, bytes content, encoding):
 
         cdef stringstream inputter;
 
@@ -252,7 +273,8 @@ cdef class PyCtxt:
         elif isinstance(other, PyPtxt):
             return self._pyfhel.multiply_plain(self, other, in_new_ctxt=True)
         else:
-            raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
+            raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt or PyPtxt"
+                            "(is %s instead)"%(type(other)))
      
     def __rmul__(self, other): return self.__mul__(other)
     def __imul__(self, other): 
@@ -271,7 +293,8 @@ cdef class PyCtxt:
         elif isinstance(other, PyPtxt):
             return self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
         else:
-            raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
+             raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt or PyPtxt"
+                            "(is %s instead)"%(type(other)))
            
                                     
     def __pow__(self, exponent, modulo):
@@ -319,3 +342,43 @@ cdef class PyCtxt:
                 ENCODING_t(self._encoding).name, self.size())
 
     
+
+
+
+# -------------------------------- AUXILIARY ----------------------------------
+cpdef to_ENCODING_t(encoding):
+    """to_ENCODING_t(encoding)
+    
+    Turns `encoding` into a valid ENCODING_t type. 
+    
+    If `encoding` is str, 'int' for IntegerEncoding,
+                          'float'/'fractional'/'double' for FractionalEncoding,
+                          'array'/'batch'/'matrix' for BatchEncoding
+    
+    """
+    if type(encoding) is unicode or isinstance(encoding, unicode):
+        # encoding is a string. Casting it to str just in case.
+        encoding = unicode(encoding)
+        if encoding.lower()[0] == 'i':
+            return ENCODING_t.INTEGER
+        elif encoding.lower()[0] in 'fd':
+            return ENCODING_t.FRACTIONAL
+        elif encoding.lower()[0] in 'abm':
+            return ENCODING_t.BATCH
+
+    elif type(encoding) is type:
+        if encoding is int:
+            return ENCODING_t.INTEGER
+        elif encoding is float:
+            return ENCODING_t.FRACTIONAL
+        if encoding is list:
+            return ENCODING_t.BATCH
+        
+    elif isinstance(encoding, (int, float)) and\
+         int(encoding) in (ENCODING_t.INTEGER.value,
+                           ENCODING_t.FRACTIONAL.value,
+                           ENCODING_t.BATCH.value):
+            return ENCODING_t(int(encoding))
+        
+    else:
+        raise TypeError("<Pyfhel ERROR>: encoding unknown. Could not convert to ENCODING_t.")
