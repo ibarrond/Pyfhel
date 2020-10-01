@@ -5497,7 +5497,7 @@ static void __pyx_f_6Pyfhel_6PyCtxt_6PyCtxt_load(struct __pyx_obj_6Pyfhel_6PyCtx
  *             self._ptr_ctxt.load(deref(inputter))
  *         finally:
  *             del inputter             # <<<<<<<<<<<<<<
- *         self._encoding = to_ENCODING_t(encoding)
+ *         self._encoding = to_ENCODING_t(encoding).value
  * 
  */
   /*finally:*/ {
@@ -5547,14 +5547,17 @@ static void __pyx_f_6Pyfhel_6PyCtxt_6PyCtxt_load(struct __pyx_obj_6Pyfhel_6PyCtx
   /* "Pyfhel/PyCtxt.pyx":159
  *         finally:
  *             del inputter
- *         self._encoding = to_ENCODING_t(encoding)             # <<<<<<<<<<<<<<
+ *         self._encoding = to_ENCODING_t(encoding).value             # <<<<<<<<<<<<<<
  * 
  *     cpdef void from_bytes(self, bytes content, encoding) except +:
  */
   __pyx_t_1 = __pyx_f_6Pyfhel_6PyCtxt_to_ENCODING_t(__pyx_v_encoding, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_17 = ((__pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T)__Pyx_PyInt_As___pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T(__pyx_t_1)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 159, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 159, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_17 = ((__pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T)__Pyx_PyInt_As___pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T(__pyx_t_2)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 159, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_self->_encoding = __pyx_t_17;
 
   /* "Pyfhel/PyCtxt.pyx":140
@@ -5681,7 +5684,7 @@ static PyObject *__pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt_16load(struct __pyx_obj_6Pyfhe
 }
 
 /* "Pyfhel/PyCtxt.pyx":161
- *         self._encoding = to_ENCODING_t(encoding)
+ *         self._encoding = to_ENCODING_t(encoding).value
  * 
  *     cpdef void from_bytes(self, bytes content, encoding) except +:             # <<<<<<<<<<<<<<
  *         """from_bytes(bytes content)
@@ -5785,7 +5788,7 @@ static void __pyx_f_6Pyfhel_6PyCtxt_6PyCtxt_from_bytes(struct __pyx_obj_6Pyfhel_
  *         cdef stringstream inputter
  *         inputter.write(content,len(content))             # <<<<<<<<<<<<<<
  *         self._ptr_ctxt.load(inputter)
- *         self._encoding = to_ENCODING_t(encoding)
+ *         self._encoding = to_ENCODING_t(encoding).value
  */
   if (unlikely(__pyx_v_content == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
@@ -5808,7 +5811,7 @@ static void __pyx_f_6Pyfhel_6PyCtxt_6PyCtxt_from_bytes(struct __pyx_obj_6Pyfhel_
  *         cdef stringstream inputter
  *         inputter.write(content,len(content))
  *         self._ptr_ctxt.load(inputter)             # <<<<<<<<<<<<<<
- *         self._encoding = to_ENCODING_t(encoding)
+ *         self._encoding = to_ENCODING_t(encoding).value
  * 
  */
   try {
@@ -5821,18 +5824,21 @@ static void __pyx_f_6Pyfhel_6PyCtxt_6PyCtxt_from_bytes(struct __pyx_obj_6Pyfhel_
   /* "Pyfhel/PyCtxt.pyx":175
  *         inputter.write(content,len(content))
  *         self._ptr_ctxt.load(inputter)
- *         self._encoding = to_ENCODING_t(encoding)             # <<<<<<<<<<<<<<
+ *         self._encoding = to_ENCODING_t(encoding).value             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __pyx_t_1 = __pyx_f_6Pyfhel_6PyCtxt_to_ENCODING_t(__pyx_v_encoding, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_9 = ((__pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T)__Pyx_PyInt_As___pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T(__pyx_t_1)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_9 = ((__pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T)__Pyx_PyInt_As___pyx_t_6Pyfhel_4util_10ENCODING_T_ENCODING_T(__pyx_t_2)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 175, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_self->_encoding = __pyx_t_9;
 
   /* "Pyfhel/PyCtxt.pyx":161
- *         self._encoding = to_ENCODING_t(encoding)
+ *         self._encoding = to_ENCODING_t(encoding).value
  * 
  *     cpdef void from_bytes(self, bytes content, encoding) except +:             # <<<<<<<<<<<<<<
  *         """from_bytes(bytes content)

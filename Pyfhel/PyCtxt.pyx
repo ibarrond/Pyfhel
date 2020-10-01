@@ -156,7 +156,7 @@ cdef class PyCtxt:
             self._ptr_ctxt.load(deref(inputter))
         finally:
             del inputter
-        self._encoding = to_ENCODING_t(encoding)
+        self._encoding = to_ENCODING_t(encoding).value
 
     cpdef void from_bytes(self, bytes content, encoding) except +:
         """from_bytes(bytes content)
@@ -172,7 +172,7 @@ cdef class PyCtxt:
         cdef stringstream inputter
         inputter.write(content,len(content))
         self._ptr_ctxt.load(inputter)
-        self._encoding = to_ENCODING_t(encoding)
+        self._encoding = to_ENCODING_t(encoding).value
 
             
     # =========================================================================

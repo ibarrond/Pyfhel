@@ -47,10 +47,10 @@ class PyfhelTestCase(unittest.TestCase):
     def test_PyCtxt_creation_deletion(self):
         try:
             ctxt = PyCtxt()
-            ctxt2 = PyCtxt(other_ctxt=ctxt)
+            ctxt2 = PyCtxt(copy_ctxt=ctxt)
             pyfhel = Pyfhel()
             ctxt3 = PyCtxt(pyfhel=pyfhel)
-            ctxt4 = PyCtxt(other_ctxt=ctxt3)
+            ctxt4 = PyCtxt(copy_ctxt=ctxt3)
         except Exception as err:
             self.fail("PyCtxt() creation failed unexpectedly: ", err)
         self.assertEqual(ctxt.size(), 2)
