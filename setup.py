@@ -6,14 +6,16 @@
 #   > twine upload dist/*
 #   > python3 setup.py clean --all
 
-import fileinput, re, os, sys
+import fileinput, re, os, sys, sysconfig, platform
+from pathlib import Path
+from setuptools.command.build_clib import build_clib as orig_build_clib
 
 # Check that Python version is 3.5+
 v_maj, v_min = sys.version_info[:2]
 assert (v_maj, v_min) >= (3,5),\
     "Pyfhel requires Python 3.5+ (your version is {}.{}).".format(v_maj, v_min)
 
-from pathlib import Path
+
 
 
 # -------------------------------- OPTIONS -------------------------------------
@@ -22,12 +24,6 @@ CYTHONIZE= False
 if "--CYTHONIZE" in sys.argv:
     CYTHONIZE= True
     del sys.argv[sys.argv.index("--CYTHONIZE")]
-
-# Use shared libraries only if installed. Disabled by default. Experimental.
-LIBS= False
-if "--LIBS" in sys.argv:
-    LIBS= True
-    del sys.argv[sys.argv.index("--LIBS")]
 
 
 # -------------------------- INSTALL REQUIREMENTS ------------------------------
@@ -59,7 +55,6 @@ from setuptools import setup, Extension, find_packages
 # Get directories for includes of both Python and Numpy
 from distutils.sysconfig import get_python_inc
 import numpy
-
 
 # --------------------------------- VERSION ------------------------------------
 # Reading version info from Readme and hardcoding it in the __init__.py file
@@ -93,14 +88,70 @@ def scan(dir, files=[]):
 
 # Including shared libraries
 # TODO: include libpython.a only in windows ? " -D MS_WIN64"
-libraries = ["seal", "afhel"] if LIBS else []
-local_sources = [] if LIBS else scan(SEAL_PATH,[str(AFHEL_PATH / 'Afseal.cpp')])
+local_sources = scan(SEAL_PATH,[str(AFHEL_PATH / 'Afseal.cpp')])
 
 # Compile flags for extensions
 language            = "c++"
 include_dirs        = [get_python_inc(),numpy.get_include(),
                        str(PYFHEL_PATH), str(AFHEL_PATH), str(SEAL_PATH)]
-extra_compile_flags = ["-std=c++17", "-O3", "-DHAVE_CONFIG_H"]
+extra_compile_flags = ["-std=c++17", "-O2", "-DHAVE_CONFIG_H"]
+
+# --------------------------- LIBRARY COMPILATION ------------------------------
+def path_to_lib_folder():
+    """Returns the name of a distutils build directory"""
+    f = "{dirname}.{platform}-{version[0]}.{version[1]}"
+    dir_name = f.format(dirname='lib',
+                    platform=sysconfig.get_platform(),
+                    version=sys.version_info)
+    return os.path.join('build', dir_name, 'Pyfhel')
+
+def get_shared_object_name(lib_name):
+    if platform.system() == 'Windows':
+        return lib_name+'.dll'
+    else:
+        return 'lib'+lib_name+'.so'
+
+def get_extra_link_args():
+    if platform.system() == 'Windows':
+        return []
+    else:
+        return ["-Wl,-rpath=$ORIGIN/."]
+
+
+class build_shared_clib(orig_build_clib):
+
+    def finalize_options(self):
+        super(build_shared_clib, self).finalize_options()
+        self.build_clib = path_to_lib_folder()
+
+    def build_libraries(self, libraries):
+        for (lib_name, build_info) in libraries:
+            # First, compile the source code to object files in the library
+            # directory.  (This should probably change to putting object
+            # files in a temporary build directory.)
+            macros = build_info.get('macros')
+            include_dirs = build_info.get('include_dirs')
+            cflags = build_info.get('cflags')
+            sources = list(build_info.get('sources'))
+            objects = self.compiler.compile(
+                    sources,
+                    output_dir=self.build_temp,
+                    macros=macros,
+                    include_dirs=include_dirs,
+                    extra_postargs=cflags,
+                    debug=self.debug
+                    )
+
+            # Now link shared object
+            # Detect target language
+            language = self.compiler.detect_language(sources)
+
+            self.compiler.link_shared_object(
+                objects,                     
+                get_shared_object_name(lib_name), # .replace(".lib", ".dll")
+                output_dir=self.build_clib, 
+                target_lang=language
+                )
 
 
 # -------------------------------- EXTENSIONS ---------------------------------
@@ -108,24 +159,21 @@ ext = ".pyx" if CYTHONIZE else ".cpp"
 ext_modules = [
          Extension(
              name="Pyfhel.Pyfhel",
-             sources=[str(PYFHEL_PATH/("Pyfhel"+ext))]+local_sources,
-             libraries=libraries,
+             sources=[str(PYFHEL_PATH/("Pyfhel"+ext))],
              include_dirs=include_dirs,
              language=language,
              extra_compile_args=extra_compile_flags,
          ),
          Extension(
              name="Pyfhel.PyPtxt",
-             sources=[str(PYFHEL_PATH/("PyPtxt"+ext))]+local_sources,
-             libraries=libraries,
+             sources=[str(PYFHEL_PATH/("PyPtxt"+ext))],
              include_dirs=include_dirs,
              language=language,
              extra_compile_args=extra_compile_flags,
          ),
          Extension(
              name="Pyfhel.PyCtxt",
-             sources=[str(PYFHEL_PATH/("PyCtxt"+ext))]+local_sources,
-             libraries=libraries,
+             sources=[str(PYFHEL_PATH/("PyCtxt"+ext))],
              include_dirs=include_dirs,
              language=language,
              extra_compile_args=extra_compile_flags,
@@ -134,6 +182,10 @@ ext_modules = [
 if CYTHONIZE:
     from Cython.Build import cythonize
     ext_modules=cythonize(ext_modules)
+
+
+#clibraries:
+libafhel = ('Pyfhel', {'sources': local_sources, 'include_dirs':include_dirs})
 
 # -------------------------------- INSTALLER ----------------------------------
 setup(
@@ -168,7 +220,11 @@ setup(
         "Topic :: Security :: Cryptography",
     ],
     zip_safe=False,
-    packages=find_packages(),
+    package_dir={"": "Pyfhel"},
+    packages=find_packages(where='Pyfhel'),
     ext_modules=ext_modules,  
     test_suite=str(PYFHEL_PATH / "test.py"),
+    libraries=[libafhel],
+    library_dirs=['.'],
+    cmdclass={'build_clib': build_shared_clib},
 )
