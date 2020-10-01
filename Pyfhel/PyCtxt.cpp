@@ -3128,7 +3128,7 @@ static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_util;
 static PyObject *__pyx_n_s_value;
-static int __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_self, PyObject *__pyx_v_fileName, PyObject *__pyx_v_encoding, struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *__pyx_v_pyfhel, struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_copy_ctxt); /* proto */
+static int __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_self, struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_copy_ctxt, struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *__pyx_v_pyfhel, PyObject *__pyx_v_fileName, PyObject *__pyx_v_encoding); /* proto */
 static void __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt_2__dealloc__(struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt_9_encoding___get__(struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_self); /* proto */
 static int __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt_9_encoding_2__set__(struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_self, PyObject *__pyx_v_new_encoding); /* proto */
@@ -3264,17 +3264,17 @@ static PyObject *__pyx_codeobj__42;
  * 
  *     """
  *     def __cinit__(self,             # <<<<<<<<<<<<<<
- *                   fileName=None,
- *                   encoding=None,
+ *                   PyCtxt copy_ctxt=None,
+ *                   Pyfhel pyfhel=None,
  */
 
 /* Python wrapper */
 static int __pyx_pw_6Pyfhel_6PyCtxt_6PyCtxt_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_6Pyfhel_6PyCtxt_6PyCtxt_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_copy_ctxt = 0;
+  struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *__pyx_v_pyfhel = 0;
   PyObject *__pyx_v_fileName = 0;
   PyObject *__pyx_v_encoding = 0;
-  struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *__pyx_v_pyfhel = 0;
-  struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_copy_ctxt = 0;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3282,44 +3282,44 @@ static int __pyx_pw_6Pyfhel_6PyCtxt_6PyCtxt_1__cinit__(PyObject *__pyx_v_self, P
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__cinit__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_fileName,&__pyx_n_s_encoding,&__pyx_n_s_pyfhel,&__pyx_n_s_copy_ctxt,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_copy_ctxt,&__pyx_n_s_pyfhel,&__pyx_n_s_fileName,&__pyx_n_s_encoding,0};
     PyObject* values[4] = {0,0,0,0};
 
     /* "Pyfhel/PyCtxt.pyx":32
  *     """
  *     def __cinit__(self,
- *                   fileName=None,             # <<<<<<<<<<<<<<
- *                   encoding=None,
+ *                   PyCtxt copy_ctxt=None,             # <<<<<<<<<<<<<<
  *                   Pyfhel pyfhel=None,
+ *                   fileName=None,
  */
-    values[0] = ((PyObject *)Py_None);
+    values[0] = (PyObject *)((struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *)Py_None);
 
     /* "Pyfhel/PyCtxt.pyx":33
  *     def __cinit__(self,
+ *                   PyCtxt copy_ctxt=None,
+ *                   Pyfhel pyfhel=None,             # <<<<<<<<<<<<<<
  *                   fileName=None,
- *                   encoding=None,             # <<<<<<<<<<<<<<
- *                   Pyfhel pyfhel=None,
- *                   PyCtxt copy_ctxt=None):
+ *                   encoding=None):
  */
-    values[1] = ((PyObject *)Py_None);
+    values[1] = (PyObject *)((struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *)Py_None);
 
     /* "Pyfhel/PyCtxt.pyx":34
- *                   fileName=None,
- *                   encoding=None,
- *                   Pyfhel pyfhel=None,             # <<<<<<<<<<<<<<
- *                   PyCtxt copy_ctxt=None):
+ *                   PyCtxt copy_ctxt=None,
+ *                   Pyfhel pyfhel=None,
+ *                   fileName=None,             # <<<<<<<<<<<<<<
+ *                   encoding=None):
  *         if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy
  */
-    values[2] = (PyObject *)((struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *)Py_None);
+    values[2] = ((PyObject *)Py_None);
 
     /* "Pyfhel/PyCtxt.pyx":35
- *                   encoding=None,
  *                   Pyfhel pyfhel=None,
- *                   PyCtxt copy_ctxt=None):             # <<<<<<<<<<<<<<
+ *                   fileName=None,
+ *                   encoding=None):             # <<<<<<<<<<<<<<
  *         if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy
  *             self._ptr_ctxt = new Ciphertext(deref(copy_ctxt._ptr_ctxt))
  */
-    values[3] = (PyObject *)((struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *)Py_None);
+    values[3] = ((PyObject *)Py_None);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
@@ -3339,25 +3339,25 @@ static int __pyx_pw_6Pyfhel_6PyCtxt_6PyCtxt_1__cinit__(PyObject *__pyx_v_self, P
       switch (pos_args) {
         case  0:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_fileName);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_copy_ctxt);
           if (value) { values[0] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  1:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_encoding);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pyfhel);
           if (value) { values[1] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pyfhel);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_fileName);
           if (value) { values[2] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_copy_ctxt);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_encoding);
           if (value) { values[3] = value; kw_args--; }
         }
       }
@@ -3378,10 +3378,10 @@ static int __pyx_pw_6Pyfhel_6PyCtxt_6PyCtxt_1__cinit__(PyObject *__pyx_v_self, P
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_fileName = values[0];
-    __pyx_v_encoding = values[1];
-    __pyx_v_pyfhel = ((struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *)values[2]);
-    __pyx_v_copy_ctxt = ((struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *)values[3]);
+    __pyx_v_copy_ctxt = ((struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *)values[0]);
+    __pyx_v_pyfhel = ((struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *)values[1]);
+    __pyx_v_fileName = values[2];
+    __pyx_v_encoding = values[3];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -3391,16 +3391,16 @@ static int __pyx_pw_6Pyfhel_6PyCtxt_6PyCtxt_1__cinit__(PyObject *__pyx_v_self, P
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pyfhel), __pyx_ptype_6Pyfhel_6Pyfhel_Pyfhel, 1, "pyfhel", 0))) __PYX_ERR(0, 34, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_copy_ctxt), __pyx_ptype_6Pyfhel_6PyCtxt_PyCtxt, 1, "copy_ctxt", 0))) __PYX_ERR(0, 35, __pyx_L1_error)
-  __pyx_r = __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(((struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *)__pyx_v_self), __pyx_v_fileName, __pyx_v_encoding, __pyx_v_pyfhel, __pyx_v_copy_ctxt);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_copy_ctxt), __pyx_ptype_6Pyfhel_6PyCtxt_PyCtxt, 1, "copy_ctxt", 0))) __PYX_ERR(0, 32, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pyfhel), __pyx_ptype_6Pyfhel_6Pyfhel_Pyfhel, 1, "pyfhel", 0))) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_r = __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(((struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *)__pyx_v_self), __pyx_v_copy_ctxt, __pyx_v_pyfhel, __pyx_v_fileName, __pyx_v_encoding);
 
   /* "Pyfhel/PyCtxt.pyx":31
  * 
  *     """
  *     def __cinit__(self,             # <<<<<<<<<<<<<<
- *                   fileName=None,
- *                   encoding=None,
+ *                   PyCtxt copy_ctxt=None,
+ *                   Pyfhel pyfhel=None,
  */
 
   /* function exit code */
@@ -3412,7 +3412,7 @@ static int __pyx_pw_6Pyfhel_6PyCtxt_6PyCtxt_1__cinit__(PyObject *__pyx_v_self, P
   return __pyx_r;
 }
 
-static int __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_self, PyObject *__pyx_v_fileName, PyObject *__pyx_v_encoding, struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *__pyx_v_pyfhel, struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_copy_ctxt) {
+static int __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_self, struct __pyx_obj_6Pyfhel_6PyCtxt_PyCtxt *__pyx_v_copy_ctxt, struct __pyx_obj_6Pyfhel_6Pyfhel_Pyfhel *__pyx_v_pyfhel, PyObject *__pyx_v_fileName, PyObject *__pyx_v_encoding) {
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -3427,8 +3427,8 @@ static int __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(struct __pyx_obj_6Pyfhel_6
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
   /* "Pyfhel/PyCtxt.pyx":36
- *                   Pyfhel pyfhel=None,
- *                   PyCtxt copy_ctxt=None):
+ *                   fileName=None,
+ *                   encoding=None):
  *         if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy             # <<<<<<<<<<<<<<
  *             self._ptr_ctxt = new Ciphertext(deref(copy_ctxt._ptr_ctxt))
  *             self._encoding = copy_ctxt._encoding
@@ -3437,7 +3437,7 @@ static int __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(struct __pyx_obj_6Pyfhel_6
   if (__pyx_t_1) {
 
     /* "Pyfhel/PyCtxt.pyx":37
- *                   PyCtxt copy_ctxt=None):
+ *                   encoding=None):
  *         if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy
  *             self._ptr_ctxt = new Ciphertext(deref(copy_ctxt._ptr_ctxt))             # <<<<<<<<<<<<<<
  *             self._encoding = copy_ctxt._encoding
@@ -3496,8 +3496,8 @@ static int __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(struct __pyx_obj_6Pyfhel_6
     }
 
     /* "Pyfhel/PyCtxt.pyx":36
- *                   Pyfhel pyfhel=None,
- *                   PyCtxt copy_ctxt=None):
+ *                   fileName=None,
+ *                   encoding=None):
  *         if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy             # <<<<<<<<<<<<<<
  *             self._ptr_ctxt = new Ciphertext(deref(copy_ctxt._ptr_ctxt))
  *             self._encoding = copy_ctxt._encoding
@@ -3648,8 +3648,8 @@ static int __pyx_pf_6Pyfhel_6PyCtxt_6PyCtxt___cinit__(struct __pyx_obj_6Pyfhel_6
  * 
  *     """
  *     def __cinit__(self,             # <<<<<<<<<<<<<<
- *                   fileName=None,
- *                   encoding=None,
+ *                   PyCtxt copy_ctxt=None,
+ *                   Pyfhel pyfhel=None,
  */
 
   /* function exit code */

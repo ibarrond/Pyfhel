@@ -29,10 +29,10 @@ cdef class PyCtxt:
     
     """
     def __cinit__(self,
-                  fileName=None,
-                  encoding=None,
+                  PyCtxt copy_ctxt=None,
                   Pyfhel pyfhel=None,
-                  PyCtxt copy_ctxt=None):
+                  fileName=None,
+                  encoding=None):
         if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy
             self._ptr_ctxt = new Ciphertext(deref(copy_ctxt._ptr_ctxt))
             self._encoding = copy_ctxt._encoding
