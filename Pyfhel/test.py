@@ -374,6 +374,7 @@ class PyfhelTestCase(unittest.TestCase):
         self.assertEqual(
             pyfhel2.decryptInt(ctxt_restored), 42, "decrypting ciphertext should work"
         )
+        tmp_dir.cleanup()
 
     def test_Pyfhel_5d_save_restore_int(self):
         pyfhel = Pyfhel()
@@ -384,12 +385,14 @@ class PyfhelTestCase(unittest.TestCase):
         # encrypt something
         ctxt = pyfhel.encryptInt(42)
         # save to temporary file
-        tmp = tempfile.NamedTemporaryFile()
-        ctxt.save(tmp.name)
+        tmp_dir = tempfile.TemporaryDirectory()
+        tmp_file = os.path.join(tmp_dir.name, "ctxt")
+        ctxt.save(tmp_file)
         # load from temporary file
         loaded = PyCtxt()
-        loaded.load(tmp.name, "int")
+        loaded.load(tmp_file, "int")
         self.assertEqual(pyfhel.decryptInt(loaded), 42)
+        tmp_dir.cleanup()
 
     def test_Pyfhel_5d_save_restore_float(self):
         pyfhel = Pyfhel()
@@ -400,12 +403,14 @@ class PyfhelTestCase(unittest.TestCase):
         # encrypt something
         ctxt = pyfhel.encryptFrac(3.125)
         # save to temporary file
-        tmp = tempfile.NamedTemporaryFile()
-        ctxt.save(tmp.name)
+        tmp_dir = tempfile.TemporaryDirectory()
+        tmp_file = os.path.join(tmp_dir.name, "ctxt")
+        ctxt.save(tmp_file)
         # load from temporary file
         loaded = PyCtxt()
-        loaded.load(tmp.name, "float")
+        loaded.load(tmp_file, "float")
         self.assertEqual(pyfhel.decryptFrac(loaded), 3.125)
+        tmp_dir.cleanup()
 
     def test_Pyfhel_5d_save_restore_batch(self):
         pyfhel = Pyfhel()
@@ -416,12 +421,14 @@ class PyfhelTestCase(unittest.TestCase):
         # encrypt something
         ctxt = pyfhel.encryptBatch([1, 2, 3, 4])
         # save to temporary file
-        tmp = tempfile.NamedTemporaryFile()
-        ctxt.save(tmp.name)
+        tmp_dir = tempfile.TemporaryDirectory()
+        tmp_file = os.path.join(tmp_dir.name, "ctxt")
+        ctxt.save(tmp_file)
         # load from temporary file
         loaded = PyCtxt()
-        loaded.load(tmp.name, "batch")
+        loaded.load(tmp_file, "batch")
         self.assertEqual(pyfhel.decryptBatch(loaded)[:4], [1, 2, 3, 4])
+        tmp_dir.cleanup()
 
 
 if __name__ == "__main__":

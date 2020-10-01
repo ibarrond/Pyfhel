@@ -14,6 +14,9 @@ from .util import ENCODING_t
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
 
+# Managing paths directly
+from pathlib import Path
+
 # ----------------------------- IMPLEMENTATION --------------------------------
 cdef class PyCtxt:
     """Ciphertext of Pyfhel. Contains a value/vector of encrypted ints/doubles.
@@ -22,18 +25,28 @@ cdef class PyCtxt:
     corresponding to the backend selected in Pyfhel. By default, it is SEAL.
 
     Attributes:
-        other (PyCtxt, optional): Other PyCtxt to deep copy.
+        copy_ctxt (PyCtxt, optional): Other PyCtxt to deep copy.
     
     """
-    def __cinit__(self, PyCtxt other_ctxt=None, Pyfhel pyfhel=None):
-        if (other_ctxt):
-            self._ptr_ctxt = new Ciphertext(deref(other_ctxt._ptr_ctxt))
-            self._encoding = other_ctxt._encoding
-            if (other_ctxt._pyfhel):
-                self._pyfhel = other_ctxt._pyfhel
+    def __cinit__(self,
+                  fileName=None,
+                  encoding=None,
+                  Pyfhel pyfhel=None,
+                  PyCtxt copy_ctxt=None):
+        if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy
+            self._ptr_ctxt = new Ciphertext(deref(copy_ctxt._ptr_ctxt))
+            self._encoding = copy_ctxt._encoding
+            if (copy_ctxt._pyfhel):
+                self._pyfhel = copy_ctxt._pyfhel
+        
         else:
             self._ptr_ctxt = new Ciphertext()
-            self._encoding = ENCODING_T.UNDEFINED
+            if fileName:
+                if not encoding:
+                    raise TypeError("<Pyfhel ERROR> PyCtxt initialization with loading requires valid encoding")    
+                self.from_file(fileName, encoding)
+            else:
+                self._encoding = to_ENCODING_t(encoding) if encoding else ENCODING_T.UNDEFINED
             if (pyfhel):
                 self._pyfhel = pyfhel
             
@@ -77,17 +90,20 @@ cdef class PyCtxt:
         """int: Actual size of the ciphertext."""
         return self._ptr_ctxt.size()
 
-    cpdef void to_file(self, str fileName) except +:
-        """to_file(str fileName)
+    cpdef void to_file(self, fileName) except +:
+        """to_file(Path fileName)
         
-        Alias of `save`.
+        Alias of `save` using Pathlib.
         """
+        if isinstance(fileName, Path):
+            fileName = str(fileName)
         self.save(fileName)
 
     cpdef void save(self, str fileName) except +:
         """save(str fileName)
         
-        Save the ciphertext into a file.
+        Save the ciphertext into a file. The file can new one or
+        exist already, in which case it will be overwriten.
 
         Args:
             fileName: (:obj:`str`) File where the ciphertext will be stored.
@@ -112,11 +128,13 @@ cdef class PyCtxt:
         self._ptr_ctxt.save(outputter)
         return outputter.str()
 
-    cpdef void from_file(self, str fileName, encoding) except +:
+    cpdef void from_file(self, fileName, encoding) except +:
         """from_file(str fileName)
         
         Alias of `load`.
         """
+        if isinstance(fileName, Path):
+            fileName = str(fileName)
         self.load(fileName, encoding)
 
     cpdef void load(self, str fileName, encoding) except +:
@@ -136,32 +154,25 @@ cdef class PyCtxt:
         inputter = new ifstream(bFileName,binary)
         try:
             self._ptr_ctxt.load(deref(inputter))
-            if encoding.lower()[0] == 'i':
-                self._encoding = ENCODING_T.INTEGER
-            elif encoding.lower()[0] in 'fd':
-                self._encoding = ENCODING_T.FRACTIONAL
-            elif encoding.lower()[0] in 'abm':
-                self._encoding = ENCODING_T.BATCH
-            else:
-                raise ValueError('Given encoding is unknown')
         finally:
             del inputter
+        self._encoding = to_ENCODING_t(encoding)
 
     cpdef void from_bytes(self, bytes content, encoding) except +:
+        """from_bytes(bytes content)
 
+        Recover the serialized ciphertext from a binary/bytes string.
+
+        Args:
+            content: (:obj:`bytes`) Python bytes object containing the PyCtxt.
+            encoding: (:obj: `str`) String describing the encoding: 'int' for
+                IntegerEncoding (default), 'float'/'fractional'/'double' for
+                FractionalEncoding, 'array'/'batch'/'matrix' for BatchEncoding
+        """
         cdef stringstream inputter
-
         inputter.write(content,len(content))
-
         self._ptr_ctxt.load(inputter)
-        if encoding.lower()[0] == 'i':
-            self._encoding = ENCODING_T.INTEGER
-        elif encoding.lower()[0] in 'fd':
-            self._encoding = ENCODING_T.FRACTIONAL
-        elif encoding.lower()[0] in 'abm':
-            self._encoding = ENCODING_T.BATCH
-        else:
-            raise ValueError('Given encoding is unknown')
+        self._encoding = to_ENCODING_t(encoding)
 
             
     # =========================================================================
