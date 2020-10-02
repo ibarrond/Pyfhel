@@ -1,20 +1,20 @@
 # =============================== SETUP.PY =====================================
-# This file installs Pyfhel in your Python3 distribution. Use:
+# This file installs Pyfhel in your Python3 distribution. Use one of the two:
 #   > python3 setup.py install
+#   > python3 -m pip install .
 # PYPI -> https://packaging.python.org/tutorials/packaging-projects/
 #   > python3 setup.py sdist
 #   > twine upload dist/*
 #   > python3 setup.py clean --all
 
-import fileinput, re, os, sys, sysconfig, platform
+import shutil, glob, fileinput, re, os, sys, sysconfig, platform
 from pathlib import Path
-from setuptools.command.build_clib import build_clib as orig_build_clib
+from setuptools._distutils.core import Command
 
 # Check that Python version is 3.5+
 v_maj, v_min = sys.version_info[:2]
 assert (v_maj, v_min) >= (3,5),\
     "Pyfhel requires Python 3.5+ (your version is {}.{}).".format(v_maj, v_min)
-
 
 
 
@@ -24,6 +24,7 @@ CYTHONIZE= False
 if "--CYTHONIZE" in sys.argv:
     CYTHONIZE= True
     del sys.argv[sys.argv.index("--CYTHONIZE")]
+
 
 
 # -------------------------- INSTALL REQUIREMENTS ------------------------------
@@ -79,79 +80,40 @@ AFHEL_PATH = PYFHEL_PATH / 'Afhel'
 SEAL_PATH = PYFHEL_PATH / 'SEAL' / 'SEAL' / 'seal'
 
 # Scan a directory searching for all C++ files
-def scan(dir, files=[]):
+def scan_cpp(dir, files=[]):
     for file in os.listdir(dir):
         path = os.path.join(dir, file)
         if os.path.isfile(path) and path.endswith(".cpp"):
             files.append(str(path))
     return files
 
-# Including shared libraries
-# TODO: include libpython.a only in windows ? " -D MS_WIN64"
-local_sources = scan(SEAL_PATH,[str(AFHEL_PATH / 'Afseal.cpp')])
+# List all the .cpp files
+local_sources = scan_cpp(SEAL_PATH,[str(AFHEL_PATH / 'Afseal.cpp')])
 
-# Compile flags for extensions
+# Compile arguments for extensions
 language            = "c++"
 include_dirs        = [get_python_inc(),numpy.get_include(),
                        str(PYFHEL_PATH), str(AFHEL_PATH), str(SEAL_PATH)]
-extra_compile_flags = ["-std=c++17", "-O2", "-DHAVE_CONFIG_H"]
+extra_compile_flags = ["-DHAVE_CONFIG_H"]
+if platform.system() == 'Windows':
+    # Windows' MSVC2019 compiler doesn't have an O3 optimization
+    #>https://docs.microsoft.com/en-us/cpp/build/reference/o-options-optimize-code
+    extra_compile_flags += ["-O2"]
+else:  # Linux, GCC
+    extra_compile_flags += ["-std=c++17","-O3"]
+
+
+print(extra_compile_flags)
 
 # --------------------------- LIBRARY COMPILATION ------------------------------
-def path_to_lib_folder():
-    """Returns the name of a distutils build directory"""
-    f = "{dirname}.{platform}-{version[0]}.{version[1]}"
-    dir_name = f.format(dirname='lib',
-                    platform=sysconfig.get_platform(),
-                    version=sys.version_info)
-    return os.path.join('build', dir_name, 'Pyfhel')
+# Here we compile Afhel (with the backends) and bundle it into a static library
+# Dynamic lybraries are much more complex to manage. In case this was necessary:
+#> https://github.com/realead/commonso/blob/master/setup.py
 
-def get_shared_object_name(lib_name):
-    if platform.system() == 'Windows':
-        return lib_name+'.dll'
-    else:
-        return 'lib'+lib_name+'.so'
-
-def get_extra_link_args():
-    if platform.system() == 'Windows':
-        return []
-    else:
-        return ["-Wl,-rpath=$ORIGIN/."]
-
-
-class build_shared_clib(orig_build_clib):
-
-    def finalize_options(self):
-        super(build_shared_clib, self).finalize_options()
-        self.build_clib = path_to_lib_folder()
-
-    def build_libraries(self, libraries):
-        for (lib_name, build_info) in libraries:
-            # First, compile the source code to object files in the library
-            # directory.  (This should probably change to putting object
-            # files in a temporary build directory.)
-            macros = build_info.get('macros')
-            include_dirs = build_info.get('include_dirs')
-            cflags = build_info.get('cflags')
-            sources = list(build_info.get('sources'))
-            objects = self.compiler.compile(
-                    sources,
-                    output_dir=self.build_temp,
-                    macros=macros,
-                    include_dirs=include_dirs,
-                    extra_postargs=cflags,
-                    debug=self.debug
-                    )
-
-            # Now link shared object
-            # Detect target language
-            language = self.compiler.detect_language(sources)
-
-            self.compiler.link_shared_object(
-                objects,                     
-                get_shared_object_name(lib_name), # .replace(".lib", ".dll")
-                output_dir=self.build_clib, 
-                target_lang=language
-                )
+# cpplibraries:
+cpplibraries = ('Afhel', {'sources': local_sources,
+                          'include_dirs':include_dirs,
+                          'cflags':extra_compile_flags})
 
 
 # -------------------------------- EXTENSIONS ---------------------------------
@@ -183,9 +145,32 @@ if CYTHONIZE:
     from Cython.Build import cythonize
     ext_modules=cythonize(ext_modules)
 
+# --------------------------------- CLEANER -----------------------------------
+# Tired of cleaning all compilation and distribution by hand
+class FlushCommand(Command):
+    """Custom clean command to tidy up the project root."""
+    CLEAN_FILES = './build ./dist ./*.pyc ./*.tgz ./*.egg-info'.split(' ')
+    user_options = []
+    def initialize_options(self):
+        pass
 
-#clibraries:
-libafhel = ('Pyfhel', {'sources': local_sources, 'include_dirs':include_dirs})
+    def finalize_options(self):
+        pass
+        
+
+    def run(self):
+        here = os.getcwd()
+
+        for path_spec in self.CLEAN_FILES:
+            # Make paths absolute and relative to this path
+            abs_paths = glob.glob(os.path.normpath(os.path.join(here, path_spec)))
+            for path in [str(p) for p in abs_paths]:
+                if not path.startswith(here):
+                    # Die if path in CLEAN_FILES is absolute + outside this directory
+                    raise ValueError("%s is not a path inside %s" % (path, here))
+                print('removing %s' % os.path.relpath(path))
+                shutil.rmtree(path)
+
 
 # -------------------------------- INSTALLER ----------------------------------
 setup(
@@ -220,11 +205,12 @@ setup(
         "Topic :: Security :: Cryptography",
     ],
     zip_safe=False,
-    package_dir={"": "Pyfhel"},
-    packages=find_packages(where='Pyfhel'),
+    #package_dir={"":"Pyfhel"},
+    packages=find_packages(),
     ext_modules=ext_modules,  
     test_suite=str(PYFHEL_PATH / "test.py"),
-    libraries=[libafhel],
+    libraries=[cpplibraries],
     library_dirs=['.'],
-    cmdclass={'build_clib': build_shared_clib},
+    extra_compile_args=extra_compile_flags,
+    cmdclass={'flush': FlushCommand},
 )
