@@ -83,8 +83,6 @@ else:  # Linux, GCC
     extra_compile_flags += ["-std=c++17","-O3"]
 
 
-print(extra_compile_flags)
-
 # --------------------------- LIBRARY COMPILATION ------------------------------
 # Here we compile Afhel (with the backends) and bundle it into a static library
 # Dynamic lybraries are much more complex to manage. In case this was necessary:
@@ -205,7 +203,6 @@ setup(
     ext_modules=ext_modules,  
     test_suite=str(PYFHEL_PATH / "test.py"),
     libraries=[cpplibraries],
-    library_dirs=["."],
     cmdclass={'flush': FlushCommand,
               'build_ext' : my_build_ext},
 )

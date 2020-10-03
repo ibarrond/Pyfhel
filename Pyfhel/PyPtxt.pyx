@@ -5,7 +5,7 @@
 """
 # -------------------------------- IMPORTS ------------------------------------
 # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from .util import ENCODING_t
+from Pyfhel.util import ENCODING_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
@@ -14,7 +14,7 @@ from cython.operator cimport dereference as deref
 cdef class PyPtxt:
     """Plaintext of Pyfhel. Contains a value/vector of unencrypted ints/doubles.
 
-    This class references SEAL, PALISADE and HElib ciphertexts, using the one 
+    This class references SEAL, PALISADE and HElib plaintexts, using the one 
     corresponding to the backend selected in Pyfhel (SEAL by default).
 
     Attributes:
@@ -22,17 +22,26 @@ cdef class PyPtxt:
     
     """
     
-    def __cinit__(self, PyPtxt other_ptxt=None, Pyfhel pyfhel=None):
-        if (other_ptxt):
-            self._ptr_ptxt = new Plaintext(deref(other_ptxt._ptr_ptxt))
-            self._encoding = other_ptxt._encoding
-            if (other_ptxt._pyfhel):
-                self._pyfhel = other_ptxt._pyfhel
+    def __cinit__(self, 
+                  PyPtxt copy_ptxt=None,
+                  Pyfhel pyfhel=None,
+                  fileName=None,
+                  encoding=None):
+        if (copy_ptxt): # If there is a PyPtxt to copy, override all arguments and copy
+            self._ptr_ptxt = new Plaintext(deref(copy_ptxt._ptr_ptxt))
+            self._encoding = copy_ptxt._encoding
+            if (copy_ptxt._pyfhel):
+                self._pyfhel = copy_ptxt._pyfhel
         else:
             self._ptr_ptxt = new Plaintext()  
-            self._encoding = ENCODING_T.UNDEFINED 
+            if fileName:
+                if not encoding:
+                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid encoding")    
+                self.from_file(fileName, encoding)
+            else:
+                self._encoding = to_ENCODING_t(encoding) if encoding else ENCODING_T.UNDEFINED
             if (pyfhel):
-                self._pyfhel = pyfhel  
+                self._pyfhel = pyfhel
                 
     def __dealloc__(self):
         if self._ptr_ptxt != NULL:
@@ -76,32 +85,112 @@ cdef class PyPtxt:
         """string: Polynomial representation of the plaintext"""
         return self._ptr_ptxt.to_string()
     
+    
+    # =========================================================================
+    # ================================== I/O ==================================
+    # =========================================================================
+    cpdef void to_file(self, fileName) except +:
+        """to_file(Path fileName)
+        
+        Alias of `save` with input sanitizing.
+        """
+        self.save(_to_valid_file_str(fileName))
+
     cpdef void save(self, str fileName) except +:
-        """Save the ciphertext into a file.
+        """Save the plaintext into a file.
 
         Args:
-            fileName: (:obj:`str`) File where the ciphertext will be stored.
+            fileName: (:obj:`str`) File where the plaintext will be stored.
 
         """
-        cdef ofstream outputter
+        cdef ofstream* outputter
         cdef string bFileName = fileName.encode('utf8')
-        outputter.open(bFileName)
+        outputter = new ofstream(bFileName, binary)
         try:
-            self._ptr_ptxt.save(outputter)
+            self._ptr_ptxt.save(deref(outputter))
         finally:
-            outputter.close()
+            del outputter
 
-    cpdef void load(self, str fileName) except +:
-        """Load the plaintext from a file.
+    cpdef bytes to_bytes(self) except +:
+        """to_bytes()
+
+        Serialize the plaintext into a binary/bytes string.
+
+        Return:
+            * bytes: serialized plaintext
+        """
+        cdef ostringstream outputter
+        self._ptr_ptxt.save(outputter)
+        return outputter.str()
+
+    cpdef void from_file(self, fileName, encoding) except +:
+        """from_file(str fileName)
+        
+        Alias of `load` with input sanitizer.
+        """
+        self.load(_to_valid_file_str(fileName, check=True), encoding)
+
+    cpdef void load(self, str fileName, encoding) except +:
+        """load(self, str fileName)
+        
+        Load the plaintext from a file.
 
         Args:
             fileName: (:obj:`str`) File where the plaintext is retrieved from.
+            encoding: (:obj: `str`) String or type describing the encoding:
+                'int' or int for IntegerEncoding (default),
+                'float'/'fractional'/'double' or float for FractionalEncoding,
+                'array'/'batch'/'matrix' or list for BatchEncoding
 
         """
-        cdef ifstream inputter
+        cdef ifstream* inputter
         cdef string bFileName = fileName.encode('utf8')
-        inputter.open(bFileName)
+        inputter = new ifstream(bFileName,binary)
         try:
-            self._ptr_ptxt.load(inputter)
+            self._ptr_ptxt.load(deref(inputter))
         finally:
-            inputter.close()
+            del inputter
+        self._encoding = to_ENCODING_t(encoding).value
+
+    cpdef void from_bytes(self, bytes content, encoding) except +:
+        """from_bytes(bytes content)
+
+        Recover the serialized plaintext from a binary/bytes string.
+
+        Args:
+            content: (:obj:`bytes`) Python bytes object containing the PyPtxt.
+            encoding: (:obj: `str`) String or type describing the encoding:
+                'int' or int for IntegerEncoding (default),
+                'float'/'fractional'/'double' or float for FractionalEncoding,
+                'array'/'batch'/'matrix' or list for BatchEncoding
+        """
+        cdef stringstream inputter
+        inputter.write(content,len(content))
+        self._ptr_ptxt.load(inputter)
+        self._encoding = to_ENCODING_t(encoding).value
+
+
+
+    # =========================================================================
+    # ============================ ENCR/DECR/CMP ==============================
+    # =========================================================================
+
+    def __int__(self):
+        if (self._encoding != ENCODING_T.INTEGER):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not INTEGER)")
+        return self._pyfhel.decodeInt(self)
+
+    def __float__(self):
+        if (self._encoding != ENCODING_T.FRACTIONAL):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not FRACTIONAL)")
+        return self._pyfhel.decodeFrac(self)
+    
+    def __str__(self):
+        return "<Pyfhel Ciphertext, encoding={}, size={}>".format(
+                ENCODING_t(self._encoding).name, self.size())
+
+    def encode(self, value):
+        self._pyfhel.encode(value, self)
+    
+    def decode(self):
+        self._pyfhel.decode(self)
