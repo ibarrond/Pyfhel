@@ -205,6 +205,7 @@ setup(
     ext_modules=ext_modules,  
     test_suite=str(PYFHEL_PATH / "test.py"),
     libraries=[cpplibraries],
+    library_dirs=["."],
     cmdclass={'flush': FlushCommand,
               'build_ext' : my_build_ext},
 )
