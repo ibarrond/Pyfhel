@@ -1,7 +1,5 @@
-# HelloWorld Demo for Pyfhel, showing the simplest use of the library by
-#   encrypting two integers, operating with them (+,-,*) and decrypting
-#   the results. The code is heavily commented.
-
+# Usage of Pyfhel with Numpy
+import numpy as np
 
 from Pyfhel import Pyfhel, PyPtxt, PyCtxt
 # Pyfhel class contains most of the functions.
@@ -10,7 +8,7 @@ from Pyfhel import Pyfhel, PyPtxt, PyCtxt
 
 
 print("==============================================================")
-print("===================== Pyfhel HELLO WORLD =====================")
+print("===================== Pyfhel with Numpy ======================")
 print("==============================================================")
 
 
@@ -23,25 +21,31 @@ HE.contextGen(p=65537)  # Generating context. The value of p is important.
 HE.keyGen()             # Key Generation.
 
 
-print("2. Encrypting integers")
-integer1 = 127
-integer2 = -2
-ctxt1 = HE.encryptInt(integer1) # Encryption makes use of the public key
-ctxt2 = HE.encryptInt(integer2) # For integers, encryptInt function is used.
-print("    int ",integer1,'-> ctxt1 ', type(ctxt1))
-print("    int ",integer2,'-> ctxt2 ', type(ctxt2))
+print("2. Encrypting two arrays of integers.")
+print("    For this, you need to create empty arrays in numpy and assign them the cyphertexts")
+array1 = np.array([1,3,5,7,9])
+array2 = np.array([-2, 4, -6, 8,-10])
+arr_ctxt1 = np.empty(len(array1),dtype=PyCtxt)
+arr_ctxt2 = np.empty(len(array1),dtype=PyCtxt)
 
-print("3. Operating with encrypted integers")
-ctxtSum = ctxt1 + ctxt2         # `ctxt1 += ctxt2` for quicker inplace operation
-ctxtSub = ctxt1 - ctxt2         # `ctxt1 -= ctxt2` for quicker inplace operation
-ctxtMul = ctxt1 * ctxt2         # `ctxt1 *= ctxt2` for quicker inplace operation
+# Encrypting! This can be parallelized!
+for i in np.arange(len(array1)):
+    arr_ctxt1[i] = HE.encryptInt(array1[i])
+    arr_ctxt2[i] = HE.encryptInt(array2[i])
+
+print("    array1: ",array1,'-> ctxt1 ', type(arr_ctxt1), ', dtype:', arr_ctxt1.dtype)
+print("    array2: ",array2,'-> ctxt2 ', type(arr_ctxt2), ', dtype:', arr_ctxt2.dtype)
+
+print("3. Vectorized operations with encrypted arrays of PyCtxt")
+ctxtSum = arr_ctxt1 + arr_ctxt2         # `ctxt1 += ctxt2` for quicker inplace operation
+ctxtSub = arr_ctxt1 - arr_ctxt2         # `ctxt1 -= ctxt2` for quicker inplace operation
+ctxtMul = arr_ctxt1 * arr_ctxt2         # `ctxt1 *= ctxt2` for quicker inplace operation
 
 
-print("4. Decrypting result:")
-resSum = HE.decryptInt(ctxtSum) # Decryption must use the corresponding function
-                                #  decryptInt.
-resSub = HE.decryptInt(ctxtSub) 
-resMul = HE.decryptInt(ctxtMul)
+print("4. Decrypting results:")
+resSum = [HE.decryptInt(ctxtSum[i]) for i in np.arange(len(ctxtSum))]
+resSub = [HE.decryptInt(ctxtSub[i]) for i in np.arange(len(ctxtSub))] 
+resMul = [HE.decryptInt(ctxtMul[i]) for i in np.arange(len(ctxtMul))]
 print("     addition:       decrypt(ctxt1 + ctxt2) =  ", resSum)
 print("     substraction:   decrypt(ctxt1 - ctxt2) =  ", resSub)
 print("     multiplication: decrypt(ctxt1 + ctxt2) =  ", resMul)

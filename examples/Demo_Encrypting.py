@@ -10,7 +10,7 @@ print("==============================================================")
 
 print("1. Creating Context and KeyGen in a Pyfhel Object ")
 HE = Pyfhel()                                       # Creating empty Pyfhel object
-HE.contextGen(p=65537, m=1024, flagBatching=True)   # Generating context. 
+HE.contextGen(p=65537, m=2048, base=3, flagBatching=True)   # Generating context. 
 # The values of p and m are chosen to enable batching (see Demo_Batching_SIMD.py)
 HE.keyGen()                                         # Key Generation.
 
@@ -27,7 +27,7 @@ print("    int ",integer2,'-> ctxt_i2 ', str(ctxt_i2))
 print("3. Encrypting floating point values with encryptFrac")
 float1 = 3.5
 float2 = -7.8
-ctxt_f1 = HE.encryptInt(float1)     # Encrypting float1 in a new PyCtxt with encryptFrac
+ctxt_f1 = HE.encryptFrac(float1)     # Encrypting float1 in a new PyCtxt with encryptFrac
 ctxt_f2 = PyCtxt()
 HE.encryptFrac(float2, ctxt_f2)     # Encrypting float2 in an existing PyCtxt
 print("    float ",float1,'-> ctxt_f1 ', str(ctxt_f1))
@@ -38,7 +38,7 @@ vector1 = [ 1, 2, 3, 4, 5, 6]
 vector2 = [-2, 3,-4,-3, 2,-1]
 ctxt_b1 = HE.encryptBatch(vector1)  # Encrypting vector1 in a new PyCtxt with encryptBatch
 ctxt_b2 = PyCtxt()                 
-HE.encryptBatch(vector2, ctxt_f2)    # Encrypting vector2 in an existing PyCtxt
+HE.encryptBatch(vector2, ctxt_b2)    # Encrypting vector2 in an existing PyCtxt
 print("    list ",vector1,'-> ctxt_b1 ', str(ctxt_b1))
 print("    list ",vector2,'-> ctxt_b2 ', str(ctxt_b2))
 
@@ -60,10 +60,6 @@ ctxt_imul = ctxt_i1 * ctxt_i2     # `ctxt_i1 *= ctxt_i2` for quicker inplace ope
 ctxt_fadd = ctxt_f1 + ctxt_f2     # `ctxt_f1 += ctxt_f2` for quicker inplace operation
 ctxt_fsub = ctxt_f1 - ctxt_f2     # `ctxt_f1 -= ctxt_f2` for quicker inplace operation
 ctxt_fmul = ctxt_f1 * ctxt_f2     # `ctxt_f1 *= ctxt_f2` for quicker inplace operation
-
-ctxt_badd = ctxt_b1 + ctxt_b2     # `ctxt_b1 += ctxt_b2` for quicker inplace operation
-ctxt_bsub = ctxt_b1 - ctxt_b2     # `ctxt_b1 -= ctxt_b2` for quicker inplace operation
-ctxt_bmul = ctxt_b1 * ctxt_b2     # `ctxt_b1 *= ctxt_b2` for quicker inplace operation
 
 ctxt_badd = ctxt_b1 + ctxt_b2     # `ctxt_b1 += ctxt_b2` for quicker inplace operation
 ctxt_bsub = ctxt_b1 - ctxt_b2     # `ctxt_b1 -= ctxt_b2` for quicker inplace operation
@@ -92,7 +88,7 @@ res_iSub = HE.decryptInt(ctxt_isub) #  function, depending on the encoding type
 res_iMul = HE.decryptInt(ctxt_imul)
 
 res_fSum = HE.decryptFrac(ctxt_fadd) # Decryption must use the corresponding decrypting
-res_fSub = HE.decryptFrac(ctxt_fSub) #  function, depending on the encoding type
+res_fSub = HE.decryptFrac(ctxt_fsub) #  function, depending on the encoding type
 res_fMul = HE.decryptFrac(ctxt_fmul)
 
 res_bSum = HE.decryptBatch(ctxt_badd) # Decryption must use the corresponding decrypting
@@ -118,19 +114,19 @@ print("     substraction:   decrypt(ctxt_f1 - ctxt_f2) =  ", res_fSub)
 print("     multiplication: decrypt(ctxt_f1 + ctxt_f2) =  ", res_fMul)
 
 print("    Batched list (encryptBatch, ENCODING_t.BATCH, decryptBatch)")
-print("     addition:       decrypt(ctxt_b1 + ctxt_b2) =  ", res_bSum)
-print("     substraction:   decrypt(ctxt_b1 - ctxt_b2) =  ", res_bSub)
-print("     multiplication: decrypt(ctxt_b1 + ctxt_b2) =  ", res_bMul)
+print("     addition:       decrypt(ctxt_b1 + ctxt_b2) =  ", res_bSum[:len(vector1)])
+print("     substraction:   decrypt(ctxt_b1 - ctxt_b2) =  ", res_bSub[:len(vector1)])
+print("     multiplication: decrypt(ctxt_b1 + ctxt_b2) =  ", res_bMul[:len(vector1)])
 
 print("    NumPy 1D vector (encryptArray, ENCODING_t.BATCH, decryptArray)")
-print("     addition:       decrypt(ctxt_a1 + ctxt_a2) =  ", res_aSum)
-print("     substraction:   decrypt(ctxt_a1 - ctxt_a2) =  ", res_aSub)
-print("     multiplication: decrypt(ctxt_a1 + ctxt_a2) =  ", res_aMul)
+print("     addition:       decrypt(ctxt_a1 + ctxt_a2) =  ", np.array(res_aSum[:len(array1)]))
+print("     substraction:   decrypt(ctxt_a1 - ctxt_a2) =  ", np.array(res_aSub[:len(array1)]))
+print("     multiplication: decrypt(ctxt_a1 + ctxt_a2) =  ", np.array(res_aMul[:len(array1)]))
 
 print("    List & np 1D vec (..., ENCODING_t.BATCH, ...)")
-print("     addition:       decrypt(ctxt_a1 + ctxt_b2) =  ", res_abSum)
-print("     substraction:   decrypt(ctxt_a1 - ctxt_b2) =  ", res_abSub)
-print("     multiplication: decrypt(ctxt_a1 + ctxt_b2) =  ", res_abMul)
+print("     addition:       decrypt(ctxt_a1 + ctxt_b2) =  ", res_abSum[:len(vector1)])
+print("     substraction:   decrypt(ctxt_a1 - ctxt_b2) =  ", res_abSub[:len(vector1)])
+print("     multiplication: decrypt(ctxt_a1 + ctxt_b2) =  ", np.array(res_abMul[:len(vector1)]))
 
 
 print("8. EXTRA: you can encrypt/decrypt function to guess type")

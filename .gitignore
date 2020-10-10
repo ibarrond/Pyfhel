@@ -37,6 +37,7 @@ Pyfhel/SEAL/*
 **.vscode
 
 # ipython checkpoints
+**.ipynb
 Pyfhel/Scratchpad
 **.ipynb_checkpoints
 **/__pycache__

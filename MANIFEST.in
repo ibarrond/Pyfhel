@@ -6,8 +6,9 @@ include Pyfhel/Afhel/*.h
 include Pyfhel/SEAL/SEAL/seal/*.cpp
 include Pyfhel/SEAL/SEAL/seal/*.h
 
-include docs/*
-include docs/HElib/*
-include docs/logo/*
+include docs/_static/*
 
 include README.md
+include LICENSE.txt
+include setup.py
+include requirements.txt
