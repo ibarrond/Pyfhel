@@ -36,15 +36,15 @@ HE.contextGen(p=p,m=m, base=2, sec=192, flagBatching=True)
 HE.keyGen()             # Key Generation.
 print("   We use Pyfhel.batchEnabled() to check if the current context allows batching, and getnSlots() to get the total number of integers that fit in a single ciphertext row (should be equal to m)")
 
-print("2. Encrypting lists of Integers / NumPy arrays")
+print("2. Encrypting lists of Integers / NumPy arrays of size up to m. Empty slots are set to 0.")
 list1 = [1,2,3,4,5,6]
 list2 = [-2, -4, -6, -8, 0, 13]
 ctxt1 = HE.encryptBatch(list1) # Encryption makes use of the public key
 ctxt2 = HE.encryptBatch(list2) # For integers, encryptInt function is used.
 print("    list1 ",list1,'-> ctxt1 ', type(ctxt1), str(ctxt1))
 print("    list2 ",list2,'-> ctxt2 ', type(ctxt2), str(ctxt2))
-arr1 = np.array([5,6,7,8])
-arr2 = np.array([-9, 10, -11, 12])
+arr1 = np.array([5,6,7,8], dtype=np.int64)
+arr2 = np.array([-9, 10, -11, 12], dtype=np.int64)
 ctxt3 = HE.encryptArray(arr1) 
 ctxt4 = HE.encryptArray(arr2)
 
@@ -77,3 +77,17 @@ print("     substraction:   decrypt(ctxt3 - ctxt4) =  ", resSub2[:4])
 print("     multiplication: decrypt(ctxt3 * ctxt2) =  ", resMul2[:4])
 
 
+
+print("5. Trying out rotation:")
+HE.rotateKeyGen(60)
+print("     Initialized rotation keys: HE.rotateKeyGen(10)")
+ctxt1_rot_r4 = ctxt1 >> 4   # Inplace equivalent: ctxt1 >>= 4 
+ctxt2_rot_l2 = ctxt2 << 2   # Inplace equivalent: ctxt2 <<= 2
+
+resrotr4 = np.array(HE.decryptBatch(ctxt1_rot_r4), dtype=np.int64)
+resrotl2 = np.array(HE.decryptBatch(ctxt2_rot_l2), dtype=np.int64)
+
+print("     ctxt1_rot_r4 = ctxt1 >> 4:  First 10 values:", resrotr4[:10])
+print("                                 last 10 values:", resrotr4[-10:])
+print("     ctxt2_rot_l2 = ctxt2 << 2:  First 10 values:", resrotl2[:10])
+print("                                 last 10 values:", resrotl2[m//2-10:m//2])

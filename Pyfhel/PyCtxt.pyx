@@ -203,6 +203,13 @@ cdef class PyCtxt:
             return self._pyfhel.add(self, other, in_new_ctxt=True)
         elif isinstance(other, PyPtxt):
             return self._pyfhel.add_plain(self, other, in_new_ctxt=True)
+        elif isinstance(other, (int, float)):
+            if self._encoding == ENCODING_t.INTEGER:
+                other = self._pyfhel.encodeInt(int(other))
+                return self._pyfhel.add_plain(self, other, in_new_ctxt=True)
+            elif self._encoding == ENCODING_t.FRACTIONAL:
+                other = self._pyfhel.encodeFrac(float(other))
+                return self._pyfhel.add_plain(self, other, in_new_ctxt=True)
         else:
             raise TypeError("<Pyfhel ERROR> other summand must be either PyCtxt or PyPtxt")
     
@@ -222,9 +229,17 @@ cdef class PyCtxt:
             self._pyfhel.add(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
             self._pyfhel.add_plain(self, other, in_new_ctxt=False)
+        elif isinstance(other, (int, float)):
+            if self._encoding == ENCODING_t.INTEGER:
+                other = self._pyfhel.encodeInt(int(other))
+                self._pyfhel.add_plain(self, other, in_new_ctxt=False)
+            elif self._encoding == ENCODING_t.FRACTIONAL:
+                other = self._pyfhel.encodeFrac(float(other))
+                self._pyfhel.add_plain(self, other, in_new_ctxt=False)
         else:
             raise TypeError("<Pyfhel ERROR> other summand must be either PyCtxt or PyPtxt")
-            
+        return self
+
 
     def __sub__(self, other):
         """Substracts this ciphertext with either another PyCtxt or a PyPtxt plaintext.
@@ -243,8 +258,16 @@ cdef class PyCtxt:
             return self._pyfhel.sub(self, other, in_new_ctxt=True)
         elif isinstance(other, PyPtxt):
             return self._pyfhel.sub_plain(self, other, in_new_ctxt=True)
+        elif isinstance(other, (int, float)):
+            if self._encoding == ENCODING_t.INTEGER:
+                other = self._pyfhel.encodeInt(int(other))
+                return self._pyfhel.sub_plain(self, other, in_new_ctxt=True)
+            elif self._encoding == ENCODING_t.FRACTIONAL:
+                other = self._pyfhel.encodeFrac(float(other))
+                return self._pyfhel.sub_plain(self, other, in_new_ctxt=True)
         else:
             raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
+    
     def __rsub__(self, other): return self.__sub__(other)
     def __isub__(self, other): 
         """Substracts this ciphertext with either another PyCtxt or a PyPtxt plaintext.
@@ -261,9 +284,17 @@ cdef class PyCtxt:
             self._pyfhel.sub(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
             self._pyfhel.sub_plain(self, other, in_new_ctxt=False)
+        elif isinstance(other, (int, float)):
+            if self._encoding == ENCODING_t.INTEGER:
+                other = self._pyfhel.encodeInt(int(other))
+                self._pyfhel.sub_plain(self, other, in_new_ctxt=False)
+            elif self._encoding == ENCODING_t.FRACTIONAL:
+                other = self._pyfhel.encodeFrac(float(other))
+                self._pyfhel.sub_plain(self, other, in_new_ctxt=False)
         else:
             raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
-    
+        return self
+
                         
     def __mul__(self, other):
         """Multiplies this ciphertext with either another PyCtxt or a PyPtxt plaintext.
@@ -283,8 +314,15 @@ cdef class PyCtxt:
             return self._pyfhel.multiply(self, other, in_new_ctxt=True)
         elif isinstance(other, PyPtxt):
             return self._pyfhel.multiply_plain(self, other, in_new_ctxt=True)
+        elif isinstance(other, (int, float)):
+            if self._encoding == ENCODING_t.INTEGER:
+                other = self._pyfhel.encodeInt(int(other))
+                return self._pyfhel.multiply_plain(self, other, in_new_ctxt=True)
+            elif self._encoding == ENCODING_t.FRACTIONAL:
+                other = self._pyfhel.encodeFrac(float(other))
+                return self._pyfhel.multiply_plain(self, other, in_new_ctxt=True)
         else:
-            raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt or PyPtxt"
+            raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt, PyPtxt or int|float"
                             "(is %s instead)"%(type(other)))
      
     def __rmul__(self, other): return self.__mul__(other)
@@ -306,9 +344,17 @@ cdef class PyCtxt:
             self._pyfhel.multiply(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
             self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
+        elif isinstance(other, (int, float)):
+            if self._encoding == ENCODING_t.INTEGER:
+                other = self._pyfhel.encodeInt(int(other))
+                self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
+            elif self._encoding == ENCODING_t.FRACTIONAL:
+                other = self._pyfhel.encodeFrac(float(other))
+                self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
         else:
-            raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt or PyPtxt"
+            raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt, PyPtxt or int|float"
                             "(is %s instead)"%(type(other)))
+        return self
 
 
     def __truediv__(self, divisor):
@@ -378,6 +424,7 @@ cdef class PyCtxt:
             raise TypeError("<Pyfhel ERROR> dividend encoding doesn't support"
                             "division (%s)"%(self._encoding))
         self._pyfhel.multiply_plain(self, inversePtxt, in_new_ctxt=False)
+        return self
 
                                     
     def __pow__(self, exponent, modulo):
@@ -389,19 +436,61 @@ cdef class PyCtxt:
             exponent (int): Exponent for the power.
         """
         if(exponent==2):
-            self._pyfhel.square()  
+            return self._pyfhel.square(self, in_new_ctxt=True)  
         else:
-            self._pyfhel.exponentiate(exponent)     
-                
+            return self._pyfhel.power(self, expon=exponent, in_new_ctxt=True)
+
+    def __ipow__(self, exponent):
+        """Exponentiates this ciphertext to the desired exponent, inplace.
+        
+        Exponentiates to the desired exponent.
+
+        Args:
+            exponent (int): Exponent for the power.
+        """
+        if(exponent==2):
+            self._pyfhel.square(self, in_new_ctxt=False)  
+        else:
+            self._pyfhel.power(self, expon=exponent, in_new_ctxt=False)
+        return self
                 
     def __rshift__(self, k):
-        """Rotates this ciphertext k positions.
+        """Rotates this ciphertext k positions to the right.
+        Only works in batching mode.
+        
+        Args:
+            k (int): Number of positions to rotate.
+        """
+        return self._pyfhel.rotate(self, -k, in_new_ctxt=True)
+
+    def __irshift__(self, k):
+        """Rotates this ciphertext k positions to the right, in-place.
+        Only works in batching mode.
 
         Args:
             k (int): Number of positions to rotate.
         """
-        self._pyfhel.rotate(self, k)
+        self._pyfhel.rotate(self, -k, in_new_ctxt=False)
+        return self
 
+    def __lshift__(self, k):
+        """Rotates this ciphertext k positions to the left.
+        Only works in batching mode.
+
+        Args:
+            k (int): Number of positions to rotate.
+        """
+        return self._pyfhel.rotate(self, k, in_new_ctxt=True)
+
+    def __ilshift__(self, k):
+        """Rotates this ciphertext k positions to the left, in-place.
+        Only works in batching mode.
+
+        Args:
+            k (int): Number of positions to rotate.
+        """
+        self._pyfhel.rotate(self, k, in_new_ctxt=False)
+        return self
 
     # =========================================================================
     # ============================ ENCR/DECR/CMP ==============================
