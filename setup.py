@@ -79,6 +79,8 @@ if platform.system() == 'Windows':
     # Windows' MSVC2019 compiler doesn't have an O3 optimization
     #>https://docs.microsoft.com/en-us/cpp/build/reference/o-options-optimize-code
     extra_compile_flags += ["-O2"]
+elif platform.system() == 'Darwin': # MacOS
+    extra_compile_flags += ["-std=c++17","-O3","-mmacosx-version-min=10.12"]
 else:  # Linux, GCC
     extra_compile_flags += ["-std=c++17","-O3"]
 
