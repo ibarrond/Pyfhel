@@ -158,3 +158,9 @@ cdef extern from "Afhel/Afseal.h" nogil:
         int getintDigits() except +
         int getfracDigits() except +
         bool getflagBatch() except +
+        bool is_secretKey_empty() except+
+        bool is_publicKey_empty() except+
+        bool is_rotKey_empty() except+
+        bool is_relinKey_empty() except+
+        bool is_context_empty() except+
+

@@ -108,6 +108,13 @@ cdef class Pyfhel:
     cpdef int getintDigits(self) except +
     cpdef int getfracDigits(self) except +
     cpdef bool getflagBatch(self) except +
+    
+    cpdef bool is_secretKey_empty(self) except+
+    cpdef bool is_publicKey_empty(self) except+
+    cpdef bool is_rotKey_empty(self) except+
+    cpdef bool is_relinKey_empty(self) except+
+    cpdef bool is_context_empty(self) except+
+
 
 # --------------------------------- UTILS --------------------------------------
 cpdef to_ENCODING_t(encoding) except +

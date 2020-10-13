@@ -88,12 +88,26 @@ cdef class Pyfhel:
     """
     def __cinit__(self):
         self.afseal = new Afseal()
+    
     def __dealloc__(self):
         if self.afseal != NULL:
             del self.afseal
+    
     def __iter__(self):
         return self
     
+    def __repr__(self):
+        return "<Pyfhel obj at {}, [pk:{}, sk:{}, rtk:{}, rlk:{}, contx({})]>".format(
+                hex(id(self)),
+                "-" if self.is_publicKey_empty() else "Y",
+                "-" if self.is_secretKey_empty() else "Y",
+                "-" if self.is_rotKey_empty() else "Y",
+                "-" if self.is_relinKey_empty() else f"Y[{self.relinBitCount()}b]",
+                "-" if self.is_context_empty() else \
+                        f"p={self.getp()}, m={self.getm()}, base={self.getbase()},"\
+                        f"sec={self.getsec()}, dig={self.getintDigits()}i.{self.getfracDigits()}f,"
+                        f"batch={self.batchEnabled()}")
+
     # =========================================================================
     # ============================ CRYPTOGRAPHY ===============================
     # =========================================================================
@@ -1393,3 +1407,28 @@ cdef class Pyfhel:
             * bool: flag for enabled BATCH encoding and operating.
         """
         return self.afseal.getflagBatch()
+    
+    cpdef bool is_secretKey_empty(self) except+:
+        """True if the current Pyfhel instance has no secret Key.
+        """
+        return self.afseal.is_secretKey_empty()
+
+    cpdef bool is_publicKey_empty(self) except+:
+        """True if the current Pyfhel instance has no public Key.
+        """
+        return self.afseal.is_publicKey_empty()
+
+    cpdef bool is_rotKey_empty(self) except+:
+        """True if the current Pyfhel instance has no rotation key.
+        """
+        return self.afseal.is_rotKey_empty()
+
+    cpdef bool is_relinKey_empty(self) except+:
+        """True if the current Pyfhel instance has no relinearization key.
+        """
+        return self.afseal.is_relinKey_empty()
+
+    cpdef bool is_context_empty(self) except+:
+        """True if the current Pyfhel instance has no context.
+        """
+        return self.afseal.is_context_empty()
