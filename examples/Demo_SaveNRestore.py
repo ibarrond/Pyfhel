@@ -50,5 +50,9 @@ ctxt2 = HE.encryptInt(42)
 ctxt2.save(tmp_dir.name + "/ctxt2")
 
 ctxt_restored = PyCtxt()
-ctxt_restored.load(tmp_dir.name + "/ctxt2")
+ctxt_restored.load(tmp_dir.name + "/ctxt2", int)
 assert HE2.decryptInt(ctxt_restored)==42, "decrypting ciphertext should work"
+
+
+# Cleaning up secure channel
+tmp_dir.cleanup()

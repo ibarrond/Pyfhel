@@ -70,4 +70,4 @@ print(c_res.decrypt())
 
 
 # Cleaning up secure channel
-del secure_channel
+secure_channel.cleanup()

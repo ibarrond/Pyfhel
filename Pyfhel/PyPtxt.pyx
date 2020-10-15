@@ -69,6 +69,7 @@ cdef class PyPtxt:
     def _pyfhel(self):
         """A pyfhel instance, used for operations"""
         return self._pyfhel
+
     @_pyfhel.setter
     def _pyfhel(self, new_pyfhel):
         """Sets the pyfhel instance, used for operations""" 
@@ -80,8 +81,8 @@ cdef class PyPtxt:
     cpdef bool is_zero(self) except +:
         """bool: Flag to quickly check if it is empty"""
         return self._ptr_ptxt.is_zero()
-    
-    cpdef string to_string(self) except +:
+
+    cpdef string to_poly_string(self) except +:
         """string: Polynomial representation of the plaintext"""
         return self._ptr_ptxt.to_string()
     
@@ -185,9 +186,10 @@ cdef class PyPtxt:
             raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not FRACTIONAL)")
         return self._pyfhel.decodeFrac(self)
     
-    def __str__(self):
-        return "<Pyfhel Ciphertext, encoding={}, size={}>".format(
-                ENCODING_t(self._encoding).name, self.size())
+    def __repr__(self):
+        return "<Pyfhel Ciphertext, encoding={}, poly={}>".format(
+                ENCODING_t(self._encoding).name,
+                str(self.to_poly_string())[:25]+'...' if len(str(self.to_poly_string()))>25 else '')
 
     def encode(self, value):
         self._pyfhel.encode(value, self)

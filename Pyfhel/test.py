@@ -4,11 +4,41 @@ import sys
 import tempfile
 import time
 import unittest
-
+from pathlib import Path
+from io import StringIO
+import contextlib
 import numpy as np
+
 # Local module
 from Pyfhel import PyCtxt, Pyfhel, PyPtxt
 from Pyfhel.util import ENCODING_t
+
+
+# Redirect stdout of Demos to a string, recover if error.
+# https://stackoverflow.com/a/41614610/9670056
+@contextlib.contextmanager
+def stdoutIO(stdout=None):
+    old = sys.stdout
+    if stdout is None:
+        stdout = StringIO()
+    sys.stdout = stdout
+    yield stdout
+    sys.stdout = old
+
+# Demo execution from https://stackoverflow.com/a/41658338/9670056
+def execfile(filepath, globals=None, locals=None):
+    if globals is None:
+        globals = {}
+    globals.update({
+        "__file__": filepath,
+        "__name__": "__main__",
+    })
+    with open(filepath, 'rb') as file:
+        with stdoutIO() as s:
+            exec(compile(file.read(), filepath, 'exec'), globals, locals)
+
+# Examples folder
+EXAMPLES_FOLDER = Path('../examples')
 
 # Value of p for batching: p=1964769281
 
@@ -20,7 +50,7 @@ class PyfhelTestCase(unittest.TestCase):
     def tearDown(self):
         sys.stderr.write("({}s) ...".format(round(time.time() - self.t0, 3)))
 
-    def test_PyPtxt_PyCtxt(self):
+    def test_PTXT_CTXT(self):
         pass
 
     def test_PyPtxt_creation_deletion(self):
@@ -114,12 +144,12 @@ class PyfhelTestCase(unittest.TestCase):
         pyfhel.keyGen()
         ptxt = pyfhel.encodeInt(127)
         self.assertEqual(
-            ptxt.to_string(), b"1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1x^1 + 1"
+            ptxt.to_poly_string(), b"1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1x^1 + 1"
         )
         self.assertEqual(pyfhel.decodeInt(ptxt), 127)
         ptxt2 = PyPtxt(ptxt)
         pyfhel.encodeInt(-2, ptxt)
-        self.assertEqual(ptxt.to_string(), b"10000x^1")
+        self.assertEqual(ptxt.to_poly_string(), b"10000x^1")
         self.assertEqual(pyfhel.decodeInt(ptxt), -2)
         self.assertEqual(pyfhel.decodeInt(ptxt2), 127)
 
@@ -128,10 +158,10 @@ class PyfhelTestCase(unittest.TestCase):
         pyfhel.contextGen(p=65537, m=8192, base=2, intDigits=80, fracDigits=20)
         pyfhel.keyGen()
         ptxt = pyfhel.encodeFrac(19.30)
-        self.assertTrue(ptxt.to_string(), b"9x^8190 + 1x^4 + 1x^1 + 1")
+        self.assertTrue(ptxt.to_poly_string(), b"9x^8190 + 1x^4 + 1x^1 + 1")
         self.assertEqual(round(pyfhel.decodeFrac(ptxt), 2), 19.30)
         pyfhel.encodeFrac(-2.25, ptxt)
-        self.assertEqual(ptxt.to_string(), b"1x^8190 + 10000x^1")
+        self.assertEqual(ptxt.to_poly_string(), b"1x^8190 + 10000x^1")
         self.assertEqual(round(pyfhel.decodeFrac(ptxt), 2), -2.25)
 
     def test_Pyfhel_2c_encode_decode_batch(self):
@@ -142,8 +172,6 @@ class PyfhelTestCase(unittest.TestCase):
         ptxt = pyfhel.encodeBatch([1, 2, 3, 4, 5, 6])
         self.assertEqual(pyfhel.getnSlots(), 8192)
         self.assertEqual(pyfhel.decodeBatch(ptxt)[:6], [1, 2, 3, 4, 5, 6])
-
-        # print(self.ptxt.to_string())
 
     def test_Pyfhel_2d_encode_decode_array(self):
         pyfhel = Pyfhel()
@@ -209,8 +237,6 @@ class PyfhelTestCase(unittest.TestCase):
         pyfhel = Pyfhel()
         pyfhel.contextGen(p=1964769281, m=8192, base=3, sec=192)
         pyfhel.keyGen()
-        # self.pyfhel.rotateKeyGen(60)
-        # self.pyfhel.relinKeyGen(60)
 
         ctxti = pyfhel.encryptInt(127)
         ctxti2 = pyfhel.encryptInt(-2)
@@ -222,10 +248,6 @@ class PyfhelTestCase(unittest.TestCase):
         ctxt_sub2 = pyfhel.sub_plain(ctxti, ptxti, in_new_ctxt=True)
         ctxt_mult = pyfhel.multiply(ctxti, ctxti2, in_new_ctxt=True)
         ctxt_mult2 = pyfhel.multiply_plain(ctxti, ptxti, in_new_ctxt=True)
-        # self.ctxt_rotate = self.pyfhel.rotate(self.ctxti, 2)
-        # self.ctxt_expon = self.pyfhel.power(self.ctxti, 3)
-        # self.ctxt_expon2 = self.pyfhel.power(self.ctxti2, 3)
-        # self.ctxt_polyEval = self.pyfhel.polyEval(self.ctxti, [1, 2, 1], in_new_ctxt=True)
 
         self.assertEqual(pyfhel.decryptInt(ctxt_add), 125)
         self.assertEqual(pyfhel.decryptInt(ctxt_add2), 130)
@@ -233,16 +255,11 @@ class PyfhelTestCase(unittest.TestCase):
         self.assertEqual(pyfhel.decryptInt(ctxt_sub2), 124)
         self.assertEqual(pyfhel.decryptInt(ctxt_mult), -254)
         self.assertEqual(pyfhel.decryptInt(ctxt_mult2), 381)
-        # self.assertEqual(self.pyfhel.decryptInt(self.ctxt_expon), 2048383)
-        # self.assertEqual(self.pyfhel.decryptInt(self.ctxt_expon2), -8)
-        # self.assertEqual(self.pyfhel.decryptInt(self.ctxt_polyEval), 16510)
 
     def test_Pyfhel_4b_operations_frac(self):
         pyfhel = Pyfhel()
         pyfhel.contextGen(p=1964769281, m=8192, base=3, sec=192)
         pyfhel.keyGen()
-        # self.pyfhel.rotateKeyGen(60)
-        # self.pyfhel.relinKeyGen(60)
 
         ctxti = pyfhel.encryptFrac(19.37)
         ctxti2 = pyfhel.encryptFrac(-2.25)
@@ -279,9 +296,6 @@ class PyfhelTestCase(unittest.TestCase):
         ctxt_mult2 = pyfhel.multiply_plain(ctxti, ptxti, in_new_ctxt=True)
         ctxt_rotate = pyfhel.rotate(ctxti, -2, in_new_ctxt=True)
         ctxt_rotate2 = pyfhel.rotate(ctxti, 2, in_new_ctxt=True)
-        # self.ctxt_expon = self.pyfhel.power(self.ctxti, 3)
-        # self.ctxt_expon2 = self.pyfhel.power(self.ctxti2, 3)
-        # self.ctxt_polyEval = self.pyfhel.polyEval(self.ctxti, [1, 2, 1], in_new_ctxt=True)
 
         self.assertEqual(pyfhel.decryptBatch(ctxt_add)[:6], [-5, -3, -1, 1, 3, 5])
         self.assertEqual(pyfhel.decryptBatch(ctxt_add2)[:6], [13, 17, 21, 25, 29, 33])
@@ -306,12 +320,12 @@ class PyfhelTestCase(unittest.TestCase):
         pyfhel.contextGen(p=1964769281, m=8192, base=2, sec=192, flagBatching=True)
         pyfhel.keyGen()
         pyfhel.rotateKeyGen(60)
-        # self.pyfhel.relinKeyGen(60)
+        pyfhel.relinKeyGen(60,3)
 
         self.assertTrue(pyfhel.saveContext("context.pycon"))
         self.assertTrue(pyfhel.savepublicKey("public_k.pypk"))
         self.assertTrue(pyfhel.savesecretKey("secret_k.pysk"))
-        # self.assertTrue(self.pyfhel.saverelinKey("relin_k.pyrlk"))
+        self.assertTrue(pyfhel.saverelinKey("relin_k.pyrlk"))
         self.assertTrue(pyfhel.saverotateKey("rotate_k.pyrok"))
 
     def test_Pyfhel_5b_restore_objects(self):
@@ -319,7 +333,7 @@ class PyfhelTestCase(unittest.TestCase):
         self.assertTrue(pyfhel.restoreContext("context.pycon"))
         self.assertTrue(pyfhel.restoresecretKey("secret_k.pysk"))
         self.assertTrue(pyfhel.restorepublicKey("public_k.pypk"))
-        # self.assertTrue(self.pyfhel.restorerelinKey("relin_k.pyrlk"))
+        self.assertTrue(pyfhel.restorerelinKey("relin_k.pyrlk"))
         self.assertTrue(pyfhel.restorerotateKey("rotate_k.pyrok"))
         os.remove("context.pycon")
         os.remove("secret_k.pysk")
@@ -394,7 +408,7 @@ class PyfhelTestCase(unittest.TestCase):
         self.assertEqual(pyfhel.decryptInt(loaded), 42)
         tmp_dir.cleanup()
 
-    def test_Pyfhel_5d_save_restore_float(self):
+    def test_Pyfhel_5e_save_restore_float(self):
         pyfhel = Pyfhel()
         pyfhel.contextGen(p=1964769281, m=8192, base=2, sec=192, flagBatching=True)
         pyfhel.keyGen()
@@ -412,7 +426,7 @@ class PyfhelTestCase(unittest.TestCase):
         self.assertEqual(pyfhel.decryptFrac(loaded), 3.125)
         tmp_dir.cleanup()
 
-    def test_Pyfhel_5d_save_restore_batch(self):
+    def test_Pyfhel_5f_save_restore_batch(self):
         pyfhel = Pyfhel()
         pyfhel.contextGen(p=1964769281, m=8192, base=2, sec=192, flagBatching=True)
         pyfhel.keyGen()
@@ -430,6 +444,38 @@ class PyfhelTestCase(unittest.TestCase):
         self.assertEqual(pyfhel.decryptBatch(loaded)[:4], [1, 2, 3, 4])
         tmp_dir.cleanup()
 
+    def test_Pyfhel_6_DEMOS(self):
+        pass
+
+    def test_Pyfhel_6a_demo_helloworld(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_HelloWorld.py')
+    
+    def test_Pyfhel_6b_demo_float(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_Float.py')
+
+    def test_Pyfhel_6c_demo_encoding(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_Encoding.py')
+
+    def test_Pyfhel_6d_demo_encrypting(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_Encrypting.py')
+
+    def test_Pyfhel_6e_demo_numpy(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_Numpy.py')
+
+    def test_Pyfhel_6f_demo_SaveNRestore(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_SaveNRestore.py')
+
+    def test_Pyfhel_6g_demo_simd(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_SIMD.py')
+
+    def test_Pyfhel_6h_demo_ClientServer(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_ClientServer.py')
+
+    def test_Pyfhel_6i_demo_MultDepth_n_relin(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_MultDepth_n_relin.py')
+        
+    def test_Pyfhel_6j_demo_MultDepth_n_relin(self):
+        execfile(EXAMPLES_FOLDER / 'Demo_ContextParameters.py')
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

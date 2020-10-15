@@ -91,6 +91,16 @@ cdef class PyCtxt:
         """int: Actual size of the ciphertext."""
         return self._ptr_ctxt.size()
 
+    @property    
+    def capacity(self):
+        """int: Maximum size the ciphertext can hold."""
+        return self._ptr_ctxt.size_capacity()
+
+    @property
+    def size(self):
+        """int: Actual size of the ciphertext."""
+        return self._ptr_ctxt.size()
+
     # =========================================================================
     # ================================== I/O ==================================
     # =========================================================================

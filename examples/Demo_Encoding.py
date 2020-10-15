@@ -44,8 +44,8 @@ print("    list ",vector2,'-> ptxt_b2 ', str(ptxt_b2))
 
 print("5. Encoding numpy 1D integer vectors using batching encodeArray")
 import numpy as np
-array1 = np.array([-6, -5, -4, -3, -2, -1])
-array2 = np.array([12, 15, 18, 21, 24, 27])
+array1 = np.array([-6, -5, -4, -3, -2, -1],dtype=np.int64)
+array2 = np.array([12, 15, 18, 21, 24, 27],dtype=np.int64)
 ptxt_a1 = HE.encodeArray(array1)   # Encoding array1 in a new PyPtxt with encodeArray
 ptxt_a2 = PyPtxt()                
 HE.encodeArray(array2, ptxt_a2)    # Encoding vector2 in an existing PyPtxt

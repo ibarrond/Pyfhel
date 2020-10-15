@@ -97,6 +97,17 @@ cdef class Pyfhel:
         return self
 
     def __repr__(self):
+        """A printable string with all the information about the Pyfhel object
+        
+        Info:
+            * at: hex ID, unique identifier and memory location.
+            * pk: 'Y' if public key is present. '-' otherwise.
+            * sk: 'Y' if secret key is present. '-' otherwise.
+            * rtk: 'Y' if rotation keys are present. '-' otherwise.
+            * rlk: 'Y' if relinarization keys are present. '-' otherwise.
+            * contx: Context, with values of p, m, base, security,
+                        # of int and frac digits and wether flagBatching is enabled.
+        """
         return "<Pyfhel obj at {}, [pk:{}, sk:{}, rtk:{}, rlk:{}, contx({})]>".format(
                 hex(id(self)),
                 "-" if self.is_publicKey_empty() else "Y",
@@ -108,6 +119,31 @@ cdef class Pyfhel:
                         f"sec={self.getsec()}, dig={self.getintDigits()}i.{self.getfracDigits()}f, "
                         f"batch={self.getflagBatch()}")
 
+    
+    @property
+    def p(self):
+        return self.getp()
+
+    @property
+    def m(self):
+        return self.getm()
+    
+    @property
+    def base(self):
+        return self.getbase()
+
+    @property
+    def intDigits(self):
+        return self.getintDigits()
+        
+    @property
+    def fracDigits(self):
+        return self.getfracDigits()
+
+    @property
+    def getflagBatch(self):
+        return self.getflagBatch()
+        
     # =========================================================================
     # ============================ CRYPTOGRAPHY ===============================
     # =========================================================================
