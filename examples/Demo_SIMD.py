@@ -4,8 +4,8 @@
 
 # This example uses sympy for primality testing, but only if sympy is installed
 def find_lib(lib=""):
-    import importlib
-    lib_spec = importlib.util.find_spec(lib)
+    from importlib import util
+    lib_spec = util.find_spec(lib)
     return lib_spec is not None
 sympy_installed = find_lib("sympy")
 if sympy_installed:
