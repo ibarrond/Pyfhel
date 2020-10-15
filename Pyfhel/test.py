@@ -38,7 +38,7 @@ def execfile(filepath, globals=None, locals=None):
             exec(compile(file.read(), filepath, 'exec'), globals, locals)
 
 # Examples folder
-EXAMPLES_FOLDER = Path('../examples')
+EXAMPLES_FOLDER = Path(__file__).parents[1].absolute() / 'examples'
 
 # Value of p for batching: p=1964769281
 
