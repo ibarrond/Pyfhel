@@ -95,7 +95,7 @@ cdef class Pyfhel:
     
     def __iter__(self):
         return self
-    
+
     def __repr__(self):
         return "<Pyfhel obj at {}, [pk:{}, sk:{}, rtk:{}, rlk:{}, contx({})]>".format(
                 hex(id(self)),
@@ -104,9 +104,9 @@ cdef class Pyfhel:
                 "-" if self.is_rotKey_empty() else "Y",
                 "-" if self.is_relinKey_empty() else f"Y[{self.relinBitCount()}b]",
                 "-" if self.is_context_empty() else \
-                        f"p={self.getp()}, m={self.getm()}, base={self.getbase()},"\
-                        f"sec={self.getsec()}, dig={self.getintDigits()}i.{self.getfracDigits()}f,"
-                        f"batch={self.batchEnabled()}")
+                        f"p={self.getp()}, m={self.getm()}, base={self.getbase()}, "\
+                        f"sec={self.getsec()}, dig={self.getintDigits()}i.{self.getfracDigits()}f, "
+                        f"batch={self.getflagBatch()}")
 
     # =========================================================================
     # ============================ CRYPTOGRAPHY ===============================

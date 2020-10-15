@@ -524,6 +524,9 @@ cdef class PyCtxt:
                 self.size(),
                 self.size_capacity(),
                 self._pyfhel.noiseLevel(self) if self._pyfhel else "-")
+                
+    def __bytes__(self):
+        return self.to_bytes()
 
     def encrypt(self, value):
         self._pyfhel.encrypt(value, self)
