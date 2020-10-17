@@ -581,9 +581,12 @@ cdef class Pyfhel:
         Based on the current context, initializes one relinearization key. 
         
         Args:
-            * bitCount (int): Bigger means faster but noisier (will require
-                            relinearization). Needs to be within [1, 60]
-                      
+            * bitCount (int): Bigger means faster but noisier (bigger
+                decrease in noise budget of the relinearized ciphertexts).
+                Needs to be within [1, 60].
+            * size (int): Number of keys created internally. There should be
+                equal or more than the size of the ciphertexts to relinearize.
+
         Return:
             None
         """

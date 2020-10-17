@@ -8,14 +8,13 @@
 #   > python3 setup.py clean --all
 
 import shutil, glob, fileinput, re, os, sys, sysconfig, platform
-from pathlib import Path
 
 # Check that Python version is 3.5+
 v_maj, v_min = sys.version_info[:2]
 assert (v_maj, v_min) >= (3,5),\
     "Pyfhel requires Python 3.5+ (your version is {}.{}).".format(v_maj, v_min)
 
-
+from pathlib import Path
 
 # -------------------------------- OPTIONS -------------------------------------
 # Compile cython files (.pyx) into C++ (.cpp) files to ship with the library.
