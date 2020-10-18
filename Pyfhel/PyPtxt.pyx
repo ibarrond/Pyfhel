@@ -68,15 +68,15 @@ cdef class PyPtxt:
         self._pyfhel = new_pyfhel 
         
         
-    cpdef bool is_zero(self):
+    cpdef bool is_zero(self) except +:
         """bool: Flag to quickly check if it is empty"""
         return self._ptr_ptxt.is_zero()
     
-    cpdef string to_string(self):
+    cpdef string to_string(self) except +:
         """string: Polynomial representation of the plaintext"""
         return self._ptr_ptxt.to_string()
     
-    cpdef void save(self, str fileName):
+    cpdef void save(self, str fileName) except +:
         """Save the ciphertext into a file.
 
         Args:
@@ -91,7 +91,7 @@ cdef class PyPtxt:
         finally:
             outputter.close()
 
-    cpdef void load(self, str fileName):
+    cpdef void load(self, str fileName) except +:
         """Load the plaintext from a file.
 
         Args:

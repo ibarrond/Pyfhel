@@ -917,7 +917,7 @@ cdef class Pyfhel:
     cpdef PyCtxt sub(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False) except +:
         """sub(PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False)
 
-        ubstracts one PyCtxt ciphertext from another.
+        Substracts one PyCtxt ciphertext from another.
         
         Substracts one ciphertext from another. Encoding must be the same.
         Requires same context and encryption with same public key.
