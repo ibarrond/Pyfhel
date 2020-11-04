@@ -1341,6 +1341,40 @@ cdef class Pyfhel:
     # =========================================================================
     # ============================== AUXILIARY ================================
     # =========================================================================
+    def MultDepth(self, max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False):
+        """MultDepth(self, max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False)
+
+        Empirically determines the multiplicative depth of a Pyfhel Object
+        for a given context. For this, it encrypts the inputs x, y and z with
+        Fractional encoding and performs the following chained multiplication
+        until the result deviates more than delta in absolute value:
+            x * y * z * y * z * y * z * y * z ...
+
+        After each multiplication, the ciphertext is relinearized and checked.
+
+        Ideally, y and z should be inverses to avoid wrapping over modulo p.
+
+        Requires the Pyfhel Object to have initialized context and pub/sec/relin keys.
+        """
+        x,y,z = x_y_z
+        cx = self.encryptFrac(x)
+        cy = self.encryptFrac(y)
+        cz = self.encryptFrac(z)
+        for m_depth in range(1, max_depth+1):
+            if m_depth%2: # Multiply by y and relinearize
+                x *= y
+                cx *= cy
+            else:         # Multiply by z and relinearize
+                x *= z
+                cx *= cz
+            ~cx           # Relinearize after every multiplication
+            x_hat = self.decryptFrac(cx)
+            if verbose:
+                print(f'Mult {m_depth} [budget: {self.noiseLevel(cx)} dB]: {x_hat} (expected {x})')
+            if abs(x - x_hat) > delta:
+                break
+        return m_depth
+
     cpdef bool batchEnabled(self) except +:
         """batchEnabled(self)
 

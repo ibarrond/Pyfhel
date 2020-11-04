@@ -338,6 +338,7 @@ class PyfhelTestCase(unittest.TestCase):
         os.remove("context.pycon")
         os.remove("secret_k.pysk")
         os.remove("public_k.pypk")
+        os.remove("relin_k.pyrlk")
         os.remove("rotate_k.pyrok")
 
     def test_Pyfhel_5c_save_restore_all(self):
@@ -474,7 +475,7 @@ class PyfhelTestCase(unittest.TestCase):
     def test_Pyfhel_6i_demo_MultDepth_n_relin(self):
         execfile(EXAMPLES_FOLDER / 'Demo_MultDepth_n_relin.py')
         
-    def test_Pyfhel_6j_demo_MultDepth_n_relin(self):
+    def test_Pyfhel_6j_demo_ContextParameters(self):
         execfile(EXAMPLES_FOLDER / 'Demo_ContextParameters.py')
 
 if __name__ == "__main__":

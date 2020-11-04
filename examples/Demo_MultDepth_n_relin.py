@@ -71,4 +71,8 @@ print("    -> Try this demo changing p to be 63 (enough to hold the result value
 print("    -> Try this demo with m=8192 (more multiplications are allowed, but operations are slower)")
 print("  - Decrypt and encrypt again.")
 print("  - Use bootstrapping: Sadly it is not available in SEAL, and even if it were, it would be extremely inefficient. It is always better to resort to the first option")
-HE
+
+
+print("7. How to check the multiplicative depth of a setup? Use the function MultDepth!")
+HE.MultDepth(max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=True)
+
