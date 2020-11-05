@@ -43,8 +43,8 @@ highlight_language = 'cython'
 # ones.
 extensions = [
     'cython_highlighting',
-
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -195,7 +195,9 @@ epub_title = project
 epub_exclude_files = ['search.html']
 
 
-# -- Extension configuration -------------------------------------------------
+# -- Personal configuration --------------------------------------------------
+autodoc_member_order = 'groupwise'
+
 
 # -- Options for intersphinx extension ---------------------------------------
 

@@ -32,6 +32,8 @@ If you're interested in contributing, please have a look at the Github repositor
 .. automodule:: Pyfhel
    :members:
    :undoc-members:
+   :private-members:
+   :special-members:
    :show-inheritance:
 
 Indices and tables
