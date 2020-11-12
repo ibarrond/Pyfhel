@@ -12,7 +12,7 @@ from cython.operator cimport dereference as deref
 
 # ----------------------------- IMPLEMENTATION --------------------------------
 cdef class PyPtxt:
-    """Plaintext of Pyfhel. Contains a value/vector of unencrypted ints/doubles.
+    """Plaintext class of Pyfhel, contains a value/vector of encoded ints/double.
 
     This class references SEAL, PALISADE and HElib plaintexts, using the one 
     corresponding to the backend selected in Pyfhel (SEAL by default).

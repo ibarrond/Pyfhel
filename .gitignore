@@ -44,5 +44,8 @@ Pyfhel/Scratchpad
 
 # Documentation
 docs/_autosummary
-docs/doctrees
+docs/_autoexamples
+**.doctree
+**.pickle
 docs/html
+docs/html/**

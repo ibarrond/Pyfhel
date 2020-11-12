@@ -21,25 +21,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   --------------------------------------------------------------------
-"""PYFHEL, PYthon For Homomorphic Encryption Libraries.
-
-Encrypted addition, multiplication, substraction, exponentiation of 
-integers/doubles. Implementation of homomorphic encryption using 
-SEAL/PALISADE/HELIB as backend. Pyfhel works with PyPtxt as  
-plaintext class and PyCtxt as cyphertext class.
-
-Example:
-    >>> he = Pyfhel()
-    >>> he.contextGen(p=65537)
-    >>> he.keyGen()
-    >>> p1 = he.encode(4)
-    >>> p2 = he.encode(2)
-    >>> c1 = he.encrypt(p1)
-    >>> c2 = he.encrypt(p2)
-    >>> c1 = c1 + c2
-    >>> p_res = he.decrypt(c1)
-    6
-"""    
 
 # -------------------------------- IMPORTS ------------------------------------
 # Both numpy and the Cython declarations for numpy
@@ -67,7 +48,7 @@ include "util/utils.pxi"
 
 # ------------------------- PYTHON IMPLEMENTATION -----------------------------
 cdef class Pyfhel:
-    """PYFHEL, PYthon For Homomorphic Encryption Libraries.
+    """Context class encapsulating most of the Homomorphic Encryption functionalities.
 
     Encrypted addition, multiplication, substraction, exponentiation of 
     integers/doubles. Implementation of homomorphic encryption using 
@@ -1348,12 +1329,10 @@ cdef class Pyfhel:
         for a given context. For this, it encrypts the inputs x, y and z with
         Fractional encoding and performs the following chained multiplication
         until the result deviates more than delta in absolute value:
-            x * y * z * y * z * y * z * y * z ...
+        >    x * y * z * y * z * y * z * y * z ...
 
         After each multiplication, the ciphertext is relinearized and checked.
-
         Ideally, y and z should be inverses to avoid wrapping over modulo p.
-
         Requires the Pyfhel Object to have initialized context and pub/sec/relin keys.
         """
         x,y,z = x_y_z

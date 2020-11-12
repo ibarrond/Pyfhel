@@ -1,5 +1,13 @@
-# Encrypting Demo for Pyfhel, covering the different ways of encrypting
-#   and decrypting.
+"""
+Encrypting with Pyfhel
+========================================
+
+Encrypting Demo for Pyfhel, covering the different ways of encrypting
+and decrypting.
+"""
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/encrypting.jpg'
+
+
 
 from Pyfhel import Pyfhel, PyPtxt, PyCtxt
 

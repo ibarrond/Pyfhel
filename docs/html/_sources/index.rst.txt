@@ -6,11 +6,11 @@
 .. role:: bolditalic
   :class: bolditalic
 
-.. |warning| image:: _static/warning_icon.png
+.. |warning| image:: static/warning_icon.png
     :align: middle
     :width: 20
 
-.. image:: _static/logo_title.png
+.. image:: static/logo_title.png
     :target: https://github.com/ibarrond/Pyfhel
 
 .. image:: https://travis-ci.org/ibarrond/Pyfhel.svg?branch=master
@@ -50,9 +50,9 @@ Index
     :maxdepth: 2
     
     source/getting_started
+    _autoexamples/index
     source/API_reference
     source/API_serialized
-    source/autoexamples/index
 
 Glossary and tables
 ====================

@@ -1,12 +1,32 @@
-# Fractional / float Demo for Pyfhel, covering the different ways of encrypting
-#   and decrypting.
+"""
+MultDepth and Relineraization
+==============================
 
+This demo focuses on managing ciphertext size and noise budget.
+
+Each ciphertext can be seen as (oversimplifying a bit) a polynomial with noise.
+When you perform encrypted multiplication, the size of the output polynomial grows
+based on the size of the tho muliplicands, which increases its memory footprint
+and slows down operations. In order to keep ciphertext sizes low (min. 2), it
+is recommended to relinearize after each multiplication, effectively shrinking
+the ciphertext back to minimum size. This demo will show relinearization in action.
+
+Besides all this, the noise inside the ciphertext grows greatly when multiplying.
+Each ciphertext is given a noise budget when first encrypted, which decreases
+irreversibly for each multiplication. If the noise budget reaches zero, the
+resultin ciphertext cannot be decrypted correctly anymore. This demo will present
+several strategies to deal with high noise.
+"""
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/multDepth.jpg'
+
+
+# %%
+# We start by importing the library with the three main classes:
+# 
+# * Pyfhel class contains most of the functions.
+# * PyPtxt is the plaintext class
 from Pyfhel import Pyfhel, PyPtxt, PyCtxt
 
-print("==============================================================")
-print("============ Pyfhel MultDepth and Relineraization ============")
-print("==============================================================")
-print(" This demo focuses on ciphertext size and noise budget")
 
 print("1. Creating Context and KeyGen in a Pyfhel Object. Using 64 ")
 print("     bits for integer part and 32 bits for decimal part.")

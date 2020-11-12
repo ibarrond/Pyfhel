@@ -1,6 +1,11 @@
-# SIMD Demo for Pyfhel, showing the use of the library to operate 
-# with multiple integers at once with the batching technique.
+"""
+SIMD - Single Instruction Multiple Data
+========================================
 
+The present demo displays the use of Pyfhel to operate 
+with multiple integers at once with the batching technique.
+"""
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/simd.png'
 
 # This example uses sympy for primality testing, but only if sympy is installed
 def find_lib(lib=""):
@@ -17,10 +22,6 @@ from Pyfhel import Pyfhel, PyPtxt, PyCtxt
 # PyCtxt is the ciphertext class
 
 import numpy as np
-
-print("==============================================================")
-print("======================= Pyfhel BATCHING ======================")
-print("==============================================================")
 
 
 print("1. Creating Context and KeyGen in a Pyfhel Object. Careful about the context parameters!")

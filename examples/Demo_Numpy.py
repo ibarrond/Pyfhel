@@ -1,4 +1,14 @@
-# Usage of Pyfhel with Numpy
+"""
+Pyfhel with Numpy
+==============================
+
+This demo shows how to leverage on the np.ndarray container to perform
+encrypted operations over vectors of ciphertexts.
+"""
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/numpy.png'
+
+
+
 import numpy as np
 
 from Pyfhel import Pyfhel, PyPtxt, PyCtxt

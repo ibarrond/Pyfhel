@@ -15,18 +15,10 @@ from cython.operator cimport dereference as deref
 
 # ----------------------------- IMPLEMENTATION --------------------------------
 cdef class PyCtxt:
-    """Ciphertext of Pyfhel. Contains a value/vector of encrypted ints/doubles.
+    """Ciphertext class of Pyfhel, contains a value/vector of encrypted ints/doubles.
 
     This class references SEAL, PALISADE and HElib ciphertexts, using the one 
-    corresponding to the backend selected in Pyfhel. By default, it is SEAL.
-
-    Attributes:
-        copy_ctxt (PyCtxt, optional): Other PyCtxt to deep copy.
-        pyfhel (Pyfhel, optional): Pyfhel instance needed to operate.
-        fileName (str|Path, optional): Load PyCtxt from this file.
-                         Requires non-empty encoding.
-        encoding (str|type|int, optional): encoding type of the new PyCtxt.
-    
+    corresponding to the backend selected in Pyfhel. By default, it is SEAL.   
     """
     def __cinit__(self,
                   PyCtxt copy_ctxt=None,
@@ -53,7 +45,30 @@ cdef class PyCtxt:
     def __dealloc__(self):
         if self._ptr_ctxt != NULL:
             del self._ptr_ctxt
-            
+    
+    def __init__(self,
+                  PyCtxt copy_ctxt=None,
+                  Pyfhel pyfhel=None,
+                  fileName=None,
+                  encoding=None):
+        """__init__(PyCtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, encoding=None)
+
+        Initializes an empty PyCtxt ciphertext.
+        
+        To fill the ciphertext during initialization you can:
+            - Provide a PyCttxt to deep copy. 
+            - Provide a pyfhel instance to act as its backend.
+            - Provide a fileName and an encoding to load the data from a saved file.
+
+        Attributes:
+            copy_ctxt (PyCtxt, optional): Other PyCtxt to deep copy.
+            pyfhel (Pyfhel, optional): Pyfhel instance needed to operate.
+            fileName (str, pathlib.Path, optional): Load PyCtxt from this file.
+                            Requires non-empty encoding.
+            encoding (str, type, int, optional): encoding type of the new PyCtxt.
+        """
+        pass
+
     @property
     def _encoding(self):
         """ENCODING_t: returns the encoding type"""
@@ -123,7 +138,7 @@ cdef class PyCtxt:
         exist already, in which case it will be overwriten.
 
         Args:
-            fileName: (:obj:`str`) File where the ciphertext will be stored.
+            fileName: (str) File where the ciphertext will be stored.
         """
         cdef ofstream* outputter
         cdef string bFileName = fileName.encode('utf8')
@@ -153,11 +168,11 @@ cdef class PyCtxt:
         Load the ciphertext from a file.
 
         Args:
-            fileName: String or Path (pathlib) where the ciphertext is retrieved from.
-            encoding: (:obj:`str`|class|`int`|ENCODING_t) One of the following:
-            * 'int'|'integer'|int|1|ENCODING_t.INTEGER -> integer encoding.
-            * 'float'|'double'|float|2|ENCODING_t.FRACTIONAL -> fractional encoding.
-            * 'array'|'batch'|'matrix'|list|3|ENCODING_t.BATCH -> batch encoding.
+            fileName (str, pathlib.Path): path to file where the ciphertext is retrieved from.
+            encoding: (str, type, int, ENCODING_t) One of the following:
+              * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
+              * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
+              * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
         """
         self.load(_to_valid_file_str(fileName, check=True), encoding)
 
@@ -167,28 +182,11 @@ cdef class PyCtxt:
         Load the ciphertext from a file.
 
         Args:
-            fileName: (:obj:str) Valid file where the ciphertext is retrieved from.
-            encoding: (:obj:str|class|int|ENCODING_t) One of the following:
-            * str:
-              * 'int'|'integer' for INTEGER encoding.
-              * 'float'|'double' for FRACTIONAL encoding.
-              * 'array'|'batch'|'matrix' for BATCH encoding.
-            * Python class:
-              * int for INTEGER encoding.
-              * float for FRACTIONAL encoding.
-              * list for BATCH encoding.
-            * int:
-              * 1 for INTEGER encoding.
-              * 2 for FRACTIONAL encoding.
-              * 3 for BATCH encoding.
-            * int:
-              * 1 for INTEGER encoding.
-              * 2 for FRACTIONAL encoding.
-              * 3 for BATCH encoding.
-            * A valid ENCODING_t Enum: 
-              * ENCODING_t.INTEGER for INTEGER encoding.
-              * ENCODING_t.FRACTIONAL for FRACTIONAL encoding.
-              * ENCODING_t.BATCH for BATCH encoding.
+            fileName: (str) Valid file where the ciphertext is retrieved from.
+            encoding: (str, type, int, ENCODING_t) One of the following:
+              * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
+              * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
+              * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
         """
         cdef ifstream* inputter
         cdef string bFileName = fileName.encode('utf8')
@@ -205,11 +203,11 @@ cdef class PyCtxt:
         Recover the serialized ciphertext from a binary/bytes string.
 
         Args:
-            content: (:obj:`bytes`) Python bytes object containing the PyCtxt.
-            encoding: (:obj:`str`|class|`int`|ENCODING_t) One of the following:
-            * 'int'|'integer'|int|1|ENCODING_t.INTEGER -> integer encoding.
-            * 'float'|'double'|float|2|ENCODING_t.FRACTIONAL -> fractional encoding.
-            * 'array'|'batch'|'matrix'|list|3|ENCODING_t.BATCH -> batch encoding.
+            content (bytes):  Python bytes object containing the PyCtxt.
+            encoding (str, type, int, ENCODING_t):  One of the following:
+              * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
+              * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
+              * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
@@ -558,12 +556,14 @@ cdef class PyCtxt:
         return self._pyfhel.decryptFrac(self)
     
     def __repr__(self):
+        sk_not_empty = self._pyfhel is not None and not self._pyfhel.is_secretKey_empty()
         return "<Pyfhel Ciphertext at {}, encoding={}, size={}/{}, noiseBudget={}>".format(
                 hex(id(self)),
                 ENCODING_t(self._encoding).name,
                 self.size(),
                 self.size_capacity(),
-                self._pyfhel.noiseLevel(self) if self._pyfhel else "-")
+                self._pyfhel.noiseLevel(self) if sk_not_empty else "-"
+                  )
                 
     def __bytes__(self):
         return self.to_bytes()

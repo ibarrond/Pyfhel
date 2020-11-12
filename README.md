@@ -1,4 +1,4 @@
-# Pyfhel [_v2.2.4_] <img width="10%" height="10%" align="right"  src="/docs/_static/logo.png">
+# Pyfhel [_v2.2.5_] <img width="10%" height="10%" align="right"  src="/docs/_static/logo.png">
 [![Build Status](https://travis-ci.org/ibarrond/Pyfhel.svg?branch=master)](https://travis-ci.org/ibarrond/Pyfhel)
 [![Documentation Status](https://readthedocs.org/projects/pyfhel/badge/?version=latest)](https://pyfhel.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)
@@ -12,14 +12,14 @@
 **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries.
 
 * **_Status_**: STABLE.
-* **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR) over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
+* **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
 * **_Language_**: Python (3.5+) & Cython on top of C++17.
 * **_OS_**: Windows (tested with `MSVC2017`, `MSVC2019`, and `gcc6` for WSL) and Linux (tested on `gcc6`). MacOS not supported.
 
 	:warning: _REQUIRED: Python must have been compiled with C++17: `g++>=6` | `MSVC 2017+`_ :warning:
 	
 * **_Docs_**: For now, only the API is documented [[link](https://pyfhel.readthedocs.io/en/latest/)]. Examples are heavily commented.
-* **_Dependencies_**: There are two possible backends, HE libraries in C++:
+* **_Dependencies_**: There are two possible backends (both shipped alongside Pyfhel), HE libraries in C++:
    
    1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies, default).
    2. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies) __WIP__
@@ -28,7 +28,7 @@
 ## Summary
 **PY**thon **F**or **H**momorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
 
-**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**momorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all three backends. Additionally, this project contains a large series of Demos & Tests for **HElib**(no longer in use), **SEAL**, **Afhel** & **Pyfhel**.
+**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**momorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all backends. Additionally, this project contains a large series of Demos & Tests for **HElib**(no longer in use), **SEAL**, **Afhel** & **Pyfhel**.
 
 Last but not least, we include Makefiles to compile and install **HElib**, **SEAL** and **Afhel** as shared libraries in Ubuntu, which can then be linked to other C++ programs using the tags `-lhelib`, `-lseal` and `-lafhel`.
 

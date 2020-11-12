@@ -1,4 +1,11 @@
-# ContextParameters shows how several parameters affect performance.
+"""
+Context Parameters in Pyfhel
+========================================
+
+Context Parameters shows how several parameters affect performance.
+"""
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/contextParameters.jpg'
+# 
 #  TODO: Finish for all parameters. Show possible values of each.
 
 import time

@@ -1,11 +1,15 @@
-# Fractional / float Demo for Pyfhel, covering the different ways of encrypting
-#   and decrypting.
+"""
+Fractionals with Pyfhel
+========================================
+
+
+Fractional / float Demo for Pyfhel, operating with fixed point encoded
+values. It follows the same structure as the HelloWorld with Integer encoding.
+"""
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/float.png'
+
 
 from Pyfhel import Pyfhel, PyPtxt, PyCtxt
-
-print("==============================================================")
-print("===================== Pyfhel FRACTIONAL ======================")
-print("==============================================================")
 
 
 print("1. Creating Context and KeyGen in a Pyfhel Object. Using 64 ")
