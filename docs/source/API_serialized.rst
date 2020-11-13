@@ -1,4 +1,4 @@
-One page API
+API serialized 
 ===============
 
 .. automodule:: Pyfhel

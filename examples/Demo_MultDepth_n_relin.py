@@ -94,5 +94,5 @@ print("  - Use bootstrapping: Sadly it is not available in SEAL, and even if it 
 
 
 print("7. How to check the multiplicative depth of a setup? Use the function MultDepth!")
-HE.MultDepth(max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=True)
+HE.multDepth(max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=True)
 

@@ -4,7 +4,6 @@ Client/Server demo with Pyfhel
 
 Context Parameters shows how several parameters affect performance.
 """
-# sphinx_gallery_thumbnail_path = 'static/thumbnails/clientServer.png'
 
 from Pyfhel import Pyfhel, PyPtxt, PyCtxt
 import tempfile
@@ -79,3 +78,7 @@ print(c_res.decrypt())
 
 # Cleaning up secure channel
 secure_channel.cleanup()
+
+
+
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/clientServer.png'

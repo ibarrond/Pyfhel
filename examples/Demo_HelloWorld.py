@@ -6,8 +6,6 @@ This basic example shows the simplest use of the library by
 encrypting two integers, operating with them (+,-,*) and decrypting
 the results.
 """
-# sphinx_gallery_thumbnail_path = 'static/thumbnails/helloworld.png'
-
 # %%
 # 1. Imports
 # ---------------------------
@@ -43,8 +41,8 @@ integer2 = -2
 ctxt1 = HE.encryptInt(integer1) # Encryption makes use of the public key
 ctxt2 = HE.encryptInt(integer2) # For integers, encryptInt function is used.
 print("3. Integer Encryption")
-print("    int ",integer1,'-> ctxt1 ', type(ctxt1), str(ctxt1))
-print("    int ",integer2,'-> ctxt2 ', type(ctxt2), str(ctxt2))
+print("    int ",integer1,'-> ctxt1 ', type(ctxt1))
+print("    int ",integer2,'-> ctxt2 ', type(ctxt2))
 # %%
 # # The best way to obtain information from a ciphertext is to print it:
 print(ctxt1)
@@ -76,3 +74,7 @@ print("#. Decrypting result:")
 print("     addition:       decrypt(ctxt1 + ctxt2) =  ", resSum)
 print("     substraction:   decrypt(ctxt1 - ctxt2) =  ", resSub)
 print("     multiplication: decrypt(ctxt1 + ctxt2) =  ", resMul)
+
+
+
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/helloworld.png'

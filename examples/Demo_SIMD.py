@@ -5,8 +5,6 @@ SIMD - Single Instruction Multiple Data
 The present demo displays the use of Pyfhel to operate 
 with multiple integers at once with the batching technique.
 """
-# sphinx_gallery_thumbnail_path = 'static/thumbnails/simd.png'
-
 # This example uses sympy for primality testing, but only if sympy is installed
 def find_lib(lib=""):
     from importlib import util
@@ -92,3 +90,7 @@ print("     ctxt1_rot_r4 = ctxt1 >> 4:  First 10 values:", resrotr4[:10])
 print("                                 last 10 values:", resrotr4[-10:])
 print("     ctxt2_rot_l2 = ctxt2 << 2:  First 10 values:", resrotl2[:10])
 print("                                 last 10 values:", resrotl2[m//2-10:m//2])
+
+
+
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/simd.png'

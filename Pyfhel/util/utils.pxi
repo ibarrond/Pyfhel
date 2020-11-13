@@ -19,28 +19,23 @@ cpdef to_ENCODING_t(encoding) except +:
     
     Arguments:
         encoding (str, type, int, ENCODING_t): One of the following:
-            * str:
-                * 'int'|'integer' for INTEGER encoding.
-                * 'float'|'double' for FRACTIONAL encoding.
-                * 'array'|'batch'|'matrix' for BATCH encoding.
-            * Python class:
-                * int for INTEGER encoding.
-                * float for FRACTIONAL encoding.
-                * list for BATCH encoding.
-            * int:
-                * 1 for INTEGER encoding.
-                * 2 for FRACTIONAL encoding.
-                * 3 for BATCH encoding.
-            * int:
-                * 1 for INTEGER encoding.
-                * 2 for FRACTIONAL encoding.
-                * 3 for BATCH encoding.
-            * An ENCODING_t Enum (does nothing)
+
+            str:
+              'int'|'integer' for INTEGER encoding, 'float'|'double' for 
+              FRACTIONAL encoding, 'array'|'batch'|'matrix' for BATCH encoding.
+
+            Python class:
+                int for INTEGER encoding, float for FRACTIONAL encoding, 
+                list for BATCH encoding.
+
+            int:
+                1 for INTEGER encoding, 2 for FRACTIONAL encoding,
+                3 for BATCH encoding.
+
+            ENCODING_t Enum (does nothing)
+
     Returns:
-        ENCODING_t: 
-            * ENCODING_t.INTEGER for INTEGER encoding.
-            * ENCODING_t.FRACTIONAL for FRACTIONAL encoding.
-            * ENCODING_t.BATCH for BATCH encoding.
+        ENCODING_t: INTEGER, FRACTIONAL or BATCH encoding.
     """
     if type(encoding) is unicode or isinstance(encoding, unicode):
         # encoding is a string. Casting it to str just in case.

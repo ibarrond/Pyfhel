@@ -43,6 +43,7 @@ highlight_language = 'cython'
 # ones.
 extensions = [
     'cython_highlighting',
+    'sphinxcontrib.fulltoc',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',
@@ -207,6 +208,7 @@ autodoc_member_order = 'groupwise'
 autosummary_generate = True
 
 # -- Options for sphinx_gallery extension ------------------------------------
+import platform
 sphinx_gallery_conf = {
     'examples_dirs': '../examples',   # path to your example scripts
     'gallery_dirs': '_autoexamples',  # path to where to save gallery generated output
@@ -215,7 +217,13 @@ sphinx_gallery_conf = {
     'min_reported_time': 0,
     'remove_config_comments': True,
     'expected_failing_examples': [],
-    'show_memory': True,
+    'show_memory': platform.system() != 'Windows', # RAM consumption if not in Windows
+    ## Links to examples disabled
+    # # directory where function/class granular galleries are stored
+    # 'backreferences_dir'  : '_backreferences',
+    # # Modules for which function/class level galleries are created. In
+    # # this case sphinx_gallery and numpy in a tuple of strings.
+    # 'doc_module'          : ('Pyfhel'),
 }
 
 # -- Options for intersphinx extension ---------------------------------------
@@ -224,8 +232,11 @@ sphinx_gallery_conf = {
 intersphinx_mapping = {
     'python': ('https://docs.python.org/{.major}'.format(sys.version_info), None),
     'numpy': ('https://numpy.org/doc/stable/', None),
+    'np': ('https://numpy.org/doc/stable/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+    'Pyfhel': ('https://pyfhel.readthedocs.io/en/latest/', None),
 }
+
 
 # -- Options for todo extension ----------------------------------------------
 

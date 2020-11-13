@@ -5,9 +5,6 @@ Saving and Restoring
 This demo creates and saves in files every kind of object managed by Pyfhel.
 Subsequently, these objects are read from the files and verified.
 """
-# sphinx_gallery_thumbnail_path = 'static/thumbnails/saveRestore.png'
-
-
 
 import tempfile
 
@@ -65,3 +62,7 @@ assert HE2.decryptInt(ctxt_restored)==42, "decrypting ciphertext should work"
 
 # Cleaning up secure channel
 tmp_dir.cleanup()
+
+
+
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/saveRestore.png'

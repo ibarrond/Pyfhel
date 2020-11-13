@@ -85,7 +85,7 @@ python3 Pyfhel/test.py
 You're ready to go! Just create a pull request to the original repo.
 
 ## Project contents
-- `docs/` Documentation, generated automatically using sphinx.
+- `docs/` Documentation, generated automatically using sphinx and pushed to [readthedocs](https://pyfhel.readthedocs.io)
 - `examples/` Demos and small programs to showcase multiple functionalities. Check `Pyfhel/test.py` for further cases!
 - `Pyfhel/` contains the source code for Pyfhel, Afhel, SEAL & PALISADE. 
 - `Pyfhel/.Makefiles/Makefile_HElib`, a makefile to compile and install HElib as a dynamic library (`-lhelib`).
@@ -95,9 +95,8 @@ You're ready to go! Just create a pull request to the original repo.
 
 
 - **Authors**: Alberto Ibarrondo [@ibarrond](https://github.com/ibarrond) with Laurent Gomez (SAP) in collaboration with EURECOM ([Melek Onen](http://www.eurecom.fr/~onen/)).
-- Latest release: 03/08/2018
 
-This library was created originally for the project "Privacy for Big Data Analytics" in EURECOM. The SW is originally based on **[HElib](https://github.com/shaih/HElib) by Shai Halevi**, with touches from **[HEIDE](https://github.com/heide-support/HEIDE) by Grant Frame**, and performance improvements thanks to **[analysis of addition](https://mshcruz.wordpress.com/2017/05/13/sum-of-encrypted-vectors/) by Matheus S.H. Cruz**. In compliance with their respective Licenses, I name all of them in this section. This project could not be possible without them. For any legal disclaimer, please contact the owner of this repository. Also, the same type of license (GNU GPLv3) applies to Afhel & Pyfhel, as mandated.
+This library was created originally for the project "Privacy for Big Data Analytics" in EURECOM. For any legal disclaimer, please contact the owner of this repository.
 
 ## Legal disclaimer
 
@@ -105,4 +104,4 @@ Pyfhel can be used, modified, copied in any way you see fit. This project is Ope
 
    1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Ibarrondo, Laurent (SAP) and Onen (EURECOM)`.
 
-   2. Offer the exact same License, allowing legal permission to copy, distribute and/or modify any SW using Pyfhel. Hence, any software using Pyfhel must remain Open Source.
+   2. Offer the exact same License, allowing legal permission to copy, distribute and/or modify any SW using Pyfhel. Hence, **any software using Pyfhel must remain Open Source**.

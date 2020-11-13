@@ -56,7 +56,7 @@ cdef class PyCtxt:
         Initializes an empty PyCtxt ciphertext.
         
         To fill the ciphertext during initialization you can:
-            - Provide a PyCttxt to deep copy. 
+            - Provide a PyCtxt to deep copy. 
             - Provide a pyfhel instance to act as its backend.
             - Provide a fileName and an encoding to load the data from a saved file.
 
@@ -71,24 +71,30 @@ cdef class PyCtxt:
 
     @property
     def _encoding(self):
-        """ENCODING_t: returns the encoding type"""
+        """ENCODING_t: returns the encoding type.
+        
+        Can be set to: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
+
+        See Also:
+            to_ENCODING_t
+
+        :meta public:
+        """
         return ENCODING_t(self._encoding)
     
     @_encoding.setter
     def _encoding(self, new_encoding):
-        """Sets Encoding type: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH""" 
         if not isinstance(new_encoding, ENCODING_t):
             raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be ENCODING_t")        
         self._encoding = new_encoding.value
         
     @_encoding.deleter
     def _encoding(self):
-        """Sets Encoding to 1-UNDEFINED""" 
         self._encoding = ENCODING_t.UNDEFINED.value
         
     @property
     def _pyfhel(self):
-        """A pyfhel instance, used for operations"""
+        """A Pyfhel instance, used for operations"""
         return self._pyfhel
     @_pyfhel.setter
     def _pyfhel(self, new_pyfhel):
@@ -97,11 +103,18 @@ cdef class PyCtxt:
         self._pyfhel = new_pyfhel 
         
     cpdef int size_capacity(self) except +:
-        """int: Maximum size the ciphertext can hold."""
+        """Maximum size the ciphertext can hold.
+        
+        Return:
+            int: allocated size for this ciphertext
+        """
         return self._ptr_ctxt.size_capacity()
      
     cpdef int size(self) except +:
-        """int: Actual size of the ciphertext."""
+        """Current size of the ciphertext.
+        
+        Return:
+            int: size of this ciphertext"""
         return self._ptr_ctxt.size()
 
     @property    
@@ -118,7 +131,11 @@ cdef class PyCtxt:
     def noiseBudget(self):
         """int: Noise budget.
         
-        A value of 0 means that it cannot be decrypted correctly anymore."""
+        A value of 0 means that it cannot be decrypted correctly anymore.
+        
+        See Also:
+            noiseLevel
+        """
         return self._pyfhel.noiseLevel(self)
 
     # =========================================================================
@@ -128,6 +145,12 @@ cdef class PyCtxt:
         """to_file(Path fileName)
         
         Alias of `save` with input sanitizing.
+
+        Args:
+            fileName: (str, pathlib.Path) File where the ciphertext will be stored.
+
+        Return:
+            None
         """
         self.save(_to_valid_file_str(fileName))
 
@@ -139,6 +162,9 @@ cdef class PyCtxt:
 
         Args:
             fileName: (str) File where the ciphertext will be stored.
+
+        Return:
+            None            
         """
         cdef ofstream* outputter
         cdef string bFileName = fileName.encode('utf8')
@@ -154,7 +180,7 @@ cdef class PyCtxt:
         Serialize the ciphertext into a binary/bytes string.
 
         Return:
-            * bytes: serialized ciphertext
+            bytes: serialized ciphertext
         """
         cdef ostringstream outputter
         self._ptr_ctxt.save(outputter)
@@ -165,7 +191,7 @@ cdef class PyCtxt:
         
         Alias of `load` with input sanitizer.
 
-        Load the ciphertext from a file.
+        Load the ciphertext from a file. Requires knowing the encoding.
 
         Args:
             fileName (str, pathlib.Path): path to file where the ciphertext is retrieved from.
@@ -173,6 +199,12 @@ cdef class PyCtxt:
               * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
               * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
               * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
+
+        Return:
+            None
+
+        See Also:
+            to_ENCODING_t
         """
         self.load(_to_valid_file_str(fileName, check=True), encoding)
 
@@ -187,6 +219,12 @@ cdef class PyCtxt:
               * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
               * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
               * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
+              
+        Return:
+            None
+
+        See Also:
+            to_ENCODING_t
         """
         cdef ifstream* inputter
         cdef string bFileName = fileName.encode('utf8')
@@ -229,10 +267,10 @@ cdef class PyCtxt:
         Sums with a PyPtxt/PyCtxt, storing the result a new ciphertext.
 
         Args:
-            other (PyCtxt|PyPtxt): Second summand.
+            other (PyCtxt, PyPtxt): Second summand.
 
         Returns:
-            (PyCtxt): Ciphertext resulting of substraction
+            PyCtxt: Ciphertext resulting of substraction
 
         Raise:
             TypeError: if other doesn't have a valid type.
@@ -258,7 +296,7 @@ cdef class PyCtxt:
         Sums with a PyPtxt/PyCtxt, storing the result in this ciphertext.
 
         Args:
-            other (PyCtxt|PyPtxt): Second summand.
+            other (PyCtxt, PyPtxt): Second summand.
             
         Raise:
             TypeError: if other doesn't have a valid type.
@@ -285,9 +323,9 @@ cdef class PyCtxt:
         Substracts with a PyPtxt/PyCtxt, storing the result in a new ciphertext.
 
         Args:
-            other (PyCtxt|PyPtxt): Substrahend, to be substracted from this ciphertext.
+            other (PyCtxt, PyPtxt): Substrahend, to be substracted from this ciphertext.
         Returns:
-            (PyCtxt): Ciphertext resulting of substraction
+            PyCtxt: Ciphertext resulting of substraction
 
         Raise:
             TypeError: if other doesn't have a valid type.
@@ -313,7 +351,7 @@ cdef class PyCtxt:
         Substracts with a PyPtxt/PyCtxt, storing the result in this ciphertext.
 
         Args:
-            other (PyCtxt|PyPtxt): Substrahend, to be substracted from this ciphertext.
+            other (PyCtxt, PyPtxt): Substrahend, to be substracted from this ciphertext.
             
         Raise:
             TypeError: if other doesn't have a valid type.
@@ -339,10 +377,10 @@ cdef class PyCtxt:
         Multiplies with a PyPtxt/PyCtxt, storing the result in a new ciphertext.
 
         Args:
-            other (PyCtxt|PyPtxt): Multiplier, to be multiplied with this ciphertext.
+            other (PyCtxt, PyPtxt): Multiplier, to be multiplied with this ciphertext.
 
         Returns:
-            (PyCtxt): Ciphertext resulting of multiplication
+            PyCtxt: Ciphertext resulting of multiplication
 
         Raise:
             TypeError: if other doesn't have a valid type.
@@ -369,10 +407,10 @@ cdef class PyCtxt:
         Multiplies with a PyPtxt/PyCtxt, storing the result in this ciphertext.
 
         Args:
-            other (PyCtxt|PyPtxt): Multiplier, to be multiplied with this ciphertext.
+            other (PyCtxt, PyPtxt): Multiplier, to be multiplied with this ciphertext.
 
         Returns:
-            (PyCtxt): Ciphertext resulting of multiplication
+            PyCtxt: Ciphertext resulting of multiplication
 
         Raise:
             TypeError: if other doesn't have a valid type.
@@ -406,7 +444,7 @@ cdef class PyCtxt:
         For FractionalEncoding, the inverse is calculated as 1/divisor.
 
         Args:
-            divisor (int|float|PyPtxt): divisor for the operation.
+            divisor (int, float, PyPtxt): divisor for the operation.
         """
         if isinstance(divisor, PyPtxt):
             divisor = divisor.decode()
@@ -440,7 +478,7 @@ cdef class PyCtxt:
         For FractionalEncoding, the inverse is calculated as 1/divisor.
 
         Args:
-            divisor (int|float|PyPtxt): divisor for the operation.
+            divisor (int, float, PyPtxt): divisor for the operation.
         """
         if isinstance(divisor, PyPtxt):
             divisor = divisor.decode()
@@ -534,6 +572,9 @@ cdef class PyCtxt:
 
         Requires valid relinearization keys with a bitcount higher than the
         current size of this ciphertext.
+
+        See Also:
+            relinearize
         """
         self._pyfhel.relinearize(self)
         return self
@@ -543,19 +584,25 @@ cdef class PyCtxt:
     # =========================================================================
 
     def __len__(self):
+        """Return the current size of the ciphertext.
+        
+        See Also:
+            size()
+        """
         return self.size()
 
-    def __int__(self):
-        if (self._encoding != ENCODING_T.INTEGER):
-            raise RuntimeError("<Pyfhel ERROR> casting (decrypting) to int requires INTEGER encoding")
-        return self._pyfhel.decryptInt(self)
+    # def __int__(self):
+    #     if (self._encoding != ENCODING_T.INTEGER):
+    #         raise RuntimeError("<Pyfhel ERROR> casting (decrypting) to int requires INTEGER encoding")
+    #     return self._pyfhel.decryptInt(self)
 
-    def __float__(self):
-        if (self._encoding != ENCODING_T.FRACTIONAL):
-            raise RuntimeError("<Pyfhel ERROR> casting (decrypting) to float requires FRACTIONAL encoding")
-        return self._pyfhel.decryptFrac(self)
+    # def __float__(self):
+    #     if (self._encoding != ENCODING_T.FRACTIONAL):
+    #         raise RuntimeError("<Pyfhel ERROR> casting (decrypting) to float requires FRACTIONAL encoding")
+    #     return self._pyfhel.decryptFrac(self)
     
     def __repr__(self):
+        """Prints information about the current ciphertext"""
         sk_not_empty = self._pyfhel is not None and not self._pyfhel.is_secretKey_empty()
         return "<Pyfhel Ciphertext at {}, encoding={}, size={}/{}, noiseBudget={}>".format(
                 hex(id(self)),
@@ -566,10 +613,37 @@ cdef class PyCtxt:
                   )
                 
     def __bytes__(self):
+        """Serialize current ciphertext to bytes"""
         return self.to_bytes()
 
     def encrypt(self, value):
+        """encrypt(value)
+        
+        Encrypts the given value using _pyfhel.
+        
+        Arguments:
+            value (int, float, np.array): Encrypts accordingly to the tipe
+            
+        Return:
+            None
+            
+        See Also:
+            Pyfhel.encrypt()
+        """
         self._pyfhel.encrypt(value, self)
     
     def decrypt(self):
+        """decrypt()
+        
+        Decrypts itself using _pyfhel.
+        
+        Arguments:
+            None
+            
+        Return:
+            int, float, np.array: value decrypted.
+   
+        See Also:
+            Pyfhel.decrypt()
+        """
         return self._pyfhel.decrypt(self, decode_value=True)

@@ -54,18 +54,6 @@ cdef class Pyfhel:
     integers/doubles. Implementation of homomorphic encryption using 
     SEAL/PALISADE/HELIB as backend. Pyfhel works with PyPtxt as  
     plaintext class and PyCtxt as cyphertext class.
-    
-    Example:
-    >>> he = Pyfhel()
-    >>> he.ContextGen(p=65537)
-    >>> he.KeyGen(p=65537)
-    >>> p1 = he.encode(4)
-    >>> p2 = he.encode(2)
-    >>> c1 = he.encrypt(p1)
-    >>> c2 = he.encrypt(p2)
-    >>> c1 = c1 + c2
-    >>> p_res = he.decrypt(c1)
-    6
     """
     def __cinit__(self):
         self.afseal = new Afseal()
@@ -103,26 +91,34 @@ cdef class Pyfhel:
     
     @property
     def p(self):
+        """Plaintext modulus. All operations are modulo p"""
         return self.getp()
 
     @property
     def m(self):
+        """Polynomial coefficient modulus. (1*x^m+1). 
+                
+        Directly linked to the multiplication depth (see multDepth)."""
         return self.getm()
     
     @property
     def base(self):
+        """Polynomial base."""
         return self.getbase()
 
     @property
     def intDigits(self):
+        """Truncated positions for integer part in FRACTIONAL encoding"""
         return self.getintDigits()
         
     @property
     def fracDigits(self):
+        """Truncated positions for decimal part in FRACTIONAL encoding"""
         return self.getfracDigits()
 
     @property
     def getflagBatch(self):
+        """Wether batching is enabled or not"""
         return self.getflagBatch()
         
     # =========================================================================
@@ -132,7 +128,7 @@ cdef class Pyfhel:
     cpdef contextGen(self, long p, long m=2048, bool flagBatching=False,
                      long base=2, long sec=128, int intDigits=64,
                      int fracDigits = 32) except +:
-        """contextGen(long p, long m=2048, bool flagBatching=False, long base=2, long sec=128, int intDigits=64, int fracDigits = 32)
+        """contextGen(int p, int m=2048, bool flagBatching=False, int base=2, int sec=128, int intDigits=64, int fracDigits = 32)
         
         Generates Homomorphic Encryption context based on parameters.
         
@@ -144,21 +140,21 @@ cdef class Pyfhel:
         
         Some tips: 
 
-        m-> Higher allows more encrypted operations. In batch mode it
+        - m-> Higher allows more encrypted operations. In batch mode it
             is the number of integers per ciphertext.
-        base-> Affects size of plaintexts and ciphertexts, and FRACTIONAL
-            encoding. See encryptFrac.
-        intDigits & fracDigits-> applicable with FRACTIONAL encoding,
-            out of 'm'
+        - base-> Affects size of plaintexts and ciphertexts, and FRACTIONAL
+            encoding.
+        - intDigits & fracDigits-> applicable with FRACTIONAL encoding.
 
         Args:
-            * p (long): Plaintext modulus. All operations are modulo p.
-            * m (long=2048): Polynomial coefficient modulus. (Poly: 1*x^m+1)
-            * flagBatching (bool=false): Set to true to enable batching.
-            * base (long=2): Polynomial base. 
-            * sec (long=128): Security level equivalent in AES. 128 or 192.
-            * intDigits (int=64): truncated positions for integer part.
-            * fracDigits (int=32): truncated positions for fractional part.
+            p (int): Plaintext modulus. All operations are modulo p.
+            m (int): Polynomial coefficient modulus. (Poly: 1*x^m+1). 
+                directly linked to the multiplication depth (see multDepth).
+            flagBatching (bool): Set to true to enable batching.
+            base (int): Polynomial base. 
+            sec (int): Security level equivalent in AES. 128 or 192.
+            intDigits (int): truncated positions for integer part.
+            fracDigits (int): truncated positions for fractional part.
                       
         Return:
             None
@@ -176,7 +172,7 @@ cdef class Pyfhel:
         
         Args:
             None
-                      
+
         Return:
             None
         """
@@ -185,7 +181,7 @@ cdef class Pyfhel:
     
     # .............................. ENCYRPTION ...............................
     cpdef PyCtxt encryptInt(self, int64_t value, PyCtxt ctxt=None) except +:
-        """encryptInt(int64_t value, PyCtxt ctxt=None)
+        """encryptInt(value, PyCtxt ctxt=None)
         
         Encrypts a single int value into a PyCtxt ciphertext.
         
@@ -194,11 +190,11 @@ cdef class Pyfhel:
         If provided a ciphertext, encrypts the value inside it. 
         
         Args:
-            * value (int): value to encrypt.
-            * ctxt (PyCtxt=None): Optional destination ciphertext.  
+            value (int): value to encrypt.
+            ctxt (PyCtxt, optional): Optional destination ciphertext.  
             
         Return:
-            * PyCtxt: the ciphertext containing the encrypted plaintext
+            PyCtxt: the ciphertext containing the encrypted plaintext
         """
         if ctxt is None:
             ctxt = PyCtxt()
@@ -208,7 +204,7 @@ cdef class Pyfhel:
         return ctxt
     
     cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=None) except +:
-        """encryptFrac(double value, PyCtxt ctxt=None)
+        """encryptFrac(value, PyCtxt ctxt=None)
         
         Encrypts a single float value into a PyCtxt ciphertext.
         
@@ -219,11 +215,11 @@ cdef class Pyfhel:
         If provided a ciphertext, encrypts the plaintext inside it. 
         
         Args:
-            * value (float): value to encrypt.
-            * ctxt (PyCtxt=None): Optional destination ciphertext.  
+            value (float): value to encrypt.
+            ctxt (PyCtxt, optional): Optional destination ciphertext.  
             
         Return:
-            * PyCtxt: the ciphertext containing the encrypted plaintext
+            PyCtxt: the ciphertext containing the encrypted plaintext
         """
         if ctxt is None:
             ctxt = PyCtxt()
@@ -235,7 +231,7 @@ cdef class Pyfhel:
 
     cpdef PyCtxt encryptBatch(self, vector[int64_t] vec,
                               PyCtxt ctxt=None) except +: 
-        """encryptBatch(vector[int64_t] vec,PyCtxt ctxt=None)
+        """encryptBatch(list[int] vec,PyCtxt ctxt=None)
         
         Encrypts a 1D vector of integers into a PyCtxt ciphertext.
         
@@ -246,11 +242,11 @@ cdef class Pyfhel:
         If provided a ciphertext, encrypts the plaintext inside it. 
         
         Args:
-            * ptxt (np.ndarray[int, ndim=1, mode="c"]): plaintext to encrypt.
-            * ctxt (PyCtxt=None): Optional destination ciphertext.  
+            ptxt (np.ndarray[int, ndim=1, mode="c"]): plaintext to encrypt.
+            ctxt (PyCtxt, optional): Optional destination ciphertext.  
             
         Return:
-            * PyCtxt: the ciphertext containing the encrypted plaintext
+            PyCtxt: the ciphertext containing the encrypted plaintext
         """
         if ctxt is None:
             ctxt = PyCtxt()
@@ -272,11 +268,11 @@ cdef class Pyfhel:
         If provided a ciphertext, encrypts the plaintext inside it. 
         
         Args:
-            * ptxt (np.ndarray[int, ndim=1, mode="c"]): plaintext to encrypt.
-            * ctxt (PyCtxt=None): Optional destination ciphertext.  
+            ptxt (np.ndarray[int, ndim=1, mode="c"]): plaintext to encrypt.
+            ctxt (PyCtxt, optional): Optional destination ciphertext.  
             
         Return:
-            * PyCtxt: the ciphertext containing the encrypted plaintext
+            PyCtxt: the ciphertext containing the encrypted plaintext
         """
         if ctxt is None:
             ctxt = PyCtxt()
@@ -297,11 +293,11 @@ cdef class Pyfhel:
         If provided a ciphertext, encrypts the plaintext inside it. 
         
         Args:
-            * ptxt (PyPtxt): plaintext to encrypt.
-            * ctxt (PyCtxt=None): Optional destination ciphertext.  
+            ptxt (PyPtxt): plaintext to encrypt.
+            ctxt (PyCtxt, optional): Optional destination ciphertext.  
             
         Return:
-            * PyCtxt: the ciphertext containing the encrypted plaintext
+            PyCtxt: the ciphertext containing the encrypted plaintext
             
         Raise:
             TypeError: if the plaintext doesn't have a valid type.
@@ -329,14 +325,14 @@ cdef class Pyfhel:
         If provided a ciphertext, encrypts the plaintext inside it. 
         
         Args:
-            * ptxt (PyPtxt|int|double|np_1d_int_array): plaintext to encrypt.
-            * ctxt (PyCtxt=None): Optional destination ciphertext.  
+            ptxt (PyPtxt, int, double, np.ndarray): plaintext to encrypt.
+            ctxt (PyCtxt, optional): Optional destination ciphertext.  
             
         Return:
-            * PyCtxt: the ciphertext containing the encrypted plaintext
+            PyCtxt: the ciphertext containing the encrypted plaintext
             
         Raise:
-            * TypeError: if the plaintext doesn't have a valid type.
+            TypeError: if the plaintext doesn't have a valid type.
         """
         if isinstance(ptxt, PyPtxt):
             return self.encryptPtxt(ptxt, ctxt)
@@ -365,13 +361,13 @@ cdef class Pyfhel:
         the current context. PyCtxt encoding must be INTEGER.
         
         Args:
-            * ctxt (PyCtxt=None): ciphertext to decrypt. 
+            ctxt (PyCtxt, optional): ciphertext to decrypt. 
             
         Return:
-            * int: the decrypted integer value
+            int: the decrypted integer value
             
         Raise:
-            * RuntimeError: if the ctxt encoding isn't ENCODING_T.INTEGER.
+            RuntimeError: if the ctxt encoding isn't ENCODING_t.INTEGER
         """
         if (ctxt._encoding != ENCODING_T.INTEGER):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
@@ -388,13 +384,13 @@ cdef class Pyfhel:
         the current context. PyCtxt encoding must be FRACTIONAL.
         
         Args:
-            * ctxt (PyCtxt): ciphertext to decrypt. 
+            ctxt (PyCtxt): ciphertext to decrypt. 
             
         Return:
-            * float: the decrypted float value
+            float: the decrypted float value
             
         Raise:
-            * RuntimeError: if the ctxt encoding isn't ENCODING_T.FRACTIONAL.
+            RuntimeError: if the ctxt encoding isn't ENCODING_t.FRACTIONAL
         """
         if (ctxt._encoding != ENCODING_T.FRACTIONAL):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
@@ -412,13 +408,13 @@ cdef class Pyfhel:
         ciphertext inside it. 
         
         Args:
-            * ctxt (PyCtxt): ciphertext to decrypt. 
+            ctxt (PyCtxt): ciphertext to decrypt. 
             
         Return:
-            * PyCtxt: the ciphertext containing the encrypted plaintext
+            PyCtxt: the ciphertext containing the encrypted plaintext
             
         Raise:
-            * RuntimeError: if the ciphertext encoding isn't ENCODING_T.BATCH.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.BATCH
         """
         if (ctxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
@@ -434,13 +430,13 @@ cdef class Pyfhel:
         ciphertext inside it. 
         
         Args:
-            * ctxt (PyCtxt): ciphertext to decrypt. 
+            ctxt (PyCtxt): ciphertext to decrypt. 
             
         Return:
-            * PyCtxt: the ciphertext containing the encrypted plaintext
+            PyCtxt: the ciphertext containing the encrypted plaintext
             
         Raise:
-            * RuntimeError: if the ciphertext encoding isn't ENCODING_T.BATCH.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.BATCH
         """
         if (ctxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
@@ -458,11 +454,11 @@ cdef class Pyfhel:
         value).
         
         Args:
-            * ctxt (PyCtxt): ciphertext to decrypt. 
-            * ptxt (PyPtxt=None): Optional destination plaintext.
+            ctxt (PyCtxt): ciphertext to decrypt. 
+            ptxt (PyPtxt, optional): Optional destination plaintext.
             
         Return:
-            * PyPtxt: the decrypted plaintext
+            PyPtxt: the decrypted plaintext
         """
         if ptxt is None:
             ptxt = PyPtxt()
@@ -486,15 +482,15 @@ cdef class Pyfhel:
         If provided a plaintext, decrypts the ciphertext inside it. 
         
         Args:
-            * ctxt (PyCtxt|int|double|np_1d_int_array): plaintext to encrypt.
-            * decode_value (bool=False): return value or return ptxt.
-            * ptxt (PyPtxt=None): Optional destination ciphertext.  
+            ctxt (PyCtxt): ciphertext to decrypt.
+            decode_value (bool): return value or return PyPtxt.
+            ptxt (PyPtxt, optional): Optional destination PyPtxt.  
             
         Return:
-            * PyPtxt|int|double|vector[int]: the decrypted result
+            PyPtxt, int, float, list[int]: the decrypted result
             
         Raise:
-            * TypeError: if the plaintext doesn't have a valid type.
+            TypeError: if the cipertext encoding is invalid.
         """
         if (decode_value):
             if (ctxt._encoding == ENCODING_T.BATCH):
@@ -504,7 +500,7 @@ cdef class Pyfhel:
             elif (ctxt._encoding == ENCODING_T.INTEGER):
                 return self.decryptInt(ctxt)
             elif (ctxt._encoding == ENCODING_T.UNDEFINED):
-                raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
+                raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt when decrypting")
         else: # Decrypt to plaintext        
             if ptxt is None:
                 ptxt = PyPtxt()
@@ -523,10 +519,10 @@ cdef class Pyfhel:
         on the current context.
         
         Args:
-            * ctxt (PyCtxt): ciphertext to be measured.
+            ctxt (PyCtxt): ciphertext to be measured.
             
         Return:
-            * int: the noise budget level
+            int: the noise budget level
         """
         return self.afseal.noiseLevel(deref(ctxt._ptr_ctxt))
     
@@ -541,7 +537,7 @@ cdef class Pyfhel:
         Based on the current context, initializes one rotation key. 
         
         Args:
-            * bitCount (int): Bigger means faster but noisier (will require
+            bitCount (int): Bigger means faster but noisier (will require
                             relinearization). Needs to be within [1, 60]
                       
         Return:
@@ -562,10 +558,10 @@ cdef class Pyfhel:
         Based on the current context, initializes one relinearization key. 
         
         Args:
-            * bitCount (int): Bigger means faster but noisier (bigger
+            bitCount (int): Bigger means faster but noisier (bigger
                 decrease in noise budget of the relinearized ciphertexts).
                 Needs to be within [1, 60].
-            * size (int): Number of keys created internally. There should be
+            size (int): Number of keys created internally. There should be
                 equal or more than the size of the ciphertexts to relinearize.
 
         Return:
@@ -588,7 +584,7 @@ cdef class Pyfhel:
         exception being thrown.
                 
         Args:
-            * bitCount (int): The bigger the faster but noisier (will require
+            bitCount (int): The bigger the faster but noisier (will require
                             relinearization). Needs to be within [1, 60]
                       
         Return:
@@ -609,11 +605,11 @@ cdef class Pyfhel:
         If provided a plaintext, encodes the value inside it. 
         
         Args:
-            * value (int): value to encrypt.
-            * ptxt (PyPtxt=None): Optional destination plaintext.  
+            value (int): value to encrypt.
+            ptxt (PyPtxt, optional): Optional destination plaintext.  
             
         Return:
-            * PyPtxt: the plaintext containing the encoded value
+            PyPtxt: the plaintext containing the encoded value
         """
         if ptxt is None:
             ptxt = PyPtxt()
@@ -630,11 +626,11 @@ cdef class Pyfhel:
         If provided a plaintext, encodes the value inside it. 
         
         Args:
-            * value (float): value to encrypt.
-            * ptxt (PyPtxt=None): Optional destination plaintext.   
+            value (float): value to encrypt.
+            ptxt (PyPtxt, optional): Optional destination plaintext.   
             
         Return:
-            * PyPtxt: the plaintext containing the encoded value
+            PyPtxt: the plaintext containing the encoded value
         """
         if ptxt is None:
             ptxt = PyPtxt()
@@ -654,11 +650,11 @@ cdef class Pyfhel:
         Maximum size of the vector defined by parameter 'm' from context.
         
         Args:
-            * vec (vector[int64_t]): vector to encode.
-            * ptxt (PyPtxt=None): Optional destination plaintext.  
+            vec (list[int]): vector to encode.
+            ptxt (PyPtxt, optional): Optional destination plaintext.  
             
         Return:
-            * PyPtxt: the plaintext containing the encoded vector.
+            PyPtxt: the plaintext containing the encoded vector.
         """
         if ptxt is None:
             ptxt = PyPtxt()
@@ -667,7 +663,7 @@ cdef class Pyfhel:
         return ptxt  
     
     cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=None) except +:
-        """encodeArray(int64_t[::1] &arr, PyPtxt ptxt=None)
+        """encodeArray(np.array[int] arr, PyPtxt ptxt=None)
 
         Encodes a 1D numpy array of integers into a PyPtxt plaintext.
         
@@ -678,11 +674,11 @@ cdef class Pyfhel:
         Maximum size of the vector defined by parameter 'm' from context.
         
         Args:
-            * vec (vector[int64_t]): vector to encode.
-            * ptxt (PyPtxt=None): Optional destination plaintext.  
+            vec (np.array[int]): vector to encode.
+            ptxt (PyPtxt, optional): Optional destination plaintext.  
             
         Return:
-            * PyPtxt: the plaintext containing the encoded vector.
+            PyPtxt: the plaintext containing the encoded vector.
         """
         if ptxt is None:
             ptxt = PyPtxt()
@@ -704,14 +700,14 @@ cdef class Pyfhel:
         If provided a plaintext, encodes the vector inside it. 
         
         Args:
-            * val_vec (int|float|vector[int64_t]): value/vector to encode.
-            * ptxt (PyPtxt=None): Optional destination plaintext. 
+            val_vec (int, float, list[int]): value/vector to encode.
+            ptxt (PyPtxt, optional): Optional destination plaintext. 
             
         Return:
-            * PyPtxt: the plaintext containing the encoded vector.
+            PyPtxt: the plaintext containing the encoded vector.
             
         Raise:
-            * TypeError: if the val_vec doesn't have a valid type.
+            TypeError: if the val_vec doesn't have a valid type.
         """            
         if isinstance(val_vec, np.ndarray):
             if (val_vec.ndim is not 1) or \
@@ -738,13 +734,13 @@ cdef class Pyfhel:
         the current context. PyPtxt encoding must be INTEGER.
         
         Args:
-            * ptxt (PyPtxt=None): plaintext to decode. 
+            ptxt (PyPtxt, optional): plaintext to decode. 
             
         Return:
-            * int64_t: the decoded integer value
+            int: the decoded integer value
             
         Raise:
-            * RuntimeError: if the ciphertext encoding isn't ENCODING_T.INTEGER.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.INTEGER
         """
         if (ptxt._encoding != ENCODING_T.INTEGER):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeInt")
@@ -761,13 +757,13 @@ cdef class Pyfhel:
         the current context. PyPtxt encoding must be FRACTIONAL.
         
         Args:
-            * ptxt (PyPtxt): plaintext to decode.
+            ptxt (PyPtxt): plaintext to decode.
             
         Return:
-            * double: the decoded float value
+            float: the decoded float value
             
         Raise:
-            * RuntimeError: if the ciphertext encoding isn't ENCODING_T.FRACTIONAL.
+            RuntimeError: if the ciphertext encoding isn't ENCODING_t.FRACTIONAL
         """
         if (ptxt._encoding != ENCODING_T.FRACTIONAL):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeFrac")
@@ -784,13 +780,13 @@ cdef class Pyfhel:
         the current context. PyPtxt encoding must be BATCH.
         
         Args:
-            * ptxt (PyPtxt): plaintext to decode.
+            ptxt (PyPtxt): plaintext to decode.
             
         Return:
-            * vector[int64_t]: the vectort containing the decoded values
+            list[int]: the vectort containing the decoded values
             
         Raise:
-            * RuntimeError: if the plaintext encoding isn't ENCODING_T.BATCH.
+            RuntimeError: if the plaintext encoding isn't ENCODING_t.BATCH
         """
         if (ptxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeBatch")
@@ -806,13 +802,13 @@ cdef class Pyfhel:
         the current context. PyPtxt encoding must be BATCH.
         
         Args:
-            * ptxt (PyPtxt): plaintext to decode.
+            ptxt (PyPtxt): plaintext to decode.
             
         Return:
-            * vector[int64_t]: the vectort containing the decoded values
+            np.array: the vector containing the decoded values
             
         Raise:
-            * RuntimeError: if the plaintext encoding isn't ENCODING_T.BATCH.
+            RuntimeError: if the plaintext encoding isn't ENCODING_t.BATCH
         """
         if (ptxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeArray")
@@ -831,14 +827,13 @@ cdef class Pyfhel:
         decoding function based on type.
     
         Args:
-            * ptxt (PyPtxt|int|double|np_1d_int_array): plaintext to encrypt.
-            * ctxt (PyCtxt=None): Optional destination ciphertext.  
+            ptxt (PyPtxt, int, float, np.array): plaintext to decode.
             
         Return:
-            * int|double|vector[int]: the decoded value or vector;
+            int, float, list[int]: the decoded value or vector.
             
         Raise:
-            * TypeError: if the plaintext doesn't have a valid type.
+            TypeError: if the plaintext doesn't have a valid type.
         """
         if (ptxt._encoding == ENCODING_T.BATCH):
             return self.decodeBatch(ptxt)
@@ -859,10 +854,10 @@ cdef class Pyfhel:
         Square PyCtxt ciphertext value/s.
     
         Args:
-            * ctxt (PyCtxt): ciphertext whose values are squared.  
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            ctxt (PyCtxt): ciphertext whose values are squared.  
+            in_new_ctxt (bool): result in a newly created ciphertext
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -878,11 +873,11 @@ cdef class Pyfhel:
         Negate PyCtxt ciphertext value/s.
     
         Args:
-            * ctxt (PyCtxt): ciphertext whose values are negated.   
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            ctxt (PyCtxt): ciphertext whose values are negated.   
+            in_new_ctxt (bool): result in a newly created ciphertext
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -896,19 +891,19 @@ cdef class Pyfhel:
     cpdef PyCtxt add(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False) except +:
         """add(PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False)
 
-        Sum two PyCtxt ciphertexts.
+        Sum two PyCtxt ciphertexts homomorphically.
         
         Sums two ciphertexts. Encoding must be the same. Requires same
         context and encryption with same public key. The result is applied
         to the first ciphertext.
     
         Args:
-            * ctxt (PyCtxt): ciphertext whose values are added with ctxt_other.  
-            * ctxt_other (PyCtxt): ciphertext left untouched.  
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            ctxt (PyCtxt): ciphertext whose values are added with ctxt_other.  
+            ctxt_other (PyCtxt): ciphertext left untouched.  
+            in_new_ctxt (bool): result in a newly created ciphertext
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
             raise RuntimeError(f"<Pyfhel ERROR> encoding type mistmatch in add terms"
@@ -932,12 +927,12 @@ cdef class Pyfhel:
         is applied to the first ciphertext.
     
         Args:
-            * ctxt (PyCtxt): ciphertext whose values are added with ptxt.  
-            * ptxt (PyPtxt): plaintext left untouched.  
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            ctxt (PyCtxt): ciphertext whose values are added with ptxt.  
+            ptxt (PyPtxt): plaintext left untouched.  
+            in_new_ctxt (bool): result in a newly created ciphertext
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ptxt._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms"
@@ -961,12 +956,12 @@ cdef class Pyfhel:
         The result is stored/applied to the first ciphertext.
     
         Args:
-            * ctxt (PyCtxt): ciphertext substracted by ctxt_other.    
-            * ctxt_other (PyCtxt): ciphertext being substracted from ctxt.
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            ctxt (PyCtxt): ciphertext substracted by ctxt_other.    
+            ctxt_other (PyCtxt): ciphertext being substracted from ctxt.
+            in_new_ctxt (bool): result in a newly created ciphertext
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms"
@@ -989,12 +984,12 @@ cdef class Pyfhel:
         stored/applied to the ciphertext.
     
         Args:
-            * ctxt (PyCtxt): ciphertext substracted by ptxt.   
+            ctxt (PyCtxt): ciphertext substracted by ptxt.   
             * ptxt (PyPtxt): plaintext substracted from ctxt.
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            in_new_ctxt (bool): result in a newly created ciphertext
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ptxt._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms"
@@ -1019,12 +1014,12 @@ cdef class Pyfhel:
         applied to the first ciphertext.
     
         Args:
-            * ctxt (PyCtxt): ciphertext multiplied with ctxt_other.   
-            * ctxt_other (PyCtxt): ciphertext left untouched.  
-            * in_new_ctxt (bool=False): result in a newly created ciphertext.
+            ctxt (PyCtxt): ciphertext multiplied with ctxt_other.   
+            ctxt_other (PyCtxt): ciphertext left untouched.  
+            in_new_ctxt (bool): result in a newly created ciphertext.
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ctxt_other._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms"
@@ -1048,11 +1043,11 @@ cdef class Pyfhel:
         result is applied to the first ciphertext.
     
         Args:
-            * ctxt (PyCtxt): ciphertext whose values are multiplied with ptxt.  
-            * ptxt (PyPtxt): plaintext left untouched.  
+            ctxt (PyCtxt): ciphertext whose values are multiplied with ptxt.  
+            ptxt (PyPtxt): plaintext left untouched.  
             
         Return:
-            * PyCtxt resulting ciphertext, either the input transformed or a new one
+            PyCtxt: resulting ciphertext, either the input transformed or a new one
         """
         if (ctxt._encoding != ptxt._encoding):
             raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms"
@@ -1074,12 +1069,12 @@ cdef class Pyfhel:
         Requires previously initialized rotation keys with rotateKeyGen().
     
         Args:
-            * ctxt (PyCtxt): ciphertext whose values are rotated.
-            * k (int): number of positions to rotate.
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            ctxt (PyCtxt): ciphertext whose values are rotated.
+            k (int): number of positions to rotate.
+            in_new_ctxt (bool): result in a newly created ciphertext
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         if (ctxt._encoding != ENCODING_T.BATCH):
             raise RuntimeError("<Pyfhel ERROR> BATCH encoding required for rotation")
@@ -1093,7 +1088,7 @@ cdef class Pyfhel:
             return ctxt
         
     cpdef PyCtxt power(self, PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=False) except +:
-        """power(PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=False)
+        """power(PyCtxt ctxt, int expon, bool in_new_ctxt=False)
 
         Exponentiates PyCtxt ciphertext value/s to expon power.
         
@@ -1102,12 +1097,12 @@ cdef class Pyfhel:
         it applies relinearization after each multiplication.
     
         Args:
-            * ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
-            * expon (uint64_t): exponent.
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
+            expon (int): exponent.
+            in_new_ctxt (bool): result in a newly created ciphertext
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -1132,12 +1127,12 @@ cdef class Pyfhel:
             coeffPoly[0]*ctxt^2 + coeffPoly[1]*ctxt + coeffPoly[2]
 
         Args:
-            * ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
-            * coeffPoly (vector[int64_t]): Polynomial coefficients
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
+            coeffPoly (list[int]): Polynomial coefficients
+            in_new_ctxt (bool): result in a newly created ciphertext
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """
         
         if (ctxt._encoding != ENCODING_T.BATCH) and (ctxt._encoding != ENCODING_T.INTEGER) :
@@ -1164,12 +1159,12 @@ cdef class Pyfhel:
             coeffPoly[0]*ctxt^2 + coeffPoly[1]*ctxt + coeffPoly[2]
 
         Args:
-            * ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
-            * coeffPoly (vector[float]): Polynomial coefficients. 
-            * in_new_ctxt (bool=False): result in a newly created ciphertext
+            ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
+            coeffPoly (list[int]): Polynomial coefficients. 
+            in_new_ctxt (bool): result in a newly created ciphertext
             
         Return:
-            * PyCtxt resulting ciphertext, the input transformed or a new one
+            PyCtxt: resulting ciphertext, the input transformed or a new one
         """        
         if (ctxt._encoding != ENCODING_T.BATCH) and (ctxt._encoding != ENCODING_T.INTEGER) :
             raise RuntimeError("<Pyfhel ERROR> encoding type must be INTEGER or BATCH")
@@ -1193,10 +1188,10 @@ cdef class Pyfhel:
         Saves current context in a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.saveContext(_to_valid_file_str(fileName, check=False).encode())
     
@@ -1206,10 +1201,10 @@ cdef class Pyfhel:
         Restores current context from a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.restoreContext(_to_valid_file_str(fileName, check=True).encode())
 
@@ -1219,10 +1214,10 @@ cdef class Pyfhel:
         Saves current public key in a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.savepublicKey(_to_valid_file_str(fileName, check=False).encode())
             
@@ -1232,10 +1227,10 @@ cdef class Pyfhel:
         Restores current public key from a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.restorepublicKey(_to_valid_file_str(fileName, check=True).encode())
 
@@ -1245,10 +1240,10 @@ cdef class Pyfhel:
         Saves current secret key in a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.savesecretKey(_to_valid_file_str(fileName, check=False).encode())
     
@@ -1258,10 +1253,10 @@ cdef class Pyfhel:
         Restores current secret key from a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.restoresecretKey(_to_valid_file_str(fileName, check=True).encode())
     
@@ -1271,10 +1266,10 @@ cdef class Pyfhel:
         Saves current relinearization keys in a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.saverelinKey(_to_valid_file_str(fileName, check=False).encode())
     
@@ -1284,10 +1279,10 @@ cdef class Pyfhel:
         Restores current relinearization keys from a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.restorerelinKey(_to_valid_file_str(fileName, check=True).encode())
     
@@ -1297,10 +1292,10 @@ cdef class Pyfhel:
         Saves current rotation Keys from a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.saverotateKey(_to_valid_file_str(fileName, check=False).encode())
     
@@ -1310,10 +1305,10 @@ cdef class Pyfhel:
         Restores current rotation Keys from a file
         
         Args:
-            * fileName (str|Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            * bool: Result, True if OK, False otherwise.
+            bool: Result, True if OK, False otherwise.
         """
         return self.afseal.restorerotateKey(_to_valid_file_str(fileName, check=True).encode())
     
@@ -1322,13 +1317,14 @@ cdef class Pyfhel:
     # =========================================================================
     # ============================== AUXILIARY ================================
     # =========================================================================
-    def MultDepth(self, max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False):
-        """MultDepth(self, max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False)
+    def multDepth(self, max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False):
+        """multDepth(max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False)
 
         Empirically determines the multiplicative depth of a Pyfhel Object
         for a given context. For this, it encrypts the inputs x, y and z with
         Fractional encoding and performs the following chained multiplication
         until the result deviates more than delta in absolute value:
+        
         >    x * y * z * y * z * y * z * y * z ...
 
         After each multiplication, the ciphertext is relinearized and checked.
@@ -1355,31 +1351,33 @@ cdef class Pyfhel:
         return m_depth
 
     cpdef bool batchEnabled(self) except +:
-        """batchEnabled(self)
+        """batchEnabled()
 
         Flag of batch enabled. 
             
         Return:
-            * bool: Result, True if enabled, False if disabled.
+            bool: Result, True if enabled, False if disabled.
         """
         return self.afseal.batchEnabled()
     
     cpdef long relinBitCount(self) except +:
-        """relinBitCount(self)
+        """relinBitCount()
 
         Relinearization bit count for current evaluation keys.
             
         Return:
-            * long: [1-60], based on relinKeyGen parameter.
+            int: [1-60], based on relinKeyGen parameter.
         """
         return self.afseal.relinBitCount()
     
     # GETTERS
     cpdef int getnSlots(self) except +:
         """Maximum number of slots fitting in a ciphertext in BATCH mode.
-            
+        
+        Generally it matches with `m`.
+
         Return:
-            * int: Maximum umber of slots.
+            int: Maximum umber of slots.
         """
         return self.afseal.getnSlots()
     
@@ -1389,7 +1387,7 @@ cdef class Pyfhel:
         All operations are  modulo p.
             
         Return:
-            * int: Plaintext modulus.
+            int: Plaintext modulus.
         """
         return self.afseal.getp()
     
@@ -1402,7 +1400,7 @@ cdef class Pyfhel:
         
             
         Return:
-            * int: Plaintext coefficient.
+            int: Plaintext coefficient.
         """
         return self.afseal.getm()
     
@@ -1414,7 +1412,7 @@ cdef class Pyfhel:
         FRACTIONAL encoding. See encryptFrac. 
         
         Return:
-            * int: Polynomial base.
+            int: Polynomial base.
         """
         return self.afseal.getbase()
     
@@ -1422,7 +1420,7 @@ cdef class Pyfhel:
         """Security level equivalent in AES.
         
         Return:
-            * int: Security level equivalent in AES. Either 128 or 192.
+            int: Security level equivalent in AES. Either 128 or 192.
         """
         return self.afseal.getsec()
     
@@ -1433,7 +1431,7 @@ cdef class Pyfhel:
         positions dedicated to integer part, out of 'm' positions.
         
         Return:
-            * int: number of integer digits.
+            int: number of integer digits.
         """
         return self.afseal.getintDigits()
     
@@ -1444,7 +1442,7 @@ cdef class Pyfhel:
         positions dedicated to deimal part, out of 'm' positions.
         
         Return:
-            * int: number of fractional digits.
+            int: number of fractional digits.
         """
         return self.afseal.getfracDigits()
     
@@ -1456,31 +1454,46 @@ cdef class Pyfhel:
         of p and m, and activated in context creation with a flag.
         
         Return:
-            * bool: flag for enabled BATCH encoding and operating.
+            bool: flag for enabled BATCH encoding and operating.
         """
         return self.afseal.getflagBatch()
     
     cpdef bool is_secretKey_empty(self) except+:
         """True if the current Pyfhel instance has no secret Key.
+
+        Return:
+            bool: True if there is no secret Key. False if there is.
         """
         return self.afseal.is_secretKey_empty()
 
     cpdef bool is_publicKey_empty(self) except+:
         """True if the current Pyfhel instance has no public Key.
+
+        Return:
+            bool: True if there is no public Key. False if there is.
         """
         return self.afseal.is_publicKey_empty()
 
     cpdef bool is_rotKey_empty(self) except+:
         """True if the current Pyfhel instance has no rotation key.
+
+        Return:
+            bool: True if there is no rotation Key. False if there is.
         """
         return self.afseal.is_rotKey_empty()
 
     cpdef bool is_relinKey_empty(self) except+:
         """True if the current Pyfhel instance has no relinearization key.
+
+        Return:
+            bool: True if there is no relinearization Key. False if there is.
         """
         return self.afseal.is_relinKey_empty()
 
     cpdef bool is_context_empty(self) except+:
         """True if the current Pyfhel instance has no context.
+
+        Return:
+            bool: True if there is no context. False if there is.
         """
         return self.afseal.is_context_empty()

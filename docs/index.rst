@@ -47,7 +47,7 @@ Index
 
 .. toctree::
     :glob:
-    :maxdepth: 2
+    :maxdepth: 3
     
     source/getting_started
     _autoexamples/index
@@ -58,5 +58,4 @@ Glossary and tables
 ====================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

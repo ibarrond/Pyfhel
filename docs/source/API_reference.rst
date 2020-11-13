@@ -1,24 +1,25 @@
+.. _sphx_glr_api_reference:
+
 API reference
 ==================
 
-.. rubric:: Main Classes
+.. currentmodule:: Pyfhel
 
+.. rubric:: Main Classes
 
 .. autosummary::
     :toctree: ../_autosummary
     :recursive:
 
-    Pyfhel.Pyfhel
-    Pyfhel.PyCtxt
-    Pyfhel.PyPtxt
-
-
+    Pyfhel
+    PyCtxt
+    PyPtxt
 
 .. rubric:: Utils
 
 .. autosummary::
-    :toctree: ../_autosummary
     :recursive:
+    :toctree: ../_autosummary
 
-    Pyfhel.util.to_ENCODING_t
-    Pyfhel.util.ENCODING_t
+    util.to_ENCODING_t
+    util.ENCODING_t

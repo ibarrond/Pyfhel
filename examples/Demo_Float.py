@@ -6,7 +6,6 @@ Fractionals with Pyfhel
 Fractional / float Demo for Pyfhel, operating with fixed point encoded
 values. It follows the same structure as the HelloWorld with Integer encoding.
 """
-# sphinx_gallery_thumbnail_path = 'static/thumbnails/float.png'
 
 
 from Pyfhel import Pyfhel, PyPtxt, PyCtxt
@@ -88,3 +87,6 @@ print("     substraction:   decrypt(ctxt1 - ctxt2) =  ", resSub)
 print("     multiplication: decrypt(ctxt1 + ctxt2) =  ", resMul)
 
 print("NOTE: As you can see, the accuracy drops! As usual, there is a tradeoff.")
+
+
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/float.png'

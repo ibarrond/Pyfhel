@@ -5,9 +5,6 @@ Pyfhel with Numpy
 This demo shows how to leverage on the np.ndarray container to perform
 encrypted operations over vectors of ciphertexts.
 """
-# sphinx_gallery_thumbnail_path = 'static/thumbnails/numpy.png'
-
-
 
 import numpy as np
 
@@ -59,3 +56,7 @@ resMul = [HE.decryptInt(ctxtMul[i]) for i in np.arange(len(ctxtMul))]
 print("     addition:       decrypt(ctxt1 + ctxt2) =  ", resSum)
 print("     substraction:   decrypt(ctxt1 - ctxt2) =  ", resSub)
 print("     multiplication: decrypt(ctxt1 + ctxt2) =  ", resMul)
+
+
+
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/numpy.png'

@@ -79,7 +79,8 @@ if platform.system() == 'Windows':
     #>https://docs.microsoft.com/en-us/cpp/build/reference/o-options-optimize-code
     extra_compile_flags += ["-O2"]
 elif platform.system() == 'Darwin': # MacOS
-    extra_compile_flags += ["-std=c++17","-O3","-mmacosx-version-min=10.12"]
+    # extra_compile_flags += ["-std=c++17","-O3","-mmacosx-version-min=10.12"]
+    raise SystemError("Pyfhel is not supported in MacOS (see issue #59). Please use a Linux VM or Docker.")
 else:  # Linux, GCC
     extra_compile_flags += ["-std=c++17","-O3"]
 
