@@ -20,19 +20,16 @@ cpdef to_ENCODING_t(encoding) except +:
     Arguments:
         encoding (str, type, int, ENCODING_t): One of the following:
 
-            str:
-              'int'|'integer' for INTEGER encoding, 'float'|'double' for 
-              FRACTIONAL encoding, 'array'|'batch'|'matrix' for BATCH encoding.
+            * (str): ('int', 'integer') for INTEGER encoding, ('float', 'double') for 
+              FRACTIONAL encoding, ('array', 'batch', 'matrix') for BATCH encoding.
 
-            Python class:
-                int for INTEGER encoding, float for FRACTIONAL encoding, 
-                list for BATCH encoding.
+            * Python class: (int) for INTEGER encoding, (float) for FRACTIONAL encoding, 
+                (list) for BATCH encoding.
 
-            int:
-                1 for INTEGER encoding, 2 for FRACTIONAL encoding,
-                3 for BATCH encoding.
+            * (int): (1) for INTEGER encoding, (2) for FRACTIONAL encoding,
+                (3) for BATCH encoding.
 
-            ENCODING_t Enum (does nothing)
+            * (ENCODING_t) Enum (does nothing)
 
     Returns:
         ENCODING_t: INTEGER, FRACTIONAL or BATCH encoding.

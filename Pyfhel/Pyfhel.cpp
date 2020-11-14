@@ -4055,7 +4055,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
   __Pyx_RefNannySetupContext("to_ENCODING_t", 0);
   __Pyx_INCREF(__pyx_v_encoding);
 
-  /* "Pyfhel/util/utils.pxi":40
+  /* "Pyfhel/util/utils.pxi":37
  *         ENCODING_t: INTEGER, FRACTIONAL or BATCH encoding.
  *     """
  *     if type(encoding) is unicode or isinstance(encoding, unicode):             # <<<<<<<<<<<<<<
@@ -4075,26 +4075,26 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "Pyfhel/util/utils.pxi":42
+    /* "Pyfhel/util/utils.pxi":39
  *     if type(encoding) is unicode or isinstance(encoding, unicode):
  *         # encoding is a string. Casting it to str just in case.
  *         encoding = unicode(encoding)             # <<<<<<<<<<<<<<
  *         if encoding.lower()[0] == 'i':
  *             return ENCODING_t.INTEGER
  */
-    __pyx_t_4 = __Pyx_PyObject_Unicode(__pyx_v_encoding); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 42, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Unicode(__pyx_v_encoding); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF_SET(__pyx_v_encoding, __pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "Pyfhel/util/utils.pxi":43
+    /* "Pyfhel/util/utils.pxi":40
  *         # encoding is a string. Casting it to str just in case.
  *         encoding = unicode(encoding)
  *         if encoding.lower()[0] == 'i':             # <<<<<<<<<<<<<<
  *             return ENCODING_t.INTEGER
  *         elif encoding.lower()[0] in 'fd':
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_encoding, __pyx_n_s_lower); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 43, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_encoding, __pyx_n_s_lower); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -4108,17 +4108,17 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     }
     __pyx_t_4 = (__pyx_t_6) ? __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6) : __Pyx_PyObject_CallNoArg(__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 43, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 43, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_1 = (__Pyx_PyUnicode_Equals(__pyx_t_5, __pyx_n_u_i, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 43, __pyx_L1_error)
+    __pyx_t_1 = (__Pyx_PyUnicode_Equals(__pyx_t_5, __pyx_n_u_i, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     if (__pyx_t_1) {
 
-      /* "Pyfhel/util/utils.pxi":44
+      /* "Pyfhel/util/utils.pxi":41
  *         encoding = unicode(encoding)
  *         if encoding.lower()[0] == 'i':
  *             return ENCODING_t.INTEGER             # <<<<<<<<<<<<<<
@@ -4126,16 +4126,16 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  *             return ENCODING_t.FRACTIONAL
  */
       __Pyx_XDECREF(__pyx_r);
-      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 44, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 41, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_INTEGER); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 44, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_INTEGER); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 41, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_r = __pyx_t_4;
       __pyx_t_4 = 0;
       goto __pyx_L0;
 
-      /* "Pyfhel/util/utils.pxi":43
+      /* "Pyfhel/util/utils.pxi":40
  *         # encoding is a string. Casting it to str just in case.
  *         encoding = unicode(encoding)
  *         if encoding.lower()[0] == 'i':             # <<<<<<<<<<<<<<
@@ -4144,14 +4144,14 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  */
     }
 
-    /* "Pyfhel/util/utils.pxi":45
+    /* "Pyfhel/util/utils.pxi":42
  *         if encoding.lower()[0] == 'i':
  *             return ENCODING_t.INTEGER
  *         elif encoding.lower()[0] in 'fd':             # <<<<<<<<<<<<<<
  *             return ENCODING_t.FRACTIONAL
  *         elif encoding.lower()[0] in 'abm':
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_encoding, __pyx_n_s_lower); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_encoding, __pyx_n_s_lower); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 42, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -4165,18 +4165,18 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     }
     __pyx_t_4 = (__pyx_t_6) ? __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6) : __Pyx_PyObject_CallNoArg(__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 42, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 42, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_1 = (__Pyx_PyUnicode_ContainsTF(__pyx_t_5, __pyx_n_u_fd, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_1 = (__Pyx_PyUnicode_ContainsTF(__pyx_t_5, __pyx_n_u_fd, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 42, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_2 = (__pyx_t_1 != 0);
     if (__pyx_t_2) {
 
-      /* "Pyfhel/util/utils.pxi":46
+      /* "Pyfhel/util/utils.pxi":43
  *             return ENCODING_t.INTEGER
  *         elif encoding.lower()[0] in 'fd':
  *             return ENCODING_t.FRACTIONAL             # <<<<<<<<<<<<<<
@@ -4184,16 +4184,16 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  *             return ENCODING_t.BATCH
  */
       __Pyx_XDECREF(__pyx_r);
-      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 46, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_FRACTIONAL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 46, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_FRACTIONAL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 43, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_r = __pyx_t_4;
       __pyx_t_4 = 0;
       goto __pyx_L0;
 
-      /* "Pyfhel/util/utils.pxi":45
+      /* "Pyfhel/util/utils.pxi":42
  *         if encoding.lower()[0] == 'i':
  *             return ENCODING_t.INTEGER
  *         elif encoding.lower()[0] in 'fd':             # <<<<<<<<<<<<<<
@@ -4202,14 +4202,14 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  */
     }
 
-    /* "Pyfhel/util/utils.pxi":47
+    /* "Pyfhel/util/utils.pxi":44
  *         elif encoding.lower()[0] in 'fd':
  *             return ENCODING_t.FRACTIONAL
  *         elif encoding.lower()[0] in 'abm':             # <<<<<<<<<<<<<<
  *             return ENCODING_t.BATCH
  * 
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_encoding, __pyx_n_s_lower); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_encoding, __pyx_n_s_lower); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 44, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -4223,18 +4223,18 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     }
     __pyx_t_4 = (__pyx_t_6) ? __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6) : __Pyx_PyObject_CallNoArg(__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 44, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 44, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_2 = (__Pyx_PyUnicode_ContainsTF(__pyx_t_5, __pyx_n_u_abm, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 47, __pyx_L1_error)
+    __pyx_t_2 = (__Pyx_PyUnicode_ContainsTF(__pyx_t_5, __pyx_n_u_abm, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 44, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_1 = (__pyx_t_2 != 0);
     if (__pyx_t_1) {
 
-      /* "Pyfhel/util/utils.pxi":48
+      /* "Pyfhel/util/utils.pxi":45
  *             return ENCODING_t.FRACTIONAL
  *         elif encoding.lower()[0] in 'abm':
  *             return ENCODING_t.BATCH             # <<<<<<<<<<<<<<
@@ -4242,16 +4242,16 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  *     elif type(encoding) is type:
  */
       __Pyx_XDECREF(__pyx_r);
-      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 45, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_BATCH); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_BATCH); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_r = __pyx_t_4;
       __pyx_t_4 = 0;
       goto __pyx_L0;
 
-      /* "Pyfhel/util/utils.pxi":47
+      /* "Pyfhel/util/utils.pxi":44
  *         elif encoding.lower()[0] in 'fd':
  *             return ENCODING_t.FRACTIONAL
  *         elif encoding.lower()[0] in 'abm':             # <<<<<<<<<<<<<<
@@ -4260,7 +4260,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  */
     }
 
-    /* "Pyfhel/util/utils.pxi":40
+    /* "Pyfhel/util/utils.pxi":37
  *         ENCODING_t: INTEGER, FRACTIONAL or BATCH encoding.
  *     """
  *     if type(encoding) is unicode or isinstance(encoding, unicode):             # <<<<<<<<<<<<<<
@@ -4270,7 +4270,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     goto __pyx_L3;
   }
 
-  /* "Pyfhel/util/utils.pxi":50
+  /* "Pyfhel/util/utils.pxi":47
  *             return ENCODING_t.BATCH
  * 
  *     elif type(encoding) is type:             # <<<<<<<<<<<<<<
@@ -4281,7 +4281,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "Pyfhel/util/utils.pxi":51
+    /* "Pyfhel/util/utils.pxi":48
  * 
  *     elif type(encoding) is type:
  *         if encoding is int:             # <<<<<<<<<<<<<<
@@ -4292,7 +4292,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     __pyx_t_1 = (__pyx_t_2 != 0);
     if (__pyx_t_1) {
 
-      /* "Pyfhel/util/utils.pxi":52
+      /* "Pyfhel/util/utils.pxi":49
  *     elif type(encoding) is type:
  *         if encoding is int:
  *             return ENCODING_t.INTEGER             # <<<<<<<<<<<<<<
@@ -4300,16 +4300,16 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  *             return ENCODING_t.FRACTIONAL
  */
       __Pyx_XDECREF(__pyx_r);
-      __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_INTEGER); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_INTEGER); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __pyx_r = __pyx_t_5;
       __pyx_t_5 = 0;
       goto __pyx_L0;
 
-      /* "Pyfhel/util/utils.pxi":51
+      /* "Pyfhel/util/utils.pxi":48
  * 
  *     elif type(encoding) is type:
  *         if encoding is int:             # <<<<<<<<<<<<<<
@@ -4318,7 +4318,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  */
     }
 
-    /* "Pyfhel/util/utils.pxi":53
+    /* "Pyfhel/util/utils.pxi":50
  *         if encoding is int:
  *             return ENCODING_t.INTEGER
  *         elif encoding is float:             # <<<<<<<<<<<<<<
@@ -4329,7 +4329,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     __pyx_t_2 = (__pyx_t_1 != 0);
     if (__pyx_t_2) {
 
-      /* "Pyfhel/util/utils.pxi":54
+      /* "Pyfhel/util/utils.pxi":51
  *             return ENCODING_t.INTEGER
  *         elif encoding is float:
  *             return ENCODING_t.FRACTIONAL             # <<<<<<<<<<<<<<
@@ -4337,16 +4337,16 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  *             return ENCODING_t.BATCH
  */
       __Pyx_XDECREF(__pyx_r);
-      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 54, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 51, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_FRACTIONAL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 54, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_FRACTIONAL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_r = __pyx_t_4;
       __pyx_t_4 = 0;
       goto __pyx_L0;
 
-      /* "Pyfhel/util/utils.pxi":53
+      /* "Pyfhel/util/utils.pxi":50
  *         if encoding is int:
  *             return ENCODING_t.INTEGER
  *         elif encoding is float:             # <<<<<<<<<<<<<<
@@ -4355,7 +4355,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  */
     }
 
-    /* "Pyfhel/util/utils.pxi":55
+    /* "Pyfhel/util/utils.pxi":52
  *         elif encoding is float:
  *             return ENCODING_t.FRACTIONAL
  *         if encoding is list:             # <<<<<<<<<<<<<<
@@ -4366,7 +4366,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     __pyx_t_1 = (__pyx_t_2 != 0);
     if (__pyx_t_1) {
 
-      /* "Pyfhel/util/utils.pxi":56
+      /* "Pyfhel/util/utils.pxi":53
  *             return ENCODING_t.FRACTIONAL
  *         if encoding is list:
  *             return ENCODING_t.BATCH             # <<<<<<<<<<<<<<
@@ -4374,16 +4374,16 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  *     elif isinstance(encoding, (int, float)) and\
  */
       __Pyx_XDECREF(__pyx_r);
-      __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 56, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_BATCH); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 56, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_BATCH); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 53, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __pyx_r = __pyx_t_5;
       __pyx_t_5 = 0;
       goto __pyx_L0;
 
-      /* "Pyfhel/util/utils.pxi":55
+      /* "Pyfhel/util/utils.pxi":52
  *         elif encoding is float:
  *             return ENCODING_t.FRACTIONAL
  *         if encoding is list:             # <<<<<<<<<<<<<<
@@ -4392,7 +4392,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  */
     }
 
-    /* "Pyfhel/util/utils.pxi":50
+    /* "Pyfhel/util/utils.pxi":47
  *             return ENCODING_t.BATCH
  * 
  *     elif type(encoding) is type:             # <<<<<<<<<<<<<<
@@ -4402,7 +4402,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     goto __pyx_L3;
   }
 
-  /* "Pyfhel/util/utils.pxi":58
+  /* "Pyfhel/util/utils.pxi":55
  *             return ENCODING_t.BATCH
  * 
  *     elif isinstance(encoding, (int, float)) and\             # <<<<<<<<<<<<<<
@@ -4427,26 +4427,26 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     goto __pyx_L9_bool_binop_done;
   }
 
-  /* "Pyfhel/util/utils.pxi":59
+  /* "Pyfhel/util/utils.pxi":56
  * 
  *     elif isinstance(encoding, (int, float)) and\
  *          int(encoding) in (ENCODING_t.INTEGER.value,             # <<<<<<<<<<<<<<
  *                            ENCODING_t.FRACTIONAL.value,
  *                            ENCODING_t.BATCH.value):
  */
-  __pyx_t_5 = __Pyx_PyNumber_Int(__pyx_v_encoding); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyNumber_Int(__pyx_v_encoding); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_INTEGER); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_INTEGER); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_value); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_value); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = PyObject_RichCompare(__pyx_t_5, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_6 = PyObject_RichCompare(__pyx_t_5, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   if (!__pyx_t_2) {
   } else {
@@ -4454,32 +4454,32 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     goto __pyx_L13_bool_binop_done;
   }
 
-  /* "Pyfhel/util/utils.pxi":60
+  /* "Pyfhel/util/utils.pxi":57
  *     elif isinstance(encoding, (int, float)) and\
  *          int(encoding) in (ENCODING_t.INTEGER.value,
  *                            ENCODING_t.FRACTIONAL.value,             # <<<<<<<<<<<<<<
  *                            ENCODING_t.BATCH.value):
  *             return ENCODING_t(int(encoding))
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 57, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_FRACTIONAL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_FRACTIONAL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 57, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_value); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_value); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 57, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyObject_RichCompare(__pyx_t_5, __pyx_t_6, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_4 = PyObject_RichCompare(__pyx_t_5, __pyx_t_6, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-  /* "Pyfhel/util/utils.pxi":59
+  /* "Pyfhel/util/utils.pxi":56
  * 
  *     elif isinstance(encoding, (int, float)) and\
  *          int(encoding) in (ENCODING_t.INTEGER.value,             # <<<<<<<<<<<<<<
  *                            ENCODING_t.FRACTIONAL.value,
  *                            ENCODING_t.BATCH.value):
  */
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   if (!__pyx_t_2) {
   } else {
@@ -4487,32 +4487,32 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     goto __pyx_L13_bool_binop_done;
   }
 
-  /* "Pyfhel/util/utils.pxi":61
+  /* "Pyfhel/util/utils.pxi":58
  *          int(encoding) in (ENCODING_t.INTEGER.value,
  *                            ENCODING_t.FRACTIONAL.value,
  *                            ENCODING_t.BATCH.value):             # <<<<<<<<<<<<<<
  *             return ENCODING_t(int(encoding))
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_BATCH); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_BATCH); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_value); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_value); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = PyObject_RichCompare(__pyx_t_5, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_6 = PyObject_RichCompare(__pyx_t_5, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "Pyfhel/util/utils.pxi":59
+  /* "Pyfhel/util/utils.pxi":56
  * 
  *     elif isinstance(encoding, (int, float)) and\
  *          int(encoding) in (ENCODING_t.INTEGER.value,             # <<<<<<<<<<<<<<
  *                            ENCODING_t.FRACTIONAL.value,
  *                            ENCODING_t.BATCH.value):
  */
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_t_3 = __pyx_t_2;
   __pyx_L13_bool_binop_done:;
@@ -4521,7 +4521,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
   __pyx_t_1 = __pyx_t_2;
   __pyx_L9_bool_binop_done:;
 
-  /* "Pyfhel/util/utils.pxi":58
+  /* "Pyfhel/util/utils.pxi":55
  *             return ENCODING_t.BATCH
  * 
  *     elif isinstance(encoding, (int, float)) and\             # <<<<<<<<<<<<<<
@@ -4530,7 +4530,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  */
   if (__pyx_t_1) {
 
-    /* "Pyfhel/util/utils.pxi":62
+    /* "Pyfhel/util/utils.pxi":59
  *                            ENCODING_t.FRACTIONAL.value,
  *                            ENCODING_t.BATCH.value):
  *             return ENCODING_t(int(encoding))             # <<<<<<<<<<<<<<
@@ -4538,9 +4538,9 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  *     elif isinstance(encoding, ENCODING_t):
  */
     __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 62, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 59, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyNumber_Int(__pyx_v_encoding); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 62, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyNumber_Int(__pyx_v_encoding); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_8 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
@@ -4555,14 +4555,14 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_8, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_4);
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 62, __pyx_L1_error)
+    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 59, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_r = __pyx_t_5;
     __pyx_t_5 = 0;
     goto __pyx_L0;
 
-    /* "Pyfhel/util/utils.pxi":58
+    /* "Pyfhel/util/utils.pxi":55
  *             return ENCODING_t.BATCH
  * 
  *     elif isinstance(encoding, (int, float)) and\             # <<<<<<<<<<<<<<
@@ -4571,21 +4571,21 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  */
   }
 
-  /* "Pyfhel/util/utils.pxi":64
+  /* "Pyfhel/util/utils.pxi":61
  *             return ENCODING_t(int(encoding))
  * 
  *     elif isinstance(encoding, ENCODING_t):             # <<<<<<<<<<<<<<
  *         return encoding
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_ENCODING_t); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 61, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyObject_IsInstance(__pyx_v_encoding, __pyx_t_5); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_1 = PyObject_IsInstance(__pyx_v_encoding, __pyx_t_5); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(0, 61, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (likely(__pyx_t_2)) {
 
-    /* "Pyfhel/util/utils.pxi":65
+    /* "Pyfhel/util/utils.pxi":62
  * 
  *     elif isinstance(encoding, ENCODING_t):
  *         return encoding             # <<<<<<<<<<<<<<
@@ -4597,7 +4597,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
     __pyx_r = __pyx_v_encoding;
     goto __pyx_L0;
 
-    /* "Pyfhel/util/utils.pxi":64
+    /* "Pyfhel/util/utils.pxi":61
  *             return ENCODING_t(int(encoding))
  * 
  *     elif isinstance(encoding, ENCODING_t):             # <<<<<<<<<<<<<<
@@ -4606,17 +4606,17 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
  */
   }
 
-  /* "Pyfhel/util/utils.pxi":68
+  /* "Pyfhel/util/utils.pxi":65
  * 
  *     else:
  *         raise TypeError("<Pyfhel ERROR>: encoding unknown. Could not convert to ENCODING_t.")             # <<<<<<<<<<<<<<
  */
   /*else*/ {
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 68, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 65, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_Raise(__pyx_t_5, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __PYX_ERR(0, 68, __pyx_L1_error)
+    __PYX_ERR(0, 65, __pyx_L1_error)
   }
   __pyx_L3:;
 
@@ -4647,7 +4647,7 @@ static PyObject *__pyx_f_6Pyfhel_6Pyfhel_to_ENCODING_t(PyObject *__pyx_v_encodin
 
 /* Python wrapper */
 static PyObject *__pyx_pw_6Pyfhel_6Pyfhel_3to_ENCODING_t(PyObject *__pyx_self, PyObject *__pyx_v_encoding); /*proto*/
-static char __pyx_doc_6Pyfhel_6Pyfhel_2to_ENCODING_t[] = "to_ENCODING_t(encoding)\n    \n    Turns `encoding` into an ENCODING_t.{INTEGER, FRACTIONAL, BATCH} enum.\n    \n    Arguments:\n        encoding (str, type, int, ENCODING_t): One of the following:\n\n            str:\n              'int'|'integer' for INTEGER encoding, 'float'|'double' for \n              FRACTIONAL encoding, 'array'|'batch'|'matrix' for BATCH encoding.\n\n            Python class:\n                int for INTEGER encoding, float for FRACTIONAL encoding, \n                list for BATCH encoding.\n\n            int:\n                1 for INTEGER encoding, 2 for FRACTIONAL encoding,\n                3 for BATCH encoding.\n\n            ENCODING_t Enum (does nothing)\n\n    Returns:\n        ENCODING_t: INTEGER, FRACTIONAL or BATCH encoding.\n    ";
+static char __pyx_doc_6Pyfhel_6Pyfhel_2to_ENCODING_t[] = "to_ENCODING_t(encoding)\n    \n    Turns `encoding` into an ENCODING_t.{INTEGER, FRACTIONAL, BATCH} enum.\n    \n    Arguments:\n        encoding (str, type, int, ENCODING_t): One of the following:\n\n            * (str): ('int', 'integer') for INTEGER encoding, ('float', 'double') for \n              FRACTIONAL encoding, ('array', 'batch', 'matrix') for BATCH encoding.\n\n            * Python class: (int) for INTEGER encoding, (float) for FRACTIONAL encoding, \n                (list) for BATCH encoding.\n\n            * (int): (1) for INTEGER encoding, (2) for FRACTIONAL encoding,\n                (3) for BATCH encoding.\n\n            * (ENCODING_t) Enum (does nothing)\n\n    Returns:\n        ENCODING_t: INTEGER, FRACTIONAL or BATCH encoding.\n    ";
 static PyObject *__pyx_pw_6Pyfhel_6Pyfhel_3to_ENCODING_t(PyObject *__pyx_self, PyObject *__pyx_v_encoding) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -38643,12 +38643,12 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "Pyfhel/util/utils.pxi":68
+  /* "Pyfhel/util/utils.pxi":65
  * 
  *     else:
  *         raise TypeError("<Pyfhel ERROR>: encoding unknown. Could not convert to ENCODING_t.")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_Pyfhel_ERROR_encoding_unknown_C); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_Pyfhel_ERROR_encoding_unknown_C); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 

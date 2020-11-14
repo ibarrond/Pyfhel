@@ -62,3 +62,9 @@ div.body .section h1{
     text-decoration: none;
     transition:.3s;
 }
+
+
+table.docutils{
+    margin: 0px;
+    width: 100%;
+}

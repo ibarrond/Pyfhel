@@ -77,7 +77,7 @@ cdef class PyPtxt:
         Can be set to: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
 
         See Also:
-            to_ENCODING_t
+            :func:`~Pyfhel.util.to_ENCODING_t`
 
         :meta public:
         """
@@ -181,7 +181,7 @@ cdef class PyPtxt:
             None
 
         See Also:
-            to_ENCODING_t
+            :func:`~Pyfhel.util.to_ENCODING_t`
         """
         self.load(_to_valid_file_str(fileName, check=True), encoding)
 
@@ -201,7 +201,7 @@ cdef class PyPtxt:
             None
 
         See Also:
-            to_ENCODING_t
+            :func:`~Pyfhel.util.to_ENCODING_t`
         """
         cdef ifstream* inputter
         cdef string bFileName = fileName.encode('utf8')
@@ -262,7 +262,7 @@ cdef class PyPtxt:
             None
             
         See Also:
-            Pyfhel.encode()
+            :func:`~Pyfhel.Pyfhel.encode`
         """
         self._pyfhel.encode(value, self)
     
@@ -278,6 +278,6 @@ cdef class PyPtxt:
             int, float, np.array: value decrypted.
    
         See Also:
-            Pyfhel.decode()
+            :func:`~Pyfhel.Pyfhel.decode`
         """
         self._pyfhel.decode(self)
