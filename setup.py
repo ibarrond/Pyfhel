@@ -84,6 +84,9 @@ elif platform.system() == 'Darwin': # MacOS
 else:  # Linux, GCC
     extra_compile_flags += ["-std=c++17","-O3"]
 
+    machine_arch = os.uname()[-1]
+    if machine_arch == 'aarch64' or machine_arch.startswith('arm'):
+        extra_compile_flags += ["-DSEAL_BUILD_SEAL_C=1", "-DSEAL_USE_INTRIN=0"]
 
 # --------------------------- LIBRARY COMPILATION ------------------------------
 # Here we compile Afhel (with the backends) and bundle it into a static library
