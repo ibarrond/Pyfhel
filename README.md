@@ -1,4 +1,4 @@
-# Pyfhel [_v2.2.0_] <img width="10%" height="10%" align="right"  src="/docs/_static/logo.png">
+# Pyfhel [_v2.2.1_] <img width="10%" height="10%" align="right"  src="/docs/_static/logo.png">
 [![Build Status](https://travis-ci.org/ibarrond/Pyfhel.svg?branch=master)](https://travis-ci.org/ibarrond/Pyfhel)
 [![Documentation Status](https://readthedocs.org/projects/pyfhel/badge/?version=latest)](https://pyfhel.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)
@@ -11,7 +11,7 @@
 
 **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries.
 
-* **_Status_**: BETA.
+* **_Status_**: STABLE.
 * **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT and binary operations (AND, OR, NOT, XOR) over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
 * **_Language_**: Python (3.5+) & Cython on top of C++17.
 

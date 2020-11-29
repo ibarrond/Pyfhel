@@ -9,13 +9,10 @@ from .Pyfhel import Pyfhel
 from .PyPtxt import PyPtxt
 
 # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from .util import ENCODING_t
+from Pyfhel.util import ENCODING_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
-
-# Managing paths directly
-from pathlib import Path
 
 # ----------------------------- IMPLEMENTATION --------------------------------
 cdef class PyCtxt:
@@ -23,7 +20,11 @@ cdef class PyCtxt:
     This class references SEAL, PALISADE and HElib ciphertexts, using the one 
     corresponding to the backend selected in Pyfhel. By default, it is SEAL.
     Attributes:
-        copy_ctxt (PyCtxt, optional): Other PyCtxt to deep copy.
+        * copy_ctxt (PyCtxt, optional): Other PyCtxt to deep copy.
+        * pyfhel (Pyfhel, optional): Pyfhel instance needed to operate.
+        * fileName (str|Path, optional): Load PyCtxt from this file.
+                         Requires non-empty encoding.
+        * encoding (str|type|int, optional): encoding type of the new PyCtxt.
     
     """
     def __cinit__(self,
@@ -88,14 +89,15 @@ cdef class PyCtxt:
         """int: Actual size of the ciphertext."""
         return self._ptr_ctxt.size()
 
+    # =========================================================================
+    # ================================== I/O ==================================
+    # =========================================================================
     cpdef void to_file(self, fileName) except +:
         """to_file(Path fileName)
         
-        Alias of `save` using Pathlib.
+        Alias of `save` with input sanitizing.
         """
-        if isinstance(fileName, Path):
-            fileName = str(fileName)
-        self.save(fileName)
+        self.save(_to_valid_file_str(fileName))
 
     cpdef void save(self, str fileName):
         """save(str fileName)
@@ -127,11 +129,9 @@ cdef class PyCtxt:
     cpdef void from_file(self, fileName, encoding) except +:
         """from_file(str fileName)
         
-        Alias of `load`.
+        Alias of `load` with input sanitizer.
         """
-        if isinstance(fileName, Path):
-            fileName = str(fileName)
-        self.load(fileName, encoding)
+        self.load(_to_valid_file_str(fileName, check=True), encoding)
 
     cpdef void load(self, str fileName, encoding):
         """load(self, str fileName)
@@ -139,9 +139,11 @@ cdef class PyCtxt:
         Load the ciphertext from a file.
         Args:
             fileName: (:obj:`str`) File where the ciphertext is retrieved from.
-            encoding: (:obj: `str`) String describing the encoding: 'int' for
-                IntegerEncoding (default), 'float'/'fractional'/'double' for
-                FractionalEncoding, 'array'/'batch'/'matrix' for BatchEncoding
+            encoding: (:obj: `str`) String or type describing the encoding:
+                'int' or int for IntegerEncoding (default),
+                'float'/'fractional'/'double' or float for FractionalEncoding,
+                'array'/'batch'/'matrix' or list for BatchEncoding
+
         """
         cdef ifstream* inputter
         cdef string bFileName = fileName.encode('utf8')
@@ -159,9 +161,10 @@ cdef class PyCtxt:
 
         Args:
             content: (:obj:`bytes`) Python bytes object containing the PyCtxt.
-            encoding: (:obj: `str`) String describing the encoding: 'int' for
-                IntegerEncoding (default), 'float'/'fractional'/'double' for
-                FractionalEncoding, 'array'/'batch'/'matrix' for BatchEncoding
+            encoding: (:obj: `str`) String or type describing the encoding:
+                'int' or int for IntegerEncoding (default),
+                'float'/'fractional'/'double' or float for FractionalEncoding,
+                'array'/'batch'/'matrix' or list for BatchEncoding
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
@@ -171,9 +174,7 @@ cdef class PyCtxt:
             
     # =========================================================================
     # ============================= OPERATIONS ================================
-    # =========================================================================
-
-            
+    # =========================================================================          
     def __neg__(self):
         """Negates this ciphertext.
         """
@@ -278,18 +279,90 @@ cdef class PyCtxt:
         Multiplies with a PyPtxt/PyCtxt, storing the result in this ciphertext.
         Args:
             other (PyCtxt|PyPtxt): Multiplier, to be multiplied with this ciphertext.
-            
+
+        Returns:
+            (PyCtxt): Ciphertext resulting of multiplication
+
         Raise:
             TypeError: if other doesn't have a valid type.
         """
         if isinstance(other, PyCtxt):
-            return self._pyfhel.multiply(self, other, in_new_ctxt=False)
+            self._pyfhel.multiply(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
-            return self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
+            self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
         else:
-             raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt or PyPtxt"
+            raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt or PyPtxt"
                             "(is %s instead)"%(type(other)))
-           
+
+
+    def __truediv__(self, divisor):
+        """Multiplies this ciphertext with the inverse of divisor.
+        
+        This operation can only be done with plaintexts. Division between 
+        two Ciphertexts is not possible.
+
+        For IntegerEncoding, the inverse is calculated as:
+            inverse -> (divisor * inverse) mod p = 1
+
+        For FractionalEncoding, the inverse is calculated as 1/divisor.
+
+        Args:
+            divisor (int|float|PyPtxt): divisor for the operation.
+        """
+        if isinstance(divisor, PyPtxt):
+            divisor = divisor.decode()
+        if not isinstance(divisor, (int, float)):
+            raise TypeError("<Pyfhel ERROR> divisor must be float, int"
+                            "or PyPtxt with those encodings (is %s:%s instead)"
+                            %(str(divisor),type(divisor)))
+        # Compute inverse. Int: https://stackoverflow.com/questions/4798654
+        if self._encoding == ENCODING_t.INTEGER:
+            divisor = int(divisor)
+            p = self._pyfhel.getp()
+            inverse = pow(divisor, p-2, p)
+            inversePtxt = self._pyfhel.encodeInt(inverse)
+        elif self._encoding == ENCODING_t.FRACTIONAL: # float. Standard inverse
+            inverse = 1/float(divisor)
+            inversePtxt = self._pyfhel.encodeFrac(inverse)
+        else:
+            raise TypeError("<Pyfhel ERROR> dividend encoding doesn't support"
+                            "division (%s)"%(self._encoding))
+        return self._pyfhel.multiply_plain(self, inversePtxt, in_new_ctxt=True)
+
+    def __itruediv__(self, divisor):
+        """Multiplies this ciphertext with the inverse of divisor.
+        
+        This operation can only be done with plaintexts. Division between 
+        two Ciphertexts is not possible.
+
+        For IntegerEncoding, the inverse is calculated as:
+            inverse -> (divisor * inverse) mod p = 1
+
+        For FractionalEncoding, the inverse is calculated as 1/divisor.
+
+        Args:
+            divisor (int|float|PyPtxt): divisor for the operation.
+        """
+        if isinstance(divisor, PyPtxt):
+            divisor = divisor.decode()
+        if not isinstance(divisor, (int, float)):
+            raise TypeError("<Pyfhel ERROR> divisor must be float, int"
+                            "or PyPtxt with those encodings (is %s:%s instead)"
+                            %(str(divisor),type(divisor)))
+        # Compute inverse. Int: https://stackoverflow.com/questions/4798654
+        if self._encoding == ENCODING_t.INTEGER:
+            divisor = int(divisor)
+            p = self._pyfhel.getp()
+            inverse = pow(divisor, p-2, p)
+            inversePtxt = self._pyfhel.encodeInt(inverse)
+        elif self._encoding == ENCODING_t.FRACTIONAL: # float. Standard inverse
+            inverse = 1/float(divisor)
+            inversePtxt = self._pyfhel.encodeFrac(inverse)
+        else:
+            raise TypeError("<Pyfhel ERROR> dividend encoding doesn't support"
+                            "division (%s)"%(self._encoding))
+        self._pyfhel.multiply_plain(self, inversePtxt, in_new_ctxt=False)
+
                                     
     def __pow__(self, exponent, modulo):
         """Exponentiates this ciphertext to the desired exponent.
@@ -333,44 +406,8 @@ cdef class PyCtxt:
         return "<Pyfhel Ciphertext, encoding={}, size={}>".format(
                 ENCODING_t(self._encoding).name, self.size())
 
+    def encrypt(self, value):
+        self._pyfhel.encrypt(value, self)
     
-
-
-
-# -------------------------------- AUXILIARY ----------------------------------
-cpdef to_ENCODING_t(encoding):
-    """to_ENCODING_t(encoding)
-    
-    Turns `encoding` into a valid ENCODING_t type. 
-    
-    If `encoding` is str, 'int' for IntegerEncoding,
-                          'float'/'fractional'/'double' for FractionalEncoding,
-                          'array'/'batch'/'matrix' for BatchEncoding
-    
-    """
-    if type(encoding) is unicode or isinstance(encoding, unicode):
-        # encoding is a string. Casting it to str just in case.
-        encoding = unicode(encoding)
-        if encoding.lower()[0] == 'i':
-            return ENCODING_t.INTEGER
-        elif encoding.lower()[0] in 'fd':
-            return ENCODING_t.FRACTIONAL
-        elif encoding.lower()[0] in 'abm':
-            return ENCODING_t.BATCH
-
-    elif type(encoding) is type:
-        if encoding is int:
-            return ENCODING_t.INTEGER
-        elif encoding is float:
-            return ENCODING_t.FRACTIONAL
-        if encoding is list:
-            return ENCODING_t.BATCH
-        
-    elif isinstance(encoding, (int, float)) and\
-         int(encoding) in (ENCODING_t.INTEGER.value,
-                           ENCODING_t.FRACTIONAL.value,
-                           ENCODING_t.BATCH.value):
-            return ENCODING_t(int(encoding))
-        
-    else:
-        raise TypeError("<Pyfhel ERROR>: encoding unknown. Could not convert to ENCODING_t.")
+    def decrypt(self):
+        return self._pyfhel.decrypt(self, decode_value=True)

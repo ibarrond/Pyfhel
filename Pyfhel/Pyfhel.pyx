@@ -56,11 +56,14 @@ from cython.operator cimport dereference as deref
 cimport cython
 
 # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from .util import ENCODING_t
+from Pyfhel.util import ENCODING_t
 
 # Define Plaintext types
 FLOAT_T = (float, np.float16, np.float32, np.float64)
 INT_T =   (int, np.int16, np.int32, np.int64, np.int_, np.intc)
+
+# Import utility functions
+include "util/utils.pxi"
 
 # ------------------------- PYTHON IMPLEMENTATION -----------------------------
 cdef class Pyfhel:
@@ -685,7 +688,7 @@ cdef class Pyfhel:
             return self.encodeBatch(val_vec, ptxt)
         elif isinstance(val_vec, FLOAT_T):
             return self.encodeFrac(<float>val_vec, ptxt) 
-        elif isinstance(val_vec, Number):
+        elif isinstance(val_vec, INT_T):
             return self.encodeInt(<int>val_vec, ptxt)
         else:
             raise TypeError('<Pyfhel ERROR> Value/Vector type \['+type(val_vec)+
@@ -710,10 +713,10 @@ cdef class Pyfhel:
             * RuntimeError: if the ciphertext encoding isn't ENCODING_T.INTEGER.
         """
         if (ptxt._encoding != ENCODING_T.INTEGER):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
+            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeInt")
         cdef int64_t output_value=0
         self.afseal.decode(deref(ptxt._ptr_ptxt), output_value)
-        return output_value
+        return output_value 
     
     cpdef double decodeFrac(self, PyPtxt ptxt) except +:
         """decodeFrac(PyPtxt ptxt)
@@ -733,7 +736,7 @@ cdef class Pyfhel:
             * RuntimeError: if the ciphertext encoding isn't ENCODING_T.FRACTIONAL.
         """
         if (ptxt._encoding != ENCODING_T.FRACTIONAL):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
+            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeFrac")
         cdef double output_value=0
         self.afseal.decode(deref(ptxt._ptr_ptxt), output_value)
         return output_value
@@ -756,7 +759,7 @@ cdef class Pyfhel:
             * RuntimeError: if the plaintext encoding isn't ENCODING_T.BATCH.
         """
         if (ptxt._encoding != ENCODING_T.BATCH):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
+            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeBatch")
         cdef vector[int64_t] output_vector=self.afseal.decode(deref(ptxt._ptr_ptxt))
         return output_vector
     
@@ -778,7 +781,7 @@ cdef class Pyfhel:
             * RuntimeError: if the plaintext encoding isn't ENCODING_T.BATCH.
         """
         if (ptxt._encoding != ENCODING_T.BATCH):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyPtxt")
+            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeArray")
         cdef vector[int64_t] output_vector = self.afseal.decode(deref(ptxt._ptr_ptxt))
         cdef int64_t[::1] output_array = <int64_t [:output_vector.size()]>output_vector.data()
         return output_array
@@ -809,8 +812,8 @@ cdef class Pyfhel:
             return self.decodeFrac(ptxt)
         elif (ptxt._encoding == ENCODING_T.INTEGER):
             return self.decodeInt(ptxt)
-        elif (ptxt._encoding == ENCODING_T.UNDEFINED):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
+        else:
+            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decode")
 
             
     # =========================================================================
@@ -1150,135 +1153,135 @@ cdef class Pyfhel:
     # =========================================================================
     # ================================ I/O ====================================
     # =========================================================================    
-    cpdef bool saveContext(self, str fileName) except +:
-        """saveContext(str fileName)
+    cpdef bool saveContext(self, fileName) except +:
+        """saveContext(fileName)
 
         Saves current context in a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saveContext(fileName.encode())
+        return self.afseal.saveContext(_to_valid_file_str(fileName, check=False).encode())
     
-    cpdef bool restoreContext(self, str fileName) except +:
-        """restoreContext(str fileName)
+    cpdef bool restoreContext(self, fileName) except +:
+        """restoreContext(fileName)
 
         Restores current context from a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restoreContext(fileName.encode())
+        return self.afseal.restoreContext(_to_valid_file_str(fileName, check=True).encode())
 
-    cpdef bool savepublicKey(self, str fileName) except +:
-        """savepublicKey(str fileName)
+    cpdef bool savepublicKey(self, fileName) except +:
+        """savepublicKey(fileName)
 
         Saves current public key in a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.savepublicKey(fileName.encode())
-    
-    cpdef bool restorepublicKey(self, str fileName) except +:
-        """restorepublicKey(str fileName)
+        return self.afseal.savepublicKey(_to_valid_file_str(fileName, check=False).encode())
+            
+    cpdef bool restorepublicKey(self, fileName) except +:
+        """restorepublicKey(fileName)
 
         Restores current public key from a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restorepublicKey(fileName.encode())
+        return self.afseal.restorepublicKey(_to_valid_file_str(fileName, check=True).encode())
 
-    cpdef bool savesecretKey(self,str fileName) except +:
-        """savesecretKey(str fileName)
+    cpdef bool savesecretKey(self, fileName) except +:
+        """savesecretKey(fileName)
 
         Saves current secret key in a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.savesecretKey(fileName.encode())
+        return self.afseal.savesecretKey(_to_valid_file_str(fileName, check=False).encode())
     
-    cpdef bool restoresecretKey(self, str fileName) except +:
-        """restoresecretKey(str fileName)
+    cpdef bool restoresecretKey(self, fileName) except +:
+        """restoresecretKey(fileName)
 
         Restores current secret key from a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restoresecretKey(fileName.encode())
+        return self.afseal.restoresecretKey(_to_valid_file_str(fileName, check=True).encode())
     
-    cpdef bool saverelinKey(self, str fileName) except +:
-        """saverelinKey(str fileName)
+    cpdef bool saverelinKey(self, fileName) except +:
+        """saverelinKey(fileName)
 
         Saves current relinearization keys in a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saverelinKey(fileName.encode())
+        return self.afseal.saverelinKey(_to_valid_file_str(fileName, check=False).encode())
     
-    cpdef bool restorerelinKey(self, str fileName) except +:
-        """restorerelinKey(str fileName)
+    cpdef bool restorerelinKey(self, fileName) except +:
+        """restorerelinKey(fileName)
 
         Restores current relinearization keys from a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restorerelinKey(fileName.encode())
+        return self.afseal.restorerelinKey(_to_valid_file_str(fileName, check=True).encode())
     
-    cpdef bool saverotateKey(self, str fileName) except +:
-        """saverotateKey(str fileName)
+    cpdef bool saverotateKey(self, fileName) except +:
+        """saverotateKey(fileName)
 
         Saves current rotation Keys from a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saverotateKey(fileName.encode())
+        return self.afseal.saverotateKey(_to_valid_file_str(fileName, check=False).encode())
     
-    cpdef bool restorerotateKey(self, str fileName) except +:
-        """restorerotateKey(str fileName)
+    cpdef bool restorerotateKey(self, fileName) except +:
+        """restorerotateKey(fileName)
 
         Restores current rotation Keys from a file
         
         Args:
-            * fileName (str): Name of the file.   
+            * fileName (str|Path): Name of the file.   
             
         Return:
             * bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restorerotateKey(fileName.encode())
+        return self.afseal.restorerotateKey(_to_valid_file_str(fileName, check=True).encode())
     
     
     
@@ -1307,7 +1310,7 @@ cdef class Pyfhel:
     
     # GETTERS
     cpdef int getnSlots(self) except +:
-        """Maximum umber of slots fitting in a ciphertext in BATCH mode.
+        """Maximum number of slots fitting in a ciphertext in BATCH mode.
             
         Return:
             * int: Maximum umber of slots.

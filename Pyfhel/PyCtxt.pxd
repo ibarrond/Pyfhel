@@ -6,8 +6,8 @@
 from libcpp.string cimport string
 from libcpp cimport bool
 
-# Used for all kinds of operations
-from Pyfhel.Pyfhel cimport Pyfhel
+# Used for all kinds of operations. Includes utility functions
+from Pyfhel.Pyfhel cimport *
 
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, binary
@@ -16,7 +16,7 @@ from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, bi
 from Pyfhel.Afhel cimport Ciphertext
 
 # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from Pyfhel.util.ENCODING_T cimport ENCODING_T
+from Pyfhel.util cimport ENCODING_T
 
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class PyCtxt:
@@ -31,5 +31,3 @@ cdef class PyCtxt:
     cpdef void load(self, str fileName, encoding) except +
     cpdef bytes to_bytes(self) except +
     cpdef void from_bytes(self, bytes content, encoding) except +
-
-cpdef to_ENCODING_t(encoding)

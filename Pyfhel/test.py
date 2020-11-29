@@ -26,10 +26,10 @@ class PyfhelTestCase(unittest.TestCase):
     def test_PyPtxt_creation_deletion(self):
         try:
             ptxt = PyPtxt()
-            ptxt2 = PyPtxt(other_ptxt=ptxt)
+            ptxt2 = PyPtxt(copy_ptxt=ptxt)
             pyfhel = Pyfhel()
             ptxt3 = PyPtxt(pyfhel=pyfhel)
-            ptxt4 = PyPtxt(other_ptxt=ptxt3)
+            ptxt4 = PyPtxt(copy_ptxt=ptxt3)
         except Exception as err:
             self.fail("PyPtxt() creation failed unexpectedly: ", err)
         self.assertEqual(ptxt._encoding, ENCODING_t.UNDEFINED)

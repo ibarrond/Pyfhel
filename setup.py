@@ -9,7 +9,6 @@
 
 import shutil, glob, fileinput, re, os, sys, sysconfig, platform
 from pathlib import Path
-from setuptools._distutils.core import Command
 
 # Check that Python version is 3.5+
 v_maj, v_min = sys.version_info[:2]
@@ -26,37 +25,17 @@ if "--CYTHONIZE" in sys.argv:
     del sys.argv[sys.argv.index("--CYTHONIZE")]
 
 
-
-# -------------------------- INSTALL REQUIREMENTS ------------------------------
-# We must install requirements before `setup` because the Cython compilation
-#  needs to know the path of numpy library to link with it.
-import subprocess, pkg_resources
-from pkg_resources import DistributionNotFound, VersionConflict
-
-# Get requirements
-with open("requirements.txt") as f:
-    requirements = [req for req in f.read().split('\n') if req]
-
-# Check requirements. If a requirement is not met, we install it using pip
-try:
-    pkg_resources.require(requirements)
-except (DistributionNotFound, VersionConflict) as e:
-    # A package is not found or the version is too old.
-    try:
-        subprocess.check_call([sys.executable,"-m","pip","install", str(e.req)])
-    except subprocess.CalledProcessError as e:
-        raise Exception("Couldn't install required lib {}."%(str(e.req))+\
-                        " Try to update pip (for conda, install it manually)")
-
-
 # --------------------------- REQUIREMENT IMPORTS ------------------------------
 # Create Extension modules written in C for Python
 from setuptools import setup, Extension, find_packages
 
 # Get directories for includes of both Python and Numpy
 from distutils.sysconfig import get_python_inc
-import numpy
 
+# Get requirements
+with open("requirements.txt") as f:
+    requirements = [req for req in f.read().split('\n') if req]
+    
 # --------------------------------- VERSION ------------------------------------
 # Reading version info from Readme and hardcoding it in the __init__.py file
 v_readme_regex = r'\[\_*v([0-9]+\.[0-9]+\.[0-9a-z]+)\_*\]'
@@ -92,8 +71,9 @@ local_sources = scan_cpp(SEAL_PATH,[str(AFHEL_PATH / 'Afseal.cpp')])
 
 # Compile arguments for extensions
 language            = "c++"
-include_dirs        = [get_python_inc(),numpy.get_include(),
+include_dirs        = [get_python_inc(),
                        str(PYFHEL_PATH), str(AFHEL_PATH), str(SEAL_PATH)]
+define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
 extra_compile_flags = ["-DHAVE_CONFIG_H"]
 if platform.system() == 'Windows':
     # Windows' MSVC2019 compiler doesn't have an O3 optimization
@@ -103,8 +83,6 @@ else:  # Linux, GCC
     extra_compile_flags += ["-std=c++17","-O3"]
 
 
-print(extra_compile_flags)
-
 # --------------------------- LIBRARY COMPILATION ------------------------------
 # Here we compile Afhel (with the backends) and bundle it into a static library
 # Dynamic lybraries are much more complex to manage. In case this was necessary:
@@ -113,7 +91,8 @@ print(extra_compile_flags)
 # cpplibraries:
 cpplibraries = ('Afhel', {'sources': local_sources,
                           'include_dirs':include_dirs,
-                          'cflags':extra_compile_flags})
+                          'cflags':extra_compile_flags,
+                          'macros':define_macros,})
 
 
 # -------------------------------- EXTENSIONS ---------------------------------
@@ -123,6 +102,7 @@ ext_modules = [
              name="Pyfhel.Pyfhel",
              sources=[str(PYFHEL_PATH/("Pyfhel"+ext))],
              include_dirs=include_dirs,
+             define_macros=define_macros,
              language=language,
              extra_compile_args=extra_compile_flags,
          ),
@@ -130,6 +110,7 @@ ext_modules = [
              name="Pyfhel.PyPtxt",
              sources=[str(PYFHEL_PATH/("PyPtxt"+ext))],
              include_dirs=include_dirs,
+             define_macros=define_macros,
              language=language,
              extra_compile_args=extra_compile_flags,
          ),
@@ -137,6 +118,7 @@ ext_modules = [
              name="Pyfhel.PyCtxt",
              sources=[str(PYFHEL_PATH/("PyCtxt"+ext))],
              include_dirs=include_dirs,
+             define_macros=define_macros,
              language=language,
              extra_compile_args=extra_compile_flags,
          ),   
@@ -147,20 +129,15 @@ if CYTHONIZE:
 
 # --------------------------------- CLEANER -----------------------------------
 # Tired of cleaning all compilation and distribution by hand
+from distutils.cmd import Command
 class FlushCommand(Command):
     """Custom clean command to tidy up the project root."""
     CLEAN_FILES = './build ./dist ./*.pyc ./*.tgz ./*.egg-info'.split(' ')
     user_options = []
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-        
-
+    def initialize_options(self):   pass
+    def finalize_options(self):     pass
     def run(self):
         here = os.getcwd()
-
         for path_spec in self.CLEAN_FILES:
             # Make paths absolute and relative to this path
             abs_paths = glob.glob(os.path.normpath(os.path.join(here, path_spec)))
@@ -171,6 +148,23 @@ class FlushCommand(Command):
                 print('removing %s' % os.path.relpath(path))
                 shutil.rmtree(path)
 
+                
+# ---------------------------------- NUMPY ------------------------------------
+# We need to know the headers of numpy for compilation. For this, we use
+#  our own build_ext function (https://stackoverflow.com/questions/54117786)
+def my_build_ext(pars):
+    # import delayed:
+    from setuptools.command.build_ext import build_ext as _build_ext
+    # include_dirs adjusted: 
+    class build_ext(_build_ext):
+        def finalize_options(self):
+            _build_ext.finalize_options(self)
+            # Prevent numpy from thinking it is still in its setup process:
+            # __builtins__.__NUMPY_SETUP__ = False
+            import numpy
+            self.include_dirs.append(numpy.get_include())
+    #object returned:
+    return build_ext(pars)
 
 # -------------------------------- INSTALLER ----------------------------------
 setup(
@@ -184,8 +178,8 @@ setup(
     keywords        = "homomorphic encryption cython cryptography",
     license         = "GNU GPLv3",
     url             = "https://github.com/ibarrond/Pyfhel",     
-    setup_requires  =["setuptools>=30.0",
-                      "numpy>=1.14.0"],
+    setup_requires  =["setuptools>=45.0",
+                      "numpy>=1.16.0"],
     install_requires=requirements,
     classifiers     =[
         "Programming Language :: C++",
@@ -196,7 +190,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: Unix",
         "Operating System :: POSIX",
@@ -205,12 +199,10 @@ setup(
         "Topic :: Security :: Cryptography",
     ],
     zip_safe=False,
-    #package_dir={"":"Pyfhel"},
     packages=find_packages(),
     ext_modules=ext_modules,  
     test_suite=str(PYFHEL_PATH / "test.py"),
     libraries=[cpplibraries],
-    library_dirs=['.'],
-    extra_compile_args=extra_compile_flags,
-    cmdclass={'flush': FlushCommand},
+    cmdclass={'flush': FlushCommand,
+              'build_ext' : my_build_ext},
 )

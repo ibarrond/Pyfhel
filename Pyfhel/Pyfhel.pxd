@@ -79,20 +79,20 @@ cdef class Pyfhel:
 
     
     # ================================ I/O =====================================
-    cpdef bool saveContext(self, str fileName) except +
-    cpdef bool restoreContext(self, str fileName) except +
+    cpdef bool saveContext(self, fileName) except +
+    cpdef bool restoreContext(self, fileName) except +
 
-    cpdef bool savepublicKey(self, str fileName) except +
-    cpdef bool restorepublicKey(self, str fileName) except +
+    cpdef bool savepublicKey(self, fileName) except +
+    cpdef bool restorepublicKey(self, fileName) except +
 
-    cpdef bool savesecretKey(self, str fileName) except +
-    cpdef bool restoresecretKey(self, str fileName) except +
+    cpdef bool savesecretKey(self, fileName) except +
+    cpdef bool restoresecretKey(self, fileName) except +
 
-    cpdef bool saverelinKey(self, str fileName) except +
-    cpdef bool restorerelinKey(self, str fileName) except +
+    cpdef bool saverelinKey(self, fileName) except +
+    cpdef bool restorerelinKey(self, fileName) except +
 
-    cpdef bool saverotateKey(self, str fileName) except +
-    cpdef bool restorerotateKey(self, str fileName) except +
+    cpdef bool saverotateKey(self, fileName) except +
+    cpdef bool restorerotateKey(self, fileName) except +
 
     
     # ============================== AUXILIARY =================================
@@ -108,4 +108,7 @@ cdef class Pyfhel:
     cpdef int getintDigits(self) except +
     cpdef int getfracDigits(self) except +
     cpdef bool getflagBatch(self) except +
-    
+
+# --------------------------------- UTILS --------------------------------------
+cpdef to_ENCODING_t(encoding) except +
+cpdef str _to_valid_file_str(fileName, bool check=*) except +
