@@ -27,10 +27,10 @@ cdef class PyCtxt:
     
     """
     def __cinit__(self,
-                  fileName=None,
-                  encoding=None,
+                  PyCtxt copy_ctxt=None,
                   Pyfhel pyfhel=None,
-                  PyCtxt copy_ctxt=None):
+                  fileName=None,
+                  encoding=None):
         if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy
             self._ptr_ctxt = new Ciphertext(deref(copy_ctxt._ptr_ctxt))
             self._encoding = copy_ctxt._encoding
@@ -150,7 +150,7 @@ cdef class PyCtxt:
             self._ptr_ctxt.load(deref(inputter))
         finally:
             del inputter
-        self._encoding = to_ENCODING_t(encoding)
+        self._encoding = to_ENCODING_t(encoding).value
 
     cpdef void from_bytes(self, bytes content, encoding) except +:
         """from_bytes(bytes content)
@@ -166,7 +166,7 @@ cdef class PyCtxt:
         cdef stringstream inputter
         inputter.write(content,len(content))
         self._ptr_ctxt.load(inputter)
-        self._encoding = to_ENCODING_t(encoding)
+        self._encoding = to_ENCODING_t(encoding).value
 
             
     # =========================================================================

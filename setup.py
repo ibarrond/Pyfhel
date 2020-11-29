@@ -1,19 +1,21 @@
 # =============================== SETUP.PY =====================================
-# This file installs Pyfhel in your Python3 distribution. Use:
+# This file installs Pyfhel in your Python3 distribution. Use one of the two:
 #   > python3 setup.py install
+#   > python3 -m pip install .
 # PYPI -> https://packaging.python.org/tutorials/packaging-projects/
 #   > python3 setup.py sdist
 #   > twine upload dist/*
 #   > python3 setup.py clean --all
 
-import fileinput, re, os, sys
+import shutil, glob, fileinput, re, os, sys, sysconfig, platform
+from pathlib import Path
+from setuptools._distutils.core import Command
 
 # Check that Python version is 3.5+
 v_maj, v_min = sys.version_info[:2]
 assert (v_maj, v_min) >= (3,5),\
     "Pyfhel requires Python 3.5+ (your version is {}.{}).".format(v_maj, v_min)
 
-from pathlib import Path
 
 
 # -------------------------------- OPTIONS -------------------------------------
@@ -23,11 +25,6 @@ if "--CYTHONIZE" in sys.argv:
     CYTHONIZE= True
     del sys.argv[sys.argv.index("--CYTHONIZE")]
 
-# Use shared libraries only if installed. Disabled by default. Experimental.
-LIBS= False
-if "--LIBS" in sys.argv:
-    LIBS= True
-    del sys.argv[sys.argv.index("--LIBS")]
 
 
 # -------------------------- INSTALL REQUIREMENTS ------------------------------
@@ -60,7 +57,6 @@ from setuptools import setup, Extension, find_packages
 from distutils.sysconfig import get_python_inc
 import numpy
 
-
 # --------------------------------- VERSION ------------------------------------
 # Reading version info from Readme and hardcoding it in the __init__.py file
 v_readme_regex = r'\[\_*v([0-9]+\.[0-9]+\.[0-9a-z]+)\_*\]'
@@ -84,23 +80,40 @@ AFHEL_PATH = PYFHEL_PATH / 'Afhel'
 SEAL_PATH = PYFHEL_PATH / 'SEAL' / 'SEAL' / 'seal'
 
 # Scan a directory searching for all C++ files
-def scan(dir, files=[]):
+def scan_cpp(dir, files=[]):
     for file in os.listdir(dir):
         path = os.path.join(dir, file)
         if os.path.isfile(path) and path.endswith(".cpp"):
             files.append(str(path))
     return files
 
-# Including shared libraries
-# TODO: include libpython.a only in windows ? " -D MS_WIN64"
-libraries = ["seal", "afhel"] if LIBS else []
-local_sources = [] if LIBS else scan(SEAL_PATH,[str(AFHEL_PATH / 'Afseal.cpp')])
+# List all the .cpp files
+local_sources = scan_cpp(SEAL_PATH,[str(AFHEL_PATH / 'Afseal.cpp')])
 
-# Compile flags for extensions
+# Compile arguments for extensions
 language            = "c++"
 include_dirs        = [get_python_inc(),numpy.get_include(),
                        str(PYFHEL_PATH), str(AFHEL_PATH), str(SEAL_PATH)]
-extra_compile_flags = ["-std=c++17", "-O3", "-DHAVE_CONFIG_H"]
+extra_compile_flags = ["-DHAVE_CONFIG_H"]
+if platform.system() == 'Windows':
+    # Windows' MSVC2019 compiler doesn't have an O3 optimization
+    #>https://docs.microsoft.com/en-us/cpp/build/reference/o-options-optimize-code
+    extra_compile_flags += ["-O2"]
+else:  # Linux, GCC
+    extra_compile_flags += ["-std=c++17","-O3"]
+
+
+print(extra_compile_flags)
+
+# --------------------------- LIBRARY COMPILATION ------------------------------
+# Here we compile Afhel (with the backends) and bundle it into a static library
+# Dynamic lybraries are much more complex to manage. In case this was necessary:
+#> https://github.com/realead/commonso/blob/master/setup.py
+
+# cpplibraries:
+cpplibraries = ('Afhel', {'sources': local_sources,
+                          'include_dirs':include_dirs,
+                          'cflags':extra_compile_flags})
 
 
 # -------------------------------- EXTENSIONS ---------------------------------
@@ -108,24 +121,21 @@ ext = ".pyx" if CYTHONIZE else ".cpp"
 ext_modules = [
          Extension(
              name="Pyfhel.Pyfhel",
-             sources=[str(PYFHEL_PATH/("Pyfhel"+ext))]+local_sources,
-             libraries=libraries,
+             sources=[str(PYFHEL_PATH/("Pyfhel"+ext))],
              include_dirs=include_dirs,
              language=language,
              extra_compile_args=extra_compile_flags,
          ),
          Extension(
              name="Pyfhel.PyPtxt",
-             sources=[str(PYFHEL_PATH/("PyPtxt"+ext))]+local_sources,
-             libraries=libraries,
+             sources=[str(PYFHEL_PATH/("PyPtxt"+ext))],
              include_dirs=include_dirs,
              language=language,
              extra_compile_args=extra_compile_flags,
          ),
          Extension(
              name="Pyfhel.PyCtxt",
-             sources=[str(PYFHEL_PATH/("PyCtxt"+ext))]+local_sources,
-             libraries=libraries,
+             sources=[str(PYFHEL_PATH/("PyCtxt"+ext))],
              include_dirs=include_dirs,
              language=language,
              extra_compile_args=extra_compile_flags,
@@ -134,6 +144,33 @@ ext_modules = [
 if CYTHONIZE:
     from Cython.Build import cythonize
     ext_modules=cythonize(ext_modules)
+
+# --------------------------------- CLEANER -----------------------------------
+# Tired of cleaning all compilation and distribution by hand
+class FlushCommand(Command):
+    """Custom clean command to tidy up the project root."""
+    CLEAN_FILES = './build ./dist ./*.pyc ./*.tgz ./*.egg-info'.split(' ')
+    user_options = []
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+        
+
+    def run(self):
+        here = os.getcwd()
+
+        for path_spec in self.CLEAN_FILES:
+            # Make paths absolute and relative to this path
+            abs_paths = glob.glob(os.path.normpath(os.path.join(here, path_spec)))
+            for path in [str(p) for p in abs_paths]:
+                if not path.startswith(here):
+                    # Die if path in CLEAN_FILES is absolute + outside this directory
+                    raise ValueError("%s is not a path inside %s" % (path, here))
+                print('removing %s' % os.path.relpath(path))
+                shutil.rmtree(path)
+
 
 # -------------------------------- INSTALLER ----------------------------------
 setup(
@@ -168,7 +205,12 @@ setup(
         "Topic :: Security :: Cryptography",
     ],
     zip_safe=False,
+    #package_dir={"":"Pyfhel"},
     packages=find_packages(),
     ext_modules=ext_modules,  
     test_suite=str(PYFHEL_PATH / "test.py"),
+    libraries=[cpplibraries],
+    library_dirs=['.'],
+    extra_compile_args=extra_compile_flags,
+    cmdclass={'flush': FlushCommand},
 )
