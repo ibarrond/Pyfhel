@@ -22,7 +22,7 @@ HE.contextGen(p=65537)  # Generating context. The value of p is important.
                         #  More info in Demo_ContextParameters.py, and
                         #  in the docs of the function (link to docs in README)
 HE.keyGen()             # Key Generation.
-
+print(HE)
 
 print("2. Encrypting integers")
 integer1 = 127
@@ -31,12 +31,16 @@ ctxt1 = HE.encryptInt(integer1) # Encryption makes use of the public key
 ctxt2 = HE.encryptInt(integer2) # For integers, encryptInt function is used.
 print("    int ",integer1,'-> ctxt1 ', type(ctxt1), str(ctxt1))
 print("    int ",integer2,'-> ctxt2 ', type(ctxt2), str(ctxt2))
+print(ctxt1)
+print(ctxt2)
 
 print("3. Operating with encrypted integers")
 ctxtSum = ctxt1 + ctxt2         # `ctxt1 += ctxt2` for quicker inplace operation
 ctxtSub = ctxt1 - ctxt2         # `ctxt1 -= ctxt2` for quicker inplace operation
 ctxtMul = ctxt1 * ctxt2         # `ctxt1 *= ctxt2` for quicker inplace operation
-
+print(f"Sum: {ctxtSum}")
+print(f"Sub: {ctxtSub}")
+print(f"Mult:{ctxtMul}")
 
 print("4. Decrypting result:")
 resSum = HE.decryptInt(ctxtSum) # Decryption must use the corresponding function

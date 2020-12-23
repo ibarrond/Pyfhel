@@ -282,7 +282,6 @@ cdef class PyCtxt:
         else:
             raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
         return self
-
                         
     def __mul__(self, other):
         """Multiplies this ciphertext with either another PyCtxt or a PyPtxt plaintext.
@@ -475,6 +474,15 @@ cdef class PyCtxt:
         self._pyfhel.rotate(self, k, in_new_ctxt=False)
         return self
 
+    def __invert__(self):
+        """Relinarizes this ciphertext in-place.
+
+        Requires valid relinearization keys with a bitcount higher than the
+        current size of this ciphertext.
+        """
+        self._pyfhel.relinearize(self)
+        return self
+
     # =========================================================================
     # ============================ ENCR/DECR/CMP ==============================
     # =========================================================================
@@ -492,9 +500,13 @@ cdef class PyCtxt:
             raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not FRACTIONAL)")
         return self._pyfhel.decryptFrac(self)
     
-    def __str__(self):
-        return "<Pyfhel Ciphertext, encoding={}, size={}>".format(
-                ENCODING_t(self._encoding).name, self.size())
+    def __repr__(self):
+        return "<Pyfhel Ciphertext at {}, encoding={}, size={}/{}, noiseBudget={}>".format(
+                hex(id(self)),
+                ENCODING_t(self._encoding).name,
+                self.size(),
+                self.size_capacity(),
+                self._pyfhel.noiseLevel(self) if self._pyfhel else "-")
 
     def encrypt(self, value):
         self._pyfhel.encrypt(value, self)

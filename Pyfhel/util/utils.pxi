@@ -45,6 +45,9 @@ cpdef to_ENCODING_t(encoding) except +:
                            ENCODING_t.FRACTIONAL.value,
                            ENCODING_t.BATCH.value):
             return ENCODING_t(int(encoding))
-        
+    
+    elif isinstance(encoding, ENCODING_t):
+        return encoding
+    
     else:
         raise TypeError("<Pyfhel ERROR>: encoding unknown. Could not convert to ENCODING_t.")

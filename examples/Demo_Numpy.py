@@ -19,7 +19,7 @@ HE.contextGen(p=65537)  # Generating context. The value of p is important.
                         #  More info in Demo_ContextParameters.py, and
                         #  in the docs of the function (link to docs in README)
 HE.keyGen()             # Key Generation.
-
+print(HE)
 
 print("2. Encrypting two arrays of integers.")
 print("    For this, you need to create empty arrays in numpy and assign them the cyphertexts")

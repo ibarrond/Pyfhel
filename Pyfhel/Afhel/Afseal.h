@@ -395,8 +395,20 @@ class Afseal{
         int getsec();
         int getintDigits();  
         int getfracDigits();  
-        bool getflagBatch();   
+        bool getflagBatch(); 
 
+	bool is_secretKey_empty()
+		{return secretKey==NULL;}
+	bool is_publicKey_empty()
+		{ return publicKey==NULL;}
+	bool is_rotKey_empty()
+		{ return rotateKeys==NULL;}
+	bool is_relinKey_empty()
+		{ return relinKey==NULL;}
+	bool is_context_empty()
+		{ return context==NULL;}
+	
+	
         //SETTERS
         void setpublicKey(PublicKey& pubKey)
             {this->publicKey = make_shared<PublicKey> (pubKey);}
