@@ -41,8 +41,12 @@ print("   This size increase makes further operations slower, and requires more 
 
 print("4. Relinearization reduces the size of a ciphertext back to 2, thus it is very convenient for deep multiplications")
 print("    First we generate relinearization keys.")
-print("    Make sure the bitcount is higher than the size of your ciphertexts")
-HE.relinKeyGen(1, 1)
+print("    * Make sure the relinKey size is higher than the size of the ciphertext you want to relinearize.")
+print("    * bigger bitCount means faster relinarization, but also bigger decrease in noiseBudget. Needs to be within [1, 60]")
+relinKeySize=5
+HE.relinKeyGen(bitCount=1, size=relinKeySize)
+print("   We can now relinearize!")
+assert relinKeySize >= ctxtMul1.size()
 
 ctxtMul1 = ~ ctxtMul1 # Equivalent to HE.relinearize(ctxtMul)
                       # and equivalent to  ~ctxtMul1 (without assignment)
@@ -64,7 +68,11 @@ print(f"      expected: {(float1*float2)**2}")
 print("6. I need more noise budget! You have several options:")
 print("  - Use better context parameters (mainly increase m, reduce p, reduce intDigits and fracDigits")
 print("    -> Try this demo changing p to be 63 (enough to hold the result value) -> precision lowers, but operations are faster and noise budget decreases slower")
-print("    -> Try this demo with m=8192 (more multiplications are allowed, but operations are slower")
+print("    -> Try this demo with m=8192 (more multiplications are allowed, but operations are slower)")
 print("  - Decrypt and encrypt again.")
 print("  - Use bootstrapping: Sadly it is not available in SEAL, and even if it were, it would be extremely inefficient. It is always better to resort to the first option")
-HE
+
+
+print("7. How to check the multiplicative depth of a setup? Use the function MultDepth!")
+HE.MultDepth(max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=True)
+

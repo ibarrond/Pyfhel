@@ -24,7 +24,7 @@ cdef class PyPtxt:
     cdef Pyfhel _pyfhel
     cdef ENCODING_T _encoding
     cpdef bool is_zero(self) except +
-    cpdef string to_string(self) except +
+    cpdef string to_poly_string(self) except +
     cpdef void to_file(self, fileName) except +
     cpdef void from_file(self, fileName, encoding) except +
     cpdef void save(self, str fileName) except +

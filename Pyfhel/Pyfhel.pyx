@@ -95,8 +95,19 @@ cdef class Pyfhel:
     
     def __iter__(self):
         return self
-    
+
     def __repr__(self):
+        """A printable string with all the information about the Pyfhel object
+        
+        Info:
+            * at: hex ID, unique identifier and memory location.
+            * pk: 'Y' if public key is present. '-' otherwise.
+            * sk: 'Y' if secret key is present. '-' otherwise.
+            * rtk: 'Y' if rotation keys are present. '-' otherwise.
+            * rlk: 'Y' if relinarization keys are present. '-' otherwise.
+            * contx: Context, with values of p, m, base, security,
+                        # of int and frac digits and wether flagBatching is enabled.
+        """
         return "<Pyfhel obj at {}, [pk:{}, sk:{}, rtk:{}, rlk:{}, contx({})]>".format(
                 hex(id(self)),
                 "-" if self.is_publicKey_empty() else "Y",
@@ -104,10 +115,35 @@ cdef class Pyfhel:
                 "-" if self.is_rotKey_empty() else "Y",
                 "-" if self.is_relinKey_empty() else f"Y[{self.relinBitCount()}b]",
                 "-" if self.is_context_empty() else \
-                        f"p={self.getp()}, m={self.getm()}, base={self.getbase()},"\
-                        f"sec={self.getsec()}, dig={self.getintDigits()}i.{self.getfracDigits()}f,"
-                        f"batch={self.batchEnabled()}")
+                        f"p={self.getp()}, m={self.getm()}, base={self.getbase()}, "\
+                        f"sec={self.getsec()}, dig={self.getintDigits()}i.{self.getfracDigits()}f, "
+                        f"batch={self.getflagBatch()}")
 
+    
+    @property
+    def p(self):
+        return self.getp()
+
+    @property
+    def m(self):
+        return self.getm()
+    
+    @property
+    def base(self):
+        return self.getbase()
+
+    @property
+    def intDigits(self):
+        return self.getintDigits()
+        
+    @property
+    def fracDigits(self):
+        return self.getfracDigits()
+
+    @property
+    def getflagBatch(self):
+        return self.getflagBatch()
+        
     # =========================================================================
     # ============================ CRYPTOGRAPHY ===============================
     # =========================================================================
@@ -545,9 +581,12 @@ cdef class Pyfhel:
         Based on the current context, initializes one relinearization key. 
         
         Args:
-            * bitCount (int): Bigger means faster but noisier (will require
-                            relinearization). Needs to be within [1, 60]
-                      
+            * bitCount (int): Bigger means faster but noisier (bigger
+                decrease in noise budget of the relinearized ciphertexts).
+                Needs to be within [1, 60].
+            * size (int): Number of keys created internally. There should be
+                equal or more than the size of the ciphertexts to relinearize.
+
         Return:
             None
         """
@@ -1302,6 +1341,40 @@ cdef class Pyfhel:
     # =========================================================================
     # ============================== AUXILIARY ================================
     # =========================================================================
+    def MultDepth(self, max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False):
+        """MultDepth(self, max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False)
+
+        Empirically determines the multiplicative depth of a Pyfhel Object
+        for a given context. For this, it encrypts the inputs x, y and z with
+        Fractional encoding and performs the following chained multiplication
+        until the result deviates more than delta in absolute value:
+            x * y * z * y * z * y * z * y * z ...
+
+        After each multiplication, the ciphertext is relinearized and checked.
+
+        Ideally, y and z should be inverses to avoid wrapping over modulo p.
+
+        Requires the Pyfhel Object to have initialized context and pub/sec/relin keys.
+        """
+        x,y,z = x_y_z
+        cx = self.encryptFrac(x)
+        cy = self.encryptFrac(y)
+        cz = self.encryptFrac(z)
+        for m_depth in range(1, max_depth+1):
+            if m_depth%2: # Multiply by y and relinearize
+                x *= y
+                cx *= cy
+            else:         # Multiply by z and relinearize
+                x *= z
+                cx *= cz
+            ~cx           # Relinearize after every multiplication
+            x_hat = self.decryptFrac(cx)
+            if verbose:
+                print(f'Mult {m_depth} [budget: {self.noiseLevel(cx)} dB]: {x_hat} (expected {x})')
+            if abs(x - x_hat) > delta:
+                break
+        return m_depth
+
     cpdef bool batchEnabled(self) except +:
         """batchEnabled(self)
 

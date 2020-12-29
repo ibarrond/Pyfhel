@@ -89,6 +89,23 @@ cdef class PyCtxt:
         """int: Actual size of the ciphertext."""
         return self._ptr_ctxt.size()
 
+    @property    
+    def capacity(self):
+        """int: Maximum size the ciphertext can hold."""
+        return self._ptr_ctxt.size_capacity()
+
+    @property
+    def size(self):
+        """int: Actual size of the ciphertext."""
+        return self._ptr_ctxt.size()
+
+    @property
+    def noiseBudget(self):
+        """int: Noise budget.
+        
+        A value of 0 means that it cannot be decrypted correctly anymore."""
+        return self._pyfhel.noiseLevel(self)
+
     # =========================================================================
     # ================================== I/O ==================================
     # =========================================================================
@@ -492,12 +509,12 @@ cdef class PyCtxt:
 
     def __int__(self):
         if (self._encoding != ENCODING_T.INTEGER):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not INTEGER)")
+            raise RuntimeError("<Pyfhel ERROR> casting (decrypting) to int requires INTEGER encoding")
         return self._pyfhel.decryptInt(self)
 
     def __float__(self):
         if (self._encoding != ENCODING_T.FRACTIONAL):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not FRACTIONAL)")
+            raise RuntimeError("<Pyfhel ERROR> casting (decrypting) to float requires FRACTIONAL encoding")
         return self._pyfhel.decryptFrac(self)
     
     def __repr__(self):
@@ -507,6 +524,9 @@ cdef class PyCtxt:
                 self.size(),
                 self.size_capacity(),
                 self._pyfhel.noiseLevel(self) if self._pyfhel else "-")
+                
+    def __bytes__(self):
+        return self.to_bytes()
 
     def encrypt(self, value):
         self._pyfhel.encrypt(value, self)
