@@ -1,0 +1,70 @@
+div.related{
+    background-color: #27076F;
+}
+
+div.body .section h1{
+    background-color: #D1D2FF;
+}
+
+.bolditalic {
+    font-weight: bold;
+    font-style: italic;
+  }
+.rubric{
+    background-color: #faf0ff;
+}
+
+
+/* List */
+#index ul {
+    padding:0;
+}
+
+/* List element */
+#index li, #index li> li:hover{
+    list-style: none;
+    font-size: 18px;
+    padding: 10px 30px;
+    border-width: 2px 2px 2px 2px;
+    border-style: solid;
+    background-image: linear-gradient(300deg, #fff 40%, #f1eaff);
+    border-bottom-left-radius: 35px;
+    border-top-left-radius: 10px;
+    border-color: #fff;
+    font-variant: small-caps;
+    transition:.3s;
+}
+
+#index li:hover{
+    background-image: linear-gradient(300deg, #fff 40%, #ececec);
+    border-bottom-left-radius: 35px;
+    border-top-left-radius: 10px;
+    text-decoration: none;
+    font-size: 20px;
+    
+}
+
+#index li li:hover{
+    background-image: linear-gradient(300deg, #fff 40%, #d5d5d5);
+    
+}
+
+#index li li {
+    background-image: linear-gradient(300deg,#fff 40%, #f2ecff);
+    border-style: None;
+    font-variant: initial;
+    font-size: 16px;
+    transition:.3s;
+}
+
+#index li a {
+    color: black;
+    text-decoration: none;
+    transition:.3s;
+}
+
+
+table.docutils{
+    margin: 0px;
+    width: 100%;
+}

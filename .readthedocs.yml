@@ -8,9 +8,15 @@ build:
 python:
    version: 3.6
    install:
+      - requirements: docs/requirements.txt
       - requirements: requirements.txt
-      - method: setuptools
+      - method: pip
         path: .
         
 submodules:
    include: all
+
+sphinx:
+  builder: html
+  configuration: docs/conf.py
+  fail_on_warning: false

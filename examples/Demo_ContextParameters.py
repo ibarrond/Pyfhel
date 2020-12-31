@@ -1,4 +1,10 @@
-# ContextParameters shows how several parameters affect performance.
+"""
+Context Parameters in Pyfhel
+========================================
+
+Context Parameters shows how several parameters affect performance.
+"""
+# 
 #  TODO: Finish for all parameters. Show possible values of each.
 
 import time
@@ -38,3 +44,6 @@ def time_demo_helloworld(integer1=127, integer2=-2):
     print(f"Elapsed time: {end - start}")
     results = (resSum==125, resSub==129, resMul==-254)
     return end - start, results
+
+
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/contextParameters.jpg'

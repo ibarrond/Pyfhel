@@ -1,0 +1,4 @@
+sphinx>=3.2
+sphinx-gallery>=0.8
+memory-profiler>=0.55
+sphinxcontrib-fulltoc>=1.2.0

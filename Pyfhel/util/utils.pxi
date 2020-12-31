@@ -15,12 +15,24 @@ cpdef str _to_valid_file_str(fileName, bool check=False) except +:
 cpdef to_ENCODING_t(encoding) except +:
     """to_ENCODING_t(encoding)
     
-    Turns `encoding` into a valid ENCODING_t type. 
+    Turns `encoding` into an ENCODING_t.{INTEGER, FRACTIONAL, BATCH} enum.
     
-    If `encoding` is str, 'int' for IntegerEncoding,
-                          'float'/'fractional'/'double' for FractionalEncoding,
-                          'array'/'batch'/'matrix' for BatchEncoding
-    
+    Arguments:
+        encoding (str, type, int, ENCODING_t): One of the following:
+
+            * (str): ('int', 'integer') for INTEGER encoding, ('float', 'double') for 
+              FRACTIONAL encoding, ('array', 'batch', 'matrix') for BATCH encoding.
+
+            * Python class: (int) for INTEGER encoding, (float) for FRACTIONAL encoding, 
+                (list) for BATCH encoding.
+
+            * (int): (1) for INTEGER encoding, (2) for FRACTIONAL encoding,
+                (3) for BATCH encoding.
+
+            * (ENCODING_t) Enum (does nothing)
+
+    Returns:
+        ENCODING_t: INTEGER, FRACTIONAL or BATCH encoding.
     """
     if type(encoding) is unicode or isinstance(encoding, unicode):
         # encoding is a string. Casting it to str just in case.

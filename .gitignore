@@ -21,7 +21,7 @@ Pyfhel/*.pyc
 # Makefiles
 **/Makefile
 
-# SEAL - They don't allow redistribution
+# SEAL
 Pyfhel/SEAL/*
 !Pyfhel/SEAL/.gitkeep
 !Pyfhel/SEAL/config.h
@@ -42,4 +42,10 @@ Pyfhel/Scratchpad
 **.ipynb_checkpoints
 **/__pycache__
 
-!docs/**
+# Documentation
+docs/_autosummary
+docs/_autoexamples
+**.doctree
+**.pickle
+docs/html
+docs/doctrees

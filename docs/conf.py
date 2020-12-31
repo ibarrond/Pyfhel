@@ -26,16 +26,16 @@ copyright = '%s, %s' % (YEAR, author)
 import Pyfhel
 
 # The short X.Y version
-# version = Pyfhel.__version__
+version = re.sub(r'(.*)(\.[0-9a-z]+)','\\1', Pyfhel.__version__)
 # The full version, including alpha/beta/rc tags
-# release = Pyfhel.__version__
+release = Pyfhel.__version__
 
 
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-# needs_sphinx = '1.0'
+needs_sphinx = '3.2'
 highlight_language = 'cython'
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -43,8 +43,11 @@ highlight_language = 'cython'
 # ones.
 extensions = [
     'cython_highlighting',
-
+    'sphinxcontrib.fulltoc',
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autosectionlabel',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -52,10 +55,11 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinx_gallery.gen_gallery',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -104,7 +108,10 @@ except (ImportError, AttributeError):
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['static']
+html_css_files = ['style.css']
+html_domain_indices = True
+
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -118,7 +125,8 @@ html_static_path = ['_static']
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "_static/logo.png"
+html_favicon = 'static/logo_empty.svg'
+html_logo = "static/logo_empty.svg"
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -196,11 +204,39 @@ epub_exclude_files = ['search.html']
 
 
 # -- Extension configuration -------------------------------------------------
+autodoc_member_order = 'groupwise'
+autosummary_generate = True
+
+# -- Options for sphinx_gallery extension ------------------------------------
+import platform
+sphinx_gallery_conf = {
+    'examples_dirs': '../examples',   # path to your example scripts
+    'gallery_dirs': '_autoexamples',  # path to where to save gallery generated output
+    'filename_pattern': r'Demo_*',
+    'ignore_pattern': r'__init__\.py',
+    'min_reported_time': 0,
+    'remove_config_comments': True,
+    'expected_failing_examples': [],
+    'show_memory': platform.system() != 'Windows', # RAM consumption if not in Windows
+    ## Links to examples disabled
+    # # directory where function/class granular galleries are stored
+    # 'backreferences_dir'  : '_backreferences',
+    # # Modules for which function/class level galleries are created. In
+    # # this case sphinx_gallery and numpy in a tuple of strings.
+    # 'doc_module'          : ('Pyfhel'),
+}
 
 # -- Options for intersphinx extension ---------------------------------------
 
 # intersphinx for standard :keyword:s (def, for, etc.)
-intersphinx_mapping = {'python': ('https://docs.python.org/3/', None)}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/{.major}'.format(sys.version_info), None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'np': ('https://numpy.org/doc/stable/', None),
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+    'Pyfhel': ('https://pyfhel.readthedocs.io/en/latest/', None),
+}
+
 
 # -- Options for todo extension ----------------------------------------------
 

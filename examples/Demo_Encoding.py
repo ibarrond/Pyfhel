@@ -1,5 +1,11 @@
-# Encoding Demo for Pyfhel, covering the different ways of encodeing
-#   and decodeing.
+"""
+Pyfhel Codecs
+========================================
+
+Encoding Demo for Pyfhel, covering the different ways of encoding
+and decodeing.
+"""
+
 
 from Pyfhel import Pyfhel, PyPtxt, PyPtxt
 
@@ -95,3 +101,7 @@ ptxt3 = HE.encode(array2)
 integer2 = HE.decode(ptxt1)
 float2 =   HE.decode(ptxt2)
 array2 =   HE.decode(ptxt3)
+
+
+
+# sphinx_gallery_thumbnail_path = 'static/thumbnails/encoding.png'

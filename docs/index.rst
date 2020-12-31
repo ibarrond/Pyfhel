@@ -3,10 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Pyfhel: Python for Homomorphic Encryption Libraries™
-==================================
+.. role:: bolditalic
+  :class: bolditalic
 
-Release v\ |version| (:ref:`Installation <install>`)
+.. |warning| image:: static/warning_icon.png
+    :align: middle
+    :width: 20
+
+.. image:: static/logo_title.png
+    :target: https://github.com/ibarrond/Pyfhel
 
 .. image:: https://travis-ci.org/ibarrond/Pyfhel.svg?branch=master
     :target: https://travis-ci.org/ibarrond/Pyfhel
@@ -19,23 +24,38 @@ Release v\ |version| (:ref:`Installation <install>`)
 .. image:: https://img.shields.io/pypi/pyversions/Pyfhel.svg
     :target: https://pypi.org/project/Pyfhel
 
-**Pyfhel** is the a Homomorphic Encryption library for Python.
+**PY**\ thon **F**\ or **H**\ momorphic **E**\ ncryption **L**\ ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
 
-.. note:: This library is built on top of C++ libraries. The current version supports only `[SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/)`
+**Pyfhel** is built on top of **Afhel**, an **A**\ bstraction **F**\ or **H**\ momorphic **E**\ ncryption **L**\ ibraries in C++. **Afhel** serves as common API for all backends.
 
-If you're interested in contributing, please have a look at the Github repository.
+* :bolditalic:`Version`: |release|.
+* :bolditalic:`Status`: STABLE.
+* :bolditalic:`Language`: Python (3.5+) & Cython on top of C++17.
+* :bolditalic:`OS`: Windows (tested with ``MSVC2017``, ``MSVC2019``) and Linux / WSL (tested on ``gcc6``, ``gcc8``). MacOS not supported.
+
+.. warning::	|warning| *REQUIRED: Python must have been compiled with C++17:* ``g++>=6`` *|* ``MSVC 2017+`` |warning|
+	
+* :bolditalic:`Dependencies`: There are two possible backends (both shipped alongside Pyfhel), HE libraries in C++:
+   
+  1.  `SEAL <https://github.com/microsoft/SEAL/>`_ (no external dependencies, default).
+  2.  `PALISADE <https://git.njit.edu/palisade/PALISADE.git>`_ (no external dependencies) **WIP**
+
+.. note:: The current version supports `SEAL <https://github.com/microsoft/SEAL/>`_ only
+
+Index
+====================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-   
-.. automodule:: Pyfhel
-   :members:
-   :undoc-members:
-   :show-inheritance:
+    :glob:
+    :maxdepth: 4
+    
+    source/getting_started
+    _autoexamples/index
+    source/API_reference
+    source/API_serialized
 
-Indices and tables
-==================
+Glossary and tables
+====================
 
 * :ref:`genindex`
 * :ref:`search`
