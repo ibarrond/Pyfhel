@@ -24,6 +24,7 @@ cdef class PyCtxt:
                   PyCtxt copy_ctxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
+                  serialized=None,
                   encoding=None):
         if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy
             self._ptr_ctxt = new Ciphertext(deref(copy_ctxt._ptr_ctxt))
@@ -35,8 +36,12 @@ cdef class PyCtxt:
             self._ptr_ctxt = new Ciphertext()
             if fileName:
                 if not encoding:
-                    raise TypeError("<Pyfhel ERROR> PyCtxt initialization with loading requires valid encoding")    
+                    raise TypeError("<Pyfhel ERROR> PyCtxt initialization with fileName requires valid encoding")    
                 self.from_file(fileName, encoding)
+            elif serialized:
+                if not encoding:
+                    raise TypeError("<Pyfhel ERROR> PyCtxt initialization from serialized requires valid encoding")    
+                self.from_bytes(serialized, encoding)
             else:
                 self._encoding = to_ENCODING_t(encoding) if encoding else ENCODING_T.UNDEFINED
             if (pyfhel):
@@ -50,8 +55,9 @@ cdef class PyCtxt:
                   PyCtxt copy_ctxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
+                  serialized=None,
                   encoding=None):
-        """__init__(PyCtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, encoding=None)
+        """__init__(PyCtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, serialized=None, encoding=None)
 
         Initializes an empty PyCtxt ciphertext.
         
@@ -65,6 +71,8 @@ cdef class PyCtxt:
             pyfhel (Pyfhel, optional): Pyfhel instance needed to operate.
             fileName (str, pathlib.Path, optional): Load PyCtxt from this file.
                             Requires non-empty encoding.
+            serialized (bytes, optional): Read PyCtxt from a bytes serialized string, 
+                            obtained by calling the to_bytes method.
             encoding (str, type, int, optional): encoding type of the new PyCtxt.
         """
         pass
@@ -141,6 +149,15 @@ cdef class PyCtxt:
     # =========================================================================
     # ================================== I/O ==================================
     # =========================================================================
+    def __reduce__(self):
+        """__reduce__()
+
+        Required for pickling purposes. Returns a tuple with:
+            - A callable object that will be called to create the initial version of the object.
+            - A tuple of arguments for the callable object.
+        """
+        return (PyCtxt, (None, None, None, self.to_bytes(), self._encoding))
+
     cpdef void to_file(self, fileName) except +:
         """to_file(Path fileName)
         

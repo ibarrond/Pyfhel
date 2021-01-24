@@ -457,6 +457,7 @@ void Afseal::polyEval(Ciphertext& cipher1, vector<double>& coeffPoly){
         evaluator->add_plain(cipher1, fracEncoder->encode(coeff));}}
 
 // ------------------------------------- I/O ----------------------------------
+// ++++ FROM FILES ++++
 // SAVE/RESTORE CONTEXT
 bool Afseal::saveContext(string fileName){
     if(context==NULL){throw std::logic_error("Context not initialized");}
@@ -645,6 +646,166 @@ bool Afseal::restorerotateKey(string fileName){
     }
     return res;                                 // 1 if all OK, 0 otherwise
 }
+
+// ++++ FROM STREAMS ++++
+// SAVE/RESTORE CONTEXT
+bool Afseal::ssaveContext(ostream& contextFile){
+    if(context==NULL){throw std::logic_error("Context not initialized");}
+    bool res=true;
+    try{
+        context->parms().save(contextFile);
+        contextFile << base << endl;
+        contextFile << sec << endl;
+        contextFile << intDigits << endl;
+        contextFile << fracDigits << endl;
+        contextFile << flagBatch << endl;
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: context could not be saved";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::srestoreContext(istream& contextFile){
+    EncryptionParameters parms;
+    bool res=true;
+    try{    
+        parms.load(contextFile);
+        contextFile >> base;
+        contextFile >> sec;
+        contextFile >> intDigits;
+        contextFile >> fracDigits;
+        contextFile >> flagBatch;
+
+        this->context = make_shared<SEALContext>(parms);
+		this->keyGenObj = make_shared<KeyGenerator>(*context);
+        this->intEncoder = make_shared<IntegerEncoder>((*context).plain_modulus(), base);
+        this->fracEncoder = make_shared<FractionalEncoder>((*context).plain_modulus(),
+                (*context).poly_modulus(), intDigits, fracDigits, base);
+        this->evaluator=make_shared<Evaluator>(*context);
+        if(flagBatch){
+            if(!(*context).qualifiers().enable_batching){
+                throw invalid_argument("p not prime | p-1 not multiple 2*m");
+            }
+            this->flagBatch=true;
+            this->crtBuilder=make_shared<PolyCRTBuilder>(*context);
+        }
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: context could not be loaded";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+// SAVE/RESTORE KEYS
+bool Afseal::ssavepublicKey(ostream& keyFile){
+    if(publicKey==NULL){throw std::logic_error("Public Key not initialized");}
+    bool res=true;
+    try{
+        publicKey->save(keyFile);
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: public key could not be saved";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::srestorepublicKey(istream& keyFile){
+    bool res=true;
+    try{        
+        this->publicKey = make_shared<PublicKey>();
+        this->publicKey->load(keyFile);
+        this->encryptor=make_shared<Encryptor>(*context, *publicKey);
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: public key could not be loaded";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::ssavesecretKey(ostream& keyFile){
+    if(publicKey==NULL){throw std::logic_error("Secret Key not initialized");}
+    bool res=true;
+    try{
+        secretKey->save(keyFile);
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: secret key could not be saved";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::srestoresecretKey(istream& keyFile){
+    bool res=true;
+    try{        
+        this->secretKey = make_shared<SecretKey>();
+        this->secretKey->load(keyFile);
+        this->decryptor=make_shared<Decryptor>(*context, *secretKey);
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: secret key could not be saved";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::ssaverelinKey(ostream& keyFile){
+    if(relinKey==NULL){throw std::logic_error("Relinearization Key not initialized");}
+    bool res=true;
+    try{
+        relinKey->save(keyFile);
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: relinearization key could not be saved";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::srestorerelinKey(istream& keyFile){
+    bool res=true;
+    try{        
+        this->relinKey = make_shared<EvaluationKeys>();
+        this->relinKey->load(keyFile);
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: relinearization key could not be loaded";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::ssaverotateKey(ostream& keyFile){
+    if(rotateKeys==NULL){throw std::logic_error("Rotation Key not initialized");}
+    bool res=true;
+    try{
+        rotateKeys->save(keyFile);
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: Galois could not be saved";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
+bool Afseal::srestorerotateKey(istream& keyFile){
+    bool res=true;
+    try{
+        this->rotateKeys = make_shared<GaloisKeys>();
+        this->rotateKeys->load(keyFile);
+    }
+    catch(exception& e){
+        std::cout << "Afseal ERROR: Galois could not be loaded";
+        res=false;
+    }
+    return res;                                 // 1 if all OK, 0 otherwise
+}
+
 
 
 // ----------------------------- AUXILIARY ----------------------------

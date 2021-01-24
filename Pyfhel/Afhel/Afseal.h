@@ -330,6 +330,7 @@ class Afseal{
          * @return BOOL 1 if all ok, 0 otherwise
          */
         bool saveContext(string fileName);
+        bool ssaveContext(ostream& contextFile);
 
         // RESTORE ENVIRONMENT
         /**
@@ -339,6 +340,7 @@ class Afseal{
          * @return BOOL 1 if all ok, 0 otherwise
          */
         bool restoreContext(string fileName);
+        bool srestoreContext(istream& contextFile);
 
         // PUBLIC KEY
         /**
@@ -347,6 +349,7 @@ class Afseal{
          * @return BOOL 1 if all ok, 0 otherwise
          */
         bool savepublicKey(string fileName);
+        bool ssavepublicKey(ostream& keyFile);
 
         /**
          * @brief Restores the public key from a .apub file.
@@ -354,6 +357,7 @@ class Afseal{
          * @return BOOL 1 if all ok, 0 otherwise
          */
         bool restorepublicKey(string fileName);
+        bool srestorepublicKey(istream& keyFile);
 
         // SECRET KEY
         /**
@@ -362,6 +366,7 @@ class Afseal{
          * @return BOOL 1 if all ok, 0 otherwise
          */
         bool savesecretKey(string fileName);
+        bool ssavesecretKey(ostream& keyFile);
 
         /**
          * @brief Restores the secretKey from a .apub file
@@ -369,14 +374,19 @@ class Afseal{
          * @return BOOL 1 if all ok, 0 otherwise
          */
         bool restoresecretKey(string fileName);
+        bool srestoresecretKey(istream& keyFile);
 
 
 
         bool saverelinKey(string fileName);
+        bool ssaverelinKey(ostream& keyFile);
         bool restorerelinKey(string fileName);
+        bool srestorerelinKey(istream& keyFile);
 
         bool saverotateKey(string fileName);
+        bool ssaverotateKey(ostream& keyFile);
         bool restorerotateKey(string fileName);
+        bool srestorerotateKey(istream& keyFile);
 
 
 

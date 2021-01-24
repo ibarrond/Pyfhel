@@ -55,9 +55,43 @@ cdef class Pyfhel:
     SEAL/PALISADE/HELIB as backend. Pyfhel works with PyPtxt as  
     plaintext class and PyCtxt as cyphertext class.
     """
-    def __cinit__(self):
+    def __cinit__(self,
+                  context_params=None,
+                  key_gen=False,
+                  pub_key_file=None,
+                  sec_key_file=None):
         self.afseal = new Afseal()
     
+    def __init__(self,
+                  context_params=None,
+                  key_gen=False,
+                  pub_key_file=None,
+                  sec_key_file=None):
+        """__init__(context_params=None, key_gen=False, pub_key_file=None, sec_key_file=None)
+
+        Initializes an empty Pyfhel object, the base for all operations.
+        
+        To fill the Pyfhel object during initialization you can:
+            - Provide a dictionary of context parameters to run Pyfhel.contextGen(**context_params). 
+            - Set key_gen to True in order to generate a new public/secret key pair.
+            - Provide a pub_key_file and/or sec_key_file to load existing keys from saved files.
+
+        Attributes:
+            context_params (dict, optional): dictionary of context parameters to run contextGen().
+            key_gen (bool, optional): generate a new public/secret key pair
+            pub_key_file (str, pathlib.Path, optional): Load public key from this file.
+            sec_key_file (str, pathlib.Path, optional): Load public key from this file.
+        """
+        if context_params is not None:
+            self.contextGen(**context_params)
+        if key_gen: # Overrides the key files
+            self.keyGen()
+        else:
+            if pub_key_file is not None:
+                self.restorepublicKey(pub_key_file)
+            if sec_key_file is not None:
+                self.restoresecretKey(sec_key_file)
+
     def __dealloc__(self):
         if self.afseal != NULL:
             del self.afseal
@@ -88,7 +122,22 @@ cdef class Pyfhel:
                         f"sec={self.getsec()}, dig={self.getintDigits()}i.{self.getfracDigits()}f, "
                         f"batch={self.getflagBatch()}")
 
-    
+    def __reduce__(self):
+        """__reduce__(self)
+
+        Required for pickling purposes. Returns a tuple with:
+            - A callable object that will be called to create the initial version of the object.
+            - A tuple of arguments for the callable object.
+        """
+        context_params={"p": self.p,
+                        "m": self.m,
+                        "flagBatching": self.flagBatch,
+                        "base": self.base,
+                        "sec": self.sec,
+                        "intDigits": self.intDigits,
+                        "fracDigits": self.fracDigits}
+        return (Pyfhel, (context_params, False, None, None))
+
     @property
     def p(self):
         """Plaintext modulus. All operations are modulo p"""
@@ -101,6 +150,11 @@ cdef class Pyfhel:
         Directly linked to the multiplication depth (see multDepth)."""
         return self.getm()
     
+    @property
+    def sec(self):
+        """Security (bits)."""
+        return self.getsec()
+
     @property
     def base(self):
         """Polynomial base."""
@@ -117,7 +171,7 @@ cdef class Pyfhel:
         return self.getfracDigits()
 
     @property
-    def getflagBatch(self):
+    def flagBatch(self):
         """Wether batching is enabled or not"""
         return self.getflagBatch()
         
@@ -1181,7 +1235,10 @@ cdef class Pyfhel:
     
     # =========================================================================
     # ================================ I/O ====================================
-    # =========================================================================    
+    # =========================================================================   
+
+    # FILES
+
     cpdef bool saveContext(self, fileName) except +:
         """saveContext(fileName)
 
@@ -1313,6 +1370,158 @@ cdef class Pyfhel:
         return self.afseal.restorerotateKey(_to_valid_file_str(fileName, check=True).encode())
     
     
+    # BYTES
+
+    cpdef bytes to_bytes_context(self) except +:
+        """to_bytes_Context()
+
+        Saves current context in a bytes string
+        
+        Args:
+            None  
+            
+        Return:
+            bytes: Serialized Context.
+        """
+        cdef ostringstream outputter
+        self.afseal.ssaveContext(outputter)
+        return outputter.str()
+    
+    cpdef bool from_bytes_context(self, bytes content) except +:
+        """from_bytes_context(bytes content)
+
+        Restores current context from a bytes object
+        
+        Args:
+            content (bytes): bytes object obtained from to_bytes_context   
+            
+        Return:
+            bool: Result, True if OK, False otherwise.
+        """
+        cdef stringstream inputter
+        inputter.write(content,len(content))
+        return self.afseal.srestoreContext(inputter)
+
+    cpdef bytes to_bytes_publicKey(self) except +:
+        """to_bytes_publicKey()
+
+        Saves current public key in a bytes string
+        
+        Args:
+            None  
+            
+        Return:
+            bytes: Serialized public key.
+        """
+        cdef ostringstream outputter
+        self.afseal.ssavepublicKey(outputter)
+        return outputter.str()
+            
+    cpdef bool from_bytes_publicKey(self, bytes content) except +:
+        """from_bytes_publicKey(bytes content)
+
+        Restores current public key from a bytes object
+        
+        Args:
+            content (bytes): bytes object obtained from to_bytes_publicKey   
+            
+        Return:
+            bool: Result, True if OK, False otherwise.
+        """
+        cdef stringstream inputter
+        inputter.write(content,len(content))
+        return self.afseal.srestorepublicKey(inputter)
+
+    cpdef bytes to_bytes_secretKey(self) except +:
+        """to_bytes_secretKey()
+
+        Saves current secret key in a bytes string
+        
+        Args:
+            None  
+            
+        Return:
+            bytes: Serialized secret key.
+        """
+        cdef ostringstream outputter
+        self.afseal.ssavesecretKey(outputter)
+        return outputter.str()
+    
+    cpdef bool from_bytes_secretKey(self, bytes content) except +:
+        """from_bytes_secretKey(bytes content)
+
+        Restores current secret key from a bytes object
+        
+        Args:
+            content (bytes): bytes object obtained from to_bytes_secretKey   
+            
+        Return:
+            bool: Result, True if OK, False otherwise.
+        """
+        cdef stringstream inputter
+        inputter.write(content,len(content))
+        return self.afseal.srestoresecretKey(inputter)
+    
+    cpdef bytes to_bytes_relinKey(self) except +:
+        """to_bytes_relinKey()
+
+        Saves current relinearization key in a bytes string
+        
+        Args:
+            None  
+            
+        Return:
+            bytes: Serialized relinearization key.
+        """
+        cdef ostringstream outputter
+        self.afseal.ssaverelinKey(outputter)
+        return outputter.str()
+    
+    cpdef bool from_bytes_relinKey(self, bytes content) except +:
+        """from_bytes_relinKey(bytes content)
+
+        Restores current relin key from a bytes object
+        
+        Args:
+            content (bytes): bytes object obtained from to_bytes_relinKey   
+            
+        Return:
+            bool: Result, True if OK, False otherwise.
+        """
+        cdef stringstream inputter
+        inputter.write(content,len(content))
+        return self.afseal.srestorerelinKey(inputter)
+    
+    cpdef bytes to_bytes_rotateKey(self) except +:
+        """to_bytes_rotateKey(fileName)
+
+        Saves current context in a bytes string
+        
+        Args:
+            None  
+            
+        Return:
+            bytes: Serialized rotation key.
+        """
+        cdef ostringstream outputter
+        self.afseal.ssaverotateKey(outputter)
+        return outputter.str()
+    
+    cpdef bool from_bytes_rotateKey(self, bytes content) except +:
+        """from_bytes_rotateKey(bytes content)
+
+        Restores current rotation key from a bytes object
+        
+        Args:
+            content (bytes): bytes object obtained from to_bytes_rotateKey   
+            
+        Return:
+            bool: Result, True if OK, False otherwise.
+        """
+        cdef stringstream inputter
+        inputter.write(content,len(content))
+        return self.afseal.srestorerotateKey(inputter)
+         
     
     # =========================================================================
     # ============================== AUXILIARY ================================

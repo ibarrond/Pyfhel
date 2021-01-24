@@ -11,7 +11,7 @@ from libcpp cimport bool
 from numpy cimport int64_t, uint64_t
 
 # Import our own wrapper for iostream classes, used for I/O ops
-from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream, binary
+from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream,ostringstream, stringstream, binary
 
 from Pyfhel.Afhel cimport Plaintext
 from Pyfhel.Afhel cimport Ciphertext
@@ -79,6 +79,7 @@ cdef class Pyfhel:
 
     
     # ================================ I/O =====================================
+    #FILES
     cpdef bool saveContext(self, fileName) except +
     cpdef bool restoreContext(self, fileName) except +
 
@@ -94,6 +95,22 @@ cdef class Pyfhel:
     cpdef bool saverotateKey(self, fileName) except +
     cpdef bool restorerotateKey(self, fileName) except +
 
+
+    #BYTES
+    cpdef bytes to_bytes_context(self) except +
+    cpdef bool from_bytes_context(self, bytes content) except +
+
+    cpdef bytes to_bytes_publicKey(self) except +
+    cpdef bool from_bytes_publicKey(self, bytes content) except +
+
+    cpdef bytes to_bytes_secretKey(self) except +
+    cpdef bool from_bytes_secretKey(self, bytes content) except +
+
+    cpdef bytes to_bytes_relinKey(self) except +
+    cpdef bool from_bytes_relinKey(self, bytes content) except +
+
+    cpdef bytes to_bytes_rotateKey(self) except +
+    cpdef bool from_bytes_rotateKey(self, bytes content) except +
     
     # ============================== AUXILIARY =================================
     cpdef bool batchEnabled(self) except +
