@@ -11,7 +11,7 @@
 
 **Pyfhel**: **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries.
 
-* **_Version_**: [_v2.3.0_]
+* **_Version_**: [_v2.3.1_]
 * **_Status_**: STABLE
 * **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
 * **_Language_**: Python (3.5+) & Cython on top of C++17.

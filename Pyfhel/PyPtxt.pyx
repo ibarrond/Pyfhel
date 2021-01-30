@@ -246,9 +246,9 @@ cdef class PyPtxt:
         return self._pyfhel.decodeFrac(self)
     
     def __repr__(self):
-        return "<Pyfhel Ciphertext, encoding={}, poly={}>".format(
+        return "<Pyfhel Plaintext, encoding={}, poly={}>".format(
                 ENCODING_t(self._encoding).name,
-                str(self.to_poly_string())[:25]+'...' if len(str(self.to_poly_string()))>25 else '')
+                str(self.to_poly_string())[:25] + ('...' if len(str(self.to_poly_string()))>25 else ''))
 
     def encode(self, value):
         """encode(value)
