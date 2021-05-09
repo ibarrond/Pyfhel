@@ -45,7 +45,7 @@ v_init_regex = r'\"([0-9]+\.[0-9]+\.[0-9a-z]+)\"'
 with open('Pyfhel/__init__.py') as f:
     s = f.read()
 with open('Pyfhel/__init__.py', 'w') as f:
-    f.write(re.sub(v_init_regex, '"%s"'.format(VERSION), s))
+    f.write(re.sub(v_init_regex, '"{}"'.format(VERSION), s))
 
 # Including Readme in the module as long description.
 with open("README.md", "r") as fh:
