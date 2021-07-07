@@ -442,11 +442,13 @@ class Afseal {
   void setsecretKey(seal::SecretKey &secKey) { this->secretKey = std::make_shared<seal::SecretKey>(secKey); }
   void setrelinKey(seal::RelinKeys &relKey) { this->relinKey = std::make_shared<seal::RelinKeys>(relKey); }
 
+  friend class AfsealPoly;
+
   // POLY CONSTRUCTION -->
-  AfsealPoly empty_poly();
+  AfsealPoly empty_poly(const seal::Ciphertext &ref);
   AfsealPoly poly_from_ciphertext(seal::Ciphertext &ctxt, int64_t pos);
-  AfsealPoly poly_from_plaintext(seal::Plaintext &ptxt);
-  AfsealPoly poly_from_coeff_vector(std::vector<std::complex<double>> &coeff_vector);
+  AfsealPoly poly_from_plaintext(seal::Plaintext &ptxt, const seal::Ciphertext &ref);
+  //AfsealPoly poly_from_coeff_vector(std::vector<std::complex<double>> &coeff_vector);
   std::vector<AfsealPoly> poly_from_ciphertext(seal::Ciphertext &ctxt);
 
   // POLY OPS --> implement checks for compatibility.
@@ -467,34 +469,80 @@ class Afseal {
   void poly_to_ciphertext(seal::Ciphertext &ctxt, int64_t pos);
 };
 
+/// Wrapper for the underlying polynomials that make up plaintexts and ciphertexts in SEAL
 class AfsealPoly {
  private:
-  std::shared_ptr<seal::util::MemoryPool> mempool;
-  // coeffs;
-  // more stuff;
+  /// Pointer to the Afseal instance associated with this AfsealPoly
+  Afseal *afseal_ptr;
+
+  /// Parameter id associated with this AfsealPoly
+  seal::parms_id_type parms_id;
+
+  /// Pointer to the SEAL MemoryPool in which the polynomial is allocated
+  seal::MemoryPoolHandle mempool;
+
+  /// Pointer to the last generated coeff_representation
+  seal::util::CoeffIter coeff_repr_coeff_iter;
+
+  /// Pointer to the underlying ponomial
+  seal::util::CoeffIter eval_repr_coeff_iter;
+
+  /// True iff the last generated coeff_representaton is still valid
+  /// (no operations were performed since the last generation)
+  bool coeff_repr_valid = false;
+
+  /// Degree of the polynomial / number of coefficients
+  size_t coeff_count;
+
+  /// The number of coefficient moduli q_i (i.e., coeff_modulus.size() )
+  size_t coeff_modulus_count;
+
+  /// Helper function to convert to coeff_repr
+  void generate_coeff_repr();
+
 
  public:
-  // All functions using an Afseal instance could also be defined as members of the Afseal class.
+  // Note: All functions using an Afseal instance could also be defined as members of the Afseal class.
 
-  // Void constructor, just take & use SealContext from afseal
-  AfsealPoly(Afseal *afseal);
+  /// Default Destructor
+  ~AfsealPoly() = default;
 
-  // Copy constructor?
+  /// Copy constructor
   AfsealPoly(AfsealPoly &other);
 
-  // CONSTRUCTORS -> just use void constructor and fill using Afseal
-  AfsealPoly(Afseal *afseal, seal::Ciphertext &ctxt, int64_t pos);
-  AfsealPoly(Afseal *afseal, seal::Plaintext &ptxt);
-  //AfsealPoly(Afseal* afseal, seal::Plaintext& ptxt); //TODO: What was the third constructor supposed to be?
+  /// Copy operator
+  AfsealPoly &operator=(AfsealPoly &other);
 
-  // destructor
-  ~AfsealPoly();
+  /// Initializes a zero polynomial with sizes based on the parameters of the current ciphertext
+  /// \param afseal Afseal object, used to access the context
+  /// \param ref Ciphertext used as a reference to get get, e.g., coeff_modulus_count
+  AfsealPoly(Afseal &afseal, const seal::Ciphertext &ref);
 
-  // export poly to complex vector --> if you need context parameters, move to Afseal.
+  /// Creates a copy of the index-th polynomial comprising the Ciphertext
+  /// \param afseal Afseal object, used to access the context
+  /// \param ctxt  Ciphertext from which the polynomial should be copied
+  /// \param index Index (starting at 0) of the polynomial to be copied
+  AfsealPoly(Afseal &afseal, seal::Ciphertext &ctxt, size_t index);
+
+  /// Creates a copy of polynomial in the Plaintext
+  /// \param afseal Afseal object, used to access the context
+  /// \param ptxt  Plaintext from which the polynomial should be copied
+  /// \param ref Ciphertext used as a reference to get get, e.g., coeff_modulus_count
+  AfsealPoly(Afseal &afseal, seal::Plaintext &ptxt, const seal::Ciphertext &ref);
+
+  //TODO: Constructor from a vector of complex values, defining the coefficients directly?
+
+  /// Export polynomial to a vector of complex values
+  /// \return vector of the (complex) coefficients of the polynomial
   std::vector<std::complex<double>> to_coeff_list(void);
 
-  // access individual coefficients
-  std::complex<double> get_coeff(int64_t i);
-  void set_coeff(int64_t i, std::complex<double> &val);
+  /// get individual coefficient
+  /// \param i index of the coefficient
+  /// \return the i-th coefficient
+  std::complex<double> get_coeff(size_t i);
+
+  /// set individual coefficient
+  /// \param i index of the coefficient
+  void set_coeff(std::complex<double> &val, size_t i);
 };
 #endif

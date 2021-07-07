@@ -59,13 +59,13 @@ Afseal::Afseal(const Afseal &otherAfseal) {
 
   this->batchEncoder = make_shared<BatchEncoder>(*context);
 
-  this->m =           otherAfseal.m;
-  this->p =           otherAfseal.p;
-  this->base =        otherAfseal.base;
-  this->sec =         otherAfseal.sec;
-  this->intDigits =   otherAfseal.intDigits;
-  this->fracDigits =  otherAfseal.fracDigits;
-  this->flagBatch =   otherAfseal.flagBatch;
+  this->m = otherAfseal.m;
+  this->p = otherAfseal.p;
+  this->base = otherAfseal.base;
+  this->sec = otherAfseal.sec;
+  this->intDigits = otherAfseal.intDigits;
+  this->fracDigits = otherAfseal.fracDigits;
+  this->flagBatch = otherAfseal.flagBatch;
 }
 
 Afseal::~Afseal() {}
@@ -431,7 +431,7 @@ void Afseal::exponentiate(vector<Ciphertext> &cipherV, uint64_t &expon) {
 }
 
 void Afseal::polyEval(Ciphertext &cipher1, vector<int64_t> &coeffPoly) {
- throw std::logic_error("Non-Batched Integer Encoder no longer supported in BFV");
+  throw std::logic_error("Non-Batched Integer Encoder no longer supported in BFV");
 }
 
 void Afseal::polyEval(Ciphertext &cipher1, vector<double> &coeffPoly) {
@@ -644,7 +644,7 @@ bool Afseal::restorerotateKey(string fileName) {
   //  return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::savePlaintext(string fileName, Plaintext& plain) {
+bool Afseal::savePlaintext(string fileName, Plaintext &plain) {
   throw std::logic_error("Serialization Support Removed Temporarily");
   //TODO: Add Serialization support
   //  if (publicKey==NULL) { throw std::logic_error("Secret Key not initialized"); }
@@ -663,7 +663,7 @@ bool Afseal::savePlaintext(string fileName, Plaintext& plain) {
   //  return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::restorePlaintext(string fileName, Plaintext& plain) {
+bool Afseal::restorePlaintext(string fileName, Plaintext &plain) {
   throw std::logic_error("Serialization Support Removed Temporarily");
   //TODO: Add Serialization support
   //  bool res = true;
@@ -682,8 +682,7 @@ bool Afseal::restorePlaintext(string fileName, Plaintext& plain) {
   //  return res;                                 // 1 if all OK, 0 otherwise
 }
 
-
-bool Afseal::saveCiphertext(string fileName, Ciphertext& ctxt) {
+bool Afseal::saveCiphertext(string fileName, Ciphertext &ctxt) {
   throw std::logic_error("Serialization Support Removed Temporarily");
   //TODO: Add Serialization support
   //  if (publicKey==NULL) { throw std::logic_error("Secret Key not initialized"); }
@@ -702,7 +701,7 @@ bool Afseal::saveCiphertext(string fileName, Ciphertext& ctxt) {
   //  return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::restoreCiphertext(string fileName, Ciphertext& ctxt) {
+bool Afseal::restoreCiphertext(string fileName, Ciphertext &ctxt) {
   throw std::logic_error("Serialization Support Removed Temporarily");
   //TODO: Add Serialization support
   //  bool res = true;
@@ -723,214 +722,174 @@ bool Afseal::restoreCiphertext(string fileName, Ciphertext& ctxt) {
 
 // ++++ FROM STREAMS ++++
 // SAVE/RESTORE CONTEXT
-bool Afseal::ssaveContext(ostream& contextFile){
+bool Afseal::ssaveContext(ostream &contextFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // if(context==NULL){throw std::logic_error("Context not initialized");}
-    // bool res=true;
-    // try{
-    //     context->first_context_data()->parms().save(contextFile);
-    //     contextFile << base << endl;
-    //     contextFile << sec << endl;
-    //     contextFile << intDigits << endl;
-    //     contextFile << fracDigits << endl;
-    //     contextFile << flagBatch << endl;
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: context could not be saved";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  // if(context==NULL){throw std::logic_error("Context not initialized");}
+  // bool res=true;
+  // try{
+  //     context->first_context_data()->parms().save(contextFile);
+  //     contextFile << base << endl;
+  //     contextFile << sec << endl;
+  //     contextFile << intDigits << endl;
+  //     contextFile << fracDigits << endl;
+  //     contextFile << flagBatch << endl;
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: context could not be saved";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::srestoreContext(istream& contextFile){
+bool Afseal::srestoreContext(istream &contextFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // EncryptionParameters parms;
-    // bool res=true;
-    // try{    
-    //     parms.load(contextFile);
-    //     contextFile >> base;
-    //     contextFile >> sec;
-    //     contextFile >> intDigits;
-    //     contextFile >> fracDigits;
-    //     contextFile >> flagBatch;
+  // EncryptionParameters parms;
+  // bool res=true;
+  // try{
+  //     parms.load(contextFile);
+  //     contextFile >> base;
+  //     contextFile >> sec;
+  //     contextFile >> intDigits;
+  //     contextFile >> fracDigits;
+  //     contextFile >> flagBatch;
 
-    //     this->context = make_shared<SEALContext>(parms);
-		// this->keyGenObj = make_shared<KeyGenerator>(*context);
-    //     this->intEncoder = make_shared<IntegerEncoder>((*context).plain_modulus(), base);
-    //     this->fracEncoder = make_shared<FractionalEncoder>((*context).plain_modulus(),
-    //             (*context).poly_modulus(), intDigits, fracDigits, base);
-    //     this->evaluator=make_shared<Evaluator>(*context);
-    //     if(flagBatch){
-    //         if(!(*context).qualifiers().enable_batching){
-    //             throw invalid_argument("p not prime | p-1 not multiple 2*m");
-    //         }
-    //         this->flagBatch=true;
-    //         this->crtBuilder=make_shared<PolyCRTBuilder>(*context);
-    //     }
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: context could not be loaded";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  //     this->context = make_shared<SEALContext>(parms);
+  // this->keyGenObj = make_shared<KeyGenerator>(*context);
+  //     this->intEncoder = make_shared<IntegerEncoder>((*context).plain_modulus(), base);
+  //     this->fracEncoder = make_shared<FractionalEncoder>((*context).plain_modulus(),
+  //             (*context).poly_modulus(), intDigits, fracDigits, base);
+  //     this->evaluator=make_shared<Evaluator>(*context);
+  //     if(flagBatch){
+  //         if(!(*context).qualifiers().enable_batching){
+  //             throw invalid_argument("p not prime | p-1 not multiple 2*m");
+  //         }
+  //         this->flagBatch=true;
+  //         this->crtBuilder=make_shared<PolyCRTBuilder>(*context);
+  //     }
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: context could not be loaded";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
 // SAVE/RESTORE KEYS
-bool Afseal::ssavepublicKey(ostream& keyFile){
+bool Afseal::ssavepublicKey(ostream &keyFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // if(publicKey==NULL){throw std::logic_error("Public Key not initialized");}
-    // bool res=true;
-    // try{
-    //     publicKey->save(keyFile);
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: public key could not be saved";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  // if(publicKey==NULL){throw std::logic_error("Public Key not initialized");}
+  // bool res=true;
+  // try{
+  //     publicKey->save(keyFile);
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: public key could not be saved";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::srestorepublicKey(istream& keyFile){
+bool Afseal::srestorepublicKey(istream &keyFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // bool res=true;
-    // try{        
-    //     this->publicKey = make_shared<PublicKey>();
-    //     this->publicKey->load(keyFile);
-    //     this->encryptor=make_shared<Encryptor>(*context, *publicKey);
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: public key could not be loaded";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  // bool res=true;
+  // try{
+  //     this->publicKey = make_shared<PublicKey>();
+  //     this->publicKey->load(keyFile);
+  //     this->encryptor=make_shared<Encryptor>(*context, *publicKey);
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: public key could not be loaded";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::ssavesecretKey(ostream& keyFile){
+bool Afseal::ssavesecretKey(ostream &keyFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // if(publicKey==NULL){throw std::logic_error("Secret Key not initialized");}
-    // bool res=true;
-    // try{
-    //     secretKey->save(keyFile);
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: secret key could not be saved";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  // if(publicKey==NULL){throw std::logic_error("Secret Key not initialized");}
+  // bool res=true;
+  // try{
+  //     secretKey->save(keyFile);
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: secret key could not be saved";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::srestoresecretKey(istream& keyFile){
+bool Afseal::srestoresecretKey(istream &keyFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // bool res=true;
-    // try{        
-    //     this->secretKey = make_shared<SecretKey>();
-    //     this->secretKey->load(keyFile);
-    //     this->decryptor=make_shared<Decryptor>(*context, *secretKey);
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: secret key could not be saved";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  // bool res=true;
+  // try{
+  //     this->secretKey = make_shared<SecretKey>();
+  //     this->secretKey->load(keyFile);
+  //     this->decryptor=make_shared<Decryptor>(*context, *secretKey);
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: secret key could not be saved";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::ssaverelinKey(ostream& keyFile){
+bool Afseal::ssaverelinKey(ostream &keyFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // if(relinKey==NULL){throw std::logic_error("Relinearization Key not initialized");}
-    // bool res=true;
-    // try{
-    //     relinKey->save(keyFile);
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: relinearization key could not be saved";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  // if(relinKey==NULL){throw std::logic_error("Relinearization Key not initialized");}
+  // bool res=true;
+  // try{
+  //     relinKey->save(keyFile);
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: relinearization key could not be saved";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::srestorerelinKey(istream& keyFile){
+bool Afseal::srestorerelinKey(istream &keyFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // bool res=true;
-    // try{        
-    //     this->relinKey = make_shared<EvaluationKeys>();
-    //     this->relinKey->load(keyFile);
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: relinearization key could not be loaded";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  // bool res=true;
+  // try{
+  //     this->relinKey = make_shared<EvaluationKeys>();
+  //     this->relinKey->load(keyFile);
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: relinearization key could not be loaded";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::ssaverotateKey(ostream& keyFile){
+bool Afseal::ssaverotateKey(ostream &keyFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // if(rotateKeys==NULL){throw std::logic_error("Rotation Key not initialized");}
-    // bool res=true;
-    // try{
-    //     rotateKeys->save(keyFile);
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: Galois could not be saved";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  // if(rotateKeys==NULL){throw std::logic_error("Rotation Key not initialized");}
+  // bool res=true;
+  // try{
+  //     rotateKeys->save(keyFile);
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: Galois could not be saved";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::srestorerotateKey(istream& keyFile){
+bool Afseal::srestorerotateKey(istream &keyFile) {
   throw std::logic_error("Serialization Support Removed Temporarily");
-    // bool res=true;
-    // try{
-    //     this->rotateKeys = make_shared<GaloisKeys>();
-    //     this->rotateKeys->load(keyFile);
-    // }
-    // catch(exception& e){
-    //     std::cout << "Afseal ERROR: Galois could not be loaded";
-    //     res=false;
-    // }
-    // return res;                                 // 1 if all OK, 0 otherwise
+  // bool res=true;
+  // try{
+  //     this->rotateKeys = make_shared<GaloisKeys>();
+  //     this->rotateKeys->load(keyFile);
+  // }
+  // catch(exception& e){
+  //     std::cout << "Afseal ERROR: Galois could not be loaded";
+  //     res=false;
+  // }
+  // return res;                                 // 1 if all OK, 0 otherwise
 }
 
-
-bool Afseal::ssavePlaintext(ostream& plaintextFile, Plaintext& plain) {
-  throw std::logic_error("Serialization Support Removed Temporarily");
-  //TODO: Add Serialization support
-  //  if (publicKey==NULL) { throw std::logic_error("Secret Key not initialized"); }
-  //  bool res = true;
-  //  try {
-  //    fstream keyFile(fileName, fstream::out | fstream::trunc | fstream::binary);
-  //    assert(keyFile.is_open());
-  //    secretKey->save(keyFile);
-  //
-  //    keyFile.close();
-  //  }
-  //  catch (exception &e) {
-  //    std::cout << "Afseal ERROR: secret key could not be saved";
-  //    res = false;
-  //  }
-  //  return res;                                 // 1 if all OK, 0 otherwise
-}
-
-bool Afseal::srestorePlaintext(istream& plaintextFile, Plaintext& plain) {
-  throw std::logic_error("Serialization Support Removed Temporarily");
-  //TODO: Add Serialization support
-  //  bool res = true;
-  //  try {
-  //    fstream keyFile(fileName, fstream::in | fstream::binary);
-  //    assert(keyFile.is_open());
-  //    this->secretKey = make_shared<SecretKey>();
-  //    this->secretKey->load(context, keyFile);
-  //    this->decryptor = make_shared<Decryptor>(*context, *secretKey);
-  //    keyFile.close();
-  //  }
-  //  catch (exception &e) {
-  //    std::cout << "Afseal ERROR: secret key could not be saved";
-  //    res = false;
-  //  }
-  //  return res;                                 // 1 if all OK, 0 otherwise
-}
-
-
-bool Afseal::ssaveCiphertext(ostream& plaintextFile, Ciphertext& ctxt) {
+bool Afseal::ssavePlaintext(ostream &plaintextFile, Plaintext &plain) {
   throw std::logic_error("Serialization Support Removed Temporarily");
   //TODO: Add Serialization support
   //  if (publicKey==NULL) { throw std::logic_error("Secret Key not initialized"); }
@@ -949,7 +908,7 @@ bool Afseal::ssaveCiphertext(ostream& plaintextFile, Ciphertext& ctxt) {
   //  return res;                                 // 1 if all OK, 0 otherwise
 }
 
-bool Afseal::srestoreCiphertext(istream& plaintextFile, Ciphertext& ctxt) {
+bool Afseal::srestorePlaintext(istream &plaintextFile, Plaintext &plain) {
   throw std::logic_error("Serialization Support Removed Temporarily");
   //TODO: Add Serialization support
   //  bool res = true;
@@ -968,7 +927,43 @@ bool Afseal::srestoreCiphertext(istream& plaintextFile, Ciphertext& ctxt) {
   //  return res;                                 // 1 if all OK, 0 otherwise
 }
 
+bool Afseal::ssaveCiphertext(ostream &plaintextFile, Ciphertext &ctxt) {
+  throw std::logic_error("Serialization Support Removed Temporarily");
+  //TODO: Add Serialization support
+  //  if (publicKey==NULL) { throw std::logic_error("Secret Key not initialized"); }
+  //  bool res = true;
+  //  try {
+  //    fstream keyFile(fileName, fstream::out | fstream::trunc | fstream::binary);
+  //    assert(keyFile.is_open());
+  //    secretKey->save(keyFile);
+  //
+  //    keyFile.close();
+  //  }
+  //  catch (exception &e) {
+  //    std::cout << "Afseal ERROR: secret key could not be saved";
+  //    res = false;
+  //  }
+  //  return res;                                 // 1 if all OK, 0 otherwise
+}
 
+bool Afseal::srestoreCiphertext(istream &plaintextFile, Ciphertext &ctxt) {
+  throw std::logic_error("Serialization Support Removed Temporarily");
+  //TODO: Add Serialization support
+  //  bool res = true;
+  //  try {
+  //    fstream keyFile(fileName, fstream::in | fstream::binary);
+  //    assert(keyFile.is_open());
+  //    this->secretKey = make_shared<SecretKey>();
+  //    this->secretKey->load(context, keyFile);
+  //    this->decryptor = make_shared<Decryptor>(*context, *secretKey);
+  //    keyFile.close();
+  //  }
+  //  catch (exception &e) {
+  //    std::cout << "Afseal ERROR: secret key could not be saved";
+  //    res = false;
+  //  }
+  //  return res;                                 // 1 if all OK, 0 otherwise
+}
 
 // ----------------------------- AUXILIARY ----------------------------
 bool Afseal::batchEnabled() {
@@ -1028,6 +1023,173 @@ bool Afseal::getflagBatch() {
   if (this->context==NULL) { throw std::logic_error("Context not initialized"); }
   return this->flagBatch;
 }
-AfsealPoly Afseal::poly_from_coeff_vector(vector<complex<double>> &coeff_vector) {
-  //TODO: Implement
+
+AfsealPoly Afseal::empty_poly(const seal::Ciphertext &ref) {
+  return AfsealPoly(*this, ref);
+}
+
+AfsealPoly Afseal::poly_from_ciphertext(Ciphertext &ctxt, int64_t pos) {
+  return AfsealPoly(*this, ctxt, pos);
+}
+
+AfsealPoly Afseal::poly_from_plaintext(seal::Plaintext &ptxt, const seal::Ciphertext &ref) {
+  return AfsealPoly(*this, ptxt, ref);
+}
+
+//AfsealPoly Afseal::poly_from_coeff_vector(vector<std::complex<double>> &coeff_vector) {
+//  return AfsealPoly(*this, coeff_vector); //TODO: Implement coeff-based ctor in AfsealPoly
+//}
+
+std::vector<AfsealPoly> Afseal::poly_from_ciphertext(Ciphertext &ctxt) {
+  std::vector<AfsealPoly> v;
+  for (size_t i = 0; i < ctxt.size(); ++i) {
+    //v.emplace_back<AfsealPoly>(*this, ctxt, i);
+  }
+  return v;
+}
+
+AfsealPoly Afseal::add(AfsealPoly &p1, AfsealPoly &p2) {
+  return p1;
+}
+
+AfsealPoly Afseal::subtract(AfsealPoly &p1, AfsealPoly &p2) {
+  return p1;
+}
+
+AfsealPoly Afseal::multiply(AfsealPoly &p1, AfsealPoly &p2) {
+  return p1;
+}
+
+AfsealPoly Afseal::invert(AfsealPoly &p) {
+  return p;
+}
+
+void Afseal::add_inplace(AfsealPoly &p1, AfsealPoly &p2) {
+
+}
+
+void Afseal::subtract_inplace(AfsealPoly &p1, AfsealPoly &p2) {
+
+}
+
+void Afseal::multiply_inplace(AfsealPoly &p1, AfsealPoly &p2) {
+
+}
+
+void Afseal::invert_inplace(AfsealPoly &p) {
+
+}
+
+void Afseal::poly_to_ciphertext(AfsealPoly &p, Ciphertext &ctxt, int64_t pos) {
+
+}
+
+void Afseal::poly_to_plaintext(AfsealPoly &p, Plaintext &ptxt) {
+
+}
+
+void Afseal::poly_to_ciphertext(Ciphertext &ctxt, int64_t pos) {
+
+}
+
+//// AfsealPoly
+
+AfsealPoly::AfsealPoly(AfsealPoly &other) {
+  afseal_ptr = other.afseal_ptr;
+  parms_id = other.parms_id;
+  mempool = other.mempool;
+  coeff_count = other.coeff_count;
+  coeff_modulus_count = other.coeff_modulus_count;
+  // copy the coefficients over
+#pragma omp parallel for
+  for (size_t i = 0; i < coeff_modulus_count; i++) {
+    util::set_poly(other.eval_repr_coeff_iter + (i*coeff_count),
+                   coeff_count,
+                   1,
+                   eval_repr_coeff_iter + (i*coeff_count));
+  }
+}
+
+AfsealPoly &AfsealPoly::operator=(AfsealPoly &other) {
+  if (&other!=this) {
+    afseal_ptr = other.afseal_ptr;
+    parms_id = other.parms_id;
+    mempool = other.mempool;
+    coeff_count = other.coeff_count;
+    coeff_modulus_count = other.coeff_modulus_count;
+    
+    // copy the coefficients over
+#pragma omp parallel for
+    for (size_t i = 0; i < coeff_modulus_count; i++) {
+      util::set_poly(other.eval_repr_coeff_iter + (i*coeff_count),
+                     coeff_count,
+                     1,
+                     eval_repr_coeff_iter + (i*coeff_count));
+    }
+  }
+  return *this;
+}
+
+AfsealPoly::AfsealPoly(Afseal &afseal, const seal::Ciphertext &ref) {
+  afseal_ptr = &afseal;
+  parms_id = ref.parms_id();
+  mempool = seal::MemoryManager::GetPool();
+  coeff_count = ref.poly_modulus_degree();
+  coeff_modulus_count = afseal.context->get_context_data(parms_id)->parms().coeff_modulus().size();
+  eval_repr_coeff_iter = util::allocate_zero_poly(coeff_count, coeff_modulus_count, mempool);
+}
+
+AfsealPoly::AfsealPoly(Afseal &afseal, seal::Ciphertext &ctxt, size_t index) : AfsealPoly(afseal, ctxt) {
+  // Copy coefficients from ctxt
+#pragma omp parallel for
+  for (size_t i = 0; i < coeff_modulus_count; i++) {
+    util::set_poly(ctxt.data(index) + (i*coeff_count), coeff_count, 1, eval_repr_coeff_iter + (i*coeff_count));
+  }
+}
+
+AfsealPoly::AfsealPoly(Afseal &afseal, seal::Plaintext &ptxt, const seal::Ciphertext &ref) : AfsealPoly(afseal, ref) {
+// Copy coefficients from ptxt
+#pragma omp parallel for
+  for (size_t i = 0; i < coeff_modulus_count; i++) {
+    util::set_poly(ptxt.data() + (i*coeff_count), coeff_count, 1, eval_repr_coeff_iter + (i*coeff_count));
+  }
+}
+
+void AfsealPoly::generate_coeff_repr() {
+  if (!coeff_repr_valid) {
+
+    // Copy the coefficients over
+#pragma omp parallel for
+    for (size_t i = 0; i < coeff_modulus_count; i++) {
+      util::set_poly(eval_repr_coeff_iter + (i*coeff_count), coeff_count, 1, coeff_repr_coeff_iter + (i*coeff_count));
+    }
+
+    // Now do the actual conversion
+    auto small_ntt_tables = afseal_ptr->context->get_context_data(parms_id)->small_ntt_tables();
+#pragma omp parallel for
+    for (size_t j = 0; j < coeff_modulus_count; j++) {
+      util::inverse_ntt_negacyclic_harvey(coeff_repr_coeff_iter + (j*coeff_count), small_ntt_tables[j]); // non-ntt form
+    }
+
+    // set valid flag
+    coeff_repr_valid = true;
+  }
+}
+
+std::vector<std::complex<double>> AfsealPoly::to_coeff_list(void) {
+  generate_coeff_repr();
+  //TODO: Need to also decompose the CRT representation
+  // and then do some more magic!
+  throw runtime_error("Not yet implemented.");
+}
+
+std::complex<double> AfsealPoly::get_coeff(size_t i) {
+  return to_coeff_list()[i];
+}
+
+void AfsealPoly::set_coeff(complex<double> &val, size_t i) {
+  auto v = to_coeff_list();
+  v[i] = val;
+  // TODO: Convert vector back into CRT, then apply NTT
+  throw runtime_error("Not yet implemented.");
 }
