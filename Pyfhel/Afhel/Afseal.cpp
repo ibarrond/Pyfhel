@@ -30,11 +30,14 @@
  *  --------------------------------------------------------------------
  */
 
-#include <math.h>       /* pow */
-#include <fstream>      /* file management */
-#include <assert.h>     /* assert */
+#include <cmath>       /* pow */
+#include <fstream>     /* file management */
+#include <cassert>     /* assert */
 
 #include "Afseal.h"
+
+using namespace std;
+using namespace seal;
 
 // ----------------------------- CLASS MANAGEMENT -----------------------------
 Afseal::Afseal() {};

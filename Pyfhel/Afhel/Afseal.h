@@ -11,37 +11,34 @@
  * @bugs No known bugs
  */
 
- /*  License: GNU GPL v3
-  *
-  *  Pyfhel is free software: you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation, either version 3 of the License, or
-  *  (at your option) any later version.
-  *
-  *  Pyfhel is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/*  License: GNU GPL v3
+ *
+ *  Pyfhel is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Pyfhel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  */
+ */
 
 
 #ifndef AFSEAL_H
 #define AFSEAL_H
- 
-#include <iostream>	/* Print in std::cout */
-#include <string>	/* String class */
-#include <vector>	/* Vectorizing all operations */
-#include <thread>	/* memory pools, multithread*/
-#include <memory>	/* Smart Pointers*/
+
+#include <iostream>    /* Print in std::cout */
+#include <string>    /* std::string class */
+#include <vector>    /* Vectorizing all operations */
+#include <thread>    /* memory pools, multithread*/
+#include <memory>    /* Smart Pointers*/
 
 #include "seal/seal.h"
-
-using namespace std;
-using namespace seal;
 
 // Forward Declaration
 class AfsealPoly;
@@ -54,448 +51,425 @@ class AfsealPoly;
 *  addition, multiplication, scalar product and others.
 *
 */
-class Afseal{ 
+class Afseal {
 
-    private: 
-        // --------------------------- ATTRIBUTES -----------------------------
-        
-        shared_ptr<SEALContext> context=NULL;           /**< Context. Used for init*/
-  		//TODO: Declare Encoder Ptr
-        shared_ptr<KeyGenerator> keyGenObj=NULL;        /**< Key Generator Object.*/
-        shared_ptr<SecretKey> secretKey=NULL;           /**< Secret key.*/
-        shared_ptr<PublicKey> publicKey=NULL;           /**< Public key.*/
-        shared_ptr<RelinKeys> relinKey=NULL;           /**< Relinearization object*/
-        shared_ptr<GaloisKeys> rotateKeys=NULL;         /**< Galois key for batching*/
+ private:
+  // --------------------------- ATTRIBUTES -----------------------------
 
-        shared_ptr<Encryptor> encryptor=NULL;           /**< Requires a Public Key.*/
-        shared_ptr<Evaluator> evaluator=NULL;           /**< Requires a context.*/
-        shared_ptr<Decryptor> decryptor=NULL;           /**< Requires a Secret Key.*/
+  std::shared_ptr<seal::SEALContext> context = NULL;           /**< Context. Used for init*/
+  //TODO: Declare Encoder Ptr
+  std::shared_ptr<seal::KeyGenerator> keyGenObj = NULL;        /**< Key Generator Object.*/
+  std::shared_ptr<seal::SecretKey> secretKey = NULL;           /**< Secret key.*/
+  std::shared_ptr<seal::PublicKey> publicKey = NULL;           /**< Public key.*/
+  std::shared_ptr<seal::RelinKeys> relinKey = NULL;           /**< Relinearization object*/
+  std::shared_ptr<seal::GaloisKeys> rotateKeys = NULL;         /**< Galois key for batching*/
 
-        shared_ptr<BatchEncoder> batchEncoder=NULL;     /**< Rotation in Batching. */
+  std::shared_ptr<seal::Encryptor> encryptor = NULL;           /**< Requires a Public Key.*/
+  std::shared_ptr<seal::Evaluator> evaluator = NULL;           /**< Requires a context.*/
+  std::shared_ptr<seal::Decryptor> decryptor = NULL;           /**< Requires a Secret Key.*/
 
-
-        long p;                          /**< All operations are modulo p^r */
-        long m;                          /**< Cyclotomic index */
-
-        long base;
-        long sec;
-        int intDigits;
-        int fracDigits;
-        
-        bool flagBatch = false;         /**< Whether to use batching or not */
+  std::shared_ptr<seal::BatchEncoder> batchEncoder = NULL;     /**< Rotation in Batching. */
 
 
+  long p;                          /**< All operations are modulo p^r */
+  long m;                          /**< Cyclotomic index */
 
-        // ------------------ STREAM OPERATORS OVERLOAD -----------------------
-        /**
-         * @brief An output stream operator, parsing the object into a string.
-         * @param[out] outs output stream where to bulk the Afseal object
-         * @param[in] af Afseal object to be exported
-         * @see operator>>
-         */
-        friend ostream& operator<< (ostream& outs, Afseal const& af);
+  long base;
+  long sec;
+  int intDigits;
+  int fracDigits;
 
-        /**
-         * @brief An input stream operator, reading the parsed Afseal object 
-         *        from a string stream.
-         * @param[in] ins input stream where to extract the Afseal object
-         * @param[out] af Afseal object to contain the parsed one
-         * @see operator<<
-         */
-        friend istream& operator>> (istream& ins, Afseal const& af);
+  bool flagBatch = false;         /**< Whether to use batching or not */
 
 
 
-    public:
-        // ----------------------- CLASS MANAGEMENT ---------------------------
-        /**
-         * @brief Default constructor.
-         */
-        Afseal();
+  // ------------------ STREAM OPERATORS OVERLOAD -----------------------
+  /**
+   * @brief An output stream operator, parsing the object into a std::string.
+   * @param[out] outs output stream where to bulk the Afseal object
+   * @param[in] af Afseal object to be exported
+   * @see operator>>
+   */
+  friend std::ostream &operator<<(std::ostream &outs, Afseal const &af);
 
-        /**
-         * @brief Copy constructor.
-         * @param[in] otherAfseal Afseal object to be copied
-         */
-        Afseal(const Afseal &otherAfseal);
-        /**
-         * @brief Overwrites current Afseal instance by a deep copy of a 
-         *          given instance.
-         * @param[in] assign The Afseal instance to overwrite current instance
-         */
-        Afseal &operator =(const Afseal &assign) = default;
-        /**
-         * @brief Creates a new Afseal instance by moving a given instance.
-         * @param[in] source The Afseal to move from
-         */
-        Afseal(Afseal &&source) = default;
-        /**
-        * @brief Default destructor.
-        */
-        virtual ~Afseal();
+  /**
+   * @brief An input stream operator, reading the parsed Afseal object
+   *        from a std::string stream.
+   * @param[in] ins input stream where to extract the Afseal object
+   * @param[out] af Afseal object to contain the parsed one
+   * @see operator<<
+   */
+  friend std::istream &operator>>(std::istream &ins, Afseal const &af);
 
+ public:
+  // ----------------------- CLASS MANAGEMENT ---------------------------
+  /**
+   * @brief Default constructor.
+   */
+  Afseal();
 
-        // -------------------------- CRYPTOGRAPHY ---------------------------
-        // CONTEXT GENERATION
-        /**
-         * @brief Performs generation of FHE context using SEAL functions.
-         * @param[in] p ciphertext space base.
-         * @param[in] r ciphertext space lifting .
-         * @param[in] m m'th cyclotomic polynomial. Power of 2. Default 2048
-         * @param[in] 
-         * @return Void.
-         */
-        void ContextGen(long p, long m = 2048, bool flagBatching=false,
-                        long base = 2, long sec=128, int intDigits = 64,
-                        int fracDigits = 32);
-
-        // KEY GENERATION
-        /**
-         * @brief Performs Key generation using SEAL functions vased on current context.
-         *        As a result, a pair of Private/Public Keys are initialized and stored.
-         * @return Void.
-         */
-        void KeyGen();
-
-        // ENCRYPTION
-        /**
-         * @brief Enctypts a provided plaintext vector using pubKey as public key.
-         *        The encryption is carried out with SEAL.
-         * @param[in] plain1 plaintext vector to encrypt.
-         * @return ciphertext the SEAL encrypted ciphertext.
-         */
-        Ciphertext encrypt(Plaintext& plain1);
-        Ciphertext encrypt(double& value1);
-        Ciphertext encrypt(int64_t& value1);
-        Ciphertext encrypt(vector<int64_t>& valueV);
-        vector<Ciphertext> encrypt(vector<int64_t>& valueV, bool& dummy_NoBatch);
-        vector<Ciphertext> encrypt(vector<double>& valueV);
-        /**
-         * @brief Enctypts a provided plaintext vector and stored in the
-         *      provided ciphertext. The encryption is carried out with SEAL. 
-         * @param[in] plain1 plaintext vector to encrypt.
-         * @param[in, out] cipher1 ciphertext to hold the result of encryption.
-         * @return ciphertext the SEAL encrypted ciphertext.
-         */
-        void encrypt(Plaintext& plain1, Ciphertext& cipherOut);
-        void encrypt(double& value1, Ciphertext& cipherOut);
-        void encrypt(int64_t& value1, Ciphertext& cipherOut);
-        void encrypt(vector<int64_t>& valueV, Ciphertext& cipherOut);
-        void encrypt(vector<int64_t>& valueV, vector<Ciphertext>& cipherOut);
-        void encrypt(vector<double>& valueV, vector<Ciphertext>& cipherOut);
-
-        // DECRYPTION
-        /**
-         * @brief Decrypts the ciphertext using secKey as secret key.
-         * The decryption is carried out with SEAL.
-         * @param[in] cipher1 a Ciphertext object from SEAL.
-         * @return Plaintext the resulting of decrypting the ciphertext, a plaintext.
-         */
-        vector<int64_t> decrypt(Ciphertext& cipher1);
-        /**
-         * @brief Decrypts the ciphertext using secKey as secret key and stores
-         *         it in a provided Plaintext.
-         * The decryption is carried out with SEAL.
-         * @param[in] cipher1 a Ciphertext object from SEAL.
-         * @param[in, out] plain1 a Plaintext object from SEAL.
-         * @return Void.
-         */
-        void decrypt(Ciphertext& cipher1, Plaintext& plainOut);
-        void decrypt(Ciphertext& cipher1, int64_t& valueOut); 
-        void decrypt(Ciphertext& cipher1, double& valueOut);
-        void decrypt(Ciphertext& cipher1, vector<int64_t>& valueVOut); 
-        void decrypt(vector<Ciphertext>& cipherV, vector<int64_t>& valueVOut);
-        void decrypt(vector<Ciphertext>& cipherV, vector<double>& valueVOut);
+  /**
+   * @brief Copy constructor.
+   * @param[in] otherAfseal Afseal object to be copied
+   */
+  Afseal(const Afseal &otherAfseal);
+  /**
+   * @brief Overwrites current Afseal instance by a deep copy of a
+   *          given instance.
+   * @param[in] assign The Afseal instance to overwrite current instance
+   */
+  Afseal &operator=(const Afseal &assign) = default;
+  /**
+   * @brief Creates a new Afseal instance by moving a given instance.
+   * @param[in] source The Afseal to move from
+   */
+  Afseal(Afseal &&source) = default;
+  /**
+  * @brief Default destructor.
+  */
+  virtual ~Afseal();
 
 
-        // NOISE MEASUREMENT
-        int noiseLevel(Ciphertext& cipher1);
+  // -------------------------- CRYPTOGRAPHY ---------------------------
+  // CONTEXT GENERATION
+  /**
+   * @brief Performs generation of FHE context using SEAL functions.
+   * @param[in] p ciphertext space base.
+   * @param[in] r ciphertext space lifting .
+   * @param[in] m m'th cyclotomic polynomial. Power of 2. Default 2048
+   * @param[in]
+   * @return Void.
+   */
+  void ContextGen(long p, long m = 2048, bool flagBatching = false,
+                  long base = 2, long sec = 128, int intDigits = 64,
+                  int fracDigits = 32);
 
-        // ------------------------------ CODEC -------------------------------
-        // ENCODE 
-        Plaintext encode(int64_t& value1);
-        Plaintext encode(double& value1);
-        Plaintext encode(vector<int64_t> &values);
-        vector<Plaintext> encode(vector<int64_t> &values, bool dummy_NoBatch);
-        vector<Plaintext> encode(vector<double> &values);
+  // KEY GENERATION
+  /**
+   * @brief Performs Key generation using SEAL functions vased on current context.
+   *        As a result, a pair of Private/Public Keys are initialized and stored.
+   * @return Void.
+   */
+  void KeyGen();
 
-        void encode(int64_t& value1, Plaintext& plainOut);
-        void encode(double& value1, Plaintext& plainOut);
-        void encode(vector<int64_t> &values, Plaintext& plainOut);
-        void encode(vector<int64_t> &values, vector<Plaintext>& plainVOut);
-        void encode(vector<double> &values, vector<Plaintext>& plainVOut);
-        
-        // DECODE 
-        vector<int64_t> decode(Plaintext& plain1);
-		void decode(Plaintext& plain1, int64_t& valOut);
-        void decode(Plaintext& plain1, double& valOut);
-        void decode(Plaintext& plain1, vector<int64_t> &valueVOut);
-        void decode(vector<Plaintext>& plain1, vector<int64_t> &valueVOut);
-        void decode(vector<Plaintext>& plain1, vector<double> &valueVOut);
+  // ENCRYPTION
+  /**
+   * @brief Enctypts a provided plaintext vector using pubKey as public key.
+   *        The encryption is carried out with SEAL.
+   * @param[in] plain1 plaintext vector to encrypt.
+   * @return ciphertext the SEAL encrypted ciphertext.
+   */
+  seal::Ciphertext encrypt(seal::Plaintext &plain1);
+  seal::Ciphertext encrypt(double &value1);
+  seal::Ciphertext encrypt(int64_t &value1);
+  seal::Ciphertext encrypt(std::vector<int64_t> &valueV);
+  std::vector<seal::Ciphertext> encrypt(std::vector<int64_t> &valueV, bool &dummy_NoBatch);
+  std::vector<seal::Ciphertext> encrypt(std::vector<double> &valueV);
+  /**
+   * @brief Enctypts a provided plaintext vector and stored in the
+   *      provided ciphertext. The encryption is carried out with SEAL.
+   * @param[in] plain1 plaintext vector to encrypt.
+   * @param[in, out] cipher1 ciphertext to hold the result of encryption.
+   * @return ciphertext the SEAL encrypted ciphertext.
+   */
+  void encrypt(seal::Plaintext &plain1, seal::Ciphertext &cipherOut);
+  void encrypt(double &value1, seal::Ciphertext &cipherOut);
+  void encrypt(int64_t &value1, seal::Ciphertext &cipherOut);
+  void encrypt(std::vector<int64_t> &valueV, seal::Ciphertext &cipherOut);
+  void encrypt(std::vector<int64_t> &valueV, std::vector<seal::Ciphertext> &cipherOut);
+  void encrypt(std::vector<double> &valueV, std::vector<seal::Ciphertext> &cipherOut);
 
+  // DECRYPTION
+  /**
+   * @brief Decrypts the ciphertext using secKey as secret key.
+   * The decryption is carried out with SEAL.
+   * @param[in] cipher1 a Ciphertext object from SEAL.
+   * @return Plaintext the resulting of decrypting the ciphertext, a plaintext.
+   */
+  std::vector<int64_t> decrypt(seal::Ciphertext &cipher1);
+  /**
+   * @brief Decrypts the ciphertext using secKey as secret key and stores
+   *         it in a provided Plaintext.
+   * The decryption is carried out with SEAL.
+   * @param[in] cipher1 a Ciphertext object from SEAL.
+   * @param[in, out] plain1 a Plaintext object from SEAL.
+   * @return Void.
+   */
+  void decrypt(seal::Ciphertext &cipher1, seal::Plaintext &plainOut);
+  void decrypt(seal::Ciphertext &cipher1, int64_t &valueOut);
+  void decrypt(seal::Ciphertext &cipher1, double &valueOut);
+  void decrypt(seal::Ciphertext &cipher1, std::vector<int64_t> &valueVOut);
+  void decrypt(std::vector<seal::Ciphertext> &cipherV, std::vector<int64_t> &valueVOut);
+  void decrypt(std::vector<seal::Ciphertext> &cipherV, std::vector<double> &valueVOut);
 
-        // -------------------------- RELINEARIZATION -------------------------
-        void rotateKeyGen(int& bitCount);
-        void relinKeyGen(int& bitCount, int& size);
-        void relinearize(Ciphertext& cipher1);
+  // NOISE MEASUREMENT
+  int noiseLevel(seal::Ciphertext &cipher1);
 
+  // ------------------------------ CODEC -------------------------------
+  // ENCODE
+  seal::Plaintext encode(int64_t &value1);
+  seal::Plaintext encode(double &value1);
+  seal::Plaintext encode(std::vector<int64_t> &values);
+  std::vector<seal::Plaintext> encode(std::vector<int64_t> &values, bool dummy_NoBatch);
+  std::vector<seal::Plaintext> encode(std::vector<double> &values);
 
-        // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
-        // SQUARE
-        /**
-         * @brief Square ciphertext values.
-         * @param[in,out] cipher1 SEAL Ciphertext  whose values will get squared.
-         * @return Void.
-         */
-        void square(Ciphertext& cipher1);
-        void square(vector<Ciphertext>& cipherV);
-        // NEGATE
-        /**
-        * @brief Negate values in a ciphertext
-        * @param[in,out] c1  Ciphertext  whose values get negated.
-        * @return Void.
-        */
-        void negate(Ciphertext& cipher1);
-        void negate(vector<Ciphertext>& cipherV);
+  void encode(int64_t &value1, seal::Plaintext &plainOut);
+  void encode(double &value1, seal::Plaintext &plainOut);
+  void encode(std::vector<int64_t> &values, seal::Plaintext &plainOut);
+  void encode(std::vector<int64_t> &values, std::vector<seal::Plaintext> &plainVOut);
+  void encode(std::vector<double> &values, std::vector<seal::Plaintext> &plainVOut);
 
-        
-        // ADDITION
-        /**
-         * @brief Add second ciphertext to the first ciphertext.
-         * @param[in,out] cipher1 First SEAL ciphertext.
-         * @param[in] cipher2 Second SEAL ciphertext, to be added to the first.
-         * @return Void.
-         */
-        void add(Ciphertext& cipher1, Ciphertext& cipher2);
-        void add(Ciphertext& cipher1, Plaintext& plain2);
-        void add(vector<Ciphertext>& cipherV, Ciphertext& cipherOut);
-        void add(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2);
-        void add(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2);
+  // DECODE
+  std::vector<int64_t> decode(seal::Plaintext &plain1);
+  void decode(seal::Plaintext &plain1, int64_t &valOut);
+  void decode(seal::Plaintext &plain1, double &valOut);
+  void decode(seal::Plaintext &plain1, std::vector<int64_t> &valueVOut);
+  void decode(std::vector<seal::Plaintext> &plain1, std::vector<int64_t> &valueVOut);
+  void decode(std::vector<seal::Plaintext> &plain1, std::vector<double> &valueVOut);
 
-        // SUBSTRACTION
-        /**
-         * @brief Substract second ciphertext to the first ciphertext.
-         * @param[in,out] cipher1 First SEAL ciphertext.
-         * @param[in] cipher2 Second SEAL ciphertext, substracted to the first.
-         * @return Void.
-         */
-        void sub(Ciphertext& cipher1, Ciphertext& cipher2);
-        void sub(Ciphertext& cipher1, Plaintext& plain2);
-        void sub(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2);
-        void sub(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2);
-        
-
-        // MULTIPLICATION
-        /**
-         * @brief Multiply first ciphertext by the second ciphertext.
-         * @param[in,out] cipher1 First SEAL Ciphertext.
-         * @param[in] cipher2 Second SEAL Ciphertext , to be miltuplied to the first.
-         * @return Void.
-         */
-        void multiply(Ciphertext& cipher1, Ciphertext& cipher2);
-        void multiply(Ciphertext& cipher1, Plaintext& plain1);
-        void multiply(vector<Ciphertext>& cipherV1, Ciphertext& cipherOut);
-        void multiply(vector<Ciphertext>& cipherVInOut, vector<Ciphertext>& cipherV2);
-        void multiply(vector<Ciphertext>& cipherVInOut, vector<Plaintext>& plainV2);
-
-        // ROTATE
-        /**
-         * @brief Rotate ciphertext by k spaces.
-         * Overflowing values are added at the other side
-         * @param[in,out] c1 SEAL Ciphertext  whose values get rotated.
-         * @param[in] k number of spaces to rotate
-         * @return Void.
-         */
-        void rotate(Ciphertext& cipher1, int& k);
-        void rotate(vector<Ciphertext>& cipherV, int& k);
-
-
-        // POLYNOMIALS
-        /**
-         * @brief Compute polynomial over a cyphertext
-         * @param[in] coeffPoly Vector of long coefficients for the polynomial
-         * @param[in,out] c1 SEAL Ciphertext  whose values get applied the polynomial.
-         * @return void.
-         */
-        void exponentiate(Ciphertext& cipher1, uint64_t& expon);
-        void exponentiate(vector<Ciphertext>& cipherV, uint64_t& expon);
-        void polyEval(Ciphertext& cipher1, vector<int64_t>& coeffPoly);
-        void polyEval(Ciphertext& cipher1, vector<double>& coeffPoly);
-
-        // -------------------------------- I/O -------------------------------
-        // SAVE ENVIRONMENT
-        /**
-         * @brief Saves the context and G polynomial in a .aenv file
-         * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool saveContext(string fileName);
-        bool ssaveContext(ostream& contextFile);
-
-        // RESTORE ENVIRONMENT
-        /**
-         * @brief Restores the context extracted form ea (containing m, p and r)
-         *  and G polynomial from a .aenv file.
-          * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool restoreContext(string fileName);
-        bool srestoreContext(istream& contextFile);
-
-        // PUBLIC KEY
-        /**
-         * @brief Saves the public key in a .apub file.
-         * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool savepublicKey(string fileName);
-        bool ssavepublicKey(ostream& keyFile);
-
-        /**
-         * @brief Restores the public key from a .apub file.
-         * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool restorepublicKey(string fileName);
-        bool srestorepublicKey(istream& keyFile);
-
-        // SECRET KEY
-        /**
-         * @brief Saves the secretKey in a .apub file
-         * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool savesecretKey(string fileName);
-        bool ssavesecretKey(ostream& keyFile);
-
-        /**
-         * @brief Restores the secretKey from a .apub file
-         * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool restoresecretKey(string fileName);
-        bool srestoresecretKey(istream& keyFile);
-
-        // PLAINTEXTS
-        /**
-         * @brief Saves the plaintext in a file
-         * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool savePlaintext(string fileName, Plaintext& plain);
-        bool ssavePlaintext(ostream& plaintextFile, Plaintext& plain);
-
-        /**
-         * @brief Restores the plaintext from a file
-         * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool restorePlaintext(string fileName, Plaintext& plain);
-        bool srestorePlaintext(istream& plaintextFile, Plaintext& plain);
+  // -------------------------- RELINEARIZATION -------------------------
+  void rotateKeyGen(int &bitCount);
+  void relinKeyGen(int &bitCount, int &size);
+  void relinearize(seal::Ciphertext &cipher1);
 
 
-        // CIPHERTEXTS
-        /**
-         * @brief Saves the ciphertext in a file
-         * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool saveCiphertext(string fileName, Ciphertext& ctxt);
-        bool ssaveCiphertext(ostream& ctxtFile, Ciphertext& ctxt);
-
-        /**
-         * @brief Restores the ciphertext from a file
-         * @param[in] fileName name of the file without the extention
-         * @return BOOL 1 if all ok, 0 otherwise
-         */
-        bool restoreCiphertext(string fileName, Ciphertext& ctxt);
-        bool srestoreCiphertext(istream& ctxtFile, Ciphertext& ctxt);
-
-
-
-        bool saverelinKey(string fileName);
-        bool ssaverelinKey(ostream& keyFile);
-        bool restorerelinKey(string fileName);
-        bool srestorerelinKey(istream& keyFile);
-
-        bool saverotateKey(string fileName);
-        bool ssaverotateKey(ostream& keyFile);
-        bool restorerotateKey(string fileName);
-        bool srestorerotateKey(istream& keyFile);
+  // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
+  // SQUARE
+  /**
+   * @brief Square ciphertext values.
+   * @param[in,out] cipher1 SEAL Ciphertext  whose values will get squared.
+   * @return Void.
+   */
+  void square(seal::Ciphertext &cipher1);
+  void square(std::vector<seal::Ciphertext> &cipherV);
+  // NEGATE
+  /**
+  * @brief Negate values in a ciphertext
+  * @param[in,out] c1  Ciphertext  whose values get negated.
+  * @return Void.
+  */
+  void negate(seal::Ciphertext &cipher1);
+  void negate(std::vector<seal::Ciphertext> &cipherV);
 
 
+  // ADDITION
+  /**
+   * @brief Add second ciphertext to the first ciphertext.
+   * @param[in,out] cipher1 First SEAL ciphertext.
+   * @param[in] cipher2 Second SEAL ciphertext, to be added to the first.
+   * @return Void.
+   */
+  void add(seal::Ciphertext &cipher1, seal::Ciphertext &cipher2);
+  void add(seal::Ciphertext &cipher1, seal::Plaintext &plain2);
+  void add(std::vector<seal::Ciphertext> &cipherV, seal::Ciphertext &cipherOut);
+  void add(std::vector<seal::Ciphertext> &cipherVInOut, std::vector<seal::Ciphertext> &cipherV2);
+  void add(std::vector<seal::Ciphertext> &cipherVInOut, std::vector<seal::Plaintext> &plainV2);
 
-        // ----------------------------- AUXILIARY ----------------------------
-        bool batchEnabled();
-        long relinBitCount();
-        // GETTERS
-        SecretKey getsecretKey(); 
-        PublicKey getpublicKey();
-        RelinKeys getrelinKey();
-        GaloisKeys getrotateKeys();  
-        int getnSlots();  
-        int getp();
-        int getm();
-        int getbase();
-        int getsec();
-        int getintDigits();  
-        int getfracDigits();  
-        bool getflagBatch(); 
-
-	bool is_secretKey_empty()
-		{return secretKey==NULL;}
-	bool is_publicKey_empty()
-		{ return publicKey==NULL;}
-	bool is_rotKey_empty()
-		{ return rotateKeys==NULL;}
-	bool is_relinKey_empty()
-		{ return relinKey==NULL;}
-	bool is_context_empty()
-		{ return context==NULL;}
-	
-	
-        //SETTERS
-        void setpublicKey(PublicKey& pubKey)
-            {this->publicKey = make_shared<PublicKey> (pubKey);}
-        void setsecretKey(SecretKey& secKey)
-            {this->secretKey = make_shared<SecretKey> (secKey);}
-        void setrelinKey(RelinKeys& relKey)
-            {this->relinKey = make_shared<RelinKeys>(relKey);}
+  // SUBSTRACTION
+  /**
+   * @brief Substract second ciphertext to the first ciphertext.
+   * @param[in,out] cipher1 First SEAL ciphertext.
+   * @param[in] cipher2 Second SEAL ciphertext, substracted to the first.
+   * @return Void.
+   */
+  void sub(seal::Ciphertext &cipher1, seal::Ciphertext &cipher2);
+  void sub(seal::Ciphertext &cipher1, seal::Plaintext &plain2);
+  void sub(std::vector<seal::Ciphertext> &cipherVInOut, std::vector<seal::Ciphertext> &cipherV2);
+  void sub(std::vector<seal::Ciphertext> &cipherVInOut, std::vector<seal::Plaintext> &plainV2);
 
 
+  // MULTIPLICATION
+  /**
+   * @brief Multiply first ciphertext by the second ciphertext.
+   * @param[in,out] cipher1 First SEAL Ciphertext.
+   * @param[in] cipher2 Second SEAL Ciphertext , to be miltuplied to the first.
+   * @return Void.
+   */
+  void multiply(seal::Ciphertext &cipher1, seal::Ciphertext &cipher2);
+  void multiply(seal::Ciphertext &cipher1, seal::Plaintext &plain1);
+  void multiply(std::vector<seal::Ciphertext> &cipherV1, seal::Ciphertext &cipherOut);
+  void multiply(std::vector<seal::Ciphertext> &cipherVInOut, std::vector<seal::Ciphertext> &cipherV2);
+  void multiply(std::vector<seal::Ciphertext> &cipherVInOut, std::vector<seal::Plaintext> &plainV2);
+
+  // ROTATE
+  /**
+   * @brief Rotate ciphertext by k spaces.
+   * Overflowing values are added at the other side
+   * @param[in,out] c1 SEAL Ciphertext  whose values get rotated.
+   * @param[in] k number of spaces to rotate
+   * @return Void.
+   */
+  void rotate(seal::Ciphertext &cipher1, int &k);
+  void rotate(std::vector<seal::Ciphertext> &cipherV, int &k);
 
 
+  // POLYNOMIALS
+  /**
+   * @brief Compute polynomial over a cyphertext
+   * @param[in] coeffPoly Vector of long coefficients for the polynomial
+   * @param[in,out] c1 SEAL Ciphertext  whose values get applied the polynomial.
+   * @return void.
+   */
+  void exponentiate(seal::Ciphertext &cipher1, uint64_t &expon);
+  void exponentiate(std::vector<seal::Ciphertext> &cipherV, uint64_t &expon);
+  void polyEval(seal::Ciphertext &cipher1, std::vector<int64_t> &coeffPoly);
+  void polyEval(seal::Ciphertext &cipher1, std::vector<double> &coeffPoly);
+
+  // -------------------------------- I/O -------------------------------
+  // SAVE ENVIRONMENT
+  /**
+   * @brief Saves the context and G polynomial in a .aenv file
+   * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool saveContext(std::string fileName);
+  bool ssaveContext(std::ostream &contextFile);
+
+  // RESTORE ENVIRONMENT
+  /**
+   * @brief Restores the context extracted form ea (containing m, p and r)
+   *  and G polynomial from a .aenv file.
+    * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool restoreContext(std::string fileName);
+  bool srestoreContext(std::istream &contextFile);
+
+  // PUBLIC KEY
+  /**
+   * @brief Saves the public key in a .apub file.
+   * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool savepublicKey(std::string fileName);
+  bool ssavepublicKey(std::ostream &keyFile);
+
+  /**
+   * @brief Restores the public key from a .apub file.
+   * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool restorepublicKey(std::string fileName);
+  bool srestorepublicKey(std::istream &keyFile);
+
+  // SECRET KEY
+  /**
+   * @brief Saves the secretKey in a .apub file
+   * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool savesecretKey(std::string fileName);
+  bool ssavesecretKey(std::ostream &keyFile);
+
+  /**
+   * @brief Restores the secretKey from a .apub file
+   * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool restoresecretKey(std::string fileName);
+  bool srestoresecretKey(std::istream &keyFile);
+
+  // PLAINTEXTS
+  /**
+   * @brief Saves the plaintext in a file
+   * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool savePlaintext(std::string fileName, seal::Plaintext &plain);
+  bool ssavePlaintext(std::ostream &plaintextFile, seal::Plaintext &plain);
+
+  /**
+   * @brief Restores the plaintext from a file
+   * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool restorePlaintext(std::string fileName, seal::Plaintext &plain);
+  bool srestorePlaintext(std::istream &plaintextFile, seal::Plaintext &plain);
 
 
+  // CIPHERTEXTS
+  /**
+   * @brief Saves the ciphertext in a file
+   * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool saveCiphertext(std::string fileName, seal::Ciphertext &ctxt);
+  bool ssaveCiphertext(std::ostream &ctxtFile, seal::Ciphertext &ctxt);
 
-        // POLY CONSTRUCTION -->
-        AfsealPoly empty_poly();
-        AfsealPoly poly_from_ciphertext(Ciphertext& ctxt, int64_t pos);
-        AfsealPoly poly_from_plaintext(Plaintext& ptxt);
-        AfsealPoly poly_from_coeff_vector(vector<complex<double>>& coeff_vector);
-        vector<AfsealPoly> poly_from_ciphertext(Ciphertext& ctxt);
+  /**
+   * @brief Restores the ciphertext from a file
+   * @param[in] fileName name of the file without the extention
+   * @return BOOL 1 if all ok, 0 otherwise
+   */
+  bool restoreCiphertext(std::string fileName, seal::Ciphertext &ctxt);
+  bool srestoreCiphertext(std::istream &ctxtFile, seal::Ciphertext &ctxt);
 
-        // POLY OPS --> implement checks for compatibility. 
-        AfsealPoly add(AfsealPoly& p1, AfsealPoly& p2);
-        AfsealPoly subtract(AfsealPoly& p1, AfsealPoly& p2);
-        AfsealPoly multiply(AfsealPoly& p1, AfsealPoly& p2);
-        AfsealPoly invert(AfsealPoly& p);
+  bool saverelinKey(std::string fileName);
+  bool ssaverelinKey(std::ostream &keyFile);
+  bool restorerelinKey(std::string fileName);
+  bool srestorerelinKey(std::istream &keyFile);
 
-        //inplace ops -> result in first operand
-        void add_inplace(AfsealPoly& p1, AfsealPoly& p2);
-        void subtract_inplace(AfsealPoly& p1, AfsealPoly& p2);
-        void multiply_inplace(AfsealPoly& p1, AfsealPoly& p2);
-        void invert_inplace(AfsealPoly& p);
+  bool saverotateKey(std::string fileName);
+  bool ssaverotateKey(std::ostream &keyFile);
+  bool restorerotateKey(std::string fileName);
+  bool srestorerotateKey(std::istream &keyFile);
 
-        // I/O
-        void poly_to_ciphertext(AfsealPoly& p, Ciphertext& ctxt, int64_t pos);
-        void poly_to_plaintext(AfsealPoly& p, Plaintext& ptxt);
-        void poly_to_ciphertext(Ciphertext& ctxt, int64_t pos);
+  // ----------------------------- AUXILIARY ----------------------------
+  bool batchEnabled();
+  long relinBitCount();
+  // GETTERS
+  seal::SecretKey getsecretKey();
+  seal::PublicKey getpublicKey();
+  seal::RelinKeys getrelinKey();
+  seal::GaloisKeys getrotateKeys();
+  int getnSlots();
+  int getp();
+  int getm();
+  int getbase();
+  int getsec();
+  int getintDigits();
+  int getfracDigits();
+  bool getflagBatch();
+
+  bool is_secretKey_empty() { return secretKey==NULL; }
+  bool is_publicKey_empty() { return publicKey==NULL; }
+  bool is_rotKey_empty() { return rotateKeys==NULL; }
+  bool is_relinKey_empty() { return relinKey==NULL; }
+  bool is_context_empty() { return context==NULL; }
+
+  //SETTERS
+  void setpublicKey(seal::PublicKey &pubKey) { this->publicKey = std::make_shared<seal::PublicKey>(pubKey); }
+  void setsecretKey(seal::SecretKey &secKey) { this->secretKey = std::make_shared<seal::SecretKey>(secKey); }
+  void setrelinKey(seal::RelinKeys &relKey) { this->relinKey = std::make_shared<seal::RelinKeys>(relKey); }
+
+  // POLY CONSTRUCTION -->
+  AfsealPoly empty_poly();
+  AfsealPoly poly_from_ciphertext(seal::Ciphertext &ctxt, int64_t pos);
+  AfsealPoly poly_from_plaintext(seal::Plaintext &ptxt);
+  AfsealPoly poly_from_coeff_vector(std::vector<std::complex<double>> &coeff_vector);
+  std::vector<AfsealPoly> poly_from_ciphertext(seal::Ciphertext &ctxt);
+
+  // POLY OPS --> implement checks for compatibility.
+  AfsealPoly add(AfsealPoly &p1, AfsealPoly &p2);
+  AfsealPoly subtract(AfsealPoly &p1, AfsealPoly &p2);
+  AfsealPoly multiply(AfsealPoly &p1, AfsealPoly &p2);
+  AfsealPoly invert(AfsealPoly &p);
+
+  //inplace ops -> result in first operand
+  void add_inplace(AfsealPoly &p1, AfsealPoly &p2);
+  void subtract_inplace(AfsealPoly &p1, AfsealPoly &p2);
+  void multiply_inplace(AfsealPoly &p1, AfsealPoly &p2);
+  void invert_inplace(AfsealPoly &p);
+
+  // I/O
+  void poly_to_ciphertext(AfsealPoly &p, seal::Ciphertext &ctxt, int64_t pos);
+  void poly_to_plaintext(AfsealPoly &p, seal::Plaintext &ptxt);
+  void poly_to_ciphertext(seal::Ciphertext &ctxt, int64_t pos);
 };
 
-class AfsealPoly{
+class AfsealPoly {
  private:
-  shared_ptr<seal::util::MemoryPool> mempool;
+  std::shared_ptr<seal::util::MemoryPool> mempool;
   // coeffs;
   // more stuff;
 
@@ -503,24 +477,24 @@ class AfsealPoly{
   // All functions using an Afseal instance could also be defined as members of the Afseal class.
 
   // Void constructor, just take & use SealContext from afseal
-  AfsealPoly(Afseal* afseal);
+  AfsealPoly(Afseal *afseal);
 
   // Copy constructor?
-  AfsealPoly(AfsealPoly& other);
+  AfsealPoly(AfsealPoly &other);
 
   // CONSTRUCTORS -> just use void constructor and fill using Afseal
-  AfsealPoly(Afseal* afseal, Ciphertext& ctxt, int64_t pos);
-  AfsealPoly(Afseal* afseal, Plaintext& ptxt);
-  //AfsealPoly(Afseal* afseal, Plaintext& ptxt); //TODO: What was the third constructor supposed to be?
+  AfsealPoly(Afseal *afseal, seal::Ciphertext &ctxt, int64_t pos);
+  AfsealPoly(Afseal *afseal, seal::Plaintext &ptxt);
+  //AfsealPoly(Afseal* afseal, seal::Plaintext& ptxt); //TODO: What was the third constructor supposed to be?
 
   // destructor
   ~AfsealPoly();
 
   // export poly to complex vector --> if you need context parameters, move to Afseal.
-  vector<complex<double>> to_coeff_list(void);
+  std::vector<std::complex<double>> to_coeff_list(void);
 
   // access individual coefficients
-  complex<double> get_coeff(int64_t i);
-  void set_coeff(int64_t i, complex<double>& val);
+  std::complex<double> get_coeff(int64_t i);
+  void set_coeff(int64_t i, std::complex<double> &val);
 };
 #endif
