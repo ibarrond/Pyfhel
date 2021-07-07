@@ -500,7 +500,6 @@ class AfsealPoly {
   /// Helper function to convert to coeff_repr
   void generate_coeff_repr();
 
-
  public:
   // Note: All functions using an Afseal instance could also be defined as members of the Afseal class.
 
@@ -544,5 +543,17 @@ class AfsealPoly {
   /// set individual coefficient
   /// \param i index of the coefficient
   void set_coeff(std::complex<double> &val, size_t i);
+
+  // ----------- OPERATIONS -------------
+  //inplace ops -> result in first operand
+  void add_inplace(const AfsealPoly &other);
+
+  void subtract_inplace(const AfsealPoly &other);
+
+  void multiply_inplace(const AfsealPoly &other);
+
+
+  bool invert_inplace();
+
 };
 #endif

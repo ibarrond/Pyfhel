@@ -35,6 +35,7 @@
 #include <cassert>     /* assert */
 
 #include "Afseal.h"
+#include <seal/util/polyarithsmallmod.h>
 
 using namespace std;
 using namespace seal;
@@ -1049,47 +1050,60 @@ std::vector<AfsealPoly> Afseal::poly_from_ciphertext(Ciphertext &ctxt) {
 }
 
 AfsealPoly Afseal::add(AfsealPoly &p1, AfsealPoly &p2) {
-  return p1;
+  auto new_poly = p1;
+  add_inplace(p1, p2);
+  return new_poly;
 }
 
 AfsealPoly Afseal::subtract(AfsealPoly &p1, AfsealPoly &p2) {
-  return p1;
+  auto new_poly = p1;
+  subtract_inplace(p1, p2);
+  return new_poly;
 }
 
 AfsealPoly Afseal::multiply(AfsealPoly &p1, AfsealPoly &p2) {
-  return p1;
+  auto new_poly = p1;
+  multiply_inplace(p1, p2);
+  return new_poly;
 }
 
-AfsealPoly Afseal::invert(AfsealPoly &p) {
-  return p;
+AfsealPoly Afseal::invert(AfsealPoly &poly) {
+  auto new_poly = poly;
+  invert_inplace(new_poly);
+  return new_poly;
 }
 
 void Afseal::add_inplace(AfsealPoly &p1, AfsealPoly &p2) {
-
+  p1.add_inplace(p2);
 }
 
 void Afseal::subtract_inplace(AfsealPoly &p1, AfsealPoly &p2) {
-
+  p1.subtract_inplace(p2);
 }
 
 void Afseal::multiply_inplace(AfsealPoly &p1, AfsealPoly &p2) {
-
+  p1.multiply_inplace(p2);
 }
 
-void Afseal::invert_inplace(AfsealPoly &p) {
-
+void Afseal::invert_inplace(AfsealPoly &poly) {
+  if (!poly.invert_inplace()) {
+    // TODO: How to communicate this information without throwing an exception?
+    throw runtime_error("Inverse does not exist.");
+  }
 }
 
 void Afseal::poly_to_ciphertext(AfsealPoly &p, Ciphertext &ctxt, int64_t pos) {
-
+  // TODO: This shouldn't be too hard, just copy into position,
+  //  but we need to ensure the sizes match,
+  //  allocate a zero poly if the index doesn't exist, etc
+  throw runtime_error("Not yet implemented.");
 }
 
 void Afseal::poly_to_plaintext(AfsealPoly &p, Plaintext &ptxt) {
-
-}
-
-void Afseal::poly_to_ciphertext(Ciphertext &ctxt, int64_t pos) {
-
+  // TODO: This shouldn't be too hard, just copy into position,
+  //  but we need to ensure the sizes match,
+  //  allocate a zero poly if the poly doesn't yet exist, etc
+  throw runtime_error("Not yet implemented.");
 }
 
 //// AfsealPoly
@@ -1108,6 +1122,8 @@ AfsealPoly::AfsealPoly(AfsealPoly &other) {
                    1,
                    eval_repr_coeff_iter + (i*coeff_count));
   }
+  // invalidate the coeff_repr
+  coeff_repr_valid = false;
 }
 
 AfsealPoly &AfsealPoly::operator=(AfsealPoly &other) {
@@ -1117,7 +1133,7 @@ AfsealPoly &AfsealPoly::operator=(AfsealPoly &other) {
     mempool = other.mempool;
     coeff_count = other.coeff_count;
     coeff_modulus_count = other.coeff_modulus_count;
-    
+
     // copy the coefficients over
 #pragma omp parallel for
     for (size_t i = 0; i < coeff_modulus_count; i++) {
@@ -1126,6 +1142,9 @@ AfsealPoly &AfsealPoly::operator=(AfsealPoly &other) {
                      1,
                      eval_repr_coeff_iter + (i*coeff_count));
     }
+
+    // invalidate the coeff_repr
+    coeff_repr_valid = false;
   }
   return *this;
 }
@@ -1191,5 +1210,87 @@ void AfsealPoly::set_coeff(complex<double> &val, size_t i) {
   auto v = to_coeff_list();
   v[i] = val;
   // TODO: Convert vector back into CRT, then apply NTT
+  //  don't forget to also write the coeff_repr and set the valid bit,
+  //  since we already have the data around!
   throw runtime_error("Not yet implemented.");
+}
+
+void AfsealPoly::add_inplace(const AfsealPoly &other) {
+  auto coeff_modulus = afseal_ptr->context->get_context_data(parms_id)->parms().coeff_modulus();
+#pragma omp parallel for
+  for (size_t j = 0; j < coeff_modulus.size(); j++) {
+    util::add_poly_coeffmod(eval_repr_coeff_iter + (j*coeff_count),
+                            other.eval_repr_coeff_iter + (j*coeff_count),
+                            coeff_count,
+                            coeff_modulus[j],
+                            eval_repr_coeff_iter      //TODO: Check if this is safe (used to be result + ..)
+                                + (j*coeff_count));
+  }
+  // invalidate the coeff_repr
+  coeff_repr_valid = false;
+}
+
+void AfsealPoly::subtract_inplace(const AfsealPoly &other) {
+  auto coeff_modulus = afseal_ptr->context->get_context_data(parms_id)->parms().coeff_modulus();
+#pragma omp parallel for
+  for (size_t j = 0; j < coeff_modulus.size(); j++) {
+    util::sub_poly_coeffmod(eval_repr_coeff_iter + (j*coeff_count),
+                            other.eval_repr_coeff_iter + (j*coeff_count),
+                            coeff_count,
+                            coeff_modulus[j],
+                            eval_repr_coeff_iter  //TODO: Check if this is safe (used to be result + ..)
+                                + (j*coeff_count));
+  }
+  // invalidate the coeff_repr
+  coeff_repr_valid = false;
+}
+
+void AfsealPoly::multiply_inplace(const AfsealPoly &other) {
+  auto coeff_modulus = afseal_ptr->context->get_context_data(parms_id)->parms().coeff_modulus();
+#pragma omp parallel for
+  for (size_t j = 0; j < coeff_modulus.size(); j++) {
+    util::dyadic_product_coeffmod(eval_repr_coeff_iter + (j*coeff_count),
+                                  other.eval_repr_coeff_iter + (j*coeff_count),
+                                  coeff_count,
+                                  coeff_modulus[j],
+                                  eval_repr_coeff_iter  //TODO: Check if this is safe (used to be result + ..)
+                                      + (j*coeff_count));
+  }
+  // invalidate the coeff_repr
+  coeff_repr_valid = false;
+}
+
+bool AfsealPoly::invert_inplace() {
+  // compute a^{-1}, where a is a double-CRT polynomial whose evaluation representation
+  // is in a. The double-CRT representation in SEAL is stored as a flat array of
+  // length coeff_count * modulus_count:
+  //    [ 0 .. coeff_count-1 , coeff_count .. 2*coeff_count-1, ... ]
+  //      ^--- a (mod p0)    , ^--- a (mod p1),              ,  ...
+  // return if the inverse exists, and result is also in evaluation representation
+
+  auto coeff_modulus = afseal_ptr->context->get_context_data(parms_id)->parms().coeff_modulus();
+  bool *has_inv = new bool[coeff_modulus_count];
+  fill_n(has_inv, coeff_modulus_count, true);
+#pragma omp parallel for
+  for (size_t j = 0; j < coeff_modulus_count; j++) {
+    for (size_t i = 0; i < coeff_count && has_inv[j]; i++) {
+      uint64_t inv = 0;
+      if (util::try_invert_uint_mod(eval_repr_coeff_iter[i + (j*coeff_count)], coeff_modulus[j], inv)) {
+        eval_repr_coeff_iter[i + (j*coeff_count)] = inv; //TODO: Check if this is safe (used to be result[...])
+      } else {
+        has_inv[j] = false;
+      }
+    }
+  }
+  for (size_t j = 0; j < coeff_modulus.size(); j++) {
+    // invalidate the coeff_repr
+    coeff_repr_valid = false;
+    if (!has_inv[j]) return false;
+  }
+  delete[] has_inv;
+
+  // invalidate the coeff_repr
+  coeff_repr_valid = false;
+
+  return true;
 }
