@@ -37,7 +37,7 @@
 #include "Afseal.h"
 
 // ----------------------------- CLASS MANAGEMENT -----------------------------
-Afseal::Afseal() {}
+Afseal::Afseal() {};
 
 Afseal::Afseal(const Afseal &otherAfseal) {
   this->context = make_shared<SEALContext>(otherAfseal.context->first_context_data()->parms());
@@ -1024,4 +1024,7 @@ int Afseal::getfracDigits() {
 bool Afseal::getflagBatch() {
   if (this->context==NULL) { throw std::logic_error("Context not initialized"); }
   return this->flagBatch;
+}
+AfsealPoly Afseal::poly_from_coeff_vector(vector<complex<double>> &coeff_vector) {
+  //TODO: Implement
 }

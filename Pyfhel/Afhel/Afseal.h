@@ -43,6 +43,9 @@
 using namespace std;
 using namespace seal;
 
+// Forward Declaration
+class AfsealPoly;
+
 /**
 * @brief Abstraction For SEAL Homomorphic Encryption Library.
 *
@@ -469,7 +472,7 @@ class Afseal{
         AfsealPoly empty_poly();
         AfsealPoly poly_from_ciphertext(Ciphertext& ctxt, int64_t pos);
         AfsealPoly poly_from_plaintext(Plaintext& ptxt);
-        AfsealPoly poly_from_coeff_vector(vector<complex>& coeff_vector);
+        AfsealPoly poly_from_coeff_vector(vector<complex<double>>& coeff_vector);
         vector<AfsealPoly> poly_from_ciphertext(Ciphertext& ctxt);
 
         // POLY OPS --> implement checks for compatibility. 
@@ -479,45 +482,45 @@ class Afseal{
         AfsealPoly invert(AfsealPoly& p);
 
         //inplace ops -> result in first operand
-        void add(AfsealPoly& p1, AfsealPoly& p2);
-        void subtract(AfsealPoly& p1, AfsealPoly& p2);
-        void multiply(AfsealPoly& p1, AfsealPoly& p2);
-        void invert(AfsealPoly& p);
+        void add_inplace(AfsealPoly& p1, AfsealPoly& p2);
+        void subtract_inplace(AfsealPoly& p1, AfsealPoly& p2);
+        void multiply_inplace(AfsealPoly& p1, AfsealPoly& p2);
+        void invert_inplace(AfsealPoly& p);
 
         // I/O
-        void poly_to_ciphertext(AfsealPoly& p, Ciphertext& ctxt, int64_t pos,);
+        void poly_to_ciphertext(AfsealPoly& p, Ciphertext& ctxt, int64_t pos);
         void poly_to_plaintext(AfsealPoly& p, Plaintext& ptxt);
-        void poly_to_ciphertext(Ciphertext& ctxt, int64_t pos,);
+        void poly_to_ciphertext(Ciphertext& ctxt, int64_t pos);
 };
 
-class AfsealPoly{ 
-    private: 
-        shared_ptr<MemoryPool> mempool;
-        coeffs;
-        more stuff;
+class AfsealPoly{
+ private:
+  shared_ptr<seal::util::MemoryPool> mempool;
+  // coeffs;
+  // more stuff;
 
-    public: 
-        // All functions using an Afseal instance could also be defined as members of the Afseal class. 
+ public:
+  // All functions using an Afseal instance could also be defined as members of the Afseal class.
 
-        // Void constructor, just take & use SealContext from afseal
-        AfsealPoly(Afseal* afseal);
+  // Void constructor, just take & use SealContext from afseal
+  AfsealPoly(Afseal* afseal);
 
-        // Copy constructor?
-        AfsealPoly(AfsealPoly& other);
+  // Copy constructor?
+  AfsealPoly(AfsealPoly& other);
 
-        // CONSTRUCTORS -> just use void constructor and fill using Afseal
-        AfsealPoly(Afseal* afseal, Ciphertext& ctxt, int64_t pos);
-        AfsealPoly(Afseal* afseal, Plaintext& ptxt);
-        AfsealPoly(Afseal* afseal, Plaintext& ptxt);
+  // CONSTRUCTORS -> just use void constructor and fill using Afseal
+  AfsealPoly(Afseal* afseal, Ciphertext& ctxt, int64_t pos);
+  AfsealPoly(Afseal* afseal, Plaintext& ptxt);
+  //AfsealPoly(Afseal* afseal, Plaintext& ptxt); //TODO: What was the third constructor supposed to be?
 
-        // destructor 
-        ~AfsealPoly();
+  // destructor
+  ~AfsealPoly();
 
-        // export poly to complex vector --> if you need context parameters, move to Afseal.
-        vector<complex> to_coeff_list(void);
+  // export poly to complex vector --> if you need context parameters, move to Afseal.
+  vector<complex<double>> to_coeff_list(void);
 
-        // access individual coefficients
-        complex get_coeff(int64_t i);
-        void set_coeff(int64_t i, complex& val);
-
+  // access individual coefficients
+  complex<double> get_coeff(int64_t i);
+  void set_coeff(int64_t i, complex<double>& val);
+};
 #endif
