@@ -459,11 +459,65 @@ class Afseal{
         void setrelinKey(RelinKeys& relKey)
             {this->relinKey = make_shared<RelinKeys>(relKey);}
 
+
+
+
+
+
+
+        // POLY CONSTRUCTION -->
+        AfsealPoly empty_poly();
+        AfsealPoly poly_from_ciphertext(Ciphertext& ctxt, int64_t pos);
+        AfsealPoly poly_from_plaintext(Plaintext& ptxt);
+        AfsealPoly poly_from_coeff_vector(vector<complex>& coeff_vector);
+        vector<AfsealPoly> poly_from_ciphertext(Ciphertext& ctxt);
+
+        // POLY OPS --> implement checks for compatibility. 
+        AfsealPoly add(AfsealPoly& p1, AfsealPoly& p2);
+        AfsealPoly subtract(AfsealPoly& p1, AfsealPoly& p2);
+        AfsealPoly multiply(AfsealPoly& p1, AfsealPoly& p2);
+        AfsealPoly invert(AfsealPoly& p);
+
+        //inplace ops -> result in first operand
+        void add(AfsealPoly& p1, AfsealPoly& p2);
+        void subtract(AfsealPoly& p1, AfsealPoly& p2);
+        void multiply(AfsealPoly& p1, AfsealPoly& p2);
+        void invert(AfsealPoly& p);
+
+        // I/O
+        void poly_to_ciphertext(AfsealPoly& p, Ciphertext& ctxt, int64_t pos,);
+        void poly_to_plaintext(AfsealPoly& p, Plaintext& ptxt);
+        void poly_to_ciphertext(Ciphertext& ctxt, int64_t pos,);
 };
 
+class AfsealPoly{ 
+    private: 
+        shared_ptr<MemoryPool> mempool;
+        coeffs;
+        more stuff;
 
+    public: 
+        // All functions using an Afseal instance could also be defined as members of the Afseal class. 
 
+        // Void constructor, just take & use SealContext from afseal
+        AfsealPoly(Afseal* afseal);
 
+        // Copy constructor?
+        AfsealPoly(AfsealPoly& other);
 
+        // CONSTRUCTORS -> just use void constructor and fill using Afseal
+        AfsealPoly(Afseal* afseal, Ciphertext& ctxt, int64_t pos);
+        AfsealPoly(Afseal* afseal, Plaintext& ptxt);
+        AfsealPoly(Afseal* afseal, Plaintext& ptxt);
+
+        // destructor 
+        ~AfsealPoly();
+
+        // export poly to complex vector --> if you need context parameters, move to Afseal.
+        vector<complex> to_coeff_list(void);
+
+        // access individual coefficients
+        complex get_coeff(int64_t i);
+        void set_coeff(int64_t i, complex& val);
 
 #endif
