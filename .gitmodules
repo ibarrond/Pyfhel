@@ -8,3 +8,6 @@
 [submodule "SEAL"]
 	path = Pyfhel/SEAL
 	url = https://github.com/ibarrond/SEAL4Pyfhel
+[submodule "Pyfhel/backend/SEAL"]
+	path = Pyfhel/backend/SEAL
+	url = https://github.com/microsoft/SEAL/

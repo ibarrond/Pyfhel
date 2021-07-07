@@ -15,24 +15,20 @@ from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream
 
 # --------------------------- EXTERN DECLARATION ------------------------------
 # SEAL plaintext class        
-cdef extern from "SEAL/SEAL/seal/plaintext.h" namespace "seal" nogil:
+cdef extern from "seal/plaintext.h" namespace "seal" nogil:
     cdef cppclass Plaintext:
         Plaintext() except +
         Plaintext(const Plaintext &copy) except +
         bool is_zero() except +
         string to_string() except +
-        void save(ostream &stream) except +
-        void load(istream &stream) except +
         
 # SEAL ciphertext class        
-cdef extern from "SEAL/SEAL/seal/ciphertext.h" namespace "seal" nogil:
+cdef extern from "seal/ciphertext.h" namespace "seal" nogil:
     cdef cppclass Ciphertext:
         Ciphertext() except +
         Ciphertext(const Ciphertext &copy) except +
         int size_capacity() except +
         int size() except +
-        void save(ostream &stream) except +
-        void load(istream &stream) except +
 
 # Afseal class to abstract SEAL
 cdef extern from "Afhel/Afseal.h" nogil:
@@ -130,6 +126,7 @@ cdef extern from "Afhel/Afseal.h" nogil:
         void polyEval(Ciphertext& cipher1, vector[double]& coeffPoly) except +
 
         # -------------------------------- I/O --------------------------------
+        # With files
         bool saveContext(string fileName) except +
         bool restoreContext(string fileName) except +
         
@@ -145,6 +142,13 @@ cdef extern from "Afhel/Afseal.h" nogil:
         bool saverotateKey(string fileName) except +
         bool restorerotateKey(string fileName) except +
 
+        bool savePlaintext(string fileName, Plaintext& plain) except +
+        bool restorePlaintext(string fileName, Plaintext& plain) except +
+
+        bool saveCiphertext(string fileName, Ciphertext& ctxt) except +
+        bool restoreCiphertext(string fileName, Ciphertext& ctxt) except +
+
+        # With Streams
         bool ssaveContext(ostream& contextFile) except +
         bool srestoreContext(istream& contextFile) except +
         
@@ -159,7 +163,12 @@ cdef extern from "Afhel/Afseal.h" nogil:
         
         bool ssaverotateKey(ostream& keyFile) except +
         bool srestorerotateKey(istream& keyFile) except +
+        
+        bool srestorePlaintext(istream& plaintextFile, Plaintext& plain) except +
+        bool ssavePlaintext(ostream& plaintextFile, Plaintext& plain)except +
 
+        bool ssaveCiphertext(ostream& ctxtFile, Ciphertext& ctxt) except +
+        bool srestoreCiphertext(istream& ctxtFile, Ciphertext& ctxt) except +
         # ----------------------------- AUXILIARY -----------------------------
         bool batchEnabled() except +
         long relinBitCount() except +

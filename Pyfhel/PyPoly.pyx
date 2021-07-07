@@ -147,7 +147,7 @@ cdef class PyPtxt:
         cdef string bFileName = fileName.encode('utf8')
         outputter = new ofstream(bFileName, binary)
         try:
-            self._pyfhel.afseal.savePlaintext(bFileName,  deref(self._ptr_ptxt))
+            self._ptr_ptxt.save(deref(outputter))
         finally:
             del outputter
 
@@ -160,7 +160,7 @@ cdef class PyPtxt:
             bytes: serialized plaintext
         """
         cdef ostringstream outputter
-        self._pyfhel.afseal.ssavePlaintext(outputter, deref(self._ptr_ptxt))
+        self._ptr_ptxt.save(outputter)
         return outputter.str()
 
     cpdef void from_file(self, fileName, encoding) except +:
@@ -207,7 +207,7 @@ cdef class PyPtxt:
         cdef string bFileName = fileName.encode('utf8')
         inputter = new ifstream(bFileName,binary)
         try:
-            self._pyfhel.afseal.restorePlaintext(bFileName,  deref(self._ptr_ptxt))
+            self._ptr_ptxt.load(deref(inputter))
         finally:
             del inputter
         self._encoding = to_ENCODING_t(encoding).value
@@ -226,7 +226,7 @@ cdef class PyPtxt:
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
-        self._pyfhel.afseal.srestorePlaintext(inputter,  deref(self._ptr_ptxt))
+        self._ptr_ptxt.load(inputter)
         self._encoding = to_ENCODING_t(encoding).value
 
 

@@ -5,6 +5,9 @@ from libcpp.string cimport string
 
 # ---------------------------- CYTHON DECLARATION ------------------------------
 
+cdef extern from "<ios>" namespace "std":
+    cdef cppclass streamoff:
+        pass
 cdef extern from "<iostream>" namespace "std":
     cdef cppclass ostream:
         ostream& write(const char*, int) except +

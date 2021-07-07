@@ -187,7 +187,7 @@ cdef class PyCtxt:
         cdef string bFileName = fileName.encode('utf8')
         outputter = new ofstream(bFileName, binary)
         try:
-            self._ptr_ctxt.save(deref(outputter))
+            self._pyfhel.afseal.saveCiphertext(bFileName, deref(self._ptr_ctxt))
         finally:
             del outputter
 
@@ -200,7 +200,7 @@ cdef class PyCtxt:
             bytes: serialized ciphertext
         """
         cdef ostringstream outputter
-        self._ptr_ctxt.save(outputter)
+        self._pyfhel.afseal.ssaveCiphertext(outputter, deref(self._ptr_ctxt))
         return outputter.str()
 
     cpdef void from_file(self, fileName, encoding) except +:
@@ -250,7 +250,7 @@ cdef class PyCtxt:
         cdef string bFileName = fileName.encode('utf8')
         inputter = new ifstream(bFileName,binary)
         try:
-            self._ptr_ctxt.load(deref(inputter))
+            self._pyfhel.afseal.restoreCiphertext(bFileName, deref(self._ptr_ctxt))
         finally:
             del inputter
         self._encoding = to_ENCODING_t(encoding).value
@@ -276,7 +276,7 @@ cdef class PyCtxt:
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
-        self._ptr_ctxt.load(inputter)
+        self._pyfhel.afseal.srestoreCiphertext(inputter, deref(self._ptr_ctxt))
         self._encoding = to_ENCODING_t(encoding).value
 
             
