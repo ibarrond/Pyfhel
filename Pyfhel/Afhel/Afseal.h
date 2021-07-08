@@ -37,6 +37,7 @@
 #include <vector>    /* Vectorizing all operations */
 #include <thread>    /* memory pools, multithread*/
 #include <memory>    /* Smart Pointers*/
+#include <complex>   /* Complex Numbers */
 
 #include "seal/seal.h"
 
@@ -466,14 +467,16 @@ class Afseal {
   // I/O
   void poly_to_ciphertext(AfsealPoly &p, seal::Ciphertext &ctxt, int64_t pos);
   void poly_to_plaintext(AfsealPoly &p, seal::Plaintext &ptxt);
-  void poly_to_ciphertext(seal::Ciphertext &ctxt, int64_t pos);
+
+  // Coefficient Access
+  std::complex<double> get_coeff(AfsealPoly& poly, size_t i);
+  void set_coeff(AfsealPoly& poly, std::complex<double> &val, size_t i);
+  std::vector<std::complex<double>> to_coeff_list(AfsealPoly& poly);
 };
 
 /// Wrapper for the underlying polynomials that make up plaintexts and ciphertexts in SEAL
 class AfsealPoly {
  private:
-  /// Pointer to the Afseal instance associated with this AfsealPoly
-  Afseal *afseal_ptr;
 
   /// Parameter id associated with this AfsealPoly
   seal::parms_id_type parms_id;
@@ -494,11 +497,13 @@ class AfsealPoly {
   /// Degree of the polynomial / number of coefficients
   size_t coeff_count;
 
+  std::vector<seal::Modulus> coeff_modulus;
+
   /// The number of coefficient moduli q_i (i.e., coeff_modulus.size() )
   size_t coeff_modulus_count;
 
   /// Helper function to convert to coeff_repr
-  void generate_coeff_repr();
+  void generate_coeff_repr(Afseal &afseal);
 
  public:
   // Note: All functions using an Afseal instance could also be defined as members of the Afseal class.
@@ -533,16 +538,16 @@ class AfsealPoly {
 
   /// Export polynomial to a vector of complex values
   /// \return vector of the (complex) coefficients of the polynomial
-  std::vector<std::complex<double>> to_coeff_list(void);
+  std::vector<std::complex<double>> to_coeff_list(Afseal &afseal);
 
   /// get individual coefficient
   /// \param i index of the coefficient
   /// \return the i-th coefficient
-  std::complex<double> get_coeff(size_t i);
+  std::complex<double> get_coeff(Afseal &afseal, size_t i);
 
   /// set individual coefficient
   /// \param i index of the coefficient
-  void set_coeff(std::complex<double> &val, size_t i);
+  void set_coeff(Afseal &afseal, std::complex<double> &val, size_t i);
 
   // ----------- OPERATIONS -------------
   //inplace ops -> result in first operand
@@ -551,7 +556,6 @@ class AfsealPoly {
   void subtract_inplace(const AfsealPoly &other);
 
   void multiply_inplace(const AfsealPoly &other);
-
 
   bool invert_inplace();
 
