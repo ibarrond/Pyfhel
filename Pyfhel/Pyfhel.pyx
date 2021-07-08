@@ -179,7 +179,7 @@ cdef class Pyfhel:
     # ============================ CRYPTOGRAPHY ===============================
     # =========================================================================
     
-    cpdef contextGen(self, long p, long m=2048, bool flagBatching=False,
+    cpdef void contextGen(self, long p, long m=2048, bool flagBatching=False,
                      long base=2, long sec=128, int intDigits=64,
                      int fracDigits = 32) except +:
         """contextGen(int p, int m=2048, bool flagBatching=False, int base=2, int sec=128, int intDigits=64, int fracDigits = 32)
@@ -1231,8 +1231,134 @@ cdef class Pyfhel:
             return ctxt
         
         
-        
+    # =========================================================================
+    # =============================== PyPoly ==================================
+    # =========================================================================  
+    # CREATION
+    cpdef PyPoly empty_poly(self, PyCtxt ref) except +:
+        """Generates an empty polynomial using `ref` as reference"""
+        # poly._afpoly =  <AfsealPoly *> self.afseal.empty_poly(deref(ref._ptr_ctxt))
+        return PyPoly(ref)
     
+    cpdef PyPoly poly_from_ciphertext(self, PyCtxt ctxt, size_t i) except +:
+        """Gets the i-th underlying polynomial of a ciphertext"""
+        return PyPoly(ctxt, i)
+
+    cpdef PyPoly poly_from_plaintext(self, PyCtxt ref, PyPtxt ptxt) except +:
+        """Gets the underlying polynomial of a plaintext"""
+        return PyPoly(ref, ptxt)
+
+    cpdef PyPoly poly_from_coeff_vector(self, vector[cy_complex] coeff_vector, PyCtxt ref) except +:
+        """Generates a polynomial with given coefficients"""
+        return PyPoly(coeff_vector, ref)
+    
+    cpdef list polys_from_ciphertext(self, PyCtxt ctxt) except +:
+        """Generates a list of polynomials of the given ciphertext"""
+        raise NotImplementedError("TODO: Not yet there")
+
+    # OPS
+    cpdef PyPoly poly_add(self, PyPoly p, PyPoly p_other, bool in_new_poly=False) except +:
+        """Sum two PyPoly polynomials: p + p_other.
+        
+        Encoding must be consistent (TODO).  The result is applied
+        to the first polynomial or to a newly created one.
+    
+        Args:
+            p (PyPoly): polynomial whose values are added with p_other.  
+            p_other (PyPoly): polynomial left untouched.  
+            in_new_poly (bool): result in a newly created polynomial
+            
+        Return:
+            PyPoly: resulting polynomial, the input transformed or a new one.
+        """
+        res_poly = PyPoly(p) if in_new_poly else p
+        self.afseal.add_inplace(deref(res_poly._afpoly), deref(p_other._afpoly))
+        return res_poly
+
+    cpdef PyPoly poly_subtract(self, PyPoly p, PyPoly p_other, bool in_new_poly=False) except +:
+        """Subtract two PyPoly polynomials: p - p_other.
+        
+        Encoding must be consistent (TODO).  The result is applied
+        to the first polynomial or to a newly created one.
+    
+        Args:
+            p (PyPoly): polynomial whose values are subtracted with p_other.  
+            p_other (PyPoly): polynomial left untouched.  
+            in_new_poly (bool): result in a newly created polynomial
+            
+        Return:
+            PyPoly: resulting polynomial, the input transformed or a new one.
+        """
+        res_poly = PyPoly(p) if in_new_poly else p
+        self.afseal.subtract_inplace(deref(res_poly._afpoly), deref(p_other._afpoly))
+        return res_poly
+
+    cpdef PyPoly poly_multiply(self, PyPoly p, PyPoly p_other, bool in_new_poly=False) except +:
+        """Multiply two PyPoly polynomials: p * p_other.
+        
+        Encoding must be consistent (TODO).  The result is applied
+        to the first polynomial or to a newly created one.
+    
+        Args:
+            p (PyPoly): polynomial whose values are multiplied with p_other.  
+            p_other (PyPoly): polynomial left untouched.  
+            in_new_poly (bool): result in a newly created polynomial
+            
+        Return:
+            PyPoly: resulting polynomial, the input transformed or a new one.
+        """
+        res_poly = PyPoly(p) if in_new_poly else p
+        self.afseal.multiply_inplace(deref(res_poly._afpoly), deref(p_other._afpoly))
+        return res_poly
+
+    cpdef PyPoly poly_invert(self, PyPoly p, bool in_new_poly=False) except +:
+        """Invert PyPoly polynomial: inverse(p)
+        
+        Encoding must be consistent (TODO).  The result is applied
+        to the polynomial or to a newly created one.
+    
+        Args:
+            p (PyPoly): polynomial whose values are inverted.  
+            in_new_poly (bool): result in a newly created polynomial
+            
+        Return:
+            PyPoly: resulting polynomial, the input transformed or a new one.
+        """
+        res_poly = PyPoly(p) if in_new_poly else p
+        self.afseal.invert(deref(res_poly._afpoly))
+        return res_poly
+
+    # I/O
+    cpdef void poly_to_ciphertext(self, PyPoly p, PyCtxt ctxt, size_t i) except+:
+        """Set chosen i-th polynimial in ctxt to p.
+        
+        Encoding must be consistent (TODO).
+    
+        Args:
+            p (PyPoly): polynomial to be inserted.  
+            ctxt (PyCtxt): base ciphertext.
+            i (int): number of polynomial in ctxt to be set.
+            
+        Return:
+            None
+        """
+        self.afseal.poly_to_ciphertext(deref(p._afpoly), deref(ctxt._ptr_ctxt), i)
+
+    cpdef void poly_to_plaintext(self, PyPoly p, PyPtxt ptxt) except+:
+        """Set the polynimial in ptxt to p.
+        
+        Encoding must be consistent (TODO).
+    
+        Args:
+            p (PyPoly): polynomial to be inserted.  
+            ptxt (PyPtxt): base plaintext.
+            
+        Return:
+            None
+        """
+        self.afseal.poly_to_plaintext(deref(p._afpoly), deref(ptxt._ptr_ptxt))
+
+
     # =========================================================================
     # ================================ I/O ====================================
     # =========================================================================   

@@ -141,12 +141,12 @@ extra_compile_flags = []
 if platform.system() == 'Windows':
     # Windows' MSVC2019 compiler doesn't have an O3 optimization
     #>https://docs.microsoft.com/en-us/cpp/build/reference/o-options-optimize-code
-    extra_compile_flags += ["-O2"]
+    extra_compile_flags += ["/O2", "/openmp"]
 elif platform.system() == 'Darwin': # MacOS
     # extra_compile_flags += ["-std=c++17","-O3","-mmacosx-version-min=10.12"]
     raise SystemError("Pyfhel is not supported in MacOS (see issue #59). Please use a Linux VM or Docker.")
 else:  # Linux, GCC
-    extra_compile_flags += ["-std=c++17","-O3"]
+    extra_compile_flags += ["-std=c++17","-O3","-fopenmp"]
 
 
 # ==============================================================================
@@ -270,6 +270,14 @@ ext_modules = [
          Extension(
              name="Pyfhel.PyCtxt",
              sources=[str(PYFHEL_PATH/("PyCtxt"+ext))],
+             include_dirs=include_dirs,
+             define_macros=define_macros,
+             language="c++",
+             extra_compile_args=extra_compile_flags,
+         ),
+         Extension(
+             name="Pyfhel.PyPoly",
+             sources=[str(PYFHEL_PATH/("PyPoly"+ext))],
              include_dirs=include_dirs,
              define_macros=define_macros,
              language="c++",

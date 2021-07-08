@@ -464,9 +464,8 @@ class Afseal {
   void invert_inplace(AfsealPoly &p);
 
   // I/O
-  void poly_to_ciphertext(AfsealPoly &p, seal::Ciphertext &ctxt, int64_t pos);
+  void poly_to_ciphertext(AfsealPoly &p, seal::Ciphertext &ctxt, size_t i);
   void poly_to_plaintext(AfsealPoly &p, seal::Plaintext &ptxt);
-  void poly_to_ciphertext(seal::Ciphertext &ctxt, int64_t pos);
 };
 
 /// Wrapper for the underlying polynomials that make up plaintexts and ciphertexts in SEAL
@@ -552,8 +551,12 @@ class AfsealPoly {
 
   void multiply_inplace(const AfsealPoly &other);
 
-
   bool invert_inplace();
 
+   /// Degree of the polynomial / number of coefficients
+  size_t get_coeff_count(){return this->coeff_count;}
+
+  /// The number of coefficient moduli q_i (i.e., coeff_modulus.size() )
+  size_t get_coeff_modulus_count(){return this->coeff_modulus_count;}
 };
 #endif

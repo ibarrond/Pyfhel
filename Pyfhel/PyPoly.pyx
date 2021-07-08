@@ -11,70 +11,71 @@ from Pyfhel.util import ENCODING_t
 from cython.operator cimport dereference as deref
 
 # ----------------------------- IMPLEMENTATION --------------------------------
-cdef class PyPtxt:
-    """Plaintext class of Pyfhel, contains a value/vector of encoded ints/double.
-
-    This class references SEAL, PALISADE and HElib plaintexts, using the one 
-    corresponding to the backend selected in Pyfhel (SEAL by default).
+cdef class PyPoly:
+    """Polynomial class of Pyfhel with the underlying data of a PyCtxt/PyPtxt.
 
     Attributes:
         other_ptxt (PyPtxt, optional): Other PyPtxt to deep copy
     
     """
     
-    def __cinit__(self, 
-                  PyPtxt copy_ptxt=None,
-                  Pyfhel pyfhel=None,
-                  fileName=None,
-                  encoding=None):
-        if (copy_ptxt): # If there is a PyPtxt to copy, override all arguments and copy
-            self._ptr_ptxt = new Plaintext(deref(copy_ptxt._ptr_ptxt))
-            self._encoding = copy_ptxt._encoding
-            if (copy_ptxt._pyfhel):
-                self._pyfhel = copy_ptxt._pyfhel
-        else:
-            self._ptr_ptxt = new Plaintext()  
-            if fileName:
-                if not encoding:
-                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid encoding")    
-                self.from_file(fileName, encoding)
-            else:
-                self._encoding = to_ENCODING_t(encoding) if encoding else ENCODING_T.UNDEFINED
-            if (pyfhel):
-                self._pyfhel = pyfhel
+    def __cinit__(
+        self,
+        PyPoly other=None,
+        PyCtxt ref=None,
+        PyPtxt ptxt=None,
+        size_t index=0,
+    ):
+        if other is not None:   # Copy constructor if there is a PyPoly to copy
+            self._afpoly = new AfsealPoly(deref(other._afpoly))
+            if (other._pyfhel):
+                self._pyfhel = other._pyfhel
+            return
+        assert ref._pyfhel is not None and ref._pyfhel.afseal is not NULL,\
+            "Reference PyCtxt `ref` has no _pyfhel member or is not initialized"
+        if index is not None:   # Construct from selected Poly in PyCtxt `ref`
+            self._afpoly = new AfsealPoly(deref(ref._pyfhel.afseal), deref(ref._ptr_ctxt), index)  
+            self._pyfhel = ref._pyfhel
+        elif ptxt is not None:  # Construct from Poly in PyPtxt `ptxt`
+            self._afpoly =\
+                new AfsealPoly(deref(ref._pyfhel.afseal), deref(ptxt._ptr_ptxt), deref(ref._ptr_ctxt))  
+            self._pyfhel = ptxt._pyfhel
+        else:                   # Base constructor
+            self._afpoly =\
+                new AfsealPoly(deref(ref._pyfhel.afseal), deref(ref._ptr_ctxt))  
+            self._pyfhel = ref._pyfhel
                 
-    def __init__(self,
-                  PyPtxt copy_ptxt=None,
-                  Pyfhel pyfhel=None,
-                  fileName=None,
-                  encoding=None):
-        """__init__(PyPtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, encoding=None)
-
-        Initializes an empty PyPtxt encoded plaintext.
+    def __init__(
+        self,
+        PyPoly other=None,
+        PyCtxt ref=None,
+        PyPtxt ptxt=None,
+        size_t index=0,
+    ):
+        """Initializes a PyPoly polynomial.
         
-        To fill the ciphertext during initialization you can:
-            - Provide a PyPtxt to deep copy. 
-            - Provide a pyfhel instance to act as its backend.
-            - Provide a fileName and an encoding to load the data from a saved file.
+        To fill the polynomial during initialization you can either:
+            - Provide a PyPoly to deep copy. 
+            - Provide a reference PyCtxt and (optionally) an index for the i-th 
+                    polynomial in the cipertext or (optionally) a source PyPtxt.
 
         Attributes:
-            copy_ctxt (PyPtxt, optional): Other PyPtxt to deep copy.
-            pyfhel (Pyfhel, optional): Pyfhel instance needed to operate.
-            fileName (str, pathlib.Path, optional): Load PyPtxt from this file.
-                            Requires non-empty encoding.
-            encoding (str, type, int, optional): encoding type of the new PyPtxt.
+            other (PyPoly, optional): Other PyPoly to deep copy.
+            ref (PyCtxt, optional): PyCtxt instance needed as reference.
+            size_t (int, optional): extract i-th polynomial from ciphertext `ref`.
+            ptxt (PyPtxt, optional): plaintext used as source.
         """
         pass
 
     def __dealloc__(self):
-        if self._ptr_ptxt != NULL:
-            del self._ptr_ptxt
+        if self._afpoly != NULL:
+            del self._afpoly
             
     @property
     def _encoding(self):
         """ENCODING_t: returns the encoding type.
         
-        Can be set to: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
+        Can be set to: 0-None, 1-BFV, 2-CKKS
 
         See Also:
             :func:`~Pyfhel.util.to_ENCODING_t`
@@ -86,7 +87,7 @@ cdef class PyPtxt:
     @_encoding.setter
     def _encoding(self, new_encoding):
         if not isinstance(new_encoding, ENCODING_t):
-            raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be ENCODING_t")        
+            raise TypeError("<Pyfhel ERROR> Encoding type of PyPoly must be ENCODING_t")        
         self._encoding = new_encoding.value
         
     @_encoding.deleter
@@ -104,16 +105,25 @@ cdef class PyPtxt:
         if not isinstance(new_pyfhel, Pyfhel):
             raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
         self._pyfhel = new_pyfhel 
-        
-        
-    cpdef bool is_zero(self) except +:
-        """bool: Flag to quickly check if it is empty"""
-        return self._ptr_ptxt.is_zero()
 
-    cpdef string to_poly_string(self) except +:
-        """str: Polynomial representation of the plaintext"""
-        return self._ptr_ptxt.to_string()
+    @property
+    def coeff_modulus_count(self):
+        self.check_afpoly()
+        return self._afpoly.get_coeff_modulus_count()
+
+    @property
+    def coeff_count(self):
+        self.check_afpoly()
+        return self._afpoly.get_coeff_count()
+
+
+    cpdef vector[cy_complex] to_coeff_list(self) except +:
+        """List of complex coefficients of the polynomial"""
+        self.check_afpoly()
+        return self._afpoly.to_coeff_list()
     
+
+
     
     # =========================================================================
     # ================================== I/O ==================================
@@ -124,78 +134,67 @@ cdef class PyPtxt:
         Alias of `save` with input sanitizing.
 
         Args:
-            fileName: (str, pathlib.Path) File where the ciphertext will be stored.
+            fileName: (str, pathlib.Path) File where the polynomial will be stored.
 
         Return:
             None
         """
-        self.save(_to_valid_file_str(fileName))
+        raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
     cpdef void save(self, str fileName) except +:
         """save(str fileName)
         
-        Save the plaintext into a file. The file can new one or
+        Save the polynomial into a file. The file can new one or
         exist already, in which case it will be overwriten.
 
         Args:
-            fileName: (str) File where the plaintext will be stored.
+            fileName: (str) File where the polynomial will be stored.
 
         Return:
             None            
         """
-        cdef ofstream* outputter
-        cdef string bFileName = fileName.encode('utf8')
-        outputter = new ofstream(bFileName, binary)
-        try:
-            self._ptr_ptxt.save(deref(outputter))
-        finally:
-            del outputter
+        raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
     cpdef bytes to_bytes(self) except +:
         """to_bytes()
 
-        Serialize the plaintext into a binary/bytes string.
+        Serialize the polynomial into a binary/bytes string.
 
         Return:
-            bytes: serialized plaintext
+            bytes: serialized polynomial
         """
-        cdef ostringstream outputter
-        self._ptr_ptxt.save(outputter)
-        return outputter.str()
+        raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
     cpdef void from_file(self, fileName, encoding) except +:
         """from_file(str fileName, encoding)
         
         Alias of `load` with input sanitizer.
 
-        Load the ciphertext from a file. Requires knowing the encoding.
+        Load the polynomial from a file. Requires knowing the encoding.
 
         Args:
-            fileName (str, pathlib.Path): path to file where the ciphertext is retrieved from.
+            fileName (str, pathlib.Path): path to file where the polynomial is retrieved from.
             encoding: (str, type, int, ENCODING_t) One of the following:
               * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
               * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
-              * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
-
         Return:
             None
 
         See Also:
             :func:`~Pyfhel.util.to_ENCODING_t`
         """
-        self.load(_to_valid_file_str(fileName, check=True), encoding)
+        raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
     cpdef void load(self, str fileName, encoding) except +:
         """load(self, str fileName, encoding)
         
-        Load the plaintext from a file.
+        Load the polynomial from a file.
 
         Args:
-            fileName: (str) Valid file where the plaintext is retrieved from.
+            fileName: (str) Valid file where the polynomial is retrieved from.
             encoding: (str, type, int, ENCODING_t) One of the following:
               * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
               * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
-              * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
               
         Return:
             None
@@ -203,31 +202,21 @@ cdef class PyPtxt:
         See Also:
             :func:`~Pyfhel.util.to_ENCODING_t`
         """
-        cdef ifstream* inputter
-        cdef string bFileName = fileName.encode('utf8')
-        inputter = new ifstream(bFileName,binary)
-        try:
-            self._ptr_ptxt.load(deref(inputter))
-        finally:
-            del inputter
-        self._encoding = to_ENCODING_t(encoding).value
+        raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
     cpdef void from_bytes(self, bytes content, encoding) except +:
         """from_bytes(bytes content)
 
-        Recover the serialized plaintext from a binary/bytes string.
+        Recover the serialized polynomial from a binary/bytes string.
 
         Args:
-            content: (:obj:`bytes`) Python bytes object containing the PyPtxt.
+            content: (:obj:`bytes`) Python bytes object containing the PyPoly.
             encoding: (:obj: `str`) String or type describing the encoding:
               * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
               * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
               * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
         """
-        cdef stringstream inputter
-        inputter.write(content,len(content))
-        self._ptr_ptxt.load(inputter)
-        self._encoding = to_ENCODING_t(encoding).value
+        raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
 
 
@@ -235,44 +224,61 @@ cdef class PyPtxt:
     # ============================ ENCR/DECR/CMP ==============================
     # =========================================================================
 
-    def __int__(self):
-        if (self._encoding != ENCODING_T.INTEGER):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not INTEGER)")
-        return self._pyfhel.decodeInt(self)
-
-    def __float__(self):
-        if (self._encoding != ENCODING_T.FRACTIONAL):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not FRACTIONAL)")
-        return self._pyfhel.decodeFrac(self)
+    def __list__(self):
+        return self.to_coeff_list()
     
-    def __repr__(self):
-        return "<Pyfhel Plaintext, encoding={}, poly={}>".format(
-                ENCODING_t(self._encoding).name,
-                str(self.to_poly_string())[:25] + ('...' if len(str(self.to_poly_string()))>25 else ''))
+    # def __repr__(self):
+    
+    def __len__(self):
+        self.check_afpoly()
+        return self._afpoly.get_coeff_count()
 
-    def encode(self, value):
-        """encode(value)
-        
-        Encodes the given value using _pyfhel.
+    def __getitem__(self, size_t i):
+        self.check_afpoly()
+        if i >= self.__len__():
+            raise IndexError("PyPoly error: coefficient index out of bounds")
+        return self._afpoly.get_coeff(i)
+    
+    def __setitem__(self, size_t i, cy_complex coeff):
+        """"""
+        self.check_afpoly()
+        if i >= self.__len__():
+            raise IndexError("PyPoly error: coefficient index out of bounds")
+        self._afpoly.set_coeff(coeff, i)
+
+    def __iter__(self):
+        """Creates an iterator to extract all coefficients"""
+        self.check_afpoly()
+        return (self._afpoly.get_coeff(i) for i in range(self._afpoly.get_coeff_count()))
+
+    cpdef cy_complex get_coeff(self, size_t i) except +:
+        """Gets the chosen coefficient in position i.
         
         Arguments:
-            value (int, float, np.array): Encodes accordingly to the tipe
+            i (int): coefficient position
+            
+        Return:
+            complex: coefficient value
+        """
+        return self._afpoly.get_coeff(i)
+
+    cpdef void set_coeff(self, cy_complex &coeff, size_t i)except +:
+        """Sets the given complex value as coefficient in position i.
+        
+        Arguments:
+            coeff (complex): new coefficient value
             
         Return:
             None
-            
-        See Also:
-            :func:`~Pyfhel.Pyfhel.encode`
         """
-        self._pyfhel.encode(value, self)
+        self.check_afpoly()
+        self._afpoly.set_coeff(coeff, i)
     
-    def decode(self):
-        """decode()
-        
-        Decodes itself using _pyfhel.
+    cpdef void from_coeff_list(self, vector[cy_complex] coeff_list, PyCtxt ref) except +:
+        """Sets all the coefficients at once.
         
         Arguments:
-            None
+            coeff_list (List(complex)): list of coefficients
             
         Return:
             int, float, np.array: value decrypted.
@@ -280,4 +286,122 @@ cdef class PyPtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.decode`
         """
-        self._pyfhel.decode(self)
+        raise NotImplementedError("Missing intermediate function")
+
+    cpdef void check_afpoly(self) except +:
+        """Checks if afpoly was initialized or not"""
+        if self._afpoly == NULL:
+            raise AttributeError("PyPoly member _afpoly not initialized")
+
+
+    # =========================================================================
+    # ============================= OPERATIONS ================================
+    # =========================================================================
+        
+    def __add__(self, PyPoly other):
+        """Sums this pollynomial with another polynomial.
+        
+        Sums with a PyPoly, storing the result in a new PyPoly.
+
+        Args:
+            other (PyPoly): Second summand.
+
+        Returns:
+            PyPoly: Polynomial resulting of addition.
+
+        See Also:
+            :func:`~Pyfhel.Pyfhel.poly_add`
+        """
+        return self._pyfhel.poly_add(self, other, in_new_poly=True)
+    
+    def __radd__(self, other): return self.__add__(other)
+    def __iadd__(self, other):
+        """Sums this pollynomial with another polynomial inplace.
+        
+        Sums with a PyPoly, storing the result in this PyPoly.
+
+        Args:
+            other (PyPoly): Second summand.
+
+        Returns:
+            None
+
+        See Also:
+            :func:`~Pyfhel.Pyfhel.poly_add`
+        """
+        return self._pyfhel.poly_add(self, other, in_new_poly=False)
+
+
+    def __sub__(self, other):
+        """Subtracts other polynomial from this polynomial.
+        
+        Subtracts with a PyPoly, storing the result in this PyPoly.
+
+        Args:
+            other (PyPoly): Substrahend, to be subtracted from this polynomial.
+
+        Returns:
+            PyPoly: Polynomial resulting of subtraction.
+
+        See Also:
+            :func:`~Pyfhel.Pyfhel.poly_subtract`
+        """
+        return self._pyfhel.poly_subtract(self, other, in_new_poly=False)
+    
+    def __rsub__(self, other): return self.__sub__(other)
+    def __isub__(self, other): 
+        """Subtracts other pollynomial from this polynomial inplace.
+        
+        Subtracts with a PyPoly, storing the result in this PyPoly.
+
+        Args:
+            other (PyPoly): Substrahend, to be subtracted from this polynomial.
+
+        Returns:
+            None
+
+        See Also:
+            :func:`~Pyfhel.Pyfhel.poly_subtract`
+        """
+        return self._pyfhel.poly_subtract(self, other, in_new_poly=False)
+                        
+    def __mul__(self, other):
+        """Multiplies this polynomial with another polynomial.
+        
+        Multiplies with a PyPoly, storing the result in a new PyPoly.
+
+        Args:
+            other (PyPoly): multiplier polynomial.
+
+        Returns:
+            PyPoly: Polynomial resulting of multiplication.
+
+        See Also:
+            :func:`~Pyfhel.Pyfhel.poly_multiply`
+        """
+        return self._pyfhel.poly_multiply(self, other, in_new_poly=True)
+     
+    def __rmul__(self, other): return self.__mul__(other)
+    def __imul__(self, other): 
+        """Multiplies this polynomial with another polynomial inplace.
+        
+        Multiplies with a PyPoly, storing the result in this PyPoly.
+
+        Args:
+            other (PyPoly): multiplier polynomial.
+
+        Returns:
+            PyPoly: Polynomial resulting of multiplication.
+
+        See Also:
+            :func:`~Pyfhel.Pyfhel.poly_multiply`
+        """
+        return self._pyfhel.poly_multiply(self, other, in_new_poly=False)
+
+    def __invert__(self):
+        """Inverts this polynomial.
+
+        See Also:
+            :func:`~Pyfhel.Pyfhel.poly_invert`
+        """
+        return self._pyfhel.poly_invert(self, in_new_poly=True)

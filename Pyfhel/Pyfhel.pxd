@@ -13,13 +13,12 @@ from numpy cimport int64_t, uint64_t
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream,ostringstream, stringstream, binary
 
-from Pyfhel.Afhel cimport Plaintext
-from Pyfhel.Afhel cimport Ciphertext
-from Pyfhel.Afhel cimport Afseal
+from Pyfhel.Afhel cimport Plaintext, Ciphertext, Afseal, AfsealPoly, cy_complex
 
-# Import the Cython Plaintext and Cyphertext classes
+# Import the Cython Plaintext, Ciphertext and Poly classes
 from Pyfhel.PyPtxt cimport PyPtxt
 from Pyfhel.PyCtxt cimport PyCtxt
+from Pyfhel.PyPoly cimport PyPoly
 
 # Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
 from Pyfhel.util cimport ENCODING_T
@@ -30,8 +29,8 @@ cdef class Pyfhel:
     cdef Afseal* afseal           # The C++ methods are accessed via a pointer
     
     # =========================== CRYPTOGRAPHY =================================
-    cpdef contextGen(self, long p, long m=*, bool flagBatching=*, long base=*,
-                     long sec=*, int intDigits=*, int fracDigits=*) except +
+    cpdef void contextGen(self, long p, long m=*, bool flagBatching=*, long base=*,
+                     long sec=*, int intDigits=*, int fracDigits=*) except+
     cpdef void keyGen(self) except +
     cpdef void rotateKeyGen(self, int bitCount) except +
     cpdef void relinKeyGen(self, int bitCount, int size) except +
@@ -132,7 +131,21 @@ cdef class Pyfhel:
     cpdef bool is_relinKey_empty(self) except+
     cpdef bool is_context_empty(self) except+
 
+    # ============================ POLYNOMIAL =================================
+    cpdef PyPoly empty_poly(self, PyCtxt ref) except +
+    cpdef PyPoly poly_from_ciphertext(self, PyCtxt ctxt, size_t i) except +
+    cpdef PyPoly poly_from_plaintext(self, PyCtxt ref, PyPtxt ptxt) except +
+    cpdef PyPoly poly_from_coeff_vector(self, vector[cy_complex] coeff_vector, PyCtxt ref) except +
+    cpdef list polys_from_ciphertext(self, PyCtxt ctxt) except +
 
+    cpdef PyPoly poly_add(self, PyPoly p, PyPoly p_other, bool in_new_poly=*) except +
+    cpdef PyPoly poly_subtract(self, PyPoly p, PyPoly p_other, bool in_new_poly=*) except +
+    cpdef PyPoly poly_multiply(self, PyPoly p, PyPoly p_other, bool in_new_poly=*) except +
+    cpdef PyPoly poly_invert(self, PyPoly p, bool in_new_poly=*) except +
+
+    cpdef void poly_to_ciphertext(self, PyPoly p, PyCtxt ctxt, size_t i) except+
+    cpdef void poly_to_plaintext(self, PyPoly p, PyPtxt ptxt) except+
+    
 # --------------------------------- UTILS --------------------------------------
-cpdef to_ENCODING_t(encoding) except +
+cpdef object to_ENCODING_t(encoding) except +
 cpdef str _to_valid_file_str(fileName, bool check=*) except +

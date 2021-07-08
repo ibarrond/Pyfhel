@@ -52,7 +52,7 @@ cdef class PyPtxt:
 
         Initializes an empty PyPtxt encoded plaintext.
         
-        To fill the ciphertext during initialization you can:
+        To fill the plaintext during initialization you can:
             - Provide a PyPtxt to deep copy. 
             - Provide a pyfhel instance to act as its backend.
             - Provide a fileName and an encoding to load the data from a saved file.
@@ -124,7 +124,7 @@ cdef class PyPtxt:
         Alias of `save` with input sanitizing.
 
         Args:
-            fileName: (str, pathlib.Path) File where the ciphertext will be stored.
+            fileName: (str, pathlib.Path) File where the plaintext will be stored.
 
         Return:
             None
@@ -168,10 +168,10 @@ cdef class PyPtxt:
         
         Alias of `load` with input sanitizer.
 
-        Load the ciphertext from a file. Requires knowing the encoding.
+        Load the plaintext from a file. Requires knowing the encoding.
 
         Args:
-            fileName (str, pathlib.Path): path to file where the ciphertext is retrieved from.
+            fileName (str, pathlib.Path): path to file where the plaintext is retrieved from.
             encoding: (str, type, int, ENCODING_t) One of the following:
               * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
               * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
@@ -237,12 +237,12 @@ cdef class PyPtxt:
 
     def __int__(self):
         if (self._encoding != ENCODING_T.INTEGER):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not INTEGER)")
+            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt encoding (not INTEGER)")
         return self._pyfhel.decodeInt(self)
 
     def __float__(self):
         if (self._encoding != ENCODING_T.FRACTIONAL):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyCtxt encoding (not FRACTIONAL)")
+            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt encoding (not FRACTIONAL)")
         return self._pyfhel.decodeFrac(self)
     
     def __repr__(self):

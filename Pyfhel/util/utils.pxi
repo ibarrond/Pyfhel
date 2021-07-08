@@ -12,7 +12,7 @@ cpdef str _to_valid_file_str(fileName, bool check=False) except +:
             raise FileNotFoundError(f"<Pyfhel ERROR> File {str(fileName)} not found.")
     return str(fileName)
 
-cpdef to_ENCODING_t(encoding) except +:
+cpdef object to_ENCODING_t(encoding) except +:
     """to_ENCODING_t(encoding)
     
     Turns `encoding` into an ENCODING_t.{INTEGER, FRACTIONAL, BATCH} enum.

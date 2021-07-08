@@ -301,7 +301,7 @@ cdef class PyCtxt:
             other (PyCtxt, PyPtxt): Second summand.
 
         Returns:
-            PyCtxt: Ciphertext resulting of substraction
+            PyCtxt: Ciphertext resulting of addition.
 
         Raise:
             TypeError: if other doesn't have a valid type.

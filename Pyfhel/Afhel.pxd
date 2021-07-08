@@ -6,12 +6,14 @@
 # Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.vector cimport vector
 from libcpp.string cimport string
+from libcpp.complex cimport complex as c_complex
 from libcpp cimport bool
 from numpy cimport int64_t, uint64_t
         
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream       
 
+ctypedef c_complex[double] cy_complex
 
 # --------------------------- EXTERN DECLARATION ------------------------------
 # SEAL plaintext class        
@@ -188,3 +190,40 @@ cdef extern from "Afhel/Afseal.h" nogil:
         bool is_relinKey_empty() except+
         bool is_context_empty() except+
 
+        # POLY
+        # Construction
+        AfsealPoly empty_poly(Ciphertext &ref) except+
+        AfsealPoly poly_from_ciphertext(Ciphertext &ctxt, size_t i) except+
+        AfsealPoly poly_from_plaintext(Ciphertext &ref, Plaintext &ptxt) except+
+        AfsealPoly poly_from_coeff_vector(vector[cy_complex] &coeff_vector, Ciphertext &ref) except+
+        vector[AfsealPoly] poly_from_ciphertext(Ciphertext &ref) except+
+
+        # Ops
+        AfsealPoly add(AfsealPoly &p1, AfsealPoly &p2) except+
+        AfsealPoly subtract(AfsealPoly &p1, AfsealPoly &p2) except+
+        AfsealPoly multiply(AfsealPoly &p1, AfsealPoly &p2) except+
+        AfsealPoly invert(AfsealPoly &p) except+
+
+        # inplace ops -> result in first operand
+        void add_inplace(AfsealPoly &p1, AfsealPoly &p2) except+
+        void subtract_inplace(AfsealPoly &p1, AfsealPoly &p2) except+
+        void multiply_inplace(AfsealPoly &p1, AfsealPoly &p2) except+
+        bool invert_inplace(AfsealPoly &p) except+
+
+        # I/O
+        void poly_to_ciphertext(AfsealPoly &p, Ciphertext &ctxt, size_t i) except+
+        void poly_to_plaintext(AfsealPoly &p, Plaintext &ptxt) except+
+
+    # Afseal class to abstract internal polynoms
+    cdef cppclass AfsealPoly:
+        AfsealPoly(Afseal &afseal, const Ciphertext &ref) except+
+        AfsealPoly(AfsealPoly &other) except+
+        AfsealPoly(Afseal &afseal, Ciphertext &ctxt, size_t index) except+
+        AfsealPoly(Afseal &afseal, Plaintext &ptxt, const Ciphertext &ref) except+
+
+        vector[cy_complex] to_coeff_list() except+
+
+        cy_complex get_coeff(int64_t i) except+
+        void set_coeff(cy_complex&val, size_t i) except+
+        size_t get_coeff_count() except+
+        size_t get_coeff_modulus_count() except+
