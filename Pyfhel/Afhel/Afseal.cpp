@@ -1106,13 +1106,25 @@ void Afseal::poly_to_plaintext(AfsealPoly &p, Plaintext &ptxt) {
   throw runtime_error("Not yet implemented.");
 }
 
+std::complex<double> Afseal::get_coeff(AfsealPoly &poly, size_t i) {
+  return poly.get_coeff(*this, i);
+}
+
+void Afseal::set_coeff(AfsealPoly &poly, complex<double> &val, size_t i) {
+  poly.set_coeff(*this, val, i);
+}
+
+std::vector<std::complex<double>> Afseal::to_coeff_list(AfsealPoly &poly) {
+  return poly.to_coeff_list(*this);
+}
+
 //// AfsealPoly
 
 AfsealPoly::AfsealPoly(AfsealPoly &other) {
-  afseal_ptr = other.afseal_ptr;
   parms_id = other.parms_id;
   mempool = other.mempool;
   coeff_count = other.coeff_count;
+  coeff_modulus = other.coeff_modulus;
   coeff_modulus_count = other.coeff_modulus_count;
   // copy the coefficients over
 #pragma omp parallel for
@@ -1128,10 +1140,10 @@ AfsealPoly::AfsealPoly(AfsealPoly &other) {
 
 AfsealPoly &AfsealPoly::operator=(AfsealPoly &other) {
   if (&other!=this) {
-    afseal_ptr = other.afseal_ptr;
     parms_id = other.parms_id;
     mempool = other.mempool;
     coeff_count = other.coeff_count;
+    coeff_modulus = other.coeff_modulus;
     coeff_modulus_count = other.coeff_modulus_count;
 
     // copy the coefficients over
@@ -1150,10 +1162,10 @@ AfsealPoly &AfsealPoly::operator=(AfsealPoly &other) {
 }
 
 AfsealPoly::AfsealPoly(Afseal &afseal, const seal::Ciphertext &ref) {
-  afseal_ptr = &afseal;
   parms_id = ref.parms_id();
   mempool = seal::MemoryManager::GetPool();
   coeff_count = ref.poly_modulus_degree();
+  coeff_modulus = afseal.context->get_context_data(parms_id)->parms().coeff_modulus();
   coeff_modulus_count = afseal.context->get_context_data(parms_id)->parms().coeff_modulus().size();
   eval_repr_coeff_iter = util::allocate_zero_poly(coeff_count, coeff_modulus_count, mempool);
 }
@@ -1174,7 +1186,7 @@ AfsealPoly::AfsealPoly(Afseal &afseal, seal::Plaintext &ptxt, const seal::Cipher
   }
 }
 
-void AfsealPoly::generate_coeff_repr() {
+void AfsealPoly::generate_coeff_repr(Afseal &afseal) {
   if (!coeff_repr_valid) {
 
     // Copy the coefficients over
@@ -1184,7 +1196,7 @@ void AfsealPoly::generate_coeff_repr() {
     }
 
     // Now do the actual conversion
-    auto small_ntt_tables = afseal_ptr->context->get_context_data(parms_id)->small_ntt_tables();
+    auto small_ntt_tables = afseal.context->get_context_data(parms_id)->small_ntt_tables();
 #pragma omp parallel for
     for (size_t j = 0; j < coeff_modulus_count; j++) {
       util::inverse_ntt_negacyclic_harvey(coeff_repr_coeff_iter + (j*coeff_count), small_ntt_tables[j]); // non-ntt form
@@ -1195,19 +1207,19 @@ void AfsealPoly::generate_coeff_repr() {
   }
 }
 
-std::vector<std::complex<double>> AfsealPoly::to_coeff_list(void) {
-  generate_coeff_repr();
+std::vector<std::complex<double>> AfsealPoly::to_coeff_list(Afseal &afseal) {
+  generate_coeff_repr(afseal);
   //TODO: Need to also decompose the CRT representation
   // and then do some more magic!
   throw runtime_error("Not yet implemented.");
 }
 
-std::complex<double> AfsealPoly::get_coeff(size_t i) {
-  return to_coeff_list()[i];
+std::complex<double> AfsealPoly::get_coeff(Afseal &afseal, size_t i) {
+  return to_coeff_list(afseal)[i];
 }
 
-void AfsealPoly::set_coeff(complex<double> &val, size_t i) {
-  auto v = to_coeff_list();
+void AfsealPoly::set_coeff(Afseal &afseal, std::complex<double> &val, size_t i) {
+  auto v = to_coeff_list(afseal);
   v[i] = val;
   // TODO: Convert vector back into CRT, then apply NTT
   //  don't forget to also write the coeff_repr and set the valid bit,
@@ -1216,7 +1228,6 @@ void AfsealPoly::set_coeff(complex<double> &val, size_t i) {
 }
 
 void AfsealPoly::add_inplace(const AfsealPoly &other) {
-  auto coeff_modulus = afseal_ptr->context->get_context_data(parms_id)->parms().coeff_modulus();
 #pragma omp parallel for
   for (size_t j = 0; j < coeff_modulus.size(); j++) {
     util::add_poly_coeffmod(eval_repr_coeff_iter + (j*coeff_count),
@@ -1231,7 +1242,6 @@ void AfsealPoly::add_inplace(const AfsealPoly &other) {
 }
 
 void AfsealPoly::subtract_inplace(const AfsealPoly &other) {
-  auto coeff_modulus = afseal_ptr->context->get_context_data(parms_id)->parms().coeff_modulus();
 #pragma omp parallel for
   for (size_t j = 0; j < coeff_modulus.size(); j++) {
     util::sub_poly_coeffmod(eval_repr_coeff_iter + (j*coeff_count),
@@ -1246,7 +1256,6 @@ void AfsealPoly::subtract_inplace(const AfsealPoly &other) {
 }
 
 void AfsealPoly::multiply_inplace(const AfsealPoly &other) {
-  auto coeff_modulus = afseal_ptr->context->get_context_data(parms_id)->parms().coeff_modulus();
 #pragma omp parallel for
   for (size_t j = 0; j < coeff_modulus.size(); j++) {
     util::dyadic_product_coeffmod(eval_repr_coeff_iter + (j*coeff_count),
@@ -1268,7 +1277,6 @@ bool AfsealPoly::invert_inplace() {
   //      ^--- a (mod p0)    , ^--- a (mod p1),              ,  ...
   // return if the inverse exists, and result is also in evaluation representation
 
-  auto coeff_modulus = afseal_ptr->context->get_context_data(parms_id)->parms().coeff_modulus();
   bool *has_inv = new bool[coeff_modulus_count];
   fill_n(has_inv, coeff_modulus_count, true);
 #pragma omp parallel for
