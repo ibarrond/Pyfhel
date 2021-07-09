@@ -15,8 +15,10 @@
 # Pyfhel building
 Pyfhel/*.pyc
 **/build
+**.eggs
 **.egg-info
 **/dist
+**/gmon.out
 
 # Makefiles
 **/Makefile

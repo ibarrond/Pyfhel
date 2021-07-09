@@ -31,8 +31,8 @@ cdef class PyPoly:
             if (other._pyfhel):
                 self._pyfhel = other._pyfhel
             return
-        assert ref._pyfhel is not None and ref._pyfhel.afseal is not NULL,\
-            "Reference PyCtxt `ref` has no _pyfhel member or is not initialized"
+        assert ref is not None and ref._pyfhel is not None and ref._pyfhel.afseal is not NULL,\
+            "Missing reference PyCtxt `ref` with initialized _pyfhel member"
         if index is not None:   # Construct from selected Poly in PyCtxt `ref`
             self._afpoly = new AfsealPoly(deref(ref._pyfhel.afseal), deref(ref._ptr_ctxt), index)  
             self._pyfhel = ref._pyfhel
@@ -120,7 +120,7 @@ cdef class PyPoly:
     cpdef vector[cy_complex] to_coeff_list(self) except +:
         """List of complex coefficients of the polynomial"""
         self.check_afpoly()
-        return self._afpoly.to_coeff_list()
+        return self._afpoly.to_coeff_list(deref(self._pyfhel.afseal))
     
 
 
@@ -237,19 +237,19 @@ cdef class PyPoly:
         self.check_afpoly()
         if i >= self.__len__():
             raise IndexError("PyPoly error: coefficient index out of bounds")
-        return self._afpoly.get_coeff(i)
+        return self._afpoly.get_coeff(deref(self._pyfhel.afseal), i)
     
     def __setitem__(self, size_t i, cy_complex coeff):
         """"""
         self.check_afpoly()
         if i >= self.__len__():
             raise IndexError("PyPoly error: coefficient index out of bounds")
-        self._afpoly.set_coeff(coeff, i)
+        self._afpoly.set_coeff(deref(self._pyfhel.afseal), coeff, i)
 
     def __iter__(self):
         """Creates an iterator to extract all coefficients"""
         self.check_afpoly()
-        return (self._afpoly.get_coeff(i) for i in range(self._afpoly.get_coeff_count()))
+        return (self._afpoly.get_coeff(deref(self._pyfhel.afseal), i) for i in range(self._afpoly.get_coeff_count()))
 
     cpdef cy_complex get_coeff(self, size_t i) except +:
         """Gets the chosen coefficient in position i.
@@ -260,7 +260,7 @@ cdef class PyPoly:
         Return:
             complex: coefficient value
         """
-        return self._afpoly.get_coeff(i)
+        return self._afpoly.get_coeff(deref(self._pyfhel.afseal), i)
 
     cpdef void set_coeff(self, cy_complex &coeff, size_t i)except +:
         """Sets the given complex value as coefficient in position i.
@@ -272,7 +272,7 @@ cdef class PyPoly:
             None
         """
         self.check_afpoly()
-        self._afpoly.set_coeff(coeff, i)
+        self._afpoly.set_coeff(deref(self._pyfhel.afseal), coeff, i)
     
     cpdef void from_coeff_list(self, vector[cy_complex] coeff_list, PyCtxt ref) except +:
         """Sets all the coefficients at once.

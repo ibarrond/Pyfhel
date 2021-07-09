@@ -1092,7 +1092,7 @@ void Afseal::invert_inplace(AfsealPoly &poly) {
   }
 }
 
-void Afseal::poly_to_ciphertext(AfsealPoly &p, Ciphertext &ctxt, int64_t pos) {
+void Afseal::poly_to_ciphertext(AfsealPoly &p, seal::Ciphertext &ctxt, size_t i) {
   // TODO: This shouldn't be too hard, just copy into position,
   //  but we need to ensure the sizes match,
   //  allocate a zero poly if the index doesn't exist, etc

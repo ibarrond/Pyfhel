@@ -3,8 +3,7 @@ include Pyfhel/*.pyx
 include Pyfhel/*.cpp
 include Pyfhel/Afhel/*.cpp
 include Pyfhel/Afhel/*.h
-include Pyfhel/SEAL/SEAL/seal/*.cpp
-include Pyfhel/SEAL/SEAL/seal/*.h
+global-include Pyfhel/backend/SEAL/**
 
 include docs/_static/*
 

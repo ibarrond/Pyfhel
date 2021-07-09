@@ -221,9 +221,9 @@ cdef extern from "Afhel/Afseal.h" nogil:
         AfsealPoly(Afseal &afseal, Ciphertext &ctxt, size_t index) except+
         AfsealPoly(Afseal &afseal, Plaintext &ptxt, const Ciphertext &ref) except+
 
-        vector[cy_complex] to_coeff_list() except+
+        vector[cy_complex] to_coeff_list(Afseal &afseal) except+
 
-        cy_complex get_coeff(int64_t i) except+
-        void set_coeff(cy_complex&val, size_t i) except+
+        cy_complex get_coeff(Afseal &afseal, size_t i) except+
+        void set_coeff(Afseal &afseal, cy_complex &val, size_t i) except+
         size_t get_coeff_count() except+
         size_t get_coeff_modulus_count() except+
