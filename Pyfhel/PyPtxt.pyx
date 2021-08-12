@@ -4,8 +4,8 @@
 """PyPtxt. Plaintext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
-# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from Pyfhel.util import ENCODING_t
+# Scheme types: 0-UNDEFINED, 1-BFV, 2-CKKS
+from Pyfhel.util.scheme cimport SCHEME_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
@@ -26,20 +26,20 @@ cdef class PyPtxt:
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
-                  encoding=None):
+                  scheme=None):
         if (copy_ptxt): # If there is a PyPtxt to copy, override all arguments and copy
             self._ptr_ptxt = new Plaintext(deref(copy_ptxt._ptr_ptxt))
-            self._encoding = copy_ptxt._encoding
+            self._scheme = copy_ptxt._scheme
             if (copy_ptxt._pyfhel):
                 self._pyfhel = copy_ptxt._pyfhel
         else:
             self._ptr_ptxt = new Plaintext()  
             if fileName:
-                if not encoding:
-                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid encoding")    
-                self.from_file(fileName, encoding)
+                if not scheme:
+                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid scheme")    
+                self.from_file(fileName, scheme)
             else:
-                self._encoding = to_ENCODING_t(encoding) if encoding else ENCODING_T.UNDEFINED
+                self._scheme = to_SCHEME_t(scheme) if scheme else SCHEME_t.UNDEFINED
             if (pyfhel):
                 self._pyfhel = pyfhel
                 
@@ -47,22 +47,22 @@ cdef class PyPtxt:
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
-                  encoding=None):
-        """__init__(PyPtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, encoding=None)
+                  scheme=None):
+        """__init__(PyPtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, scheme=None)
 
         Initializes an empty PyPtxt encoded plaintext.
         
         To fill the plaintext during initialization you can:
             - Provide a PyPtxt to deep copy. 
             - Provide a pyfhel instance to act as its backend.
-            - Provide a fileName and an encoding to load the data from a saved file.
+            - Provide a fileName and an scheme to load the data from a saved file.
 
         Attributes:
             copy_ctxt (PyPtxt, optional): Other PyPtxt to deep copy.
             pyfhel (Pyfhel, optional): Pyfhel instance needed to operate.
             fileName (str, pathlib.Path, optional): Load PyPtxt from this file.
-                            Requires non-empty encoding.
-            encoding (str, type, int, optional): encoding type of the new PyPtxt.
+                            Requires non-empty scheme.
+            scheme (str, type, int, optional): scheme type of the new PyPtxt.
         """
         pass
 
@@ -71,27 +71,28 @@ cdef class PyPtxt:
             del self._ptr_ptxt
             
     @property
-    def _encoding(self):
-        """ENCODING_t: returns the encoding type.
+    def _scheme(self):
+        """SCHEME_t: returns the scheme type.
         
-        Can be set to: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
+        Can be set to: 0-UNDEFINED, 1-BFV, 2-CKKS
 
         See Also:
-            :func:`~Pyfhel.util.to_ENCODING_t`
+            :func:`~Pyfhel.util.to_SCHEME_t`
 
         :meta public:
         """
-        return ENCODING_t(self._encoding)
+        return to_SCHEME_t(self._scheme)
     
-    @_encoding.setter
-    def _encoding(self, new_encoding):
-        if not isinstance(new_encoding, ENCODING_t):
-            raise TypeError("<Pyfhel ERROR> Encoding type of PyPtxt must be ENCODING_t")        
-        self._encoding = new_encoding.value
+    @_scheme.setter
+    def _scheme(self, new_scheme):
+        new_scheme = to_SCHEME_t(new_scheme)
+        if not isinstance(new_scheme, SCHEME_t):
+            raise TypeError("<Pyfhel ERROR> Scheme type of PyPtxt must be SCHEME_t")        
+        self._scheme = new_scheme
         
-    @_encoding.deleter
-    def _encoding(self):
-        self._encoding = ENCODING_t.UNDEFINED.value
+    @_scheme.deleter
+    def _scheme(self):
+        self._scheme = SCHEME_t.UNDEFINED
               
         
     @property
@@ -106,11 +107,11 @@ cdef class PyPtxt:
         self._pyfhel = new_pyfhel 
         
         
-    cpdef bool is_zero(self) except +:
+    cpdef bool is_zero(self):
         """bool: Flag to quickly check if it is empty"""
         return self._ptr_ptxt.is_zero()
 
-    cpdef string to_poly_string(self) except +:
+    cpdef string to_poly_string(self):
         """str: Polynomial representation of the plaintext"""
         return self._ptr_ptxt.to_string()
     
@@ -118,20 +119,7 @@ cdef class PyPtxt:
     # =========================================================================
     # ================================== I/O ==================================
     # =========================================================================
-    cpdef void to_file(self, fileName) except +:
-        """to_file(Path fileName)
-        
-        Alias of `save` with input sanitizing.
-
-        Args:
-            fileName: (str, pathlib.Path) File where the plaintext will be stored.
-
-        Return:
-            None
-        """
-        self.save(_to_valid_file_str(fileName))
-
-    cpdef void save(self, str fileName) except +:
+    cpdef void save(self, str fileName, str compr_mode="zstd"):
         """save(str fileName)
         
         Save the plaintext into a file. The file can new one or
@@ -139,95 +127,74 @@ cdef class PyPtxt:
 
         Args:
             fileName: (str) File where the plaintext will be stored.
+            compr_mode: (str) Compression mode. One of "none", "zlib", "zstd".
 
         Return:
             None            
         """
         cdef ofstream* outputter
-        cdef string bFileName = fileName.encode('utf8')
+        cdef string bFileName = _to_valid_file_str(fileName).encode('utf8')
+        cdef string bcompr_mode = compr_mode.encode('utf8')
         outputter = new ofstream(bFileName, binary)
         try:
-            self._pyfhel.afseal.savePlaintext(bFileName,  deref(self._ptr_ptxt))
+            self._pyfhel.afseal.save_plaintext(deref(outputter), bcompr_mode, deref(self._ptr_ptxt))
         finally:
             del outputter
 
-    cpdef bytes to_bytes(self) except +:
+    cpdef bytes to_bytes(self, str compr_mode="none"):
         """to_bytes()
 
         Serialize the plaintext into a binary/bytes string.
+
+        Args:
+            compr_mode: (str) Compression mode. One of "none", "zlib", "zstd"
 
         Return:
             bytes: serialized plaintext
         """
         cdef ostringstream outputter
-        self._pyfhel.afseal.ssavePlaintext(outputter, deref(self._ptr_ptxt))
+        cdef string bcompr_mode = compr_mode.encode('utf8')
+        self._pyfhel.afseal.save_plaintext(outputter, bcompr_mode, deref(self._ptr_ptxt))
         return outputter.str()
 
-    cpdef void from_file(self, fileName, encoding) except +:
-        """from_file(str fileName, encoding)
-        
-        Alias of `load` with input sanitizer.
-
-        Load the plaintext from a file. Requires knowing the encoding.
-
-        Args:
-            fileName (str, pathlib.Path): path to file where the plaintext is retrieved from.
-            encoding: (str, type, int, ENCODING_t) One of the following:
-              * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
-              * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
-              * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
-
-        Return:
-            None
-
-        See Also:
-            :func:`~Pyfhel.util.to_ENCODING_t`
-        """
-        self.load(_to_valid_file_str(fileName, check=True), encoding)
-
-    cpdef void load(self, str fileName, encoding) except +:
-        """load(self, str fileName, encoding)
+    cpdef void load(self, str fileName, object scheme):
+        """load(self, str fileName, scheme)
         
         Load the plaintext from a file.
 
         Args:
             fileName: (str) Valid file where the plaintext is retrieved from.
-            encoding: (str, type, int, ENCODING_t) One of the following:
-              * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
-              * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
-              * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
               
         Return:
             None
 
         See Also:
-            :func:`~Pyfhel.util.to_ENCODING_t`
+            :func:`~Pyfhel.util.to_SCHEME_t`
         """
         cdef ifstream* inputter
-        cdef string bFileName = fileName.encode('utf8')
-        inputter = new ifstream(bFileName,binary)
+        cdef string bFileName = _to_valid_file_str(fileName, check=True).encode('utf8')
+        inputter = new ifstream(bFileName, binary)
         try:
-            self._pyfhel.afseal.restorePlaintext(bFileName,  deref(self._ptr_ptxt))
+            self._pyfhel.afseal.load_plaintext(deref(inputter), deref(self._ptr_ptxt))
         finally:
             del inputter
-        self._encoding = to_ENCODING_t(encoding).value
+        self._scheme = to_SCHEME_t(scheme)
 
-    cpdef void from_bytes(self, bytes content, encoding) except +:
+    cpdef void from_bytes(self, bytes content, object scheme):
         """from_bytes(bytes content)
 
         Recover the serialized plaintext from a binary/bytes string.
 
         Args:
             content: (:obj:`bytes`) Python bytes object containing the PyPtxt.
-            encoding: (:obj: `str`) String or type describing the encoding:
-              * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
-              * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
-              * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
+            scheme: (:obj: `str`) String or type describing the scheme:
+              * ('int', 'integer', int, 1, SCHEME_t.BFV) -> integer scheme.
+              * ('float', 'double', float, 2, SCHEME_t.CKKS) -> fractional scheme.
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
-        self._pyfhel.afseal.srestorePlaintext(inputter,  deref(self._ptr_ptxt))
-        self._encoding = to_ENCODING_t(encoding).value
+        self._pyfhel.afseal.load_plaintext(inputter, deref(self._ptr_ptxt))
+        self._scheme = to_SCHEME_t(scheme)
 
 
 
@@ -236,19 +203,20 @@ cdef class PyPtxt:
     # =========================================================================
 
     def __int__(self):
-        if (self._encoding != ENCODING_T.INTEGER):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt encoding (not INTEGER)")
+        if (self._scheme != SCHEME_t.BFV):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not BFV)")
         return self._pyfhel.decodeInt(self)
 
     def __float__(self):
-        if (self._encoding != ENCODING_T.FRACTIONAL):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt encoding (not FRACTIONAL)")
+        if (self._scheme != SCHEME_t.CKKS):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not CKKS)")
         return self._pyfhel.decodeFrac(self)
     
     def __repr__(self):
-        return "<Pyfhel Plaintext, encoding={}, poly={}>".format(
-                ENCODING_t(self._encoding).name,
-                str(self.to_poly_string())[:25] + ('...' if len(str(self.to_poly_string()))>25 else ''))
+        poly_s = str(self.to_poly_string())
+        return "<Pyfhel Plaintext, scheme={}, poly={}>".format(
+                SCHEME_t(self._scheme).name,
+                poly_s[:25] + ('...' if len(poly_s)>25 else ''))
 
     def encode(self, value):
         """encode(value)

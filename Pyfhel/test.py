@@ -83,13 +83,13 @@ class PyfhelTestCase(unittest.TestCase):
             ctxt4 = PyCtxt(copy_ctxt=ctxt3)
         except Exception as err:
             self.fail("PyCtxt() creation failed unexpectedly: ", err)
-        self.assertEqual(ctxt.size(), 2)
+        self.assertEqual(ctxt.size(), 0)
         self.assertEqual(ctxt._encoding, ENCODING_t.UNDEFINED)
         ctxt._encoding = ENCODING_t.FRACTIONAL
         self.assertEqual(ctxt._encoding, ENCODING_t.FRACTIONAL)
         del (ctxt._encoding)
         self.assertEqual(ctxt._encoding, ENCODING_t.UNDEFINED)
-        self.assertEqual(ctxt.size(), 2)
+        self.assertEqual(ctxt.size(), 0)
         ctxt._pyfhel = pyfhel
         ctxt2._pyfhel = ctxt._pyfhel
         try:

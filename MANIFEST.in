@@ -4,6 +4,7 @@ include Pyfhel/*.cpp
 include Pyfhel/Afhel/*.cpp
 include Pyfhel/Afhel/*.h
 global-include Pyfhel/backend/SEAL/**
+global-include Pyfhel/backend/palisade/**
 
 include docs/_static/*
 
@@ -12,4 +13,4 @@ include examples/*.py
 include README.md
 include LICENSE.txt
 include setup.py
-include requirements.txt
+include pyproject.toml

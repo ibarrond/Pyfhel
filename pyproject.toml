@@ -1,3 +1,144 @@
-[build-system]
+# This file contains the project metadata as defined in PEP621, as well as 
+#  custom compilation and linking flags. Non-expert users should only modify
+#  the following sections:
+#  - [cpplibraries.SEAL.cmake-opts]
+
+
+#===============================================================================
+#========================= COMPILATION CONFIGURATION ===========================
+#===============================================================================
+# Compile & link configuration for C/C++ libraries and extensions
+# - Libs in mode 'cmake' are compiled running `cmake` inside source_dir.
+# - Libs in mode 'standard' are compiled using the default platform compiler.
+#------------------------------ C/C++ LIBRARIES --------------------------------
+[cpplibraries]
+
+  #--> SEAL
+  [cpplibraries.SEAL]
+  mode = 'cmake'              # standard/cmake
+  lib_type = 'static'          # static/shared
+  # source_dir: dir with the top CMakeLists.txt.
+  source_dir = 'Pyfhel/backend/SEAL'
+  include_dirs = [
+    'Pyfhel/backend/SEAL/native/src',
+    'Pyfhel/backend/SEAL/thirdparty/msgsl-src/include'
+  ]
+
+  ## Build-relative dirs:
+  #  -> paths are relative to build directory.
+  # built_library_dir: output dir containing the cmake-built libs
+  built_library_dir='lib' 
+  # built_include_dirs: dirs with cmake-built headers.
+  built_include_dirs=['native/src']
+
+  ## CMake options: https://github.com/microsoft/SEAL/#basic-cmake-options
+    [cpplibraries.SEAL.cmake_opts]
+    SEAL_USE_INTEL_HEXL ='OFF'   # ON/OFF, use Intel HEXL for low-level kernels
+    SEAL_USE_ALIGNED_ALLOC ='OFF'# ON/OFF, 64B aligned memory allocations, better perf with Intel HEXL.
+    BUILD_SHARED_LIBS ='OFF'     # ON/OFF, build shared and not static library
+
+  #--> Afhel
+  [cpplibraries.Afhel]
+  mode = 'standard'       # standard/cmake
+  lib_type = 'shared'      # static/shared
+  sources = ['Pyfhel/Afhel/Afseal.cpp',]
+  include_dirs = ['Pyfhel/Afhel',]
+  define_macros = []
+  extra_compile_args = [
+    {Windows = ["/O2"]},
+    {Linux = ["-std=c++17","-O3","-fopenmp"]} ]
+  extra_link_args = [
+    {Windows = []},
+    {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]} ]
+  libraries = ['SEAL']
+
+
+#----------------------------- CYTHON EXTENSIONS -------------------------------
+[extensions.config]   # Common compilation config for all extensions
+include_dirs = []
+define_macros = [
+  ["NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"]
+]
+extra_compile_args = [
+  {Windows = ["/O2","/openmp"]},
+  {Linux = ["-std=c++17","-O3","-fopenmp"]},
+]
+extra_link_args = [
+  {Windows = ["/openmp"]},
+  {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
+]
+libraries = []  # libraries to link with, cpplibraries above are added by default
+
+# List of extensions to compile. Custom compilation config can be defined for each
+[extensions.Pyfhel]
+fullname='Pyfhel.Pyfhel'    
+sources=['Pyfhel/Pyfhel.pyx']
+
+[extensions.PyCtxt]
+fullname='Pyfhel.PyCtxt'    
+sources=['Pyfhel/PyCtxt.pyx']
+
+[extensions.PyPtxt]
+fullname='Pyfhel.PyPtxt'    
+sources=['Pyfhel/PyPtxt.pyx']
+
+[extensions.PyPoly]
+fullname='Pyfhel.PyPoly'    
+sources=['Pyfhel/PyPoly.pyx']
+  
+
+#===============================================================================
+#============================== PROJECT METADATA ===============================
+#===============================================================================
+# Pyfhel's core metadata
+[project]
+name = "Pyfhel"
+version = "3.1.0"
+description = "Python for Homomorphic Encryption Libraries"
+readme = "README.md"
+requires-python = ">=3.5"
+license = "GNU GPLv3"
+keywords = ["homomorphic" , "encryption", "cython", "cryptography"]
+author = {name = "Alberto Ibarrondo", email = "ibarrond@eurecom.fr"}
+classifiers = [
+    "Programming Language :: C++",
+    "Programming Language :: Cython",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: Unix",
+    "Operating System :: POSIX",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Security",
+    "Topic :: Security :: Cryptography",
+]
+
+dependencies = [
+  "numpy>=1.20"
+]
+
+platforms = ["Linux", "Windows"]
+
+[project.optional-dependencies]
+test = [
+  "pytest >= 6.0.0",
+]
+
+[project.urls]
+documentation = "https://pyfhel.readthedocs.io"
+repository = "https://github.com/ibarrond/github"
+
+
 # Minimum requirements for the build system to execute.
-requires = ["setuptools>=50.0", "wheel", "cython>=0.29", "numpy>=1.20", "cmake>=3.15"]
+[build-system]
+requires = [
+  "setuptools>=50.0","wheel","cython>=0.29","numpy>=1.20","cmake>=3.15","toml>=0.10"
+]
+build-backend = "setuptools.build_meta"

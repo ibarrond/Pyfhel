@@ -117,7 +117,7 @@ cdef class PyPoly:
         return self._afpoly.get_coeff_count()
 
 
-    cpdef vector[cy_complex] to_coeff_list(self) except +:
+    cpdef vector[cy_complex] to_coeff_list(self):
         """List of complex coefficients of the polynomial"""
         self.check_afpoly()
         return self._afpoly.to_coeff_list(deref(self._pyfhel.afseal))
@@ -128,20 +128,7 @@ cdef class PyPoly:
     # =========================================================================
     # ================================== I/O ==================================
     # =========================================================================
-    cpdef void to_file(self, fileName) except +:
-        """to_file(Path fileName)
-        
-        Alias of `save` with input sanitizing.
-
-        Args:
-            fileName: (str, pathlib.Path) File where the polynomial will be stored.
-
-        Return:
-            None
-        """
-        raise NotImplementedError("No PyPoly Serialization avaliable yet")
-
-    cpdef void save(self, str fileName) except +:
+    cpdef void save(self, str fileName):
         """save(str fileName)
         
         Save the polynomial into a file. The file can new one or
@@ -155,7 +142,7 @@ cdef class PyPoly:
         """
         raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
-    cpdef bytes to_bytes(self) except +:
+    cpdef bytes to_bytes(self):
         """to_bytes()
 
         Serialize the polynomial into a binary/bytes string.
@@ -165,27 +152,7 @@ cdef class PyPoly:
         """
         raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
-    cpdef void from_file(self, fileName, encoding) except +:
-        """from_file(str fileName, encoding)
-        
-        Alias of `load` with input sanitizer.
-
-        Load the polynomial from a file. Requires knowing the encoding.
-
-        Args:
-            fileName (str, pathlib.Path): path to file where the polynomial is retrieved from.
-            encoding: (str, type, int, ENCODING_t) One of the following:
-              * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
-              * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
-        Return:
-            None
-
-        See Also:
-            :func:`~Pyfhel.util.to_ENCODING_t`
-        """
-        raise NotImplementedError("No PyPoly Serialization avaliable yet")
-
-    cpdef void load(self, str fileName, encoding) except +:
+    cpdef void load(self, str fileName, encoding):
         """load(self, str fileName, encoding)
         
         Load the polynomial from a file.
@@ -204,7 +171,7 @@ cdef class PyPoly:
         """
         raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
-    cpdef void from_bytes(self, bytes content, encoding) except +:
+    cpdef void from_bytes(self, bytes content, encoding):
         """from_bytes(bytes content)
 
         Recover the serialized polynomial from a binary/bytes string.
@@ -251,7 +218,7 @@ cdef class PyPoly:
         self.check_afpoly()
         return (self._afpoly.get_coeff(deref(self._pyfhel.afseal), i) for i in range(self._afpoly.get_coeff_count()))
 
-    cpdef cy_complex get_coeff(self, size_t i) except +:
+    cpdef cy_complex get_coeff(self, size_t i):
         """Gets the chosen coefficient in position i.
         
         Arguments:
@@ -262,7 +229,7 @@ cdef class PyPoly:
         """
         return self._afpoly.get_coeff(deref(self._pyfhel.afseal), i)
 
-    cpdef void set_coeff(self, cy_complex &coeff, size_t i)except +:
+    cpdef void set_coeff(self, cy_complex &coeff, size_t i):
         """Sets the given complex value as coefficient in position i.
         
         Arguments:
@@ -274,7 +241,7 @@ cdef class PyPoly:
         self.check_afpoly()
         self._afpoly.set_coeff(deref(self._pyfhel.afseal), coeff, i)
     
-    cpdef void from_coeff_list(self, vector[cy_complex] coeff_list, PyCtxt ref) except +:
+    cpdef void from_coeff_list(self, vector[cy_complex] coeff_list, PyCtxt ref):
         """Sets all the coefficients at once.
         
         Arguments:
@@ -288,7 +255,7 @@ cdef class PyPoly:
         """
         raise NotImplementedError("Missing intermediate function")
 
-    cpdef void check_afpoly(self) except +:
+    cpdef void check_afpoly(self):
         """Checks if afpoly was initialized or not"""
         if self._afpoly == NULL:
             raise AttributeError("PyPoly member _afpoly not initialized")

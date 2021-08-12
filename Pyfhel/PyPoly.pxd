@@ -16,24 +16,22 @@ from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, bi
 # Import AfsealPoly class
 from Pyfhel.Afhel cimport AfsealPoly, cy_complex
 
-# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from Pyfhel.util cimport ENCODING_T
+# Encoding types: 0-UNDEFINED, 1-BFV, 2-CKKS
+from Pyfhel.util cimport SCHEME_t
 # ------------------------------- DECLARATION ---------------------------------
 
 cdef class PyPoly:
     cdef AfsealPoly* _afpoly
     cdef Pyfhel _pyfhel
-    cdef ENCODING_T _encoding
-    cpdef vector[cy_complex] to_coeff_list(self) except+
-    cpdef cy_complex get_coeff(self, size_t i) except+
-    cpdef void set_coeff(self, cy_complex&val, size_t i) except+
-    cpdef void check_afpoly(self) except+
-    cpdef void from_coeff_list(self, vector[cy_complex] coeff_list, PyCtxt ref) except+
+    cdef SCHEME_t _scheme
+    cpdef vector[cy_complex] to_coeff_list(self)
+    cpdef cy_complex get_coeff(self, size_t i)
+    cpdef void set_coeff(self, cy_complex&val, size_t i)
+    cpdef void check_afpoly(self)
+    cpdef void from_coeff_list(self, vector[cy_complex] coeff_list, PyCtxt ref)
 
     # Serialize
-    cpdef void to_file(self, fileName) except +
-    cpdef void from_file(self, fileName, encoding) except +
-    cpdef void save(self, str fileName) except +
-    cpdef void load(self, str fileName, encoding) except +
-    cpdef bytes to_bytes(self) except +
-    cpdef void from_bytes(self, bytes content, encoding) except +
+    cpdef void save(self, str fileName)
+    cpdef void load(self, str fileName, encoding)
+    cpdef bytes to_bytes(self)
+    cpdef void from_bytes(self, bytes content, encoding)

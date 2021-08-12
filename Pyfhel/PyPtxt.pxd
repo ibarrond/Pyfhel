@@ -15,19 +15,16 @@ from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, bi
 # Import Plaintext class, original from SEAL
 from Pyfhel.Afhel cimport Plaintext
 
-# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from Pyfhel.util cimport ENCODING_T
+from Pyfhel.util cimport SCHEME_t
 # ------------------------------- DECLARATION ---------------------------------
 
 cdef class PyPtxt:
     cdef Plaintext* _ptr_ptxt
     cdef Pyfhel _pyfhel
-    cdef ENCODING_T _encoding
-    cpdef bool is_zero(self) except +
-    cpdef string to_poly_string(self) except +
-    cpdef void to_file(self, fileName) except +
-    cpdef void from_file(self, fileName, encoding) except +
-    cpdef void save(self, str fileName) except +
-    cpdef void load(self, str fileName, encoding) except +
-    cpdef bytes to_bytes(self) except +
-    cpdef void from_bytes(self, bytes content, encoding) except +
+    cdef SCHEME_t _scheme
+    cpdef bool is_zero(self)
+    cpdef string to_poly_string(self)
+    cpdef void save(self, str fileName, str compr_mode=*)
+    cpdef void load(self, str fileName, object scheme)
+    cpdef bytes to_bytes(self, str compr_mode=*)
+    cpdef void from_bytes(self, bytes content, object scheme)

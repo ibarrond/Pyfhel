@@ -15,19 +15,17 @@ from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, bi
 # Import Ciphertext class, original for SEAL
 from Pyfhel.Afhel cimport Ciphertext
 
-# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from Pyfhel.util cimport ENCODING_T
+# Scheme types: UNDEFINED, BFV(INTEGER), CKKS (FRACTIONAL)
+from Pyfhel.util.scheme cimport SCHEME_t
 
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class PyCtxt:
     cdef Ciphertext* _ptr_ctxt
     cdef Pyfhel _pyfhel
-    cdef ENCODING_T _encoding
-    cpdef int size_capacity(self) except +
-    cpdef int size(self) except +
-    cpdef void to_file(self, fileName) except +
-    cpdef void from_file(self, fileName, encoding) except +
-    cpdef void save(self, str fileName) except +
-    cpdef void load(self, str fileName, encoding) except +
-    cpdef bytes to_bytes(self) except +
-    cpdef void from_bytes(self, bytes content, encoding) except +
+    cdef SCHEME_t _scheme
+    cpdef int size_capacity(self)
+    cpdef int size(self)
+    cpdef void save(self, str fileName, str compr_mode=*)
+    cpdef void load(self, str fileName, object scheme)
+    cpdef bytes to_bytes(self, str compr_mode=*)
+    cpdef void from_bytes(self, bytes content, object scheme)

@@ -32,158 +32,150 @@ cdef extern from "seal/ciphertext.h" namespace "seal" nogil:
         int size_capacity() except +
         int size() except +
 
-# Afseal class to abstract SEAL
-cdef extern from "Afhel/Afseal.h" nogil:
-    cdef cppclass Afseal:
-        # ----------------------- OBJECT MANAGEMENT ---------------------------
-        Afseal() except +
-        Afseal(const Afseal &otherAfseal) except +
-        Afseal(Afseal &&source) except +
 
-        # -------------------------- CRYPTOGRAPHY -----------------------------
+# Afhel class
+cdef extern from "Afhel/afhel.h" nogil:
+    cdef cppclass AfCtxt:
+        AfCtxt() except +
+
+    cdef cppclass AfPtxt:
+        AfPtxt() except +
+
+    cdef cppclass AfPoly:
+        AfPoly() except +
+        void add_inplace(const AfPoly &other) except +
+        void subtract_inplace(const AfPoly &other) except +
+        void multiply_inplace(const AfPoly &other) except +
+        bool invert_inplace() except +
+
+    cdef cppclass Afhel:
+        # ----------------------- OBJECT MANAGEMENT ----------------------------
+        Afhel() except +
+
+        # -------------------------- CRYPTOGRAPHY ------------------------------
         # CONTEXT & KEY GENERATION
-        void ContextGen(long p, long m, bool flagBatching, long base,
-                 long sec, int intDigits, int fracDigits) except +
+        void ContextGen(string scheme_t, uint64_t plain_modulus, size_t poly_modulus_degree, long sec, vector[int] qs) except +
         void KeyGen() except +
+        void relinKeyGen() except +
+        void rotateKeyGen() except +
 
         # ENCRYPTION
-        Ciphertext encrypt(Plaintext& plain1) except +
-        Ciphertext encrypt(double& value1) except +
-        Ciphertext encrypt(int64_t& value1) except +
-        Ciphertext encrypt(vector[int64_t]& valueV) except +
-        vector[Ciphertext] encrypt(vector[int64_t]& valueV, bool& dummy_NoBatch) except +
-        vector[Ciphertext] encrypt(vector[double]& valueV) except +
+        void encrypt(AfPtxt& plain1, AfCtxt& cipherOut) except +
+        void encrypt(vector[AfPtxt]& plainV, vector[AfCtxt]& cipherVOut) except +
         
-        void encrypt(Plaintext& plain1, Ciphertext& cipherOut) except +
-        void encrypt(double& value1, Ciphertext& cipherOut) except +
-        void encrypt(int64_t& value1, Ciphertext& cipherOut) except +
-        void encrypt(vector[int64_t]& valueV, Ciphertext& cipherOut) except +
-        void encrypt(vector[int64_t]& valueV, vector[Ciphertext]& cipherOut) except +
-        void encrypt(vector[double]& valueV, vector[Ciphertext]& cipherOut) except +
-
         # DECRYPTION
-        vector[int64_t] decrypt(Ciphertext& cipher1) except +
-
-        void decrypt(Ciphertext& cipher1, Plaintext& plainOut) except +
-        void decrypt(Ciphertext& cipher1, int64_t& valueOut) except + 
-        void decrypt(Ciphertext& cipher1, double& valueOut) except +
-        void decrypt(Ciphertext& cipher1, vector[int64_t]& valueVOut) except + 
-        void decrypt(vector[Ciphertext]& cipherV, vector[int64_t]& valueVOut) except +
-        void decrypt(vector[Ciphertext]& cipherV, vector[double]& valueVOut) except +
-
+        void decrypt(AfCtxt &cipher1, AfPtxt &plainOut) except +
+        void decrypt(vector[AfCtxt] &cipherV, vector[AfPtxt] &plainVOut) except +
+        
         # NOISE LEVEL
-        int noiseLevel(Ciphertext& cipher1) except +
+        int noise_level(AfCtxt& cipher1) except +
 
-        # ------------------------------ CODEC --------------------------------
+        # ------------------------------ CODEC ---------------------------------
         # ENCODE
-        Plaintext encode(int64_t& value1) except +
-        Plaintext encode(double& value1) except +
-        Plaintext encode(vector[int64_t] &values) except +
-        vector[Plaintext] encode(vector[int64_t] &values, bool dummy_NoBatch) except +
-        vector[Plaintext] encode(vector[double] &values) except +
-
-        void encode(int64_t& value1, Plaintext& plainOut) except +
-        void encode(double& value1, Plaintext& plainOut) except +
-        void encode(vector[int64_t] &values, Plaintext& plainOut) except +
-        void encode(vector[int64_t] &values, vector[Plaintext]& plainVOut) except +
-        void encode(vector[double] &values, vector[Plaintext]& plainVOut) except +
+        # bfv
+        void encode(vector[int64_t] &values, AfPtxt &plainOut) except +
+        # ckks
+        void encode(vector[double] &values, double scale, AfPtxt &plainVOut);
+        void encode(vector[cy_complex] &values, double scale, AfPtxt &plainVOut);
         
-        # DECODE 
-        vector[int64_t] decode(Plaintext& plain1) except +
+        # DECODE
+        # bfv
+        void decode(AfPtxt &plain1, vector[int64_t] &valueVOut) except +
+        # ckks
+        void decode(AfPtxt &plain1, vector[double] &valueVOut) except +
+        void decode(AfPtxt &plain1, vector[cy_complex] &valueVOut) except +
+
+        # AUXILIARY
+        void data(AfPtxt &ptxt, uint64_t *dest) except +
+        void allocate_zero_poly(uint64_t n, uint64_t coeff_mod_count, uint64_t *dest) except +
         
-        void decode(Plaintext& plain1, double& valOut) except +
-        void decode(Plaintext& plain1, vector[int64_t] &valueVOut) except +
-        void decode(vector[Plaintext]& plain1, vector[int64_t] &valueVOut) except +
-        void decode(vector[Plaintext]& plain1, vector[double] &valueVOut) except +
+        # -------------------------- RELINEARIZATION ---------------------------
+        void relinearize(AfCtxt& cipher1) except +
 
-        # -------------------------- OTHER OPERATIONS -------------------------
-        void rotateKeyGen(int& bitCount) except +
-        void relinKeyGen(int& bitCount, int& size) except +
-        void relinearize(Ciphertext& cipher1) except +
+        # ---------------------- HOMOMORPHIC OPERATIONS ------------------------
+        # Negate
+        void negate(AfCtxt& cipher1) except +
+        void negate(vector[AfCtxt]& cipherV) except +
+        # Square
+        void square(AfCtxt& cipher1) except +
+        void square(vector[AfCtxt]& cipherV) except +
+        # Add
+        void add(AfCtxt& cipher1, AfCtxt& cipher2) except +
+        void add(AfCtxt& cipher1, AfPtxt& plain2) except +
+        void add(vector[AfCtxt]& cipherVInOut, vector[AfCtxt]& cipherV2) except +
+        void add(vector[AfCtxt]& cipherVInOut, vector[AfPtxt]& plainV2) except +
+        void cumsum(vector[AfCtxt]& cipherV, AfCtxt& cipherOut) except +
 
-        # ---------------------- HOMOMORPHIC OPERATIONS -----------------------
-        void square(Ciphertext& cipher1) except +
-        void square(vector[Ciphertext]& cipherV) except +
-        void negate(Ciphertext& cipher1) except +
-        void negate(vector[Ciphertext]& cipherV) except +
-        void add(Ciphertext& cipher1, Ciphertext& cipher2) except +
-        void add(Ciphertext& cipher1, Plaintext& plain2) except +
-        void add(vector[Ciphertext]& cipherV, Ciphertext& cipherOut) except +
-        void add(vector[Ciphertext]& cipherVInOut, vector[Ciphertext]& cipherV2) except +
-        void add(vector[Ciphertext]& cipherVInOut, vector[Plaintext]& plainV2) except +
-        void sub(Ciphertext& cipher1, Ciphertext& cipher2) except +
-        void sub(Ciphertext& cipher1, Plaintext& plain2) except +
-        void sub(vector[Ciphertext]& cipherVInOut, vector[Ciphertext]& cipherV2) except +
-        void sub(vector[Ciphertext]& cipherVInOut, vector[Plaintext]& plainV2) except +
-        void multiply(Ciphertext& cipher1, Ciphertext& cipher2) except +
-        void multiply(Ciphertext& cipher1, Plaintext& plain1) except +
-        void multiply(vector[Ciphertext]& cipherV1, Ciphertext& cipherOut) except +
-        void multiply(vector[Ciphertext]& cipherVInOut, vector[Ciphertext]& cipherV2) except +
-        void multiply(vector[Ciphertext]& cipherVInOut, vector[Plaintext]& plainV2) except +
-        void rotate(Ciphertext& cipher1, int& k) except +
-        void rotate(vector[Ciphertext]& cipherV, int& k) except +
-        void exponentiate(Ciphertext& cipher1, uint64_t& expon) except +
-        void exponentiate(vector[Ciphertext]& cipherV, uint64_t& expon) except +
-        void polyEval(Ciphertext& cipher1, vector[int64_t]& coeffPoly) except +
-        void polyEval(Ciphertext& cipher1, vector[double]& coeffPoly) except +
+        # Subtract
+        void sub(AfCtxt& cipher1, AfCtxt& cipher2) except +
+        void sub(AfCtxt& cipher1, AfPtxt& plain2) except +
+        void sub(vector[AfCtxt]& cipherVInOut, vector[AfCtxt]& cipherV2) except +
+        void sub(vector[AfCtxt]& cipherVInOut, vector[AfPtxt]& plainV2) except +
+
+        # Multiply
+        void multiply(AfCtxt& cipher1, AfCtxt& cipher2) except +
+        void multiply(AfCtxt& cipher1, AfPtxt& plain1) except +
+        void multiply(vector[AfCtxt]& cipherVInOut, vector[AfCtxt]& cipherV2) except +
+        void multiply(vector[AfCtxt]& cipherVInOut, vector[AfPtxt]& plainV2) except +        
+        void cumprod(vector[AfCtxt]& cipherV1, AfCtxt& cipherOut) except +
+
+        # Rotate
+        void rotate(AfCtxt& cipher1, int& k) except +
+        void rotate(vector[AfCtxt]& cipherV, int& k) except +
+
+        # Power
+        void exponentiate(AfCtxt& cipher1, uint64_t& expon) except +
+        void exponentiate(vector[AfCtxt]& cipherV, uint64_t& expon) except +
+
+        # ckks -> rescale and mod switching
+        void rescale_to_next(AfCtxt &cipher1) except +
+        void mod_switch_to_next(AfCtxt &cipher1) except +
+        void mod_switch_to_next(AfPtxt &ptxt) except +
 
         # -------------------------------- I/O --------------------------------
-        # With files
-        bool saveContext(string fileName) except +
-        bool restoreContext(string fileName) except +
-        
-        bool savepublicKey(string fileName) except +
-        bool restorepublicKey(string fileName) except +
-        
-        bool savesecretKey(string fileName) except +
-        bool restoresecretKey(string fileName) except +
-        
-        bool saverelinKey(string fileName) except +
-        bool restorerelinKey(string fileName) except +
-        
-        bool saverotateKey(string fileName) except +
-        bool restorerotateKey(string fileName) except +
+        # SAVE/LOAD CONTEXT
+        size_t save_context(ostream &out_stream, string &compr_mode) except +
+        size_t load_context(istream &in_stream) except +
 
-        bool savePlaintext(string fileName, Plaintext& plain) except +
-        bool restorePlaintext(string fileName, Plaintext& plain) except +
+        # SAVE/LOAD PUBLICKEY
+        size_t save_public_key(ostream &out_stream, string &compr_mode) except +
+        size_t load_public_key(istream &in_stream) except +
 
-        bool saveCiphertext(string fileName, Ciphertext& ctxt) except +
-        bool restoreCiphertext(string fileName, Ciphertext& ctxt) except +
+        # SAVE/LOAD SECRETKEY
+        size_t save_secret_key(ostream &out_stream, string &compr_mode) except +
+        size_t load_secret_key(istream &in_stream) except +
 
-        # With Streams
-        bool ssaveContext(ostream& contextFile) except +
-        bool srestoreContext(istream& contextFile) except +
-        
-        bool ssavepublicKey(ostream& keyFile) except +
-        bool srestorepublicKey(istream& keyFile) except +
-        
-        bool ssavesecretKey(ostream& keyFile) except +
-        bool srestoresecretKey(istream& keyFile) except +
-        
-        bool ssaverelinKey(ostream& keyFile) except +
-        bool srestorerelinKey(istream& keyFile) except +
-        
-        bool ssaverotateKey(ostream& keyFile) except +
-        bool srestorerotateKey(istream& keyFile) except +
-        
-        bool srestorePlaintext(istream& plaintextFile, Plaintext& plain) except +
-        bool ssavePlaintext(ostream& plaintextFile, Plaintext& plain)except +
+        # SAVE/LOAD RELINKEY
+        size_t save_relin_keys(ostream &out_stream, string &compr_mode) except +
+        size_t load_relin_keys(istream &in_stream) except +
 
-        bool ssaveCiphertext(ostream& ctxtFile, Ciphertext& ctxt) except +
-        bool srestoreCiphertext(istream& ctxtFile, Ciphertext& ctxt) except +
+        # SAVE/LOAD ROTKEYS
+        size_t save_rotate_keys(ostream &out_stream, string &compr_mode) except +
+        size_t load_rotate_keys(istream &in_stream) except +
+
+        # SAVE/LOAD PLAINTEXT --> Could be achieved outside of Afseal
+        size_t save_plaintext(ostream &out_stream, string &compr_mode, AfPtxt &plain) except +
+        size_t load_plaintext(istream &in_stream, AfPtxt &plain) except +
+
+        # SAVE/LOAD CIPHERTEXT --> Could be achieved outside of Afseal
+        size_t save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ciphert) except +
+        size_t load_ciphertext(istream &in_stream, AfCtxt &plain) except +
+
         # ----------------------------- AUXILIARY -----------------------------
-        bool batchEnabled() except +
-        long relinBitCount() except +
+        long maxBitCount(long poly_modulus_degree, int sec_level) except +
+
+        # ckks
+        double scale(AfCtxt &ctxt) except +
+        void override_scale(AfCtxt &ctxt, double scale) except +
 
         # GETTERS
-        int getnSlots() except +
-        int getp() except +
-        int getm() except +
-        int getbase() except +
-        int getsec() except + 
-        int getintDigits() except +
-        int getfracDigits() except +
-        bool getflagBatch() except +
+        bool batchEnabled() except +
+        int get_nSlots() except +
+        int get_sec() except +
+        uint64_t get_plain_modulus() except +
+        size_t get_poly_modulus_degree() except +
+        string get_scheme() except +
+
         bool is_secretKey_empty() except+
         bool is_publicKey_empty() except+
         bool is_rotKey_empty() except+
@@ -191,19 +183,168 @@ cdef extern from "Afhel/Afseal.h" nogil:
         bool is_context_empty() except+
 
         # POLY
-        # Construction
-        AfsealPoly empty_poly(Ciphertext &ref) except+
-        AfsealPoly poly_from_ciphertext(Ciphertext &ctxt, size_t i) except+
-        AfsealPoly poly_from_plaintext(Ciphertext &ref, Plaintext &ptxt) except+
-        AfsealPoly poly_from_coeff_vector(vector[cy_complex] &coeff_vector, Ciphertext &ref) except+
-        vector[AfsealPoly] poly_from_ciphertext(Ciphertext &ref) except+
+        # inplace ops -> result in first operand
+        void add_inplace(AfPoly &p1, AfPoly &p2) except+
+        void subtract_inplace(AfPoly &p1, AfPoly &p2) except+
+        void multiply_inplace(AfPoly &p1, AfPoly &p2) except+
+        bool invert_inplace(AfPoly &p) except+
 
-        # Ops
-        AfsealPoly add(AfsealPoly &p1, AfsealPoly &p2) except+
-        AfsealPoly subtract(AfsealPoly &p1, AfsealPoly &p2) except+
-        AfsealPoly multiply(AfsealPoly &p1, AfsealPoly &p2) except+
-        AfsealPoly invert(AfsealPoly &p) except+
+        # I/O
+        void poly_to_ciphertext(AfPoly &p, AfCtxt &ctxt, size_t i) except+
+        void poly_to_plaintext(AfPoly &p, AfPtxt &ptxt) except+
 
+    # Afseal class to abstract internal polynoms
+    cdef cppclass AfPoly:
+        AfPoly(Afseal &afseal, const Ciphertext &ref) except+
+        AfPoly(AfPoly &other) except+
+        AfPoly(Afseal &afseal, Ciphertext &ctxt, size_t index) except+
+        AfPoly(Afseal &afseal, Plaintext &ptxt, const Ciphertext &ref) except+
+
+        vector[cy_complex] to_coeff_list(Afseal &afseal) except+
+
+        cy_complex get_coeff(Afseal &afseal, size_t i) except+
+        void set_coeff(Afseal &afseal, cy_complex &val, size_t i) except+
+        size_t get_coeff_count() except+
+        size_t get_coeff_modulus_count() except+
+
+# Afseal class to abstract SEAL
+cdef extern from "Afhel/Afseal.h" nogil:
+    cdef cppclass Afseal:
+        # ----------------------- OBJECT MANAGEMENT ----------------------------
+        Afseal() except +
+        Afseal(const Afseal &otherAfseal) except +
+
+        # -------------------------- CRYPTOGRAPHY ------------------------------
+        # CONTEXT & KEY GENERATION
+        void ContextGen(string scheme_t, uint64_t plain_modulus, size_t poly_modulus_degree, long sec, vector[int] qs) except +
+        void KeyGen() except +
+        void relinKeyGen() except +
+        void rotateKeyGen() except +
+
+        # ENCRYPTION
+        void encrypt(Plaintext& plain1, Ciphertext& cipherOut) except +
+        void encrypt(vector[Plaintext]& plainV, vector[Ciphertext]& cipherVOut) except +
+        
+        # DECRYPTION
+        void decrypt(Ciphertext &cipher1, Plaintext &plainOut) except +
+        void decrypt(vector[Ciphertext] &cipherV, vector[Plaintext] &plainVOut) except +
+        
+        # NOISE LEVEL
+        int noise_level(Ciphertext& cipher1) except +
+
+        # ------------------------------ CODEC ---------------------------------
+        # ENCODE
+        # bfv
+        void encode(vector[int64_t] &values, Plaintext &plainOut) except +
+        # ckks
+        void encode(vector[double] &values, double scale, Plaintext &plainVOut);
+        void encode(vector[cy_complex] &values, double scale, Plaintext &plainVOut);
+        
+        # DECODE
+        # bfv
+        void decode(Plaintext &plain1, vector[int64_t] &valueVOut) except +
+        # ckks
+        void decode(Plaintext &plain1, vector[double] &valueVOut) except +
+        void decode(Plaintext &plain1, vector[cy_complex] &valueVOut) except +
+
+        # AUXILIARY
+        void data(Plaintext &ptxt, uint64_t *dest) except +
+        void allocate_zero_poly(uint64_t n, uint64_t coeff_mod_count, uint64_t *dest) except +
+        
+        # -------------------------- RELINEARIZATION ---------------------------
+        void relinearize(Ciphertext& cipher1) except +
+
+        # ---------------------- HOMOMORPHIC OPERATIONS ------------------------
+        # Negate
+        void negate(Ciphertext& cipher1) except +
+        void negate(vector[Ciphertext]& cipherV) except +
+        # Square
+        void square(Ciphertext& cipher1) except +
+        void square(vector[Ciphertext]& cipherV) except +
+        # Add
+        void add(Ciphertext& cipher1, Ciphertext& cipher2) except +
+        void add(Ciphertext& cipher1, Plaintext& plain2) except +
+        void add(vector[Ciphertext]& cipherVInOut, vector[Ciphertext]& cipherV2) except +
+        void add(vector[Ciphertext]& cipherVInOut, vector[Plaintext]& plainV2) except +
+        void cumsum(vector[Ciphertext]& cipherV, Ciphertext& cipherOut) except +
+
+        # Subtract
+        void sub(Ciphertext& cipher1, Ciphertext& cipher2) except +
+        void sub(Ciphertext& cipher1, Plaintext& plain2) except +
+        void sub(vector[Ciphertext]& cipherVInOut, vector[Ciphertext]& cipherV2) except +
+        void sub(vector[Ciphertext]& cipherVInOut, vector[Plaintext]& plainV2) except +
+
+        # Multiply
+        void multiply(Ciphertext& cipher1, Ciphertext& cipher2) except +
+        void multiply(Ciphertext& cipher1, Plaintext& plain1) except +
+        void multiply(vector[Ciphertext]& cipherVInOut, vector[Ciphertext]& cipherV2) except +
+        void multiply(vector[Ciphertext]& cipherVInOut, vector[Plaintext]& plainV2) except +        
+        void cumprod(vector[Ciphertext]& cipherV1, Ciphertext& cipherOut) except +
+
+        # Rotate
+        void rotate(Ciphertext& cipher1, int& k) except +
+        void rotate(vector[Ciphertext]& cipherV, int& k) except +
+
+        # Power
+        void exponentiate(Ciphertext& cipher1, uint64_t& expon) except +
+        void exponentiate(vector[Ciphertext]& cipherV, uint64_t& expon) except +
+
+        # ckks -> rescale and mod switching
+        void rescale_to_next(Ciphertext &cipher1) except +
+        void mod_switch_to_next(Ciphertext &cipher1) except +
+        void mod_switch_to_next(Plaintext &ptxt) except +
+
+        # -------------------------------- I/O --------------------------------
+        # SAVE/LOAD CONTEXT
+        size_t save_context(ostream &out_stream, string &compr_mode) except +
+        size_t load_context(istream &in_stream) except +
+
+        # SAVE/LOAD PUBLICKEY
+        size_t save_public_key(ostream &out_stream, string &compr_mode) except +
+        size_t load_public_key(istream &in_stream) except +
+
+        # SAVE/LOAD SECRETKEY
+        size_t save_secret_key(ostream &out_stream, string &compr_mode) except +
+        size_t load_secret_key(istream &in_stream) except +
+
+        # SAVE/LOAD RELINKEY
+        size_t save_relin_keys(ostream &out_stream, string &compr_mode) except +
+        size_t load_relin_keys(istream &in_stream) except +
+
+        # SAVE/LOAD ROTKEYS
+        size_t save_rotate_keys(ostream &out_stream, string &compr_mode) except +
+        size_t load_rotate_keys(istream &in_stream) except +
+
+        # SAVE/LOAD PLAINTEXT --> Could be achieved outside of Afseal
+        size_t save_plaintext(ostream &out_stream, string &compr_mode, Plaintext &plain) except +
+        size_t load_plaintext(istream &in_stream, Plaintext &plain) except +
+
+        # SAVE/LOAD CIPHERTEXT --> Could be achieved outside of Afseal
+        size_t save_ciphertext(ostream &out_stream, string &compr_mode, Ciphertext &ciphert) except +
+        size_t load_ciphertext(istream &in_stream, Ciphertext &plain) except +
+
+        # ----------------------------- AUXILIARY -----------------------------
+        long maxBitCount(long poly_modulus_degree, int sec_level) except +
+
+        # ckks
+        double scale(Ciphertext &ctxt) except +
+        void override_scale(Ciphertext &ctxt, double scale) except +
+
+        # GETTERS
+        bool batchEnabled() except +
+        int get_nSlots() except +
+        int get_sec() except +
+        uint64_t get_plain_modulus() except +
+        size_t get_poly_modulus_degree() except +
+        string get_scheme() except +
+
+        bool is_secretKey_empty() except+
+        bool is_publicKey_empty() except+
+        bool is_rotKey_empty() except+
+        bool is_relinKey_empty() except+
+        bool is_context_empty() except+
+
+        # POLY
         # inplace ops -> result in first operand
         void add_inplace(AfsealPoly &p1, AfsealPoly &p2) except+
         void subtract_inplace(AfsealPoly &p1, AfsealPoly &p2) except+

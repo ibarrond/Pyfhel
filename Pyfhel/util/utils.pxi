@@ -1,6 +1,6 @@
 from pathlib import Path
 
-cpdef str _to_valid_file_str(fileName, bool check=False) except +:
+cpdef str _to_valid_file_str(fileName, bool check=False):
     """_to_valid_file_str(fileName)
     
     Checks that the fileName is valid, and returns a str with the valid fileName.
@@ -12,54 +12,44 @@ cpdef str _to_valid_file_str(fileName, bool check=False) except +:
             raise FileNotFoundError(f"<Pyfhel ERROR> File {str(fileName)} not found.")
     return str(fileName)
 
-cpdef object to_ENCODING_t(encoding) except +:
-    """to_ENCODING_t(encoding)
-    
-    Turns `encoding` into an ENCODING_t.{INTEGER, FRACTIONAL, BATCH} enum.
+cpdef SCHEME_t to_SCHEME_t(object scheme):
+    """Turns `scheme` into an SCHEME_t.{INTEGER, FRACTIONAL} enum.
     
     Arguments:
-        encoding (str, type, int, ENCODING_t): One of the following:
+        scheme (str, type, int, SCHEME_t): One of the following:
 
-            * (str): ('int', 'integer') for INTEGER encoding, ('float', 'double') for 
-              FRACTIONAL encoding, ('array', 'batch', 'matrix') for BATCH encoding.
+            * (str): ('int', 'integer') for BFV scheme, ('float', 'double') for 
+              CKKS scheme.
 
-            * Python class: (int) for INTEGER encoding, (float) for FRACTIONAL encoding, 
-                (list) for BATCH encoding.
+            * Python class: (int) for BFV scheme, (float) for CKKS scheme.
 
-            * (int): (1) for INTEGER encoding, (2) for FRACTIONAL encoding,
-                (3) for BATCH encoding.
+            * (int): (1) for BFV scheme, (2) for CKKS scheme.
 
-            * (ENCODING_t) Enum (does nothing)
+            * (SCHEME_t) Enum (does nothing)
 
     Returns:
-        ENCODING_t: INTEGER, FRACTIONAL or BATCH encoding.
+        SCHEME_t: BFV or CKKS.
     """
-    if type(encoding) is unicode or isinstance(encoding, unicode):
-        # encoding is a string. Casting it to str just in case.
-        encoding = unicode(encoding)
-        if encoding.lower()[0] == 'i':
-            return ENCODING_t.INTEGER
-        elif encoding.lower()[0] in 'fd':
-            return ENCODING_t.FRACTIONAL
-        elif encoding.lower()[0] in 'abm':
-            return ENCODING_t.BATCH
+    if type(scheme) is unicode or isinstance(scheme, unicode):
+        # scheme is a string. Casting it to str just in case.
+        scheme = unicode(scheme)
+        if scheme.lower() in ('int', 'integer'):
+            return SCHEME_t.BFV
+        elif scheme.lower() in ('float', 'double'):
+            return SCHEME_t.CKKS
 
-    elif type(encoding) is type:
-        if encoding is int:
-            return ENCODING_t.INTEGER
-        elif encoding is float:
-            return ENCODING_t.FRACTIONAL
-        if encoding is list:
-            return ENCODING_t.BATCH
+    elif type(scheme) is type:
+        if scheme is int:
+            return SCHEME_t.BFV
+        elif scheme is float:
+            return SCHEME_t.CKKS
         
-    elif isinstance(encoding, (int, float)) and\
-         int(encoding) in (ENCODING_t.INTEGER.value,
-                           ENCODING_t.FRACTIONAL.value,
-                           ENCODING_t.BATCH.value):
-            return ENCODING_t(int(encoding))
+    elif isinstance(scheme, (int, float)) and\
+         int(scheme) in (SCHEME_t.BFV,
+                           SCHEME_t.CKKS):
+            return SCHEME_t(int(scheme))
     
-    elif isinstance(encoding, ENCODING_t):
-        return encoding
+    elif isinstance(scheme, SCHEME_t):
+        return scheme
     
-    else:
-        raise TypeError("<Pyfhel ERROR>: encoding unknown. Could not convert to ENCODING_t.")
+    raise TypeError("<Pyfhel ERROR>: scheme unknown. Could not convert to SCHEME_t.")

@@ -36,9 +36,6 @@ from cython.operator cimport dereference as deref
 # Importing it for the fused types
 cimport cython
 
-# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from Pyfhel.util import ENCODING_t
-
 # Define Plaintext types
 FLOAT_T = (float, np.float16, np.float32, np.float64)
 INT_T =   (int, np.int16, np.int32, np.int64, np.int_, np.intc)
@@ -61,6 +58,8 @@ cdef class Pyfhel:
                   pub_key_file=None,
                   sec_key_file=None):
         self.afseal = new Afseal()
+        self.sec = 0
+        self.qs = []
     
     def __init__(self,
                   context_params=None,
@@ -88,9 +87,9 @@ cdef class Pyfhel:
             self.keyGen()
         else:
             if pub_key_file is not None:
-                self.restorepublicKey(pub_key_file)
+                self.load_public_key(pub_key_file)
             if sec_key_file is not None:
-                self.restoresecretKey(sec_key_file)
+                self.load_secret_key(sec_key_file)
 
     def __dealloc__(self):
         if self.afseal != NULL:
@@ -111,16 +110,19 @@ cdef class Pyfhel:
             * contx: Context, with values of p, m, base, security,
                         # of int and frac digits and wether flagBatching is enabled.
         """
-        return "<Pyfhel obj at {}, [pk:{}, sk:{}, rtk:{}, rlk:{}, contx({})]>".format(
+        return "<{} Pyfhel obj at {}, [pk:{}, sk:{}, rtk:{}, rlk:{}, contx({})]>".format(
+                self.get_scheme(),
                 hex(id(self)),
                 "-" if self.is_publicKey_empty() else "Y",
                 "-" if self.is_secretKey_empty() else "Y",
                 "-" if self.is_rotKey_empty() else "Y",
-                "-" if self.is_relinKey_empty() else f"Y[{self.relinBitCount()}b]",
+                "-" if self.is_relinKey_empty() else f"Y",
                 "-" if self.is_context_empty() else \
-                        f"p={self.getp()}, m={self.getm()}, base={self.getbase()}, "\
-                        f"sec={self.getsec()}, dig={self.getintDigits()}i.{self.getfracDigits()}f, "
-                        f"batch={self.getflagBatch()}")
+                        f"p={self.plain_modulus}, "\
+                        f"m={self.poly_modulus_degree}, "\
+                        f"slots={self.get_nSlots}, "\
+                        f"sec={self.sec}, "\
+                        f"batch={self.batchEnabled()}")
 
     def __reduce__(self):
         """__reduce__(self)
@@ -129,98 +131,74 @@ cdef class Pyfhel:
             - A callable object that will be called to create the initial version of the object.
             - A tuple of arguments for the callable object.
         """
-        context_params={"p": self.p,
-                        "m": self.m,
-                        "flagBatching": self.flagBatch,
-                        "base": self.base,
-                        "sec": self.sec,
-                        "intDigits": self.intDigits,
-                        "fracDigits": self.fracDigits}
+        context_params={"scheme": self.scheme,
+                        "plain_modulus": self.plain_modulus,
+                        "poly_modulus_degree": self.poly_modulus_degree,
+                        "sec": self.sec}
         return (Pyfhel, (context_params, False, None, None))
 
     @property
-    def p(self):
-        """Plaintext modulus. All operations are modulo p"""
-        return self.getp()
+    def plain_modulus(self):
+        """Plaintext modulus."""
+        return self.get_plain_modulus()
 
     @property
-    def m(self):
+    def poly_modulus_degree(self):
         """Polynomial coefficient modulus. (1*x^m+1). 
                 
         Directly linked to the multiplication depth (see multDepth)."""
-        return self.getm()
+        return self.poly_modulus_degree()
     
     @property
     def sec(self):
-        """Security (bits)."""
-        return self.getsec()
-
+        """Security (bits). Only applies to BFV scheme."""
+        return self.sec
+    
+    
     @property
-    def base(self):
-        """Polynomial base."""
-        return self.getbase()
-
-    @property
-    def intDigits(self):
-        """Truncated positions for integer part in FRACTIONAL encoding"""
-        return self.getintDigits()
-        
-    @property
-    def fracDigits(self):
-        """Truncated positions for decimal part in FRACTIONAL encoding"""
-        return self.getfracDigits()
-
-    @property
-    def flagBatch(self):
-        """Wether batching is enabled or not"""
-        return self.getflagBatch()
+    def qs(self):
+        """Chain of prime sizes (bits). Only applies to CKKS scheme."""
+        return self.qs
         
     # =========================================================================
     # ============================ CRYPTOGRAPHY ===============================
     # =========================================================================
-    
-    cpdef void contextGen(self, long p, long m=2048, bool flagBatching=False,
-                     long base=2, long sec=128, int intDigits=64,
-                     int fracDigits = 32) except +:
-        """contextGen(int p, int m=2048, bool flagBatching=False, int base=2, int sec=128, int intDigits=64, int fracDigits = 32)
-        
-        Generates Homomorphic Encryption context based on parameters.
+    # ....................... CONTEXT & KEY GENERATION ........................
+
+    cpdef void contextGen(self, str scheme_t, int plain_modulus, 
+                                int poly_modulus_degree, int sec=0,  vector[int] qs = {}):
+        """Generates Homomorphic Encryption context based on parameters.
         
         Creates a HE context based in parameters, as well as integer,
         fractional and batch encoders. The HE context is required for any 
-        other function (encryption/decryption,encoding/decoding, operations)
+        other function (encryption/decryption,scheme/decoding, operations)
         
-        Batch encoding is available if p is prime and p-1 is multiple of 2*m
+        Batch scheme is available if p is prime and p-1 is multiple of 2*m
         
         Some tips: 
 
-        - m-> Higher allows more encrypted operations. In batch mode it
-            is the number of integers per ciphertext.
-        - base-> Affects size of plaintexts and ciphertexts, and FRACTIONAL
-            encoding.
-        - intDigits & fracDigits-> applicable with FRACTIONAL encoding.
+        - poly_modulus_degree-> Higher allows more encrypted operations.
+                    In bfv it is the number of integers per ciphertext.
 
         Args:
-            p (int): Plaintext modulus. All operations are modulo p.
-            m (int): Polynomial coefficient modulus. (Poly: 1*x^m+1). 
-                directly linked to the multiplication depth (see multDepth).
-            flagBatching (bool): Set to true to enable batching.
-            base (int): Polynomial base. 
-            sec (int): Security level equivalent in AES. 128 or 192.
-            intDigits (int): truncated positions for integer part.
-            fracDigits (int): truncated positions for fractional part.
+            scheme_t (str): HE scheme ("bfv" or "ckks", for integer or float ops).
+            plain_modulus (int): Plaintext modulus.
+            poly_modulus_degree (int): Polynomial coefficient modulus. (Poly: 1*x^m+1). 
+                directly linked to the multiplication depth.
+            sec (int): Security level equivalent in AES. 128, 192 or 256.
+                More means more security but also more time and memory.
+            qs (list of ints): Chain of prime sizes (bits). Only applies to CKKS scheme.
                       
         Return:
             None
         """
-        self.afseal.ContextGen(p, m, flagBatching, base,
-                               sec,intDigits, fracDigits)
+        scheme_t = scheme_t.lower()
+        self.afseal.ContextGen(scheme_t.encode(), <np.uint64_t> plain_modulus, <size_t> poly_modulus_degree, <long> sec, qs)
+        self.sec = sec if scheme_t=='bfv' else 0
+        self.qs = qs if scheme_t=='ckks' else []
         
-        
-    cpdef void keyGen(self) except +:
-        """keyGen()
-        
-        Generates a pair of secret/Public Keys.
+    cpdef void keyGen(self):
+        """Generates a pair of secret/Public Keys.
         
         Based on the current context, initializes a public/secret key pair.
         
@@ -231,16 +209,46 @@ cdef class Pyfhel:
             None
         """
         self.afseal.KeyGen()
-    
+        
+    cpdef void rotateKeyGen(self):
+        """Generates a rotation Key.
+        
+        Generates a rotation Key, used to rotate cyclically 
+        the values inside the encrypted vector.
+        
+        Based on the current context, initializes one rotation key. 
+        
+        Args:
+            None
+                      
+        Return:
+            None
+        """
+        self.afseal.rotateKeyGen()
+        
+    cpdef void relinKeyGen(self):
+        """Generates a relinearization Key.
+        
+        Generates a relinearization Key, used to reduce size of the
+        ciphertexts when multiplying or exponentiating them. This is needed
+        due to the fact that ciphertexts grow in size after encrypted
+        mults/exponentiations.
+        
+        Based on the current context, initializes one relinearization key. 
+        
+        Args:
+            None
+
+        Return:
+            None
+        """
+        self.afseal.relinKeyGen()        
+  
     
     # .............................. ENCYRPTION ...............................
-    cpdef PyCtxt encryptInt(self, int64_t value, PyCtxt ctxt=None) except +:
-        """encryptInt(value, PyCtxt ctxt=None)
+    cpdef PyCtxt encryptInt(self, int64_t[:] arr, PyCtxt ctxt=None):
+        """Encrypts a 1D vector of int values into a PyCtxt ciphertext.
         
-        Encrypts a single int value into a PyCtxt ciphertext.
-        
-        Encrypts a single value using the current public key, based on the 
-        current context. Value must either be an integer (int64_t)
         If provided a ciphertext, encrypts the value inside it. 
         
         Args:
@@ -252,92 +260,41 @@ cdef class Pyfhel:
         """
         if ctxt is None:
             ctxt = PyCtxt()
-        self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
-        ctxt._encoding = ENCODING_T.INTEGER
+        cdef vector[int] vec = new vector[int](&arr[0], &arr[0] + arr.size)
+        self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt))
+        ctxt._scheme = SCHEME_t.BFV
         ctxt._pyfhel = self
         return ctxt
     
-    cpdef PyCtxt encryptFrac(self, double value, PyCtxt ctxt=None) except +:
-        """encryptFrac(value, PyCtxt ctxt=None)
+    cpdef PyCtxt encryptFrac(self, double[:] arr, PyCtxt ctxt=None, double scale=1.0):
+        """Encrypts a 1D vector of float values into a PyCtxt ciphertext.
         
-        Encrypts a single float value into a PyCtxt ciphertext.
-        
-        Encrypts a single value using the current secret key, based on the
+        Encrypts a fractional vector using the current secret key, based on the
         current context. Value must a decimal (float, double) that will 
-        get truncated both in the integer part (base^intDigits) and in the
-        decimal part (base^fracDigits).
+        get truncated.
         If provided a ciphertext, encrypts the plaintext inside it. 
         
         Args:
-            value (float): value to encrypt.
-            ctxt (PyCtxt, optional): Optional destination ciphertext.  
+            arr (float[]): values to encrypt.
+            ctxt (PyCtxt, optional): Optional destination ciphertext.
+            scale (double): scale factor to apply to the values.  
             
         Return:
             PyCtxt: the ciphertext containing the encrypted plaintext
         """
         if ctxt is None:
             ctxt = PyCtxt()
-        self.afseal.encrypt(value, deref(ctxt._ptr_ctxt))
-        ctxt._encoding = ENCODING_T.FRACTIONAL
+        cdef vector[double] vec = new vector[double](&arr[0], &arr[0] + arr.size)
+        cdef Plaintext pt = new Plaintext()
+        self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt), scale)
+        ctxt._scheme = SCHEME_t.CKKS
         ctxt._pyfhel = self
         return ctxt
 
+        
 
-    cpdef PyCtxt encryptBatch(self, vector[int64_t] vec,
-                              PyCtxt ctxt=None) except +: 
-        """encryptBatch(list[int] vec,PyCtxt ctxt=None)
-        
-        Encrypts a 1D vector of integers into a PyCtxt ciphertext.
-        
-        Encrypts a 1D vector of integers using the current secret key,
-        based on the current context. Plaintext must be a 1D numpy vector
-        of integers. Requires batch mode. The vector needs to be in 
-        'contiguous' or 'c' mode.
-        If provided a ciphertext, encrypts the plaintext inside it. 
-        
-        Args:
-            ptxt (np.ndarray[int, ndim=1, mode="c"]): plaintext to encrypt.
-            ctxt (PyCtxt, optional): Optional destination ciphertext.  
-            
-        Return:
-            PyCtxt: the ciphertext containing the encrypted plaintext
-        """
-        if ctxt is None:
-            ctxt = PyCtxt()
-        self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
-        ctxt._encoding = ENCODING_T.BATCH
-        ctxt._pyfhel = self
-        return ctxt  
-        
-    cpdef PyCtxt encryptArray(self, int64_t[::1] arr,
-                              PyCtxt ctxt=None) except +:
-        """encryptArray(int64_t[::1] arr, PyCtxt ctxt=None)
-        
-        Encrypts a 1D numpy array of integers into a PyCtxt ciphertext.
-        
-        Encrypts a 1D numpy array of integers using the current secret key,
-        based on the current context. Plaintext must be a 1D numpy vector of
-        integers. Requires batch mode. The vector needs to be in 
-        'contiguous' or 'c' mode.
-        If provided a ciphertext, encrypts the plaintext inside it. 
-        
-        Args:
-            ptxt (np.ndarray[int, ndim=1, mode="c"]): plaintext to encrypt.
-            ctxt (PyCtxt, optional): Optional destination ciphertext.  
-            
-        Return:
-            PyCtxt: the ciphertext containing the encrypted plaintext
-        """
-        if ctxt is None:
-            ctxt = PyCtxt()
-        cdef vector[int64_t] vec;
-        vec.assign(&arr[0], &arr[-1]+1)
-        self.afseal.encrypt(vec, deref(ctxt._ptr_ctxt)) 
-        ctxt._encoding = ENCODING_T.BATCH
-        ctxt._pyfhel = self
-        return ctxt  
     
-    cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=None) except +:
+    cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=None):
         """encryptPtxt(PyPtxt ptxt, PyCtxt ctxt=None)
         
         Encrypts an encoded PyPtxt plaintext into a PyCtxt ciphertext.
@@ -361,19 +318,25 @@ cdef class Pyfhel:
         if ctxt is None:
             ctxt = PyCtxt()
         self.afseal.encrypt(deref(ptxt._ptr_ptxt), deref(ctxt._ptr_ctxt)) 
-        ctxt._encoding = ptxt._encoding
+        ctxt._scheme = ptxt._scheme
         ctxt._pyfhel = self
         return ctxt
 
-    def encrypt(self, ptxt not None, PyCtxt ctxt=None):
-        """encrypt(ptxt not None, PyCtxt ctxt=None)
+    # vectorized
+    cpdef np.ndarray[object, ndim=1] encryptAInt(self, int64_t[:,::1] arr):
+        raise NotImplementedError("<Pyfhel ERROR> encryptAInt not implemented")
 
-        Encrypts any valid plaintext into a PyCtxt ciphertext.
+    cpdef np.ndarray[object, ndim=1] encryptAFrac(self, double[:,::1] arr, double scale=1.0):
+        raise NotImplementedError("<Pyfhel ERROR> encryptAFrac not implemented")
+    cpdef np.ndarray[object, ndim=1] encryptAPtxt(self, PyPtxt[:] ptxt):
+        raise NotImplementedError("<Pyfhel ERROR> encryptAPtxt not implemented")
+
+    def encrypt(self, ptxt not None, PyCtxt ctxt=None):
+        """Encrypts any valid value into a PyCtxt ciphertext.
         
         Encrypts a plaintext using the current secret key, based on the
-        current context. Plaintext must be an integer (int), a decimal 
-        that will get truncated (double), a PyPtxt encoded plaintext, 
-        or in Batch mode a 1D numpy vector of integers.
+        current context. Plaintext must be an integer vector (int), a float vector
+        that will get truncated (double), or a PyPtxt encoded plaintext.
         Selects the encryption function based on type.
         
         If provided a ciphertext, encrypts the plaintext inside it. 
@@ -392,27 +355,27 @@ cdef class Pyfhel:
             return self.encryptPtxt(ptxt, ctxt)
         elif isinstance(ptxt, np.ndarray):
             if (ptxt.ndim is not 1) or \
-               (ptxt.dtype not in INT_T):
+               (ptxt.dtype not in INT_T+FLOAT_T):
                 raise TypeError('<Pyfhel ERROR> Plaintext numpy array is not'
                                 '1D vector of int values, cannot encrypt.  Allowed'
                                 'types: (int, np.int32, np.int64, np.intc, np.int_)')
-            return self.encryptBatch(ptxt, ctxt)  
+            return self.encryptInt(ptxt, ctxt)   
         elif isinstance(ptxt, float):
-            return self.encryptFrac(<float>ptxt, ctxt)   
+            return self.encryptFrac(ptxt, ctxt)   
         elif isinstance(ptxt, Number):
-            return self.encryptInt(<int>ptxt, ctxt)  
+            return self.encryptInt(ptxt, ctxt)  
         else:
             raise TypeError('<Pyfhel ERROR> Plaintext type \['+type(ptxt)+
                             '\] not supported for encryption')
     
     # .............................. DECRYPTION ...............................
-    cpdef int64_t decryptInt(self, PyCtxt ctxt) except +:
+    cpdef np.ndarray[int64_t, ndim=1] decryptInt(self, PyCtxt ctxt):
         """decryptInt(PyCtxt ctxt)
 
         Decrypts a PyCtxt ciphertext into a single int value.
         
         Decrypts a PyCtxt ciphertext using the current secret key, based on
-        the current context. PyCtxt encoding must be INTEGER.
+        the current context. PyCtxt scheme must be INTEGER.
         
         Args:
             ctxt (PyCtxt, optional): ciphertext to decrypt. 
@@ -421,21 +384,21 @@ cdef class Pyfhel:
             int: the decrypted integer value
             
         Raise:
-            RuntimeError: if the ctxt encoding isn't ENCODING_t.INTEGER
+            RuntimeError: if the ctxt scheme isn't SCHEME_t.BFV
         """
-        if (ctxt._encoding != ENCODING_T.INTEGER):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
+        if (ctxt._scheme != SCHEME_t.BFV):
+            raise RuntimeError("<Pyfhel ERROR> wrong scheme type in PyCtxt")
         cdef int64_t output_value = 0
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_value)
         return output_value
     
-    cpdef double decryptFrac(self, PyCtxt ctxt) except +:
+    cpdef np.ndarray[double, ndim=1] decryptFrac(self, PyCtxt ctxt):
         """decryptFrac(PyCtxt ctxt)
 
         Decrypts a PyCtxt ciphertext into a single float value.
         
         Decrypts a PyCtxt ciphertext using the current secret key, based on
-        the current context. PyCtxt encoding must be FRACTIONAL.
+        the current context. PyCtxt scheme must be FRACTIONAL.
         
         Args:
             ctxt (PyCtxt): ciphertext to decrypt. 
@@ -444,67 +407,22 @@ cdef class Pyfhel:
             float: the decrypted float value
             
         Raise:
-            RuntimeError: if the ctxt encoding isn't ENCODING_t.FRACTIONAL
+            RuntimeError: if the ctxt scheme isn't SCHEME_t.CKKS
         """
-        if (ctxt._encoding != ENCODING_T.FRACTIONAL):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
+        raise NotImplementedError("<Pyfhel ERROR> decryptFrac not implemented")
+        """if (ctxt._scheme != SCHEME_t.CKKS):
+            raise RuntimeError("<Pyfhel ERROR> wrong scheme type in PyCtxt")
         cdef double output_value = 0
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), output_value)
-        return output_value
+        return output_value"""
     
-    cpdef vector[int64_t] decryptBatch(self, PyCtxt ctxt) except +:    
-        """decryptBatch(PyCtxt ctxt)
-
-        Decrypts a PyCtxt ciphertext into a 1D numpy vector of integers.
-        
-        Decrypts a PyCtxt ciphertext  using the current secret key, based on
-        the current context. If provided an output vector, decrypts the
-        ciphertext inside it. 
-        
-        Args:
-            ctxt (PyCtxt): ciphertext to decrypt. 
-            
-        Return:
-            PyCtxt: the ciphertext containing the encrypted plaintext
-            
-        Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.BATCH
-        """
-        if (ctxt._encoding != ENCODING_T.BATCH):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
-        return self.afseal.decrypt(deref(ctxt._ptr_ctxt))
-        
-    cpdef int64_t[::1] decryptArray(self, PyCtxt ctxt) except +: 
-        """decryptArray(PyCtxt ctxt)
-
-        Decrypts a PyCtxt ciphertext into a 1D numpy vector of integers.
-        
-        Decrypts a PyCtxt ciphertext  using the current secret key, based on
-        the current context. If provided an output vector, decrypts the
-        ciphertext inside it. 
-        
-        Args:
-            ctxt (PyCtxt): ciphertext to decrypt. 
-            
-        Return:
-            PyCtxt: the ciphertext containing the encrypted plaintext
-            
-        Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.BATCH
-        """
-        if (ctxt._encoding != ENCODING_T.BATCH):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt")
-        cdef vector[int64_t] output_vector=self.afseal.decrypt(deref(ctxt._ptr_ctxt))  
-        cdef int64_t[::1] output_array = <int64_t [:output_vector.size()]>output_vector.data()
-        return output_array
-    
-    cpdef PyPtxt decryptPtxt(self, PyCtxt ctxt, PyPtxt ptxt=None) except +:
+    cpdef PyPtxt decryptPtxt(self, PyCtxt ctxt, PyPtxt ptxt=None):
         """decryptPtxt(PyCtxt ctxt, PyPtxt ptxt=None)
 
         Decrypts a PyCtxt ciphertext into a PyPtxt plaintext.
         
         Decrypts a PyCtxt ciphertext using the current secret key, based on
-        the current context. No regard to encoding (decode PyPtxt to obtain 
+        the current context. No regard to scheme (decode PyPtxt to obtain 
         value).
         
         Args:
@@ -517,9 +435,20 @@ cdef class Pyfhel:
         if ptxt is None:
             ptxt = PyPtxt()
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ctxt._encoding
+        ptxt._scheme = ctxt._scheme
         return ptxt
+
+    cpdef np.ndarray[int64_t, ndim=2] decryptAInt(self, PyCtxt ctxt):
+        raise NotImplementedError("<Pyfhel ERROR> decryptAInt not implemented")
+
+    cpdef np.ndarray[double, ndim=2] decryptAFrac(self, PyCtxt ctxt):
+        raise NotImplementedError("<Pyfhel ERROR> decryptAFrac not implemented")
+
+    cpdef np.ndarray[object, ndim=1] decryptAPtxt(self, PyCtxt ctxt):
+        raise NotImplementedError("<Pyfhel ERROR> decryptAPtxt not implemented")
     
+
+
     def decrypt(self, PyCtxt ctxt, bool decode_value=False, PyPtxt ptxt=None):
         """decrypt(PyCtxt ctxt, bool decode_value=False, PyPtxt ptxt=None)
 
@@ -544,17 +473,15 @@ cdef class Pyfhel:
             PyPtxt, int, float, list[int]: the decrypted result
             
         Raise:
-            TypeError: if the cipertext encoding is invalid.
+            TypeError: if the cipertext scheme is invalid.
         """
         if (decode_value):
-            if (ctxt._encoding == ENCODING_T.BATCH):
-                return self.decryptBatch(ctxt)
-            elif (ctxt._encoding == ENCODING_T.FRACTIONAL):
+            elif (ctxt._scheme == SCHEME_t.CKKS):
                 return self.decryptFrac(ctxt)
-            elif (ctxt._encoding == ENCODING_T.INTEGER):
+            elif (ctxt._scheme == SCHEME_t.BFV):
                 return self.decryptInt(ctxt)
-            elif (ctxt._encoding == ENCODING_T.UNDEFINED):
-                raise RuntimeError("<Pyfhel ERROR> wrong encoding type in PyCtxt when decrypting")
+            else:
+                raise RuntimeError("<Pyfhel ERROR> wrong scheme type in PyCtxt when decrypting")
         else: # Decrypt to plaintext        
             if ptxt is None:
                 ptxt = PyPtxt()
@@ -562,7 +489,7 @@ cdef class Pyfhel:
         
         
     # ................................ OTHER ..................................
-    cpdef int noiseLevel(self, PyCtxt ctxt) except +:
+    cpdef int noiseLevel(self, PyCtxt ctxt):
         """noiseLevel(PyCtxt ctxt)
 
         Computes the invariant noise budget (bits) of a PyCtxt ciphertext.
@@ -579,51 +506,8 @@ cdef class Pyfhel:
             int: the noise budget level
         """
         return self.afseal.noiseLevel(deref(ctxt._ptr_ctxt))
-    
-    cpdef void rotateKeyGen(self, int bitCount) except +:
-        """rotateKeyGen(int bitCount)
-
-        Generates a rotation Key.
-        
-        Generates a rotation Key, used in BATCH mode to rotate cyclically 
-        the values inside the encrypted vector.
-        
-        Based on the current context, initializes one rotation key. 
-        
-        Args:
-            bitCount (int): Bigger means faster but noisier (will require
-                            relinearization). Needs to be within [1, 60]
-                      
-        Return:
-            None
-        """
-        self.afseal.rotateKeyGen(bitCount)
-        
-    cpdef void relinKeyGen(self, int bitCount, int size) except +:
-        """relinKeyGen(int bitCount, int size)
-
-        Generates a relinearization Key.
-        
-        Generates a relinearization Key, used to reduce size of the
-        ciphertexts when multiplying or exponentiating them. This is needed
-        due to the fact that ciphertexts grow in size after encrypted
-        mults/exponentiations.
-        
-        Based on the current context, initializes one relinearization key. 
-        
-        Args:
-            bitCount (int): Bigger means faster but noisier (bigger
-                decrease in noise budget of the relinearized ciphertexts).
-                Needs to be within [1, 60].
-            size (int): Number of keys created internally. There should be
-                equal or more than the size of the ciphertexts to relinearize.
-
-        Return:
-            None
-        """
-        self.afseal.relinKeyGen(bitCount, size)        
-        
-    cpdef void relinearize(self, PyCtxt ctxt) except +:
+      
+    cpdef void relinearize(self, PyCtxt ctxt):
         """relinearize(PyCtxt ctxt)
 
         Relinearizes a ciphertext.
@@ -650,7 +534,7 @@ cdef class Pyfhel:
     # ============================== ENCODING =================================
     # =========================================================================
     # ............................... ENCODE ..................................
-    cpdef PyPtxt encodeInt(self, int64_t value, PyPtxt ptxt=None) except +:
+    cpdef PyPtxt encodeInt(self,  int64_t[::1] value, PyPtxt ptxt=None):
         """encodeInt(int64_t &value, PyPtxt ptxt=None)
 
         Encodes a single int value into a PyPtxt plaintext.
@@ -665,13 +549,9 @@ cdef class Pyfhel:
         Return:
             PyPtxt: the plaintext containing the encoded value
         """
-        if ptxt is None:
-            ptxt = PyPtxt()
-        self.afseal.encode(value, deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ENCODING_T.INTEGER
-        return ptxt
+        raise NotImplementedError("<Pyfhel ERROR> encodeInt not implemented")
     
-    cpdef PyPtxt encodeFrac(self, double value, PyPtxt ptxt=None) except +:
+    cpdef PyPtxt encodeFrac(self, double[::1] arr, double scale=1.0, PyPtxt ptxt=None):
         """encodeFrac(double &value, PyPtxt ptxt=None)
 
         Encodes a single float value into a PyPtxt plaintext.
@@ -688,60 +568,14 @@ cdef class Pyfhel:
         """
         if ptxt is None:
             ptxt = PyPtxt()
-        self.afseal.encode(value, deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ENCODING_T.FRACTIONAL
-        return ptxt
-    
-    cpdef PyPtxt encodeBatch(self, vector[int64_t] vec, PyPtxt ptxt=None) except +: 
-        """encodeBatch(vector[int64_t]& vec, PyPtxt ptxt=None)
+        raise NotImplementedError("<Pyfhel ERROR> encodeFrac not implemented")
+ 
+    cpdef np.ndarray[object, ndim=1] encodeAInt(self, int64_t[:,::1] arr):
+        raise NotImplementedError("<Pyfhel ERROR> encodeAInt not implemented")
 
-        Encodes a 1D list of integers into a PyPtxt plaintext.
-        
-        Encodes a 1D vector of integers based on the current context.
-        Plaintext must be a 1D vector of integers. Requires batch mode.
-        In Numpy the vector needs to be in 'contiguous' or 'c' mode.
-        If provided a plaintext, encodes the vector inside it. 
-        Maximum size of the vector defined by parameter 'm' from context.
-        
-        Args:
-            vec (list[int]): vector to encode.
-            ptxt (PyPtxt, optional): Optional destination plaintext.  
-            
-        Return:
-            PyPtxt: the plaintext containing the encoded vector.
-        """
-        if ptxt is None:
-            ptxt = PyPtxt()
-        self.afseal.encode(vec, deref(ptxt._ptr_ptxt))
-        ptxt._encoding = ENCODING_T.BATCH
-        return ptxt  
-    
-    cpdef PyPtxt encodeArray(self, int64_t[::1] arr, PyPtxt ptxt=None) except +:
-        """encodeArray(np.array[int] arr, PyPtxt ptxt=None)
+    cpdef np.ndarray[object, ndim=1] encodeAFrac(self, double[:,::1] arr):
+        raise NotImplementedError("<Pyfhel ERROR> encodeAFrac not implemented")
 
-        Encodes a 1D numpy array of integers into a PyPtxt plaintext.
-        
-        Encodes a 1D numpy vector of integers based on the current context.
-        Plaintext must be a 1D vector of integers. Requires batch mode.
-        In Numpy the vector needs to be in 'contiguous' or 'c' mode.
-        If provided a plaintext, encodes the vector inside it. 
-        Maximum size of the vector defined by parameter 'm' from context.
-        
-        Args:
-            vec (np.array[int]): vector to encode.
-            ptxt (PyPtxt, optional): Optional destination plaintext.  
-            
-        Return:
-            PyPtxt: the plaintext containing the encoded vector.
-        """
-        if ptxt is None:
-            ptxt = PyPtxt()
-        cdef vector[int64_t] vec=[0];
-        vec.assign(&arr[0], &arr[-1]+1)
-        self.afseal.encode(vec, deref(ptxt._ptr_ptxt)) 
-        ptxt._encoding = ENCODING_T.BATCH
-        return ptxt  
-    
     def encode(self, val_vec not None, PyPtxt ptxt=None):
         """encode(val_vec not None, PyPtxt ptxt=None)
 
@@ -776,16 +610,16 @@ cdef class Pyfhel:
             return self.encodeInt(<int>val_vec, ptxt)
         else:
             raise TypeError('<Pyfhel ERROR> Value/Vector type \['+type(val_vec)+
-                            '\] not supported for encoding')
+                            '\] not supported for scheme')
 
     # ................................ DECODE .................................
-    cpdef int64_t decodeInt(self, PyPtxt ptxt) except +:
+    cpdef int64_t[::1] decodeInt(self, PyPtxt ptxt):
         """decodeInt(PyPtxt ptxt)
 
         Decodes a PyPtxt plaintext into a single int value.
         
         Decodes a PyPtxt plaintext into a single int value based on
-        the current context. PyPtxt encoding must be INTEGER.
+        the current context. PyPtxt scheme must be INTEGER.
         
         Args:
             ptxt (PyPtxt, optional): plaintext to decode. 
@@ -794,21 +628,17 @@ cdef class Pyfhel:
             int: the decoded integer value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.INTEGER
+            RuntimeError: if the ciphertext scheme isn't SCHEME_t.BFV
         """
-        if (ptxt._encoding != ENCODING_T.INTEGER):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeInt")
-        cdef int64_t output_value=0
-        self.afseal.decode(deref(ptxt._ptr_ptxt), output_value)
-        return output_value 
+        raise NotImplementedError("<Pyfhel ERROR> decodeInt not implemented")
     
-    cpdef double decodeFrac(self, PyPtxt ptxt) except +:
+    cpdef double[::1] decodeFrac(self, PyPtxt ptxt):
         """decodeFrac(PyPtxt ptxt)
 
         Decodes a PyPtxt plaintext into a single float value.
         
         Decodes a PyPtxt plaintext into a single float value based on
-        the current context. PyPtxt encoding must be FRACTIONAL.
+        the current context. PyPtxt scheme must be FRACTIONAL.
         
         Args:
             ptxt (PyPtxt): plaintext to decode.
@@ -817,59 +647,15 @@ cdef class Pyfhel:
             float: the decoded float value
             
         Raise:
-            RuntimeError: if the ciphertext encoding isn't ENCODING_t.FRACTIONAL
+            RuntimeError: if the ciphertext scheme isn't SCHEME_t.CKKS
         """
-        if (ptxt._encoding != ENCODING_T.FRACTIONAL):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeFrac")
-        cdef double output_value=0
-        self.afseal.decode(deref(ptxt._ptr_ptxt), output_value)
-        return output_value
-    
-    cpdef vector[int64_t] decodeBatch(self, PyPtxt ptxt) except +:
-        """decodeBatch(PyPtxt ptxt)
+        raise NotImplementedError("<Pyfhel ERROR> decodeFrac not implemented")
+    cpdef np.ndarray[int64_t, ndim=2] decodeAInt(self, PyPtxt[:] ptxt):
+        raise NotImplementedError("<Pyfhel ERROR> decodeAInt not implemented")
 
-        Decodes a PyPtxt plaintext into a 1D vector of integers.
-        
-        Decodes a PyPtxt plaintext into a 1D vector of integers based on
-        the current context. PyPtxt encoding must be BATCH.
-        
-        Args:
-            ptxt (PyPtxt): plaintext to decode.
-            
-        Return:
-            list[int]: the vectort containing the decoded values
-            
-        Raise:
-            RuntimeError: if the plaintext encoding isn't ENCODING_t.BATCH
-        """
-        if (ptxt._encoding != ENCODING_T.BATCH):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeBatch")
-        cdef vector[int64_t] output_vector=self.afseal.decode(deref(ptxt._ptr_ptxt))
-        return output_vector
-    
-    cpdef int64_t[::1] decodeArray(self, PyPtxt ptxt) except +:
-        """decodeArray(PyPtxt ptxt)
+    cpdef np.ndarray[double, ndim=2] decodeAFrac(self, PyPtxt[:] ptxt):
+        raise NotImplementedError("<Pyfhel ERROR> decodeAFrac not implemented")
 
-        Decodes a PyPtxt plaintext into a 1D numpy numpy  of integers.
-        
-        Decodes a PyPtxt plaintext into a 1D numpy array of integers based on
-        the current context. PyPtxt encoding must be BATCH.
-        
-        Args:
-            ptxt (PyPtxt): plaintext to decode.
-            
-        Return:
-            np.array: the vector containing the decoded values
-            
-        Raise:
-            RuntimeError: if the plaintext encoding isn't ENCODING_t.BATCH
-        """
-        if (ptxt._encoding != ENCODING_T.BATCH):
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decodeArray")
-        cdef vector[int64_t] output_vector = self.afseal.decode(deref(ptxt._ptr_ptxt))
-        cdef int64_t[::1] output_array = <int64_t [:output_vector.size()]>output_vector.data()
-        return output_array
-        
     def decode(self, PyPtxt ptxt):
         """decode(PyPtxt ptxt)
 
@@ -889,20 +675,18 @@ cdef class Pyfhel:
         Raise:
             TypeError: if the plaintext doesn't have a valid type.
         """
-        if (ptxt._encoding == ENCODING_T.BATCH):
-            return self.decodeBatch(ptxt)
-        elif (ptxt._encoding == ENCODING_T.FRACTIONAL):
+        elif (ptxt._scheme == SCHEME_t.CKKS):
             return self.decodeFrac(ptxt)
-        elif (ptxt._encoding == ENCODING_T.INTEGER):
+        elif (ptxt._scheme == SCHEME_t.BFV):
             return self.decodeInt(ptxt)
         else:
-            raise RuntimeError("<Pyfhel ERROR> wrong encoding in PyPtxt. Cannot decode")
+            raise RuntimeError("<Pyfhel ERROR> wrong scheme in PyPtxt. Cannot decode")
 
             
     # =========================================================================
     # ============================= OPERATIONS ================================
     # =========================================================================
-    cpdef PyCtxt square(self, PyCtxt ctxt, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt square(self, PyCtxt ctxt, bool in_new_ctxt=False):
         """square(PyCtxt ctxt, bool in_new_ctxt=False)
 
         Square PyCtxt ciphertext value/s.
@@ -921,7 +705,7 @@ cdef class Pyfhel:
             self.afseal.square(deref(ctxt._ptr_ctxt))
             return ctxt
         
-    cpdef PyCtxt negate(self, PyCtxt ctxt, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt negate(self, PyCtxt ctxt, bool in_new_ctxt=False):
         """negate(PyCtxt ctxt, bool in_new_ctxt=False)
 
         Negate PyCtxt ciphertext value/s.
@@ -942,7 +726,7 @@ cdef class Pyfhel:
             return ctxt
 
         
-    cpdef PyCtxt add(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt add(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False):
         """add(PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False)
 
         Sum two PyCtxt ciphertexts homomorphically.
@@ -959,9 +743,9 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, the input transformed or a new one
         """
-        if (ctxt._encoding != ctxt_other._encoding):
-            raise RuntimeError(f"<Pyfhel ERROR> encoding type mistmatch in add terms"
-                                " ({ctxt._encoding} VS {ctxt_other._encoding})")
+        if (ctxt._scheme != ctxt_other._scheme):
+            raise RuntimeError(f"<Pyfhel ERROR> scheme type mistmatch in add terms"
+                                " ({ctxt._scheme} VS {ctxt_other._scheme})")
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.add(deref(new_ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
@@ -971,7 +755,7 @@ cdef class Pyfhel:
             return ctxt
         
         
-    cpdef PyCtxt add_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt add_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False):
         """add_plain(PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False)
 
         Sum a PyCtxt ciphertext and a PyPtxt plaintext.
@@ -988,9 +772,9 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, the input transformed or a new one
         """
-        if (ctxt._encoding != ptxt._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in add terms"
-                                " ({ctxt._encoding} VS {ptxt._encoding})")
+        if (ctxt._scheme != ptxt._scheme):
+            raise RuntimeError("<Pyfhel ERROR> scheme type mistmatch in add terms"
+                                " ({ctxt._scheme} VS {ptxt._scheme})")
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.add(deref(new_ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
@@ -1000,7 +784,7 @@ cdef class Pyfhel:
             return ctxt
 
             
-    cpdef PyCtxt sub(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt sub(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False):
         """sub(PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False)
 
         Substracts one PyCtxt ciphertext from another.
@@ -1017,9 +801,9 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, the input transformed or a new one
         """
-        if (ctxt._encoding != ctxt_other._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms"
-                                " ({ctxt._encoding} VS {ctxt_other._encoding})")
+        if (ctxt._scheme != ctxt_other._scheme):
+            raise RuntimeError("<Pyfhel ERROR> scheme type mistmatch in sub terms"
+                                " ({ctxt._scheme} VS {ctxt_other._scheme})")
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.sub(deref(new_ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
@@ -1028,7 +812,7 @@ cdef class Pyfhel:
             self.afseal.sub(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
             return ctxt
         
-    cpdef PyCtxt sub_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt sub_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False):
         """sub_plain (PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False)
 
         Substracts a PyCtxt ciphertext and a plaintext.
@@ -1045,9 +829,9 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, the input transformed or a new one
         """
-        if (ctxt._encoding != ptxt._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in sub terms"
-                                " ({ctxt._encoding} VS {ptxt._encoding})")
+        if (ctxt._scheme != ptxt._scheme):
+            raise RuntimeError("<Pyfhel ERROR> scheme type mistmatch in sub terms"
+                                " ({ctxt._scheme} VS {ptxt._scheme})")
         
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -1058,7 +842,7 @@ cdef class Pyfhel:
             return ctxt
 
         
-    cpdef PyCtxt multiply (self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt multiply (self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False):
         """multiply (PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False)
 
         Multiply first PyCtxt ciphertext by the second PyCtxt ciphertext.
@@ -1075,9 +859,9 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, the input transformed or a new one
         """
-        if (ctxt._encoding != ctxt_other._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms"
-                                " ({ctxt._encoding} VS {ctxt_other._encoding})")
+        if (ctxt._scheme != ctxt_other._scheme):
+            raise RuntimeError("<Pyfhel ERROR> scheme type mistmatch in mult terms"
+                                " ({ctxt._scheme} VS {ctxt_other._scheme})")
         
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -1087,7 +871,7 @@ cdef class Pyfhel:
             self.afseal.multiply(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
             return ctxt
         
-    cpdef PyCtxt multiply_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt multiply_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False):
         """multiply_plain (PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False)
 
         Multiply a PyCtxt ciphertext and a PyPtxt plaintext.
@@ -1103,9 +887,9 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, either the input transformed or a new one
         """
-        if (ctxt._encoding != ptxt._encoding):
-            raise RuntimeError("<Pyfhel ERROR> encoding type mistmatch in mult terms"
-                                " ({ctxt._encoding} VS {ptxt._encoding})")   
+        if (ctxt._scheme != ptxt._scheme):
+            raise RuntimeError("<Pyfhel ERROR> scheme type mistmatch in mult terms"
+                                " ({ctxt._scheme} VS {ptxt._scheme})")   
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.multiply(deref(new_ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))     
@@ -1114,7 +898,7 @@ cdef class Pyfhel:
             self.afseal.multiply(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))     
             return ctxt
         
-    cpdef PyCtxt rotate(self, PyCtxt ctxt, int k, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt rotate(self, PyCtxt ctxt, int k, bool in_new_ctxt=False):
         """rotate(PyCtxt ctxt, int k, bool in_new_ctxt=False)
 
         Rotates cyclically PyCtxt ciphertext values k positions.
@@ -1130,8 +914,6 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, the input transformed or a new one
         """
-        if (ctxt._encoding != ENCODING_T.BATCH):
-            raise RuntimeError("<Pyfhel ERROR> BATCH encoding required for rotation")
         
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
@@ -1141,7 +923,7 @@ cdef class Pyfhel:
             self.afseal.rotate(deref(ctxt._ptr_ctxt), k)   
             return ctxt
         
-    cpdef PyCtxt power(self, PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=False) except +:
+    cpdef PyCtxt power(self, PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=False):
         """power(PyCtxt ctxt, int expon, bool in_new_ctxt=False)
 
         Exponentiates PyCtxt ciphertext value/s to expon power.
@@ -1165,223 +947,26 @@ cdef class Pyfhel:
         else:
             self.afseal.exponentiate(deref(ctxt._ptr_ctxt), expon) 
             return ctxt
-        
-    cpdef PyCtxt polyEval(self, PyCtxt ctxt,
-                        vector[int64_t] coeffPoly, bool in_new_ctxt=False) except +:
-        """polyEval(PyCtxt ctxt, vector[int64_t] coeffPoly, bool in_new_ctxt=False)
-
-        Evaluates polynomial in PyCtxt ciphertext value/s.
-        
-        Evaluates a polynomial given by integer coefficients. Requires 
-        previously initialized relinearization keys with
-        relinearizeKeyGen(), since it applies relinearization after
-        each multiplication.
-    
-        Polynomial coefficients are in the form:
-            coeffPoly[0]*ctxt^2 + coeffPoly[1]*ctxt + coeffPoly[2]
-
-        Args:
-            ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
-            coeffPoly (list[int]): Polynomial coefficients
-            in_new_ctxt (bool): result in a newly created ciphertext
-            
-        Return:
-            PyCtxt: resulting ciphertext, the input transformed or a new one
-        """
-        
-        if (ctxt._encoding != ENCODING_T.BATCH) and (ctxt._encoding != ENCODING_T.INTEGER) :
-            raise RuntimeError("<Pyfhel ERROR> encoding type must be INTEGER or BATCH")
-        if (in_new_ctxt):
-            new_ctxt = PyCtxt(ctxt)
-            self.afseal.polyEval(deref(new_ctxt._ptr_ctxt), coeffPoly)      
-            return new_ctxt
-        else:
-            self.afseal.polyEval(deref(ctxt._ptr_ctxt), coeffPoly)    
-            return ctxt
-        
-    cpdef PyCtxt polyEval_double (self, PyCtxt ctxt,
-                 vector[double] coeffPoly, bool in_new_ctxt=False) except +:
-        """polyEval_double (PyCtxt ctxt, vector[double] coeffPoly, bool in_new_ctxt=False)
-
-        Evaluates polynomial in PyCtxt ciphertext value/s.
-        
-        Evaluates a polynomial given by float coefficients. Requires 
-        previously initialized relinearization keys with relinearizeKeyGen(),
-        since it applies relinearization after each multiplication.
-    
-        Polynomial coefficients are in the form:
-            coeffPoly[0]*ctxt^2 + coeffPoly[1]*ctxt + coeffPoly[2]
-
-        Args:
-            ctxt (PyCtxt): ciphertext whose value/s are exponetiated.  
-            coeffPoly (list[int]): Polynomial coefficients. 
-            in_new_ctxt (bool): result in a newly created ciphertext
-            
-        Return:
-            PyCtxt: resulting ciphertext, the input transformed or a new one
-        """        
-        if (ctxt._encoding != ENCODING_T.BATCH) and (ctxt._encoding != ENCODING_T.INTEGER) :
-            raise RuntimeError("<Pyfhel ERROR> encoding type must be INTEGER or BATCH")
-        if (in_new_ctxt):
-            new_ctxt = PyCtxt(ctxt)
-            self.afseal.polyEval(deref(new_ctxt._ptr_ctxt), coeffPoly)      
-            return new_ctxt
-        else:
-            self.afseal.polyEval(deref(ctxt._ptr_ctxt), coeffPoly)    
-            return ctxt
-        
-        
-    # =========================================================================
-    # =============================== PyPoly ==================================
-    # =========================================================================  
-    # CREATION
-    cpdef PyPoly empty_poly(self, PyCtxt ref) except +:
-        """Generates an empty polynomial using `ref` as reference"""
-        # poly._afpoly =  <AfsealPoly *> self.afseal.empty_poly(deref(ref._ptr_ctxt))
-        return PyPoly(ref)
-    
-    cpdef PyPoly poly_from_ciphertext(self, PyCtxt ctxt, size_t i) except +:
-        """Gets the i-th underlying polynomial of a ciphertext"""
-        return PyPoly(ctxt, i)
-
-    cpdef PyPoly poly_from_plaintext(self, PyCtxt ref, PyPtxt ptxt) except +:
-        """Gets the underlying polynomial of a plaintext"""
-        return PyPoly(ref, ptxt)
-
-    cpdef PyPoly poly_from_coeff_vector(self, vector[cy_complex] coeff_vector, PyCtxt ref) except +:
-        """Generates a polynomial with given coefficients"""
-        return PyPoly(coeff_vector, ref)
-    
-    cpdef list polys_from_ciphertext(self, PyCtxt ctxt) except +:
-        """Generates a list of polynomials of the given ciphertext"""
-        raise NotImplementedError("TODO: Not yet there")
-
-    # OPS
-    cpdef PyPoly poly_add(self, PyPoly p, PyPoly p_other, bool in_new_poly=False) except +:
-        """Sum two PyPoly polynomials: p + p_other.
-        
-        Encoding must be consistent (TODO).  The result is applied
-        to the first polynomial or to a newly created one.
-    
-        Args:
-            p (PyPoly): polynomial whose values are added with p_other.  
-            p_other (PyPoly): polynomial left untouched.  
-            in_new_poly (bool): result in a newly created polynomial
-            
-        Return:
-            PyPoly: resulting polynomial, the input transformed or a new one.
-        """
-        res_poly = PyPoly(p) if in_new_poly else p
-        self.afseal.add_inplace(deref(res_poly._afpoly), deref(p_other._afpoly))
-        return res_poly
-
-    cpdef PyPoly poly_subtract(self, PyPoly p, PyPoly p_other, bool in_new_poly=False) except +:
-        """Subtract two PyPoly polynomials: p - p_other.
-        
-        Encoding must be consistent (TODO).  The result is applied
-        to the first polynomial or to a newly created one.
-    
-        Args:
-            p (PyPoly): polynomial whose values are subtracted with p_other.  
-            p_other (PyPoly): polynomial left untouched.  
-            in_new_poly (bool): result in a newly created polynomial
-            
-        Return:
-            PyPoly: resulting polynomial, the input transformed or a new one.
-        """
-        res_poly = PyPoly(p) if in_new_poly else p
-        self.afseal.subtract_inplace(deref(res_poly._afpoly), deref(p_other._afpoly))
-        return res_poly
-
-    cpdef PyPoly poly_multiply(self, PyPoly p, PyPoly p_other, bool in_new_poly=False) except +:
-        """Multiply two PyPoly polynomials: p * p_other.
-        
-        Encoding must be consistent (TODO).  The result is applied
-        to the first polynomial or to a newly created one.
-    
-        Args:
-            p (PyPoly): polynomial whose values are multiplied with p_other.  
-            p_other (PyPoly): polynomial left untouched.  
-            in_new_poly (bool): result in a newly created polynomial
-            
-        Return:
-            PyPoly: resulting polynomial, the input transformed or a new one.
-        """
-        res_poly = PyPoly(p) if in_new_poly else p
-        self.afseal.multiply_inplace(deref(res_poly._afpoly), deref(p_other._afpoly))
-        return res_poly
-
-    cpdef PyPoly poly_invert(self, PyPoly p, bool in_new_poly=False) except +:
-        """Invert PyPoly polynomial: inverse(p)
-        
-        Encoding must be consistent (TODO).  The result is applied
-        to the polynomial or to a newly created one.
-    
-        Args:
-            p (PyPoly): polynomial whose values are inverted.  
-            in_new_poly (bool): result in a newly created polynomial
-            
-        Return:
-            PyPoly: resulting polynomial, the input transformed or a new one.
-        """
-        res_poly = PyPoly(p) if in_new_poly else p
-        self.afseal.invert(deref(res_poly._afpoly))
-        return res_poly
-
-    # I/O
-    cpdef void poly_to_ciphertext(self, PyPoly p, PyCtxt ctxt, size_t i) except+:
-        """Set chosen i-th polynimial in ctxt to p.
-        
-        Encoding must be consistent (TODO).
-    
-        Args:
-            p (PyPoly): polynomial to be inserted.  
-            ctxt (PyCtxt): base ciphertext.
-            i (int): number of polynomial in ctxt to be set.
-            
-        Return:
-            None
-        """
-        self.afseal.poly_to_ciphertext(deref(p._afpoly), deref(ctxt._ptr_ctxt), i)
-
-    cpdef void poly_to_plaintext(self, PyPoly p, PyPtxt ptxt) except+:
-        """Set the polynimial in ptxt to p.
-        
-        Encoding must be consistent (TODO).
-    
-        Args:
-            p (PyPoly): polynomial to be inserted.  
-            ptxt (PyPtxt): base plaintext.
-            
-        Return:
-            None
-        """
-        self.afseal.poly_to_plaintext(deref(p._afpoly), deref(ptxt._ptr_ptxt))
-
-
     # =========================================================================
     # ================================ I/O ====================================
     # =========================================================================   
 
     # FILES
 
-    cpdef bool saveContext(self, fileName) except +:
-        """saveContext(fileName)
-
-        Saves current context in a file
+    cpdef size_t save_context(self, fileName, str compr_mode="zstd"):
+        """Saves current context in a file
         
         Args:
-            fileName (str, pathlib.Path): Name of the file.   
+            fileName (str, pathlib.Path): Name of the file.  
+            compr_mode (str): Compression. One of "none", "zlib", "zstd" 
             
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saveContext(_to_valid_file_str(fileName, check=False).encode())
+        return self.afseal.save_context(_to_valid_file_str(fileName, check=False).encode(), compr_mode.encode())
     
-    cpdef bool restoreContext(self, fileName) except +:
-        """restoreContext(fileName)
-
-        Restores current context from a file
+    cpdef size_t load_context(self, fileName):
+        """Restores context from a file
         
         Args:
             fileName (str, pathlib.Path): Name of the file.   
@@ -1389,12 +974,22 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restoreContext(_to_valid_file_str(fileName, check=True).encode())
+        return self.afseal.load_context(_to_valid_file_str(fileName, check=True).encode())
 
-    cpdef bool savepublicKey(self, fileName) except +:
-        """savepublicKey(fileName)
-
-        Saves current public key in a file
+    cpdef size_t save_public_key(self, fileName, str compr_mode="zstd"):
+        """Saves current public key in a file
+        
+        Args:
+            fileName (str, pathlib.Path): Name of the file.   
+            compr_mode (str): Compression. One of "none", "zlib", "zstd" 
+            
+        Return:
+            bool: Result, True if OK, False otherwise.
+        """
+        return self.afseal.save_public_key(_to_valid_file_str(fileName, check=False).encode(), compr_mode.encode())
+            
+    cpdef size_t load_public_key(self, fileName):
+        """Restores current public key from a file
         
         Args:
             fileName (str, pathlib.Path): Name of the file.   
@@ -1402,36 +997,22 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.savepublicKey(_to_valid_file_str(fileName, check=False).encode())
-            
-    cpdef bool restorepublicKey(self, fileName) except +:
-        """restorepublicKey(fileName)
+        return self.afseal.load_public_key(_to_valid_file_str(fileName, check=True).encode())
 
-        Restores current public key from a file
+    cpdef size_t save_secretKey(self, fileName, str compr_mode="zstd"):
+        """Saves current secret key in a file
         
         Args:
             fileName (str, pathlib.Path): Name of the file.   
+            compr_mode (str): Compression. One of "none", "zlib", "zstd"
             
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restorepublicKey(_to_valid_file_str(fileName, check=True).encode())
-
-    cpdef bool savesecretKey(self, fileName) except +:
-        """savesecretKey(fileName)
-
-        Saves current secret key in a file
-        
-        Args:
-            fileName (str, pathlib.Path): Name of the file.   
-            
-        Return:
-            bool: Result, True if OK, False otherwise.
-        """
-        return self.afseal.savesecretKey(_to_valid_file_str(fileName, check=False).encode())
+        return self.afseal.save_secret_key(_to_valid_file_str(fileName, check=False).encode(), compr_mode.encode())
     
-    cpdef bool restoresecretKey(self, fileName) except +:
-        """restoresecretKey(fileName)
+    cpdef size_t load_secret_key(self, fileName):
+        """load_secret_key(fileName)
 
         Restores current secret key from a file
         
@@ -1441,23 +1022,22 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restoresecretKey(_to_valid_file_str(fileName, check=True).encode())
+        return self.afseal.load_secret_key(_to_valid_file_str(fileName, check=True).encode())
     
-    cpdef bool saverelinKey(self, fileName) except +:
-        """saverelinKey(fileName)
-
-        Saves current relinearization keys in a file
+    cpdef size_t save_relin_key(self, fileName, str compr_mode="zstd"):
+        """Saves current relinearization keys in a file
         
         Args:
             fileName (str, pathlib.Path): Name of the file.   
+            compr_mode (str): Compression. One of "none", "zlib", "zstd"
             
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saverelinKey(_to_valid_file_str(fileName, check=False).encode())
+        return self.afseal.save_relin_key(_to_valid_file_str(fileName, check=False).encode(), compr_mode.encode())
     
-    cpdef bool restorerelinKey(self, fileName) except +:
-        """restorerelinKey(fileName)
+    cpdef size_t load_relin_key(self, fileName):
+        """load_relin_key(fileName)
 
         Restores current relinearization keys from a file
         
@@ -1467,23 +1047,22 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restorerelinKey(_to_valid_file_str(fileName, check=True).encode())
+        return self.afseal.load_relin_key(_to_valid_file_str(fileName, check=True).encode())
     
-    cpdef bool saverotateKey(self, fileName) except +:
-        """saverotateKey(fileName)
-
-        Saves current rotation Keys from a file
+    cpdef size_t save_rotate_key(self, fileName, str compr_mode="zstd"):
+        """Saves current rotation Keys from a file
         
         Args:
             fileName (str, pathlib.Path): Name of the file.   
+            compr_mode (str): Compression. One of "none", "zlib", "zstd"
             
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.saverotateKey(_to_valid_file_str(fileName, check=False).encode())
+        return self.afseal.save_rotate_key(_to_valid_file_str(fileName, check=False).encode(), compr_mode.encode())
     
-    cpdef bool restorerotateKey(self, fileName) except +:
-        """restorerotateKey(fileName)
+    cpdef size_t load_rotate_key(self, fileName):
+        """load_rotate_key(fileName)
 
         Restores current rotation Keys from a file
         
@@ -1493,12 +1072,12 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        return self.afseal.restorerotateKey(_to_valid_file_str(fileName, check=True).encode())
+        return self.afseal.load_rotate_key(_to_valid_file_str(fileName, check=True).encode())
     
     
     # BYTES
 
-    cpdef bytes to_bytes_context(self) except +:
+    cpdef bytes to_bytes_context(self):
         """to_bytes_Context()
 
         Saves current context in a bytes string
@@ -1510,10 +1089,10 @@ cdef class Pyfhel:
             bytes: Serialized Context.
         """
         cdef ostringstream outputter
-        self.afseal.ssaveContext(outputter)
+        self.afseal.save_context(outputter)
         return outputter.str()
     
-    cpdef bool from_bytes_context(self, bytes content) except +:
+    cpdef bool from_bytes_context(self, bytes content):
         """from_bytes_context(bytes content)
 
         Restores current context from a bytes object
@@ -1526,9 +1105,9 @@ cdef class Pyfhel:
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
-        return self.afseal.srestoreContext(inputter)
+        return self.afseal.load_context(inputter)
 
-    cpdef bytes to_bytes_publicKey(self) except +:
+    cpdef bytes to_bytes_publicKey(self):
         """to_bytes_publicKey()
 
         Saves current public key in a bytes string
@@ -1540,10 +1119,10 @@ cdef class Pyfhel:
             bytes: Serialized public key.
         """
         cdef ostringstream outputter
-        self.afseal.ssavepublicKey(outputter)
+        self.afseal.save_public_key(outputter)
         return outputter.str()
             
-    cpdef bool from_bytes_publicKey(self, bytes content) except +:
+    cpdef bool from_bytes_publicKey(self, bytes content):
         """from_bytes_publicKey(bytes content)
 
         Restores current public key from a bytes object
@@ -1556,9 +1135,9 @@ cdef class Pyfhel:
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
-        return self.afseal.srestorepublicKey(inputter)
+        return self.afseal.load_public_key(inputter)
 
-    cpdef bytes to_bytes_secretKey(self) except +:
+    cpdef bytes to_bytes_secretKey(self):
         """to_bytes_secretKey()
 
         Saves current secret key in a bytes string
@@ -1570,10 +1149,10 @@ cdef class Pyfhel:
             bytes: Serialized secret key.
         """
         cdef ostringstream outputter
-        self.afseal.ssavesecretKey(outputter)
+        self.afseal.save_secret_key(outputter)
         return outputter.str()
     
-    cpdef bool from_bytes_secretKey(self, bytes content) except +:
+    cpdef bool from_bytes_secretKey(self, bytes content):
         """from_bytes_secretKey(bytes content)
 
         Restores current secret key from a bytes object
@@ -1586,9 +1165,9 @@ cdef class Pyfhel:
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
-        return self.afseal.srestoresecretKey(inputter)
+        return self.afseal.load_secret_key(inputter)
     
-    cpdef bytes to_bytes_relinKey(self) except +:
+    cpdef bytes to_bytes_relinKey(self):
         """to_bytes_relinKey()
 
         Saves current relinearization key in a bytes string
@@ -1600,10 +1179,10 @@ cdef class Pyfhel:
             bytes: Serialized relinearization key.
         """
         cdef ostringstream outputter
-        self.afseal.ssaverelinKey(outputter)
+        self.afseal.save_relin_key(outputter)
         return outputter.str()
     
-    cpdef bool from_bytes_relinKey(self, bytes content) except +:
+    cpdef bool from_bytes_relinKey(self, bytes content):
         """from_bytes_relinKey(bytes content)
 
         Restores current relin key from a bytes object
@@ -1616,9 +1195,9 @@ cdef class Pyfhel:
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
-        return self.afseal.srestorerelinKey(inputter)
+        return self.afseal.load_relin_key(inputter)
     
-    cpdef bytes to_bytes_rotateKey(self) except +:
+    cpdef bytes to_bytes_rotateKey(self):
         """to_bytes_rotateKey(fileName)
 
         Saves current context in a bytes string
@@ -1630,10 +1209,10 @@ cdef class Pyfhel:
             bytes: Serialized rotation key.
         """
         cdef ostringstream outputter
-        self.afseal.ssaverotateKey(outputter)
+        self.afseal.save_rotate_key(outputter)
         return outputter.str()
     
-    cpdef bool from_bytes_rotateKey(self, bytes content) except +:
+    cpdef bool from_bytes_rotateKey(self, bytes content):
         """from_bytes_rotateKey(bytes content)
 
         Restores current rotation key from a bytes object
@@ -1646,7 +1225,7 @@ cdef class Pyfhel:
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
-        return self.afseal.srestorerotateKey(inputter)
+        return self.afseal.load_rotate_key(inputter)
          
     
     # =========================================================================
@@ -1657,7 +1236,7 @@ cdef class Pyfhel:
 
         Empirically determines the multiplicative depth of a Pyfhel Object
         for a given context. For this, it encrypts the inputs x, y and z with
-        Fractional encoding and performs the following chained multiplication
+        Fractional scheme and performs the following chained multiplication
         until the result deviates more than delta in absolute value:
         
         >    x * y * z * y * z * y * z * y * z ...
@@ -1685,7 +1264,7 @@ cdef class Pyfhel:
                 break
         return m_depth
 
-    cpdef bool batchEnabled(self) except +:
+    cpdef bool batchEnabled(self):
         """batchEnabled()
 
         Flag of batch enabled. 
@@ -1695,18 +1274,8 @@ cdef class Pyfhel:
         """
         return self.afseal.batchEnabled()
     
-    cpdef long relinBitCount(self) except +:
-        """relinBitCount()
-
-        Relinearization bit count for current evaluation keys.
-            
-        Return:
-            int: [1-60], based on relinKeyGen parameter.
-        """
-        return self.afseal.relinBitCount()
-    
     # GETTERS
-    cpdef int getnSlots(self) except +:
+    cpdef int getnSlots(self):
         """Maximum number of slots fitting in a ciphertext in BATCH mode.
         
         Generally it matches with `m`.
@@ -1716,7 +1285,7 @@ cdef class Pyfhel:
         """
         return self.afseal.getnSlots()
     
-    cpdef int getp(self) except +:
+    cpdef int getp(self):
         """Plaintext modulus of the current context.
 
         All operations are  modulo p.
@@ -1726,12 +1295,12 @@ cdef class Pyfhel:
         """
         return self.afseal.getp()
     
-    cpdef int getm(self) except +:
+    cpdef int getm(self):
         """Plaintext coefficient of the current context.
         
         The more, the bigger the ciphertexts are, thus allowing for 
         more operations with correct decryption. Also, number of 
-        values in a ciphertext in BATCH encoding mode. 
+        values in a ciphertext in BATCH scheme mode. 
         
             
         Return:
@@ -1739,19 +1308,19 @@ cdef class Pyfhel:
         """
         return self.afseal.getm()
     
-    cpdef int getbase(self) except +:
+    cpdef int getbase(self):
         """Polynomial base.
         
         Polynomial base of polynomials that conform cyphertexts and 
         plaintexts.Affects size of plaintexts and ciphertexts, and 
-        FRACTIONAL encoding. See encryptFrac. 
+        FRACTIONAL scheme. See encryptFrac. 
         
         Return:
             int: Polynomial base.
         """
         return self.afseal.getbase()
     
-    cpdef int getsec(self) except +:
+    cpdef int getsec(self):
         """Security level equivalent in AES.
         
         Return:
@@ -1759,10 +1328,10 @@ cdef class Pyfhel:
         """
         return self.afseal.getsec()
     
-    cpdef int getintDigits(self) except +:
-        """Integer digits in FRACTIONAL encoding.
+    cpdef int getintDigits(self):
+        """Integer digits in FRACTIONAL scheme.
         
-        When encrypting/encoding double (FRACTIONAL encoding), truncated
+        When encrypting/scheme double (FRACTIONAL scheme), truncated
         positions dedicated to integer part, out of 'm' positions.
         
         Return:
@@ -1770,10 +1339,10 @@ cdef class Pyfhel:
         """
         return self.afseal.getintDigits()
     
-    cpdef int getfracDigits(self) except +:
-        """Decimal digits in FRACTIONAL encoding.
+    cpdef int getfracDigits(self):
+        """Decimal digits in FRACTIONAL scheme.
         
-        When encrypting/encoding double (FRACTIONAL encoding), truncated
+        When encrypting/scheme double (FRACTIONAL scheme), truncated
         positions dedicated to deimal part, out of 'm' positions.
         
         Return:
@@ -1781,19 +1350,19 @@ cdef class Pyfhel:
         """
         return self.afseal.getfracDigits()
     
-    cpdef bool getflagBatch(self) except +:
-        """Flag for BATCH encoding mode.
+    cpdef bool getflagBatch(self):
+        """Flag for BATCH scheme mode.
         
         If True, allows operations over vectors encrypted in single PyCtxt 
         ciphertexts. Defined in context creation based on the chosen values
         of p and m, and activated in context creation with a flag.
         
         Return:
-            bool: flag for enabled BATCH encoding and operating.
+            bool: flag for enabled BATCH scheme and operating.
         """
         return self.afseal.getflagBatch()
     
-    cpdef bool is_secretKey_empty(self) except+:
+    cpdef bool is_secretKey_empty(self):
         """True if the current Pyfhel instance has no secret Key.
 
         Return:
@@ -1801,7 +1370,7 @@ cdef class Pyfhel:
         """
         return self.afseal.is_secretKey_empty()
 
-    cpdef bool is_publicKey_empty(self) except+:
+    cpdef bool is_publicKey_empty(self):
         """True if the current Pyfhel instance has no public Key.
 
         Return:
@@ -1809,7 +1378,7 @@ cdef class Pyfhel:
         """
         return self.afseal.is_publicKey_empty()
 
-    cpdef bool is_rotKey_empty(self) except+:
+    cpdef bool is_rotKey_empty(self):
         """True if the current Pyfhel instance has no rotation key.
 
         Return:
@@ -1817,7 +1386,7 @@ cdef class Pyfhel:
         """
         return self.afseal.is_rotKey_empty()
 
-    cpdef bool is_relinKey_empty(self) except+:
+    cpdef bool is_relinKey_empty(self):
         """True if the current Pyfhel instance has no relinearization key.
 
         Return:
@@ -1825,10 +1394,142 @@ cdef class Pyfhel:
         """
         return self.afseal.is_relinKey_empty()
 
-    cpdef bool is_context_empty(self) except+:
+    cpdef bool is_context_empty(self):
         """True if the current Pyfhel instance has no context.
 
         Return:
             bool: True if there is no context. False if there is.
         """
         return self.afseal.is_context_empty()
+
+
+
+    # =========================================================================
+    # =============================== PyPoly ==================================
+    # =========================================================================  
+    # CREATION
+    cpdef PyPoly empty_poly(self, PyCtxt ref):
+        """Generates an empty polynomial using `ref` as reference"""
+        # poly._afpoly =  <AfsealPoly *> self.afseal.empty_poly(deref(ref._ptr_ctxt))
+        return PyPoly(ref)
+    
+    cpdef PyPoly poly_from_ciphertext(self, PyCtxt ctxt, size_t i):
+        """Gets the i-th underlying polynomial of a ciphertext"""
+        return PyPoly(ctxt, i)
+
+    cpdef PyPoly poly_from_plaintext(self, PyCtxt ref, PyPtxt ptxt):
+        """Gets the underlying polynomial of a plaintext"""
+        return PyPoly(ref, ptxt)
+
+    cpdef PyPoly poly_from_coeff_vector(self, vector[cy_complex] coeff_vector, PyCtxt ref):
+        """Generates a polynomial with given coefficients"""
+        return PyPoly(coeff_vector, ref)
+    
+    cpdef list polys_from_ciphertext(self, PyCtxt ctxt):
+        """Generates a list of polynomials of the given ciphertext"""
+        raise NotImplementedError("TODO: Not yet there")
+
+    # OPS
+    cpdef PyPoly poly_add(self, PyPoly p, PyPoly p_other, bool in_new_poly=False):
+        """Sum two PyPoly polynomials: p + p_other.
+        
+        Encoding must be consistent (TODO).  The result is applied
+        to the first polynomial or to a newly created one.
+    
+        Args:
+            p (PyPoly): polynomial whose values are added with p_other.  
+            p_other (PyPoly): polynomial left untouched.  
+            in_new_poly (bool): result in a newly created polynomial
+            
+        Return:
+            PyPoly: resulting polynomial, the input transformed or a new one.
+        """
+        res_poly = PyPoly(p) if in_new_poly else p
+        self.afseal.add_inplace(deref(res_poly._afpoly), deref(p_other._afpoly))
+        return res_poly
+
+    cpdef PyPoly poly_subtract(self, PyPoly p, PyPoly p_other, bool in_new_poly=False):
+        """Subtract two PyPoly polynomials: p - p_other.
+        
+        Encoding must be consistent (TODO).  The result is applied
+        to the first polynomial or to a newly created one.
+    
+        Args:
+            p (PyPoly): polynomial whose values are subtracted with p_other.  
+            p_other (PyPoly): polynomial left untouched.  
+            in_new_poly (bool): result in a newly created polynomial
+            
+        Return:
+            PyPoly: resulting polynomial, the input transformed or a new one.
+        """
+        res_poly = PyPoly(p) if in_new_poly else p
+        self.afseal.subtract_inplace(deref(res_poly._afpoly), deref(p_other._afpoly))
+        return res_poly
+
+    cpdef PyPoly poly_multiply(self, PyPoly p, PyPoly p_other, bool in_new_poly=False):
+        """Multiply two PyPoly polynomials: p * p_other.
+        
+        Encoding must be consistent (TODO).  The result is applied
+        to the first polynomial or to a newly created one.
+    
+        Args:
+            p (PyPoly): polynomial whose values are multiplied with p_other.  
+            p_other (PyPoly): polynomial left untouched.  
+            in_new_poly (bool): result in a newly created polynomial
+            
+        Return:
+            PyPoly: resulting polynomial, the input transformed or a new one.
+        """
+        res_poly = PyPoly(p) if in_new_poly else p
+        self.afseal.multiply_inplace(deref(res_poly._afpoly), deref(p_other._afpoly))
+        return res_poly
+
+    cpdef PyPoly poly_invert(self, PyPoly p, bool in_new_poly=False):
+        """Invert PyPoly polynomial: inverse(p)
+        
+        Encoding must be consistent (TODO).  The result is applied
+        to the polynomial or to a newly created one.
+    
+        Args:
+            p (PyPoly): polynomial whose values are inverted.  
+            in_new_poly (bool): result in a newly created polynomial
+            
+        Return:
+            PyPoly: resulting polynomial, the input transformed or a new one.
+        """
+        res_poly = PyPoly(p) if in_new_poly else p
+        self.afseal.invert(deref(res_poly._afpoly))
+        return res_poly
+
+    # I/O
+    cpdef void poly_to_ciphertext(self, PyPoly p, PyCtxt ctxt, size_t i):
+        """Set chosen i-th polynimial in ctxt to p.
+        
+        Encoding must be consistent (TODO).
+    
+        Args:
+            p (PyPoly): polynomial to be inserted.  
+            ctxt (PyCtxt): base ciphertext.
+            i (int): number of polynomial in ctxt to be set.
+            
+        Return:
+            None
+        """
+        self.afseal.poly_to_ciphertext(deref(p._afpoly), deref(ctxt._ptr_ctxt), i)
+
+    cpdef void poly_to_plaintext(self, PyPoly p, PyPtxt ptxt):
+        """Set the polynimial in ptxt to p.
+        
+        Encoding must be consistent (TODO).
+    
+        Args:
+            p (PyPoly): polynomial to be inserted.  
+            ptxt (PyPtxt): base plaintext.
+            
+        Return:
+            None
+        """
+        self.afseal.poly_to_plaintext(deref(p._afpoly), deref(ptxt._ptr_ptxt))
+
+
+    
