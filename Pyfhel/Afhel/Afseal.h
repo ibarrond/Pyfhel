@@ -60,22 +60,21 @@ class AfsealPoly;
 
 
 // Enum converters
-std::map<seal::compr_mode_type, std::string> compr_mode_str {
+static std::map<seal::compr_mode_type, std::string> compr_mode_str {
    {compr_mode_type::none, "none"},
    {compr_mode_type::zlib, "zlib"},
    {compr_mode_type::zstd, "zstd"},
 };
-std::map<std::string, seal::compr_mode_type> compr_mode_map {
+static std::map<std::string, seal::compr_mode_type> compr_mode_map {
    {"none", compr_mode_type::none},
    {"zlib", compr_mode_type::zlib},
    {"zstd", compr_mode_type::zstd},
 };
-std::map<seal::scheme_type, scheme_t> scheme_map {
+static std::map<seal::scheme_type, scheme_t> scheme_map {
    {seal::scheme_type::none, scheme_t::none},
    {seal::scheme_type::bfv,  scheme_t::bfv},
    {seal::scheme_type::ckks, scheme_t::ckks},
 };
-
 
 
 // =============================================================================
@@ -136,7 +135,7 @@ class AfsealPoly: public AfPoly {
   // Note: All functions using an Afseal instance could also be defined as members of the Afseal class.
 
   /// Default Destructor
-  ~AfsealPoly() = default;
+  virtual ~AfsealPoly();
 
   /// Copy constructor
   AfsealPoly(AfsealPoly &other);
@@ -165,22 +164,22 @@ class AfsealPoly: public AfPoly {
 
   /// Export polynomial to a vector of complex values
   /// \return vector of the (complex) coefficients of the polynomial
-  std::vector<std::complex<double>> to_coeff_list(Afseal &afseal);
+  std::vector<std::complex<double>> to_coeff_list(Afhel &afseal);
 
   /// get individual coefficient
   /// \param i index of the coefficient
   /// \return the i-th coefficient
-  std::complex<double> get_coeff(Afseal &afseal, size_t i);
+  std::complex<double> get_coeff(Afhel &afseal, size_t i);
 
   /// set individual coefficient
   /// \param i index of the coefficient
-  void set_coeff(Afseal &afseal, std::complex<double> &val, size_t i);
+  void set_coeff(Afhel &afseal, std::complex<double> &val, size_t i);
 
   // ----------- OPERATIONS -------------
   //inplace ops -> result in first operand
-  void add_inplace(const AfsealPoly &other);
-  void subtract_inplace(const AfsealPoly &other);
-  void multiply_inplace(const AfsealPoly &other);
+  void add_inplace(const AfPoly &other);
+  void subtract_inplace(const AfPoly &other);
+  void multiply_inplace(const AfPoly &other);
 
   bool invert_inplace();
 
@@ -230,9 +229,9 @@ class Afseal: public Afhel {
   // -------------------------- CRYPTOGRAPHY ---------------------------
   // CONTEXT GENERATION
   void ContextGen(
-    std::string scheme_t, uint64_t plain_modulus = 2,
-    size_t poly_modulus_degree = 2048,
-    long sec = 128, std::vector<int> qs = {});
+    scheme_t scheme, uint64_t poly_modulus_degree = 2048, 
+    uint64_t plain_modulus_bit_size = 20, uint64_t plain_modulus = 0, 
+    int sec = 128, std::vector<int> qs = {});
 
   // KEY GENERATION
   void KeyGen();
@@ -240,82 +239,79 @@ class Afseal: public Afhel {
   void rotateKeyGen();
 
   // ENCRYPTION
-  void encrypt(AfsealPtxt &plain1, AfsealCtxt &cipherOut);
-  void encrypt(std::vector<AfsealPtxt> &plainV, std::vector<AfsealCtxt> &cipherVOut);
+  void encrypt(AfPtxt &plain1, AfCtxt &cipherOut);
+  void encrypt_v(std::vector<AfPtxt*> &plainV, std::vector<AfCtxt*> &cipherVOut);
 
   // DECRYPTION
-  void decrypt(AfsealCtxt &cipher1, AfsealPtxt &plainOut);
-  void decrypt(std::vector<AfsealCtxt> &cipherV, std::vector<AfsealPtxt> &plainVOut);
+  void decrypt(AfCtxt &cipher1, AfPtxt &plainOut);
+  void decrypt_v(std::vector<AfCtxt*> &cipherV, std::vector<AfPtxt*> &plainVOut);
 
   // NOISE MEASUREMENT
-  int noise_level(AfsealCtxt &cipher1);
+  int noise_level(AfCtxt &cipher1);
 
   // ------------------------------ CODEC -------------------------------
   // ENCODE
   // bfv
-  void encode(std::vector<int64_t> &values, AfsealPtxt &plainOut);
+  void encode_i(std::vector<int64_t> &values, AfPtxt &plainOut);
   // ckks
-  void encode(std::vector<double> &values, double scale, AfsealPtxt &plainVOut);
-  void encode(std::vector<complex<double>> &values, double scale, AfsealPtxt &plainVOut);
+  void encode_f(std::vector<double> &values, double scale, AfPtxt &plainVOut);
+  void encode_c(std::vector<std::complex<double>> &values, double scale, AfPtxt &plainVOut);
 
   // DECODE
   // bfv
-  void decode(AfsealPtxt &plain1, vector<int64_t> &valueVOut);
+  void decode_i(AfPtxt &plain1, vector<int64_t> &valueVOut);
   // ckks
-  void decode(AfsealPtxt &plain1, std::vector<double> &valueVOut);
-  void decode(AfsealPtxt &plain1, std::vector<complex<double>> &valueVOut);
+  void decode_f(AfPtxt &plain1, std::vector<double> &valueVOut);
+  void decode_c(AfPtxt &plain1, std::vector<std::complex<double>> &valueVOut);
 
   // AUXILIARY
-  void data(AfsealPtxt &ptxt, uint64_t *dest);
+  void data(AfPtxt &ptxt, uint64_t *dest);
   void allocate_zero_poly(uint64_t n, uint64_t coeff_mod_count, uint64_t *dest);
   
   // -------------------------- RELINEARIZATION -------------------------
-  void relinearize(AfsealCtxt &cipher1);
+  void relinearize(AfCtxt &cipher1);
 
 
   // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
   // NEGATE
-  void negate(AfsealCtxt &cipher1);
-  void negate(std::vector<AfsealCtxt> &cipherV);
+  void negate(AfCtxt &cipher1);
+  void negate(std::vector<AfCtxt*> &cipherV);
 
   // SQUARE
-  void square(AfsealCtxt &cipher1);
-  void square(std::vector<AfsealCtxt> &cipherV);
+  void square(AfCtxt &cipher1);
+  void square(std::vector<AfCtxt*> &cipherV);
 
   // ADDITION
-  void add(AfsealCtxt &cipherInOut, AfsealCtxt &cipher2);
-  void add(AfsealCtxt &cipherInOut, AfsealPtxt &plain2);
-  void add(std::vector<AfsealCtxt> &cipherVInOut, std::vector<AfsealCtxt> &cipherV2);
-  void add(std::vector<AfsealCtxt> &cipherVInOut, std::vector<AfsealPtxt> &plainV2);
-  
-  void cumsum(std::vector<seal::Ciphertext> &cipherV, AfsealCtxt &cipherOut);
+  void add(AfCtxt &cipherInOut, AfCtxt &cipher2);
+  void add_plain(AfCtxt &cipherInOut, AfPtxt &plain2);
+  void add(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2);
+  void add(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2);
 
   // SUBTRACTION
-  void sub(AfsealCtxt &cipherInOut, AfsealCtxt &cipher2);
-  void sub(AfsealCtxt &cipherInOut, AfsealPtxt &plain2);
-  void sub(std::vector<AfsealCtxt> &cipherVInOut, std::vector<AfsealCtxt> &cipherV2);
-  void sub(std::vector<AfsealCtxt> &cipherVInOut, std::vector<AfsealPtxt> &plainV2);
+  void sub(AfCtxt &cipherInOut, AfCtxt &cipher2);
+  void sub_plain(AfCtxt &cipherInOut, AfPtxt &plain2);
+  void sub(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2);
+  void sub(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2);
 
 
   // MULTIPLICATION
-  void multiply(AfsealCtxt &cipherVInOut, AfsealCtxt &cipher2);
-  void multiply(AfsealCtxt &cipherVInOut, AfsealPtxt &plain1);
-  void multiply(std::vector<AfsealCtxt> &cipherVInOut, std::vector<AfsealCtxt> &cipherV2);
-  void multiply(std::vector<AfsealCtxt> &cipherVInOut, std::vector<AfsealPtxt> &plainV2);
-  void cumprod(std::vector<seal::Ciphertext> &cipherV, AfsealCtxt &cipherOut);
+  void multiply(AfCtxt &cipherVInOut, AfCtxt &cipher2);
+  void multiply_plain(AfCtxt &cipherVInOut, AfPtxt &plain1);
+  void multiply(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2);
+  void multiply(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2);
 
   // ROTATE
-  void rotate(AfsealCtxt &cipher1, int &k);
-  void rotate(std::vector<AfsealCtxt> &cipherV, int &k);
+  void rotate(AfCtxt &cipher1, int &k);
+  void rotate(std::vector<AfCtxt*> &cipherV, int &k);
 
   // POWER
-  void exponentiate(AfsealCtxt &cipher1, uint64_t &expon);
-  void exponentiate(std::vector<AfsealCtxt> &cipherV, uint64_t &expon);
+  void exponentiate(AfCtxt &cipher1, uint64_t &expon);
+  void exponentiate(std::vector<AfCtxt*> &cipherV, uint64_t &expon);
 
   // CKKS -> Rescaling and mod switching
-  void rescale_to_next(AfsealCtxt &cipher1);
-  void mod_switch_to_next(AfsealCtxt &cipher1);
-  void mod_switch_to_next(AfsealPtxt &ptxt);
+  void rescale_to_next(AfCtxt &cipher1);
+  void mod_switch_to_next(AfCtxt &cipher1);
+  void mod_switch_to_next_plain(AfPtxt &ptxt);
 
 
   // -------------------------------- I/O -------------------------------
@@ -344,19 +340,19 @@ class Afseal: public Afhel {
   size_t load_rotate_keys(istream &in_stream);
 
   // SAVE/LOAD PLAINTEXT --> Could be achieved outside of Afseal
-  size_t save_plaintext(ostream &out_stream, string &compr_mode, AfsealPtxt &plain);
-  size_t load_plaintext(istream &in_stream, AfsealPtxt &plain);
+  size_t save_plaintext(ostream &out_stream, string &compr_mode, AfPtxt &plain);
+  size_t load_plaintext(istream &in_stream, AfPtxt &plain);
 
   // SAVE/LOAD CIPHERTEXT --> Could be achieved outside of Afseal
-  size_t save_ciphertext(ostream &out_stream, string &compr_mode, AfsealCtxt &ciphert);
-  size_t load_ciphertext(istream &in_stream, AfsealCtxt &plain);
+  size_t save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ciphert);
+  size_t load_ciphertext(istream &in_stream, AfCtxt &plain);
 
   // ----------------------------- AUXILIARY ----------------------------
   long maxBitCount(long poly_modulus_degree, int sec_level);
 
   // ckks
-  double scale(AfsealCtxt &ctxt);
-  void override_scale(AfsealCtxt &ctxt, double scale);
+  double scale(AfCtxt &ctxt);
+  void override_scale(AfCtxt &ctxt, double scale);
 
   // GETTERS
   bool batchEnabled();
@@ -364,6 +360,7 @@ class Afseal: public Afhel {
   uint64_t get_plain_modulus();
   size_t get_poly_modulus_degree();
   scheme_t get_scheme();
+  int get_sec();
 
   bool is_secretKey_empty() { return secretKey==NULL; }
   bool is_publicKey_empty() { return publicKey==NULL; }
@@ -381,21 +378,22 @@ class Afseal: public Afhel {
   void setrelinKeys(seal::RelinKeys &relKey) { this->relinKeys = std::make_shared<seal::RelinKeys>(relKey); }
 
   // ----------------------------- POLYNOMIALS ----------------------------
+  friend class AfPoly;
   friend class AfsealPoly;
 
   // POLY OPS --> result in first operand
-  void add_inplace(AfsealPoly &polyInOut, AfsealPoly &polyOther);
-  void subtract_inplace(AfsealPoly &polyInOut, AfsealPoly &polyOther);
-  void multiply_inplace(AfsealPoly &polyInOut, AfsealPoly &polyOther);
-  void invert_inplace(AfsealPoly &polyInOut);
+  void add_inplace(AfPoly &polyInOut, AfPoly &polyOther);
+  void subtract_inplace(AfPoly &polyInOut, AfPoly &polyOther);
+  void multiply_inplace(AfPoly &polyInOut, AfPoly &polyOther);
+  void invert_inplace(AfPoly &polyInOut);
 
   // I/O
-  void poly_to_ciphertext(AfsealPoly &p, AfsealCtxt &ctxt, size_t i);
-  void poly_to_plaintext(AfsealPoly &p, AfsealPtxt &ptxt);
+  void poly_to_ciphertext(AfPoly &p, AfCtxt &ctxt, size_t i);
+  void poly_to_plaintext(AfPoly &p, AfPtxt &ptxt);
 
   // Coefficient Access
-  std::complex<double> get_coeff(AfsealPoly& poly, size_t i);
-  void set_coeff(AfsealPoly& poly, std::complex<double> &val, size_t i);
-  std::vector<std::complex<double>> to_coeff_list(AfsealPoly& poly);
+  std::complex<double> get_coeff(AfPoly& poly, size_t i);
+  void set_coeff(AfPoly& poly, std::complex<double> &val, size_t i);
+  std::vector<std::complex<double>> to_coeff_list(AfPoly& poly);
 };
 #endif

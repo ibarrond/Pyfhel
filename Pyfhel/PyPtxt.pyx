@@ -4,11 +4,16 @@
 """PyPtxt. Plaintext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
-# Scheme types: 0-UNDEFINED, 1-BFV, 2-CKKS
-from Pyfhel.util.scheme cimport SCHEME_t
+# Used for all kinds of operations. Includes utility functions
+from Pyfhel.Pyfhel cimport *
+from .util.Scheme_t import Scheme_t
+from .util.Backend_t import Backend_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
+
+# Import Abstract Plaintext class
+from Pyfhel.Afhel cimport *
 
 # ----------------------------- IMPLEMENTATION --------------------------------
 cdef class PyPtxt:
@@ -28,18 +33,18 @@ cdef class PyPtxt:
                   fileName=None,
                   scheme=None):
         if (copy_ptxt): # If there is a PyPtxt to copy, override all arguments and copy
-            self._ptr_ptxt = new Plaintext(deref(copy_ptxt._ptr_ptxt))
+            self._ptr_ptxt = new AfsealPtxt(deref(<AfsealPtxt*>copy_ptxt._ptr_ptxt))
             self._scheme = copy_ptxt._scheme
             if (copy_ptxt._pyfhel):
                 self._pyfhel = copy_ptxt._pyfhel
         else:
-            self._ptr_ptxt = new Plaintext()  
+            self._ptr_ptxt = new AfsealPtxt()  
             if fileName:
                 if not scheme:
                     raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid scheme")    
                 self.from_file(fileName, scheme)
             else:
-                self._scheme = to_SCHEME_t(scheme) if scheme else SCHEME_t.UNDEFINED
+                self._scheme = to_Scheme_t(scheme) if scheme else scheme_t.none
             if (pyfhel):
                 self._pyfhel = pyfhel
                 
@@ -71,49 +76,48 @@ cdef class PyPtxt:
             del self._ptr_ptxt
             
     @property
-    def _scheme(self):
-        """SCHEME_t: returns the scheme type.
+    def scheme(self):
+        """scheme: returns the scheme type.
         
-        Can be set to: 0-UNDEFINED, 1-BFV, 2-CKKS
+        Can be set to: 0-none, 1-bfv, 2-ckks
 
         See Also:
-            :func:`~Pyfhel.util.to_SCHEME_t`
+            :func:`~Pyfhel.util.to_Scheme_t`
 
         :meta public:
         """
-        return to_SCHEME_t(self._scheme)
+        return to_Scheme_t(self._scheme)
     
-    @_scheme.setter
-    def _scheme(self, new_scheme):
-        new_scheme = to_SCHEME_t(new_scheme)
-        if not isinstance(new_scheme, SCHEME_t):
-            raise TypeError("<Pyfhel ERROR> Scheme type of PyPtxt must be SCHEME_t")        
-        self._scheme = new_scheme
+    @scheme.setter
+    def scheme(self, new_scheme):
+        new_scheme = to_Scheme_t(new_scheme)
+        if not isinstance(new_scheme, Scheme_t):
+            raise TypeError("<Pyfhel ERROR> Scheme type of PyPtxt must be Scheme_t")        
+        self._scheme = new_scheme.value
         
-    @_scheme.deleter
-    def _scheme(self):
-        self._scheme = SCHEME_t.UNDEFINED
+    @scheme.deleter
+    def scheme(self):
+        self._scheme = scheme_t.none
               
         
     @property
-    def _pyfhel(self):
+    def pyfhel(self):
         """A pyfhel instance, used for operations"""
         return self._pyfhel
 
-    @_pyfhel.setter
-    def _pyfhel(self, new_pyfhel):
+    @pyfhel.setter
+    def pyfhel(self, new_pyfhel):
         if not isinstance(new_pyfhel, Pyfhel):
             raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
         self._pyfhel = new_pyfhel 
         
-        
     cpdef bool is_zero(self):
         """bool: Flag to quickly check if it is empty"""
-        return self._ptr_ptxt.is_zero()
+        return (<AfsealPtxt*>self._ptr_ptxt).is_zero()
 
     cpdef string to_poly_string(self):
         """str: Polynomial representation of the plaintext"""
-        return self._ptr_ptxt.to_string()
+        return (<AfsealPtxt*>self._ptr_ptxt).to_string()
     
     
     # =========================================================================
@@ -169,7 +173,7 @@ cdef class PyPtxt:
             None
 
         See Also:
-            :func:`~Pyfhel.util.to_SCHEME_t`
+            :func:`~Pyfhel.util.to_Scheme_t`
         """
         cdef ifstream* inputter
         cdef string bFileName = _to_valid_file_str(fileName, check=True).encode('utf8')
@@ -178,7 +182,7 @@ cdef class PyPtxt:
             self._pyfhel.afseal.load_plaintext(deref(inputter), deref(self._ptr_ptxt))
         finally:
             del inputter
-        self._scheme = to_SCHEME_t(scheme)
+        self._scheme = to_Scheme_t(scheme)
 
     cpdef void from_bytes(self, bytes content, object scheme):
         """from_bytes(bytes content)
@@ -188,13 +192,13 @@ cdef class PyPtxt:
         Args:
             content: (:obj:`bytes`) Python bytes object containing the PyPtxt.
             scheme: (:obj: `str`) String or type describing the scheme:
-              * ('int', 'integer', int, 1, SCHEME_t.BFV) -> integer scheme.
-              * ('float', 'double', float, 2, SCHEME_t.CKKS) -> fractional scheme.
+              * ('int', 'integer', int, 1, scheme_t.bfv) -> integer scheme.
+              * ('float', 'double', float, 2, scheme_t.ckks) -> fractional scheme.
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
         self._pyfhel.afseal.load_plaintext(inputter, deref(self._ptr_ptxt))
-        self._scheme = to_SCHEME_t(scheme)
+        self._scheme = to_Scheme_t(scheme)
 
 
 
@@ -203,19 +207,19 @@ cdef class PyPtxt:
     # =========================================================================
 
     def __int__(self):
-        if (self._scheme != SCHEME_t.BFV):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not BFV)")
+        if (self._scheme != scheme_t.bfv):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not bfv)")
         return self._pyfhel.decodeInt(self)
 
     def __float__(self):
-        if (self._scheme != SCHEME_t.CKKS):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not CKKS)")
+        if (self._scheme != scheme_t.ckks):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not ckks)")
         return self._pyfhel.decodeFrac(self)
     
     def __repr__(self):
         poly_s = str(self.to_poly_string())
         return "<Pyfhel Plaintext, scheme={}, poly={}>".format(
-                SCHEME_t(self._scheme).name,
+                self.scheme.name,
                 poly_s[:25] + ('...' if len(poly_s)>25 else ''))
 
     def encode(self, value):
@@ -232,7 +236,7 @@ cdef class PyPtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.encode`
         """
-        self._pyfhel.encode(value, self)
+        return self._pyfhel.encode(value, self)
     
     def decode(self):
         """decode()
@@ -248,4 +252,4 @@ cdef class PyPtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.decode`
         """
-        self._pyfhel.decode(self)
+        return self._pyfhel.decode(self)

@@ -57,7 +57,8 @@
 [extensions.config]   # Common compilation config for all extensions
 include_dirs = []
 define_macros = [
-  ["NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"]
+  ["NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"],
+  ["__PYX_ENUM_CLASS_DECL", "enum"], # Support enums in cython
 ]
 extra_compile_args = [
   {Windows = ["/O2","/openmp"]},
@@ -93,7 +94,7 @@ sources=['Pyfhel/PyPoly.pyx']
 # Pyfhel's core metadata
 [project]
 name = "Pyfhel"
-version = "3.1.0"
+version = "3.1.1"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
 requires-python = ">=3.5"
@@ -139,6 +140,11 @@ repository = "https://github.com/ibarrond/github"
 # Minimum requirements for the build system to execute.
 [build-system]
 requires = [
-  "setuptools>=50.0","wheel","cython>=0.29","numpy>=1.20","cmake>=3.15","toml>=0.10"
+  "setuptools>=50.0",
+  "wheel",
+  "cython>=3.0.0a9",
+  "numpy>=1.20",
+  "cmake>=3.15",
+  "toml>=0.10"
 ]
 build-backend = "setuptools.build_meta"

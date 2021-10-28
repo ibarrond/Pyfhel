@@ -1,4 +1,3 @@
-from ..Pyfhel import to_ENCODING_t
-from .ENCODING_t import ENCODING_t
-
-__all__ = ["ENCODING_t", "to_ENCODING_t"]
+from Pyfhel.util.Scheme_t import Scheme_t
+from Pyfhel.util.Backend_t import Backend_t
+__all__ = ["Backend_t", "Scheme_t"]

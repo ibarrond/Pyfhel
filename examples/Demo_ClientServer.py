@@ -5,7 +5,7 @@ Client/Server demo with Pyfhel
 Context Parameters shows how several parameters affect performance.
 """
 
-from Pyfhel import Pyfhel, PyPtxt, PyCtxt
+from Pyfhel import Pyfhel, PyPtxt, PyCtxt, PyPoly
 import tempfile
 from pathlib import Path
 

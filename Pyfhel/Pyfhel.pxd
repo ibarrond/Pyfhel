@@ -8,30 +8,29 @@ cimport numpy as np
 # Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.vector cimport vector
 from libcpp.string cimport string
+from libcpp.cast cimport reinterpret_cast
 from libcpp cimport bool
 from numpy cimport int64_t, uint64_t
 
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream,ostringstream, stringstream, binary
 
-from Pyfhel.Afhel cimport Plaintext, Ciphertext, Afseal, AfsealPoly, cy_complex
+from Pyfhel.Afhel cimport *
 
 # Import the Cython Plaintext, Ciphertext and Poly classes
 from Pyfhel.PyPtxt cimport PyPtxt
 from Pyfhel.PyCtxt cimport PyCtxt
 from Pyfhel.PyPoly cimport PyPoly
 
-# Scheme types: UNDEFINED, BFV(INTEGER), CKKS (FRACTIONAL)
-from Pyfhel.util.scheme cimport SCHEME_t
-
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class Pyfhel:
-    cdef Afseal* afseal           # The C++ methods are accessed via a pointer
-    
+    cdef Afhel* afseal           # The C++ methods are accessed via a pointer
+    cdef int _sec
+    cdef vector[int] _qs
+    cdef double _scale
     # =========================== CRYPTOGRAPHY =================================
     # CONTEXT & KEY GENERATION
-    cpdef void contextGen(self, str scheme_t, int plain_modulus,
-                                int poly_modulus_degree, int sec=*, vector[int] qs=*)
+    cpdef void contextGen(self, str scheme, int n, int p_bits=*, int p=*, int sec=*, int scale=*, vector[int] qs =*)
     cpdef void keyGen(self)
     cpdef void relinKeyGen(self)
     cpdef void rotateKeyGen(self)
@@ -39,38 +38,46 @@ cdef class Pyfhel:
     # ENCRYPTION
     cpdef PyCtxt encryptInt(self, int64_t[:] arr, PyCtxt ctxt=*)
     cpdef PyCtxt encryptFrac(self, double[:] arr, PyCtxt ctxt=*, double scale=*)
+    cpdef PyCtxt encryptComplex(self, complex[:] arr, PyCtxt ctxt=*, double scale=*)
     cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=*)
     # vectorized
     cpdef np.ndarray[object, ndim=1] encryptAInt(self, int64_t[:,::1] arr)
     cpdef np.ndarray[object, ndim=1] encryptAFrac(self, double[:,::1] arr, double scale=*)
+    cpdef np.ndarray[object, ndim=1] encryptAComplex(self, complex[:,::1] arr, double scale=*)
     cpdef np.ndarray[object, ndim=1] encryptAPtxt(self, PyPtxt[:] ptxt)
 
     # DECRYPTION
     cpdef np.ndarray[int64_t, ndim=1] decryptInt(self, PyCtxt ctxt)
     cpdef np.ndarray[double, ndim=1] decryptFrac(self, PyCtxt ctxt)
+    cpdef np.ndarray[complex, ndim=1] decryptComplex(self, PyCtxt ctxt)
     cpdef PyPtxt decryptPtxt(self, PyCtxt ctxt, PyPtxt ptxt=*)
     # vectorized
     cpdef np.ndarray[int64_t, ndim=2] decryptAInt(self, PyCtxt ctxt)
     cpdef np.ndarray[double, ndim=2] decryptAFrac(self, PyCtxt ctxt)
+    cpdef np.ndarray[double, ndim=2] decryptAComplex(self, PyCtxt ctxt)
     cpdef np.ndarray[object, ndim=1] decryptAPtxt(self, PyCtxt ctxt)
     
     # NOISE LEVEL    
-    cpdef int noiseLevel(self, PyCtxt ctxt)
+    cpdef int noise_level(self, PyCtxt ctxt)
     
     # ============================= ENCODING ===================================
     # ENCODE
     cpdef PyPtxt encodeInt(self, int64_t[::1] arr, PyPtxt ptxt=*)
     cpdef PyPtxt encodeFrac(self, double[::1] arr, double scale=*, PyPtxt ptxt=*)
+    cpdef PyPtxt encodeComplex(self, complex[::1] arr, double scale=*, PyPtxt ptxt=*)
     # vectorized
-    cpdef np.ndarray[object, ndim=1] encodeAInt(self, int64_t[:,::1] arr)
+    cpdef np.ndarray[object, ndim=1] encodeAInt(self, int[:,::1] arr)
     cpdef np.ndarray[object, ndim=1] encodeAFrac(self, double[:,::1] arr, double scale=*)
+    cpdef np.ndarray[object, ndim=1] encodeAComplex(self, complex[:,::1] arr, double scale=*)
 
     # DECODE
-    cpdef int64_t[::1] decodeInt(self, PyPtxt ptxt)
-    cpdef double[::1] decodeFrac(self, PyPtxt ptxt)
+    cpdef np.ndarray[int64_t, ndim=1] decodeInt(self, PyPtxt ptxt)
+    cpdef np.ndarray[double, ndim=1] decodeFrac(self, PyPtxt ptxt)
+    cpdef np.ndarray[complex, ndim=1] decodeComplex(self, PyPtxt ptxt)
     # vectorized
     cpdef np.ndarray[int64_t, ndim=2] decodeAInt(self, PyPtxt[:] ptxt)
     cpdef np.ndarray[double, ndim=2] decodeAFrac(self, PyPtxt[:] ptxt)
+    cpdef np.ndarray[complex, ndim=2] decodeAComplex(self, PyPtxt[:] ptxt)
     
     # RELINEARIZE
     cpdef void relinearize(self, PyCtxt ctxt)
@@ -87,58 +94,56 @@ cdef class Pyfhel:
     cpdef PyCtxt rotate(self, PyCtxt ctxt, int k, bool in_new_ctxt=*)
     cpdef PyCtxt power(self, PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=*)
     # ckks
-    cpdef void rescale_to_next(self, Ciphertext &cipher1)
-    cpdef void mod_switch_to_next_c(self, Ciphertext &cipher1)
-    cpdef void mod_switch_to_next_p(self, Plaintext &ptxt)
+    cpdef void rescale_to_next(self, PyCtxt ctxt)
 
     # ================================ I/O =====================================
     #FILES
     cpdef size_t save_context(self, fileName, str compr_mode=*)
     cpdef size_t load_context(self, fileName)
 
-    cpdef size_t save_publicKey(self, fileName, str compr_mode=*)
-    cpdef size_t load_publicKey(self, fileName)
+    cpdef size_t save_public_key(self, fileName, str compr_mode=*)
+    cpdef size_t load_public_key(self, fileName)
 
-    cpdef size_t save_secretKey(self, fileName, str compr_mode=*)
-    cpdef size_t load_secretKey(self, fileName)
+    cpdef size_t save_secret_key(self, fileName, str compr_mode=*)
+    cpdef size_t load_secret_key(self, fileName)
 
-    cpdef size_t save_relinKey(self, fileName, str compr_mode=*)
-    cpdef size_t load_relinKey(self, fileName)
+    cpdef size_t save_relin_key(self, fileName, str compr_mode=*)
+    cpdef size_t load_relin_key(self, fileName)
 
-    cpdef size_t save_rotateKey(self, fileName, str compr_mode=*)
-    cpdef size_t load_rotateKey(self, fileName)
+    cpdef size_t save_rotate_key(self, fileName, str compr_mode=*)
+    cpdef size_t load_rotate_key(self, fileName)
 
 
     #BYTES
     cpdef bytes to_bytes_context(self, str compr_mode=*)
     cpdef size_t from_bytes_context(self, bytes content)
 
-    cpdef bytes to_bytes_publicKey(self, str compr_mode=*)
-    cpdef size_t from_bytes_publicKey(self, bytes content)
+    cpdef bytes to_bytes_public_key(self, str compr_mode=*)
+    cpdef size_t from_bytes_public_key(self, bytes content)
 
-    cpdef bytes to_bytes_secretKey(self, str compr_mode=*)
-    cpdef size_t from_bytes_secretKey(self, bytes content)
+    cpdef bytes to_bytes_secret_key(self, str compr_mode=*)
+    cpdef size_t from_bytes_secret_key(self, bytes content)
 
-    cpdef bytes to_bytes_relinKey(self, str compr_mode=*)
-    cpdef size_t from_bytes_relinKey(self, bytes content)
+    cpdef bytes to_bytes_relin_key(self, str compr_mode=*)
+    cpdef size_t from_bytes_relin_key(self, bytes content)
 
-    cpdef bytes to_bytes_rotateKey(self, str compr_mode=*)
-    cpdef size_t from_bytes_rotateKey(self, bytes content)
+    cpdef bytes to_bytes_rotate_key(self, str compr_mode=*)
+    cpdef size_t from_bytes_rotate_key(self, bytes content)
     
     # ============================== AUXILIARY =================================
     cpdef long maxBitCount(self, long poly_modulus_degree, int sec_level)
 
     # GETTERS
     cpdef bool batchEnabled(self)
-    cpdef int getnSlots(self)
+    cpdef int get_nSlots(self)
     cpdef uint64_t get_plain_modulus(self)
     cpdef size_t get_poly_modulus_degree(self)
-    cpdef string get_scheme(self)
+    cpdef scheme_t get_scheme(self)
     
-    cpdef bool is_secretKey_empty(self)
-    cpdef bool is_publicKey_empty(self)
-    cpdef bool is_rotKey_empty(self)
-    cpdef bool is_relinKey_empty(self)
+    cpdef bool is_secret_key_empty(self)
+    cpdef bool is_public_key_empty(self)
+    cpdef bool is_rotate_key_empty(self)
+    cpdef bool is_relin_key_empty(self)
     cpdef bool is_context_empty(self)
 
     # ============================ POLYNOMIAL =================================
@@ -157,5 +162,8 @@ cdef class Pyfhel:
     cpdef void poly_to_plaintext(self, PyPoly p, PyPtxt ptxt)
     
 # --------------------------------- UTILS --------------------------------------
-cpdef SCHEME_t to_SCHEME_t(object scheme)
+cpdef to_Scheme_t(object scheme)
+cpdef to_Backend_t(object backend)
 cpdef str _to_valid_file_str(fileName, bool check=*)
+cpdef np.ndarray[dtype=np.int64_t, ndim=1] vec_to_array_i(vector[int64_t] vec)
+cpdef np.ndarray[dtype=double, ndim=1] vec_to_array_f(vector[double] vec)

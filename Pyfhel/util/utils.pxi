@@ -1,4 +1,26 @@
 from pathlib import Path
+from Pyfhel.util.Scheme_t import Scheme_t
+from Pyfhel.util.Backend_t import Backend_t
+
+
+
+@cython.wraparound(False)
+@cython.boundscheck(False)
+cpdef np.ndarray[dtype=np.int64_t, ndim=1] vec_to_array_i(vector[int64_t] vec):
+    cdef np.ndarray[dtype=np.int64_t, ndim=1] arr = np.empty(vec.size(), dtype=np.int64)
+    cdef int64_t i
+    for i in range(vec.size()):
+        arr[i]=vec[i]
+    return arr
+
+@cython.wraparound(False)
+@cython.boundscheck(False)
+cpdef np.ndarray[dtype=double, ndim=1] vec_to_array_f(vector[double] vec):
+    cdef np.ndarray[dtype=double, ndim=1] arr = np.empty(vec.size(), dtype=np.float64)
+    cdef int64_t i
+    for i in range(vec.size()):
+        arr[i]=vec[i]
+    return arr
 
 cpdef str _to_valid_file_str(fileName, bool check=False):
     """_to_valid_file_str(fileName)
@@ -12,44 +34,56 @@ cpdef str _to_valid_file_str(fileName, bool check=False):
             raise FileNotFoundError(f"<Pyfhel ERROR> File {str(fileName)} not found.")
     return str(fileName)
 
-cpdef SCHEME_t to_SCHEME_t(object scheme):
-    """Turns `scheme` into an SCHEME_t.{INTEGER, FRACTIONAL} enum.
+
+cpdef to_Scheme_t(object scheme):
+    """Turns `scheme` into an scheme_t.{bfv, ckks} enum.
     
     Arguments:
-        scheme (str, type, int, SCHEME_t): One of the following:
+        scheme (str, type, int, scheme_t): One of the following:
 
-            * (str): ('int', 'integer') for BFV scheme, ('float', 'double') for 
-              CKKS scheme.
+            * (str): ('int', 'integer', 'bfv') for bfv scheme, 
+                     ('float', 'double', 'ckks') for ckks scheme.
 
-            * Python class: (int) for BFV scheme, (float) for CKKS scheme.
+            * Python class: (int) for bfv scheme, (float) for ckks scheme.
 
-            * (int): (1) for BFV scheme, (2) for CKKS scheme.
+            * (int): (1) for bfv scheme, (2) for ckks scheme.
 
-            * (SCHEME_t) Enum (does nothing)
+            * (scheme_t) Enum (does nothing)
 
     Returns:
-        SCHEME_t: BFV or CKKS.
+        scheme_t: bfv or ckks.
     """
-    if type(scheme) is unicode or isinstance(scheme, unicode):
-        # scheme is a string. Casting it to str just in case.
-        scheme = unicode(scheme)
-        if scheme.lower() in ('int', 'integer'):
-            return SCHEME_t.BFV
-        elif scheme.lower() in ('float', 'double'):
-            return SCHEME_t.CKKS
-
-    elif type(scheme) is type:
-        if scheme is int:
-            return SCHEME_t.BFV
-        elif scheme is float:
-            return SCHEME_t.CKKS
-        
-    elif isinstance(scheme, (int, float)) and\
-         int(scheme) in (SCHEME_t.BFV,
-                           SCHEME_t.CKKS):
-            return SCHEME_t(int(scheme))
-    
-    elif isinstance(scheme, SCHEME_t):
+    if type(scheme) is type: scheme = scheme.__class__.__name__
+    if type(scheme) is str:
+        if scheme.lower() in ('int', 'integer', 'bfv'):     scheme = "bfv"
+        elif scheme.lower() in ('float', 'double', 'ckks'): scheme = "ckks"
+        return Scheme_t[scheme]
+    elif isinstance(scheme, (int, float)):
+        return Scheme_t(int(scheme))
+    elif isinstance(scheme, Scheme_t):
         return scheme
+    raise TypeError("<Pyfhel ERROR>: scheme unknown. Could not convert to Scheme_t.")
+
+
+cpdef to_Backend_t(object backend):
+    """Turns `backend` into a backend_t.{seal, palisade} enum.
     
-    raise TypeError("<Pyfhel ERROR>: scheme unknown. Could not convert to SCHEME_t.")
+    Arguments:
+        backend (str, backend_t): One of the following:
+
+            * (str): ('seal' | 'palisade') with uppercase variants.
+            * (backend_t) Enum (does nothing)
+
+    Returns:
+        backend_t: seal or palisade.
+    """
+    if type(backend) is type: backend = backend.__class__.__name__
+    if type(backend) is str:
+        if backend.lower()   in ('seal'):     backend = "seal"
+        elif backend.lower() in ('palisade'): backend = "palisade"
+        return Backend_t[backend]
+    elif isinstance(backend, (int, float)):
+        return Backend_t(int(backend))
+    elif isinstance(backend, Backend_t):
+        return backend
+    raise TypeError("<Pyfhel ERROR>: backend unknown. Could not convert to Backend_t.")

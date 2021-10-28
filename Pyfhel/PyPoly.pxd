@@ -14,16 +14,15 @@ from Pyfhel.Pyfhel cimport *
 from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, binary
 
 # Import AfsealPoly class
-from Pyfhel.Afhel cimport AfsealPoly, cy_complex
+from Pyfhel.Afhel cimport AfPoly, AfsealPoly, scheme_t, backend_t, cy_complex
 
-# Encoding types: 0-UNDEFINED, 1-BFV, 2-CKKS
-from Pyfhel.util cimport SCHEME_t
 # ------------------------------- DECLARATION ---------------------------------
 
 cdef class PyPoly:
     cdef AfsealPoly* _afpoly
     cdef Pyfhel _pyfhel
-    cdef SCHEME_t _scheme
+    cdef scheme_t _scheme
+    cdef backend_t _backend
     cpdef vector[cy_complex] to_coeff_list(self)
     cpdef cy_complex get_coeff(self, size_t i)
     cpdef void set_coeff(self, cy_complex&val, size_t i)

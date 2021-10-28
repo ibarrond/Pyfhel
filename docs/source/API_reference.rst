@@ -21,5 +21,5 @@ API reference
     :recursive:
     :toctree: ../_autosummary
 
-    util.to_ENCODING_t
-    util.ENCODING_t
+    util.to_SCHEME_t
+    util.SCHEME_t

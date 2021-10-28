@@ -4,11 +4,11 @@
 """PyPtxt. Plaintext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
-# Encoding types: 0-UNDEFINED, 1-INTEGER, 2-FRACTIONAL, 3-BATCH
-from Pyfhel.util import ENCODING_t
-
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
+
+from .util.Scheme_t import Scheme_t
+from .util.Backend_t import Backend_t
 
 # ----------------------------- IMPLEMENTATION --------------------------------
 cdef class PyPoly:
@@ -34,15 +34,15 @@ cdef class PyPoly:
         assert ref is not None and ref._pyfhel is not None and ref._pyfhel.afseal is not NULL,\
             "Missing reference PyCtxt `ref` with initialized _pyfhel member"
         if index is not None:   # Construct from selected Poly in PyCtxt `ref`
-            self._afpoly = new AfsealPoly(deref(ref._pyfhel.afseal), deref(ref._ptr_ctxt), index)  
+            self._afpoly = new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealCtxt*>ref._ptr_ctxt), <size_t>index)  
             self._pyfhel = ref._pyfhel
         elif ptxt is not None:  # Construct from Poly in PyPtxt `ptxt`
             self._afpoly =\
-                new AfsealPoly(deref(ref._pyfhel.afseal), deref(ptxt._ptr_ptxt), deref(ref._ptr_ctxt))  
+                new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealPtxt*>ptxt._ptr_ptxt), <AfsealCtxt>deref(<AfsealCtxt*>ref._ptr_ctxt))  
             self._pyfhel = ptxt._pyfhel
         else:                   # Base constructor
             self._afpoly =\
-                new AfsealPoly(deref(ref._pyfhel.afseal), deref(ref._ptr_ctxt))  
+                new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealCtxt*>ref._ptr_ctxt))  
             self._pyfhel = ref._pyfhel
                 
     def __init__(
@@ -72,27 +72,27 @@ cdef class PyPoly:
             del self._afpoly
             
     @property
-    def _encoding(self):
-        """ENCODING_t: returns the encoding type.
+    def _scheme(self):
+        """_scheme: returns the scheme type.
         
         Can be set to: 0-None, 1-BFV, 2-CKKS
 
         See Also:
-            :func:`~Pyfhel.util.to_ENCODING_t`
+            :func:`~Pyfhel.util.to_scheme_t`
 
         :meta public:
         """
-        return ENCODING_t(self._encoding)
+        return scheme_t(self._scheme)
     
-    @_encoding.setter
-    def _encoding(self, new_encoding):
-        if not isinstance(new_encoding, ENCODING_t):
-            raise TypeError("<Pyfhel ERROR> Encoding type of PyPoly must be ENCODING_t")        
-        self._encoding = new_encoding.value
+    @_scheme.setter
+    def _scheme(self, new_scheme):
+        if not isinstance(new_scheme, scheme_t):
+            raise TypeError("<Pyfhel ERROR> Scheme type of PyPoly must be scheme_t")        
+        self._scheme = new_scheme
         
-    @_encoding.deleter
-    def _encoding(self):
-        self._encoding = ENCODING_t.UNDEFINED.value
+    @_scheme.deleter
+    def _scheme(self):
+        self._scheme = scheme_t.none
               
         
     @property
@@ -120,7 +120,7 @@ cdef class PyPoly:
     cpdef vector[cy_complex] to_coeff_list(self):
         """List of complex coefficients of the polynomial"""
         self.check_afpoly()
-        return self._afpoly.to_coeff_list(deref(self._pyfhel.afseal))
+        return self._afpoly.to_coeff_list(deref(<Afseal*>self._pyfhel.afseal))
     
 
 
@@ -159,15 +159,15 @@ cdef class PyPoly:
 
         Args:
             fileName: (str) Valid file where the polynomial is retrieved from.
-            encoding: (str, type, int, ENCODING_t) One of the following:
-              * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
-              * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
+            encoding: (str, type, int, scheme_t) One of the following:
+              * ('int', 'integer', int, 1, scheme_t.INTEGER) -> integer encoding.
+              * ('float', 'double', float, 2, scheme_t.FRACTIONAL) -> fractional encoding.
               
         Return:
             None
 
         See Also:
-            :func:`~Pyfhel.util.to_ENCODING_t`
+            :func:`~Pyfhel.util.to_scheme_t`
         """
         raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
@@ -179,9 +179,9 @@ cdef class PyPoly:
         Args:
             content: (:obj:`bytes`) Python bytes object containing the PyPoly.
             encoding: (:obj: `str`) String or type describing the encoding:
-              * ('int', 'integer', int, 1, ENCODING_t.INTEGER) -> integer encoding.
-              * ('float', 'double', float, 2, ENCODING_t.FRACTIONAL) -> fractional encoding.
-              * ('array', 'batch', 'matrix', list, 3, ENCODING_t.BATCH) -> batch encoding.
+              * ('int', 'integer', int, 1, scheme_t.INTEGER) -> integer encoding.
+              * ('float', 'double', float, 2, scheme_t.FRACTIONAL) -> fractional encoding.
+              * ('array', 'batch', 'matrix', list, 3, scheme_t.BATCH) -> batch encoding.
         """
         raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
@@ -204,19 +204,19 @@ cdef class PyPoly:
         self.check_afpoly()
         if i >= self.__len__():
             raise IndexError("PyPoly error: coefficient index out of bounds")
-        return self._afpoly.get_coeff(deref(self._pyfhel.afseal), i)
+        return self._afpoly.get_coeff(deref(<Afseal*>self._pyfhel.afseal), i)
     
     def __setitem__(self, size_t i, cy_complex coeff):
         """"""
         self.check_afpoly()
         if i >= self.__len__():
             raise IndexError("PyPoly error: coefficient index out of bounds")
-        self._afpoly.set_coeff(deref(self._pyfhel.afseal), coeff, i)
+        self._afpoly.set_coeff(deref(<Afseal*>self._pyfhel.afseal), coeff, i)
 
     def __iter__(self):
         """Creates an iterator to extract all coefficients"""
         self.check_afpoly()
-        return (self._afpoly.get_coeff(deref(self._pyfhel.afseal), i) for i in range(self._afpoly.get_coeff_count()))
+        return (self._afpoly.get_coeff(deref(<Afseal*>self._pyfhel.afseal), i) for i in range(self._afpoly.get_coeff_count()))
 
     cpdef cy_complex get_coeff(self, size_t i):
         """Gets the chosen coefficient in position i.
@@ -227,7 +227,7 @@ cdef class PyPoly:
         Return:
             complex: coefficient value
         """
-        return self._afpoly.get_coeff(deref(self._pyfhel.afseal), i)
+        return self._afpoly.get_coeff(deref(<Afseal*>self._pyfhel.afseal), i)
 
     cpdef void set_coeff(self, cy_complex &coeff, size_t i):
         """Sets the given complex value as coefficient in position i.
@@ -239,7 +239,7 @@ cdef class PyPoly:
             None
         """
         self.check_afpoly()
-        self._afpoly.set_coeff(deref(self._pyfhel.afseal), coeff, i)
+        self._afpoly.set_coeff(deref(<Afseal*>self._pyfhel.afseal), coeff, i)
     
     cpdef void from_coeff_list(self, vector[cy_complex] coeff_list, PyCtxt ref):
         """Sets all the coefficients at once.

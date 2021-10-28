@@ -13,15 +13,15 @@ from Pyfhel.Pyfhel cimport *
 from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, binary
 
 # Import Plaintext class, original from SEAL
-from Pyfhel.Afhel cimport Plaintext
+from Pyfhel.Afhel cimport AfPtxt, AfsealPtxt, scheme_t, backend_t
 
-from Pyfhel.util cimport SCHEME_t
 # ------------------------------- DECLARATION ---------------------------------
 
 cdef class PyPtxt:
-    cdef Plaintext* _ptr_ptxt
+    cdef AfPtxt* _ptr_ptxt
     cdef Pyfhel _pyfhel
-    cdef SCHEME_t _scheme
+    cdef scheme_t _scheme
+    cdef backend_t _backend
     cpdef bool is_zero(self)
     cpdef string to_poly_string(self)
     cpdef void save(self, str fileName, str compr_mode=*)

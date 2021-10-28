@@ -6,6 +6,8 @@
 # Import Pyfhel and PyPtxt for operations
 from .Pyfhel import Pyfhel
 from .PyPtxt import PyPtxt
+from .util.Scheme_t import Scheme_t
+from .util.Backend_t import Backend_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
@@ -24,25 +26,26 @@ cdef class PyCtxt:
                   serialized=None,
                   scheme=None):
         if (copy_ctxt): # If there is a PyCtxt to copy, override all arguments and copy
-            self._ptr_ctxt = new Ciphertext(deref(copy_ctxt._ptr_ctxt))
+            self._ptr_ctxt = new AfsealCtxt(deref(<AfsealCtxt*>copy_ctxt._ptr_ctxt))
             self._scheme = copy_ctxt._scheme
             if (copy_ctxt._pyfhel):
                 self._pyfhel = copy_ctxt._pyfhel
         
         else:
-            self._ptr_ctxt = new Ciphertext()
+            self._ptr_ctxt = new AfsealCtxt()
+            if (pyfhel):
+                self._pyfhel = pyfhel
+                self.scheme = self._pyfhel.scheme
             if fileName:
                 if not scheme:
                     raise TypeError("<Pyfhel ERROR> PyCtxt initialization with fileName requires valid scheme")    
-                self.from_file(fileName, scheme)
+                self.load(fileName, scheme)
             elif serialized:
                 if not scheme:
                     raise TypeError("<Pyfhel ERROR> PyCtxt initialization from serialized requires valid scheme")    
                 self.from_bytes(serialized, scheme)
             else:
-                self._scheme = to_SCHEME_t(scheme) if scheme else SCHEME_t.UNDEFINED
-            if (pyfhel):
-                self._pyfhel = pyfhel
+                self.scheme = to_Scheme_t(scheme) if scheme else Scheme_t.none
             
     def __dealloc__(self):
         if self._ptr_ctxt != NULL:
@@ -75,63 +78,56 @@ cdef class PyCtxt:
         pass
 
     @property
-    def _scheme(self):
-        """SCHEME_t: returns the scheme type.
+    def scheme(self):
+        """scheme: returns the scheme type.
         
-        Can be set to: UNDEFINED, BFV (INTEGER) or CKKS (FRACTIONAL).
+        Can be set to: none, bfv (INTEGER) or ckks (FRACTIONAL).
 
         See Also:
-            :func:`~Pyfhel.util.to_SCHEME_t`
+            :func:`~Pyfhel.util.to_Scheme_t`
 
         :meta public:
         """
-        return SCHEME_t(self._scheme)
+        return Scheme_t(self._scheme)
     
-    @_scheme.setter
-    def _scheme(self, new_scheme):
-        new_scheme = to_SCHEME_t(new_scheme)
-        if not isinstance(new_scheme, SCHEME_t):
-            raise TypeError("<Pyfhel ERROR> scheme type of PyCtxt must be SCHEME_t")        
-        self._scheme = new_scheme
+    @scheme.setter
+    def scheme(self, newscheme):
+        new_scheme = to_Scheme_t(newscheme)
+        if not isinstance(newscheme, Scheme_t):
+            raise TypeError("<Pyfhel ERROR> scheme type of PyCtxt must be Scheme_t")        
+        self._scheme = new_scheme.value
         
-    @_scheme.deleter
-    def _scheme(self):
-        self._scheme = SCHEME_t.UNDEFINED
+    @scheme.deleter
+    def scheme(self):
+        self._scheme = scheme_t.none
         
     @property
     def _pyfhel(self):
         """A Pyfhel instance, used for operations"""
         return self._pyfhel
+        
     @_pyfhel.setter
     def _pyfhel(self, new_pyfhel):
         if not isinstance(new_pyfhel, Pyfhel):
             raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
         self._pyfhel = new_pyfhel 
-        
-    cpdef int size_capacity(self):
-        """Maximum size the ciphertext can hold.
-        
-        Return:
-            int: allocated size for this ciphertext
-        """
-        return self._ptr_ctxt.size_capacity()
      
     cpdef int size(self):
         """Current size of the ciphertext.
         
         Return:
             int: size of this ciphertext"""
-        return self._ptr_ctxt.size()
+        return (<AfsealCtxt*>(self._ptr_ctxt)).size()
 
     @property    
     def capacity(self):
         """int: Maximum size the ciphertext can hold."""
-        return self._ptr_ctxt.size_capacity()
+        return (<AfsealCtxt*>(self._ptr_ctxt)).size_capacity()
 
     @property
     def size(self):
         """int: Actual size of the ciphertext."""
-        return self._ptr_ctxt.size()
+        return (<AfsealCtxt*>(self._ptr_ctxt)).size()
 
     @property
     def noiseBudget(self):
@@ -142,7 +138,8 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.noiseLevel`
         """
-        return self._pyfhel.noise_level(self)
+        sk_not_empty = self._pyfhel is not None and not self._pyfhel.is_secret_key_empty()
+        return self._pyfhel.noise_level(self) if sk_not_empty else -1
 
     # =========================================================================
     # ================================== I/O ==================================
@@ -154,7 +151,7 @@ cdef class PyCtxt:
             - A callable object that will be called to create the initial version of the object.
             - A tuple of arguments for the callable object.
         """
-        return (PyCtxt, (None, None, None, self.to_bytes(), self._scheme))
+        return (PyCtxt, (None, None, None, self.to_bytes(), self.scheme))
 
     cpdef void save(self, str fileName, str compr_mode="zstd"):
         """save(str fileName)
@@ -201,17 +198,17 @@ cdef class PyCtxt:
 
         Args:
             fileName: (str) Valid file where the ciphertext is retrieved from.
-            scheme (str, type, int, SCHEME_t): One of the following:
+            scheme (str, type, int, Scheme_t): One of the following:
 
-                * ('int', 'INTEGER', int, 1, SCHEME_t.BFV) -> integer scheme.
-                * ('float', 'FRACTIONAL', float, 2, SCHEME_t.CKKS) -> fractional scheme.
+                * ('int', 'INTEGER', int, 1, Scheme_t.bfv) -> integer scheme.
+                * ('float', 'FRACTIONAL', float, 2, Scheme_t.ckks) -> fractional scheme.
 
               
         Return:
             None
 
         See Also:
-            :func:`~Pyfhel.util.to_SCHEME_t`
+            :func:`~Pyfhel.util.to_Scheme_t`
         """
         cdef ifstream* inputter
         cdef string bFileName = _to_valid_file_str(fileName, check=True).encode('utf8')
@@ -220,7 +217,7 @@ cdef class PyCtxt:
             self._pyfhel.afseal.load_ciphertext(deref(inputter), deref(self._ptr_ctxt))
         finally:
             del inputter
-        self._scheme = to_SCHEME_t(scheme)
+        self._scheme = to_Scheme_t(scheme)
 
     cpdef void from_bytes(self, bytes content, object scheme):
         """from_bytes(bytes content, scheme)
@@ -229,21 +226,21 @@ cdef class PyCtxt:
 
         Args:
             content (bytes):  Python bytes object containing the PyCtxt.
-            scheme (str, type, int, SCHEME_t): One of the following:
+            scheme (str, type, int, Scheme_t): One of the following:
 
-                * ('int', 'INTEGER', int, 1, SCHEME_t.BFV) -> integer scheme.
-                * ('float', 'FRACTIONAL', float, 2, SCHEME_t.CKKS) -> fractional scheme.
+                * ('int', 'INTEGER', int, 1, Scheme_t.bfv) -> integer scheme.
+                * ('float', 'FRACTIONAL', float, 2, Scheme_t.ckks) -> fractional scheme.
 
         Return:
             None
 
         See Also:
-            :func:`~Pyfhel.util.to_SCHEME_t`
+            :func:`~Pyfhel.util.to_Scheme_t`
         """
         cdef stringstream inputter
         inputter.write(content,len(content))
         self._pyfhel.afseal.load_ciphertext(inputter, deref(self._ptr_ctxt))
-        self._scheme = to_SCHEME_t(scheme)
+        self._scheme = to_Scheme_t(scheme)
 
             
     # =========================================================================
@@ -275,19 +272,21 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.add`
         """
+        if isinstance(other, (int, float, list)):
+            other = np.array(other)
         if isinstance(other, PyCtxt):
             return self._pyfhel.add(self, other, in_new_ctxt=True)
         elif isinstance(other, PyPtxt):
             return self._pyfhel.add_plain(self, other, in_new_ctxt=True)
-        elif isinstance(other, (int, float)):
-            if self._scheme == SCHEME_t.BFV:
-                other = self._pyfhel.encodeInt(int(other))
+        elif isinstance(other, np.ndarray):
+            if self._scheme == scheme_t.bfv:
+                other = self._pyfhel.encodeInt(other)
                 return self._pyfhel.add_plain(self, other, in_new_ctxt=True)
-            elif self._scheme == SCHEME_t.CKKS:
-                other = self._pyfhel.encodeFrac(float(other))
+            elif self._scheme == scheme_t.ckks:
+                other = self._pyfhel.encodeFrac(other)
                 return self._pyfhel.add_plain(self, other, in_new_ctxt=True)
         else:
-            raise TypeError("<Pyfhel ERROR> other summand must be either PyCtxt or PyPtxt")
+            raise TypeError("<Pyfhel ERROR> other summand must be numeric, array, PyCtxt or PyPtxt")
     
     def __radd__(self, other): return self.__add__(other)
     def __iadd__(self, other):
@@ -301,19 +300,21 @@ cdef class PyCtxt:
         Raise:
             TypeError: if other doesn't have a valid type.
         """
+        if isinstance(other, (int, float, list)):
+            other = np.array(other)
         if isinstance(other, PyCtxt):
             self._pyfhel.add(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
             self._pyfhel.add_plain(self, other, in_new_ctxt=False)
-        elif isinstance(other, (int, float)):
-            if self._scheme == SCHEME_t.BFV:
-                other = self._pyfhel.encodeInt(int(other))
+        elif isinstance(other, np.ndarray):
+            if self._scheme == scheme_t.bfv:
+                other = self._pyfhel.encodeInt(other)
                 self._pyfhel.add_plain(self, other, in_new_ctxt=False)
-            elif self._scheme == SCHEME_t.CKKS:
-                other = self._pyfhel.encodeFrac(float(other))
+            elif self._scheme == scheme_t.ckks:
+                other = self._pyfhel.encodeFrac(other)
                 self._pyfhel.add_plain(self, other, in_new_ctxt=False)
         else:
-            raise TypeError("<Pyfhel ERROR> other summand must be either PyCtxt or PyPtxt")
+            raise TypeError("<Pyfhel ERROR> other summand must be numeric, array, PyCtxt or PyPtxt")
         return self
 
 
@@ -335,19 +336,21 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.sub`
         """
+        if isinstance(other, (int, float, list)):
+            other = np.array(other)
         if isinstance(other, PyCtxt):
             return self._pyfhel.sub(self, other, in_new_ctxt=True)
         elif isinstance(other, PyPtxt):
             return self._pyfhel.sub_plain(self, other, in_new_ctxt=True)
-        elif isinstance(other, (int, float)):
-            if self._scheme == SCHEME_t.BFV:
-                other = self._pyfhel.encodeInt(int(other))
+        elif isinstance(other, np.ndarray):
+            if self._scheme == scheme_t.bfv:
+                other = self._pyfhel.encodeInt(other)
                 return self._pyfhel.sub_plain(self, other, in_new_ctxt=True)
-            elif self._scheme == SCHEME_t.CKKS:
-                other = self._pyfhel.encodeFrac(float(other))
+            elif self._scheme == scheme_t.ckks:
+                other = self._pyfhel.encodeFrac(other)
                 return self._pyfhel.sub_plain(self, other, in_new_ctxt=True)
         else:
-            raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
+            raise TypeError("<Pyfhel ERROR> substrahend must be numeric, array, PyCtxt or PyPtxt")
     
     def __rsub__(self, other): return self.__sub__(other)
     def __isub__(self, other): 
@@ -365,15 +368,15 @@ cdef class PyCtxt:
             self._pyfhel.sub(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
             self._pyfhel.sub_plain(self, other, in_new_ctxt=False)
-        elif isinstance(other, (int, float)):
-            if self._scheme == SCHEME_t.BFV:
-                other = self._pyfhel.encodeInt(int(other))
+        elif isinstance(other, np.ndarray):
+            if self._scheme == scheme_t.bfv:
+                other = self._pyfhel.encodeInt(other)
                 self._pyfhel.sub_plain(self, other, in_new_ctxt=False)
-            elif self._scheme == SCHEME_t.CKKS:
-                other = self._pyfhel.encodeFrac(float(other))
+            elif self._scheme == scheme_t.ckks:
+                other = self._pyfhel.encodeFrac(other)
                 self._pyfhel.sub_plain(self, other, in_new_ctxt=False)
         else:
-            raise TypeError("<Pyfhel ERROR> substrahend must be either PyCtxt or PyPtxt")
+            raise TypeError("<Pyfhel ERROR> substrahend must be numeric, array, PyCtxt or PyPtxt")
         return self
                         
     def __mul__(self, other):
@@ -395,19 +398,21 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.multiply`
         """
+        if isinstance(other, (int, float, list)):
+            other = np.array(other)
         if isinstance(other, PyCtxt):
             return self._pyfhel.multiply(self, other, in_new_ctxt=True)
         elif isinstance(other, PyPtxt):
             return self._pyfhel.multiply_plain(self, other, in_new_ctxt=True)
-        elif isinstance(other, (int, float)):
-            if self._scheme == SCHEME_t.BFV:
-                other = self._pyfhel.encodeInt(int(other))
+        elif isinstance(other, np.ndarray):
+            if self._scheme == scheme_t.bfv:
+                other = self._pyfhel.encodeInt(other)
                 return self._pyfhel.multiply_plain(self, other, in_new_ctxt=True)
-            elif self._scheme == SCHEME_t.CKKS:
-                other = self._pyfhel.encodeFrac(float(other))
+            elif self._scheme == scheme_t.ckks:
+                other = self._pyfhel.encodeFrac(other)
                 return self._pyfhel.multiply_plain(self, other, in_new_ctxt=True)
         else:
-            raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt, PyPtxt or int|float"
+            raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt, PyPtxt or numerical"
                             "(is %s instead)"%(type(other)))
      
     def __rmul__(self, other): return self.__mul__(other)
@@ -429,12 +434,12 @@ cdef class PyCtxt:
             self._pyfhel.multiply(self, other, in_new_ctxt=False)
         elif isinstance(other, PyPtxt):
             self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
-        elif isinstance(other, (int, float)):
-            if self._scheme == SCHEME_t.BFV:
-                other = self._pyfhel.encodeInt(int(other))
+        elif isinstance(other, np.ndarray):
+            if self._scheme == scheme_t.bfv:
+                other = self._pyfhel.encodeInt(other)
                 self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
-            elif self._scheme == SCHEME_t.CKKS:
-                other = self._pyfhel.encodeFrac(float(other))
+            elif self._scheme == scheme_t.ckks:
+                other = self._pyfhel.encodeFrac(other)
                 self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
         else:
             raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt, PyPtxt or int|float"
@@ -450,10 +455,10 @@ cdef class PyCtxt:
         This operation can only be done with plaintexts. Division between 
         two Ciphertexts is not possible.
 
-        For BFV Integer Scheme, the inverse is calculated as:
+        For bfv Integer Scheme, the inverse is calculated as:
             inverse -> (divisor * inverse) mod p = 1
 
-        For CKKS Fractional scheme, the inverse is calculated as 1/divisor.
+        For ckks Fractional scheme, the inverse is calculated as 1/divisor.
 
         Args:
             divisor (int, float, PyPtxt): divisor for the operation.
@@ -462,20 +467,20 @@ cdef class PyCtxt:
             divisor = divisor.decode()
         if not isinstance(divisor, (int, float)):
             raise TypeError("<Pyfhel ERROR> divisor must be float, int"
-                            "or PyPtxt with BFV/CKKS scheme (is %s:%s instead)"
+                            "or PyPtxt with bfv/ckks scheme (is %s:%s instead)"
                             %(str(divisor),type(divisor)))
         # Compute inverse. Int: https://stackoverflow.com/questions/4798654
-        if self._scheme == SCHEME_t.BFV:
+        if self._scheme == scheme_t.bfv:
             divisor = int(divisor)
             p = self._pyfhel.getp()
             inverse = pow(divisor, p-2, p)
             inversePtxt = self._pyfhel.encodeInt(inverse)
-        elif self._scheme == SCHEME_t.CKKS: # float. Standard inverse
+        elif self._scheme == scheme_t.ckks: # float. Standard inverse
             inverse = 1/float(divisor)
             inversePtxt = self._pyfhel.encodeFrac(inverse)
         else:
             raise TypeError("<Pyfhel ERROR> dividend scheme doesn't support"
-                            "division (%s)"%(self._scheme))
+                            "division (%s)"%(self.scheme))
         return self._pyfhel.multiply_plain(self, inversePtxt, in_new_ctxt=True)
 
     def __itruediv__(self, divisor):
@@ -484,10 +489,10 @@ cdef class PyCtxt:
         This operation can only be done with plaintexts. Division between 
         two Ciphertexts is not possible.
 
-        For BFV Integer Scheme, the inverse is calculated as:
+        For bfv Integer Scheme, the inverse is calculated as:
             inverse -> (divisor * inverse) mod p = 1
 
-        For CKKS Fractional scheme, the inverse is calculated as 1/divisor.
+        For ckks Fractional scheme, the inverse is calculated as 1/divisor.
 
         Args:
             divisor (int, float, PyPtxt): divisor for the operation.
@@ -496,20 +501,20 @@ cdef class PyCtxt:
             divisor = divisor.decode()
         if not isinstance(divisor, (int, float)):
             raise TypeError("<Pyfhel ERROR> divisor must be float, int"
-                            "or PyPtxt with BFV/CKKS scheme (is %s:%s instead)"
+                            "or PyPtxt with bfv/ckks scheme (is %s:%s instead)"
                             %(str(divisor),type(divisor)))
         # Compute inverse. Int: https://stackoverflow.com/questions/4798654
-        if self._scheme == SCHEME_t.BFV:
+        if self._scheme == scheme_t.bfv:
             divisor = int(divisor)
             p = self._pyfhel.getp()
             inverse = pow(divisor, p-2, p)
             inversePtxt = self._pyfhel.encodeInt(inverse)
-        elif self._scheme == SCHEME_t.CKKS: # float. Standard inverse
+        elif self._scheme == scheme_t.ckks: # float. Standard inverse
             inverse = 1/float(divisor)
             inversePtxt = self._pyfhel.encodeFrac(inverse)
         else:
             raise TypeError("<Pyfhel ERROR> dividend scheme doesn't support"
-                            "division (%s)"%(self._scheme))
+                            "division (%s)"%(self.scheme))
         self._pyfhel.multiply_plain(self, inversePtxt, in_new_ctxt=False)
         return self
 
@@ -608,20 +613,18 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.PyCtxt.size`
         """
-        return self.size()
+        return (<AfsealCtxt*>(self._ptr_ctxt)).size()
     
     def __repr__(self):
         """__repr__()
         
         Prints information about the current ciphertext"""
-        sk_not_empty = self._pyfhel is not None and not self._pyfhel.is_secretKey_empty()
         return "<Pyfhel Ciphertext at {}, scheme={}, size={}/{}, noiseBudget={}>".format(
                 hex(id(self)),
-                to_SCHEME_t(self._scheme).name,
+                self.scheme.name,
                 self.size(),
-                self.size_capacity(),
-                self._pyfhel.noiseLevel(self) if sk_not_empty else "-"
-                  )
+                self.capacity,
+                self.noiseBudget)
                 
     def __bytes__(self):
         """__bytes__()
@@ -659,4 +662,4 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.decrypt`
         """
-        return self._pyfhel.decrypt(self, decode_value=True)
+        return self._pyfhel.decrypt(self, decode=True)
