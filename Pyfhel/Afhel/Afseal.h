@@ -94,6 +94,10 @@ class AfsealCtxt: public AfCtxt, public seal::Ciphertext{
 public:
   using seal::Ciphertext::Ciphertext;
   virtual ~AfsealCtxt() = default;
+  void set_scale(double new_scale){
+    this->scale() = new_scale;
+  };
+
 };
 
 
@@ -361,7 +365,8 @@ class Afseal: public Afhel {
   size_t get_poly_modulus_degree();
   scheme_t get_scheme();
   int get_sec();
-
+  int total_coeff_modulus_bit_count();
+  
   bool is_secretKey_empty() { return secretKey==NULL; }
   bool is_publicKey_empty() { return publicKey==NULL; }
   bool is_rotKey_empty() { return rotateKeys==NULL; }

@@ -385,7 +385,7 @@ void Afseal::mod_switch_to_next_plain(AfPtxt &ptxt) {
 // SAVE/LOAD CONTEXT
 size_t Afseal::save_context(ostream &out_stream, string &compr_mode) {
   if (context==NULL) { throw std::logic_error("<Afseal>: Context not initialized"); }
-  return (size_t)context->first_context_data()->parms().save(
+  return (size_t)context->key_context_data()->parms().save(
     out_stream, compr_mode_map[compr_mode]);
 }
 size_t Afseal::load_context(istream &in_stream) {
@@ -535,6 +535,10 @@ scheme_t Afseal::get_scheme() {
   return scheme_map[context->first_context_data()->parms().scheme()];
 }
 
+int Afseal::total_coeff_modulus_bit_count() {
+  if (this->context==NULL) { throw std::logic_error("<Afseal>: Context not initialized"); }
+  return context->first_context_data()->total_coeff_modulus_bit_count();
+}
 // TODO: coeff_modulus?
 
 // -----------------------------------------------------------------------------

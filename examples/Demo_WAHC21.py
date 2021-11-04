@@ -103,7 +103,7 @@ ca = PyCtxt(pyfhel=HE_server, fileName="ctxt_a.ctxt")
 cb = PyCtxt(pyfhel=HE_server, fileName="ctxt_b.ctxt")
 # Compute homomorphically and send result
 cr = (ca + cb) * 2
-cr.to_file("cr.ctxt")
+cr.save("cr.ctxt")
 
 ##### CLIENT 
 # Load and decrypt result
@@ -120,8 +120,7 @@ for f in ["mypk.pk", "mycontext.con", "ctxt_a.ctxt", "ctxt_b.ctxt", "cr.ctxt"]:
 from Pyfhel import PyCtxt, Pyfhel, PyPtxt
 HE = Pyfhel()
 HE.contextGen(scheme='CKKS', n=16384, qs=[30,30,30,30,30])
-HE.keyGen() 
-
+HE.keyGen()
 ctxt_x = HE.encrypt(3.1, scale=2 ** 30) # implicit encode
 ctxt_y = HE.encrypt(4.1, scale=2 ** 30)
 ctxt_z = HE.encrypt(5.9, scale=2 ** 30)
@@ -131,8 +130,12 @@ ctxtProd = ctxt_z * 5
 ctxt_t = ctxtSum * ctxtProd
 
 ptxt_ten = HE.encode(10, scale=2 ** 30)
-ctxt_result = ctxt_t + ptxt_ten #error: mismatched scales
-
+try:
+    ctxt_result = ctxt_t + ptxt_ten #error: mismatched scales
+except ValueError as e:
+    assert str(e) == "scale mismatch"
+    print("Mismatched scales detected!")
+    
 ptxt_d = HE.encode(10, 2 ** 30)
 ctxt_d = HE.encrypt(ptxt_d)
 HE.rescale_to_next(ctxt_t)  # 2^90 -> 2^60
@@ -145,7 +148,7 @@ ctxt_t.set_scale(2**30)
 ctxt_result = ctxt_t + ctxt_d # final result
 
 # %% --------------------------------------------------
-# 6. mplementing Key-Recovery for CKKS (Sec. 5.2)
+# 6. Implementing Key-Recovery for CKKS (Sec. 5.2)
 # -----------------------------------------------------
 # Setup: Encrypt, Decrypt, Decode
 ctxt = HE.encrypt(0, scale=2**40)
@@ -156,8 +159,9 @@ values = HE.decodeComplex(ptxt_dec)
 ptxt_re = HE.encode(values, scale=2**40)
 a = HE.poly_from_ciphertext(ctxt,1) # PyPoly
 b = HE.poly_from_ciphertext(ctxt,0) # or b = ctxt[0]
-m = HE.poly_from_plaintext(ptxt_re) # PyPoly
+m = HE.poly_from_plaintext(ctxt, ptxt_re) # PyPoly
 s = (m - b) * ~a # ~a = inverse of a
 
 
 # sphinx_gallery_thumbnail_path = 'static/thumbnails/helloworld.png'
+# %%

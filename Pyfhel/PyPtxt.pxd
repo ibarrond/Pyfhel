@@ -23,6 +23,7 @@ cdef class PyPtxt:
     cdef scheme_t _scheme
     cdef backend_t _backend
     cpdef bool is_zero(self)
+    cpdef bool is_ntt_form(self)
     cpdef string to_poly_string(self)
     cpdef void save(self, str fileName, str compr_mode=*)
     cpdef void load(self, str fileName, object scheme)

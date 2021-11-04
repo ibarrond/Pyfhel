@@ -15,6 +15,8 @@ from cython.operator cimport dereference as deref
 # Import Abstract Plaintext class
 from Pyfhel.Afhel cimport *
 
+import numpy as np
+
 # ----------------------------- IMPLEMENTATION --------------------------------
 cdef class PyPtxt:
     """Plaintext class of Pyfhel, contains a value/vector of encoded ints/double.
@@ -119,6 +121,10 @@ cdef class PyPtxt:
         """str: Polynomial representation of the plaintext"""
         return (<AfsealPtxt*>self._ptr_ptxt).to_string()
     
+    cpdef bool is_ntt_form(self):
+        """bool: Flag to quickly check if it is in NTT form"""
+        return (<AfsealPtxt*>self._ptr_ptxt).is_ntt_form()
+    
     
     # =========================================================================
     # ================================== I/O ==================================
@@ -217,10 +223,15 @@ cdef class PyPtxt:
         return self._pyfhel.decodeFrac(self)
     
     def __repr__(self):
-        poly_s = str(self.to_poly_string())
-        return "<Pyfhel Plaintext, scheme={}, poly={}>".format(
+        if self.is_ntt_form():
+            poly_s = "?"
+        else:
+            poly_s = str(self.to_poly_string())
+            poly_s = poly_s[:25] + ('...' if len(poly_s)>25 else '')
+        return "<Pyfhel Plaintext, scheme={}, poly={}, is_ntt={}>".format(
                 self.scheme.name,
-                poly_s[:25] + ('...' if len(poly_s)>25 else ''))
+                poly_s,
+                "Y" if self.is_ntt_form() else "-")
 
     def encode(self, value):
         """encode(value)

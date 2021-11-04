@@ -1,4 +1,4 @@
-## This file installs Pyfhel in your Python3 distribution.
+"""This file installs Pyfhel in your Python3 distribution.
 # Use one of the two:
 #   > python3 setup.py install
 #   > python3 -m pip install .
@@ -6,65 +6,71 @@
 #   > python3 setup.py sdist
 #   > twine upload dist/*
 #   > python3 setup.py clean --all
-
+"""
 # ==============================================================================
 # ============================ INITIALIZATION ==================================
 # ==============================================================================
-
-import shutil, glob, fileinput, re, os, sys, sysconfig, platform, subprocess
 from typing import Union, List, Dict, Tuple
-
-# Check that Python version is 3.5+
-v_maj, v_min = sys.version_info[:2]
-assert (v_maj, v_min) >= (3,5),\
-    "Pyfhel requires Python 3.5+ (your version is {}.{}).".format(v_maj, v_min)
-
-# Common Paths for this setup
 from pathlib import Path
-PYFHEL_PATH = Path('Pyfhel')
-AFHEL_PATH = PYFHEL_PATH / 'Afhel'
-SEAL_PATH = PYFHEL_PATH / 'backend' / 'SEAL'
-PALISADE_PATH = PYFHEL_PATH / 'backend' / 'palisade'
+import sys
+import os
+import re
+import glob
+import shutil
+import sysconfig
+import platform
+import subprocess
+import toml
+from pkg_resources import parse_version as v_parse
 
 # Create Extension modules written in C for Python
 from setuptools import setup, Extension, find_packages
 
-# Get directories for includes of CPython library
-from distutils.sysconfig import get_python_inc
-    
+# # Check that Python version is 3.7+
+# v_maj, v_min = sys.version_info[:2]
+# assert (v_maj, v_min) >= (3,7),\
+#     "Pyfhel requires Python 3.7+ (your version is {}.{}).".format(v_maj, v_min)
+
 # Get platform system
 platform_system = platform.system()
 if platform_system == 'Darwin': # MacOS
-    raise SystemError("Pyfhel is not supported in MacOS (see issue #59). Please use a Linux VM or Docker.")
+    raise SystemError("Pyfhel is not supported in MacOS (see issue #59)."
+                      "Please use a Linux VM or Docker.")
 
 # Read config file
-import toml
 config = toml.load("pyproject.toml")
 project_config = config['project']
 project_name = project_config['name']
 
 # -------------------------------- VERSION -------------------------------------
-## Uniformize version across the entire project, taking pyproject.toml as truth. 
+## Uniformize version across the entire project, taking pyproject.toml as truth.
 # Reading version from pyproject.toml
 VERSION = project_config['version']
 def re_sub_file(regex: str, replace: str, filename: str):
-    with open(filename) as f:
-        file_string = f.read()
-    with open(filename, 'w') as f:
-        f.write(re.sub(regex, '{}'.format(replace), file_string))
+    """Replaces all occurrences of regex in filename with re.sub
+
+    Args:
+        regex (str): Regular expression to be replaced
+        replace (str): Replacement string
+        filename (str): File to be modified
+    """
+    with open(filename) as sub_file:
+        file_string = sub_file.read()
+    with open(filename, 'w') as sub_file:
+        sub_file.write(re.sub(regex, '{}'.format(replace), file_string))
 
 # Writing version in __init__.py and README.md
-v_readme_regex = r'(?<=\* \*\*_Version_\*\*: )[0-9]+\.[0-9]+\.[0-9a-z]+'
-v_init_regex = r'(?<=__version__ = \")[0-9]+\.[0-9]+\.[0-9a-z]+(?=\")'
-re_sub_file(regex=v_readme_regex, replace=VERSION, filename='README.md')
-re_sub_file(regex=v_init_regex, replace=VERSION, filename='Pyfhel/__init__.py')
+V_README_REGEX = r'(?<=\* \*\*_Version_\*\*: )[0-9]+\.[0-9]+\.[0-9a-z]+'
+V_INIT_REGEX = r'(?<=__version__ = \")[0-9]+\.[0-9]+\.[0-9a-z]+(?=\")'
+re_sub_file(regex=V_README_REGEX, replace=VERSION, filename='README.md')
+re_sub_file(regex=V_INIT_REGEX, replace=VERSION, filename='Pyfhel/__init__.py')
 
 
 # -------------------------------- OPTIONS -------------------------------------
 # Compile cython files (.pyx) into C++ (.cpp) files to ship with the library.
 CYTHONIZE = False
 try:
-    import cython
+    from Cython.Build import cythonize
     CYTHONIZE = True
 except ImportError:
     pass    # Cython not available, reverting to previously cythonized C++ files
@@ -85,18 +91,19 @@ def _pl(args: List[Union[str,dict]]) -> List[str]:
                 args_pl += arg[platform_system]
         else:   args_pl.append(arg)
     return args_pl
-                
+
 def _path(args: List[str]) -> List[Path]:
     """_path: Turns all string elements into absolute paths with pathlib.Path"""
-    return  [str(Path(arg).absolute()) if type(arg)==str else arg for arg in args]
+    return  [str(Path(arg).absolute()) if isinstance(arg, str) else arg for arg in args]
 
 def _tupl(args: List[List[str]]) -> List[Tuple[str, str]]:
     """_tupl: Picks elements and turns them into tuples"""
     return  [tuple(arg) for arg in args]
 # --------------------------- FILE/DIR FINDER ----------------------------------
-def scan_ftypes(folder: Union[str, Path], ftypes: List[str]=[], only: str=None, recursive: bool=True):
+def scan_ftypes(folder: Union[str, Path],   ftypes: List[str],
+                only: str=None,             recursive: bool=True):
     """Scan a folder searching for files and/or folders ending with the strings in ftypes.
-    
+
     If only is 'dirs' or 'files', returns only directories or files respectively"""
     matches = []
     if recursive:
@@ -108,14 +115,14 @@ def scan_ftypes(folder: Union[str, Path], ftypes: List[str]=[], only: str=None, 
             if only in (None, 'dirs'):
                 matches+=\
                 [str(root/d) for ftype in ftypes for d in dirs if d.endswith(ftype)]
-    else: # just first 
+    else: # just first
         for file_or_dir in os.listdir(folder):
-            f  = (Path(folder) / file_or_dir).absolute()
-            if only in (None, 'files') and f.is_file() and f.suffix in ftypes:
-                matches+= [str(f)] 
-            if only in (None, 'dirs') and f.is_dir() and \
-                any([f.name.endswith(ftype) for ftype in ftypes]):
-                matches+= [str(f)] 
+            f_obj = (Path(folder) / file_or_dir).absolute()
+            if only in (None, 'files') and f_obj.is_file() and f_obj.suffix in ftypes:
+                matches+= [str(f_obj)]
+            if only in (None, 'dirs') and f_obj.is_dir() and \
+                any([f_obj.name.endswith(ftype) for ftype in ftypes]):
+                matches+= [str(f_obj)]
     return matches
 
 def shutil_copy_same_ok(src_list: List[Union[str, Path]], dst: Union[str, Path]):
@@ -137,19 +144,23 @@ def run_command(command, **kwargs):
     )
     while True:   # Could be more pythonic with := in Python3.8+
         line = process.stdout.readline()
-        if not line and process.poll() is not None: break
+        if not line and process.poll() is not None:
+            break
         print(line.decode(), end='')
-           
+
 # ---------------------------- AUXILIARY CLEANER -------------------------------
 # Tired of cleaning all compilation and distribution by hand.
 #  Run `python setup.py flush` to clean-up the entire project.
 from distutils.cmd import Command
-class flush(Command):
+class FlushCommand(Command):
     """Custom clean command to tidy up the project root."""
-    CLEAN_FILES = '*/__pycache__ .eggs ./gmon.out ./build ./dist ./*.pyc ./*.tgz ./*.egg-info'.split(' ')
+    CLEAN_FILES = "*/__pycache__ .eggs ./gmon.out ./build "\
+                  "./dist ./*.pyc ./*.tgz ./*.egg-info".split(" ")
     user_options = []
-    def initialize_options(self):   pass
-    def finalize_options(self):     pass
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
     def run(self):
         here = os.getcwd()
         for path_spec in self.CLEAN_FILES:
@@ -160,8 +171,10 @@ class flush(Command):
                     # Die if path in CLEAN_FILES is absolute + outside this directory
                     raise ValueError("%s is not a path inside %s" % (path, here))
                 print('removing %s' % os.path.relpath(path))
-                if os.path.isfile(path):    os.remove(path)
-                else:                       shutil.rmtree(path) 
+                if os.path.isfile(path):
+                    os.remove(path)
+                else:
+                    shutil.rmtree(path)
 
 
 # ==============================================================================
@@ -169,7 +182,7 @@ class flush(Command):
 # ==============================================================================
 # This section is in charge of compiling C/C++ libraries that will be linked to
 #  all the Cython extensions. We currently support standard static libraries,
-#  standard shared libraries & cmake-based libraries. There are several 
+#  standard shared libraries & cmake-based libraries. There are several
 #  possible compilation chains:
 #  - cmake static/shared libs
 #  - standard static/shared libs
@@ -246,7 +259,7 @@ from setuptools.command.build_clib import build_clib
 from setuptools.dep_util import newer_pairwise_group
 from distutils import log
 
-class super_build_clib(build_clib):
+class SuperBuildClib(build_clib):
     def finalize_options(self):
         build_clib.finalize_options(self)
         self.final_lib_folder = get_final_lib_folder()
@@ -298,7 +311,12 @@ class super_build_clib(build_clib):
         source_dir = build_info.get('source_dir')
         
         # Actual build
-        run_command(['cmake', source_dir], cwd=build_dir)
+        cmake_ver_str = subprocess.run(['cmake', '--version'], check=True, capture_output=True, text=True).stdout
+        cmake_ver = v_parse(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
+        if cmake_ver >= v_parse('3.14'):
+            run_command(['cmake', '-S', source_dir, '-B', build_dir], cwd=build_dir)
+        else:
+            run_command(['cmake', source_dir], cwd=build_dir)
         run_command(['cmake', '--build',  '.', '-j', str(n_jobs)], cwd=build_dir)
         
         # Post build -> register as built lib/s
@@ -435,7 +453,7 @@ from distutils.sysconfig import customize_compiler, get_python_version
 from distutils.sysconfig import get_config_h_filename
 from distutils.dep_util import newer_group
 from distutils import log
-class super_build_ext(build_ext):
+class SuperBuildExt(build_ext):
     def finalize_options(self):
         build_ext.finalize_options(self)
         # We need the numpy headers and cmake-built headers for compilation.
@@ -501,7 +519,6 @@ if CYTHONIZE:
         'wraparound': False,
         'initializedcheck': False,
     }
-    from Cython.Build import cythonize
     ext_modules=cythonize(
         ext_modules,
         compiler_directives=cython_directives)
@@ -539,10 +556,9 @@ setup(
     python_requires =project_config['requires-python'],
     zip_safe        =False,
     packages        =find_packages(),
-    ext_modules     =ext_modules,  
-    # test_suite=str(PYFHEL_PATH / "test.py"),
+    ext_modules     =ext_modules,
     libraries       =cpplibraries,
-    cmdclass        ={'flush': flush,
-                      'build_ext' : super_build_ext,
-                      'build_clib' : super_build_clib},
+    cmdclass        ={'flush': FlushCommand,
+                      'build_ext' : SuperBuildExt,
+                      'build_clib' : SuperBuildClib},
 )

@@ -26,24 +26,24 @@ cdef class PyPoly:
         PyPtxt ptxt=None,
         size_t index=0,
     ):
-        if other is not None:   # Copy constructor if there is a PyPoly to copy
+        if other is not None and other._afpoly is not NULL:   # Copy constructor if there is a PyPoly to copy
             self._afpoly = new AfsealPoly(deref(other._afpoly))
-            if (other._pyfhel):
+            if other._pyfhel is not None:
                 self._pyfhel = other._pyfhel
-            return
-        assert ref is not None and ref._pyfhel is not None and ref._pyfhel.afseal is not NULL,\
-            "Missing reference PyCtxt `ref` with initialized _pyfhel member"
-        if index is not None:   # Construct from selected Poly in PyCtxt `ref`
-            self._afpoly = new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealCtxt*>ref._ptr_ctxt), <size_t>index)  
-            self._pyfhel = ref._pyfhel
-        elif ptxt is not None:  # Construct from Poly in PyPtxt `ptxt`
-            self._afpoly =\
-                new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealPtxt*>ptxt._ptr_ptxt), <AfsealCtxt>deref(<AfsealCtxt*>ref._ptr_ctxt))  
-            self._pyfhel = ptxt._pyfhel
-        else:                   # Base constructor
-            self._afpoly =\
-                new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealCtxt*>ref._ptr_ctxt))  
-            self._pyfhel = ref._pyfhel
+        else:
+            assert ref is not None and ref._pyfhel is not None and ref._pyfhel.afseal is not NULL,\
+                "Missing reference PyCtxt `ref` with initialized _pyfhel member"
+            if index is not None:   # Construct from selected Poly in PyCtxt `ref`
+                self._afpoly = new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealCtxt*>ref._ptr_ctxt), <size_t>index)  
+                self._pyfhel = ref._pyfhel
+            elif ptxt is not None:  # Construct from Poly in PyPtxt `ptxt`
+                self._afpoly =\
+                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealPtxt*>ptxt._ptr_ptxt), <AfsealCtxt>deref(<AfsealCtxt*>ref._ptr_ctxt))  
+                self._pyfhel = ptxt._pyfhel
+            else:                   # Base constructor
+                self._afpoly =\
+                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealCtxt*>ref._ptr_ctxt))  
+                self._pyfhel = ref._pyfhel
                 
     def __init__(
         self,
@@ -82,7 +82,7 @@ cdef class PyPoly:
 
         :meta public:
         """
-        return scheme_t(self._scheme)
+        return Scheme_t(self._scheme)
     
     @_scheme.setter
     def _scheme(self, new_scheme):
@@ -92,7 +92,7 @@ cdef class PyPoly:
         
     @_scheme.deleter
     def _scheme(self):
-        self._scheme = scheme_t.none
+        self._scheme = Scheme_t.none
               
         
     @property

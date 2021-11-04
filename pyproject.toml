@@ -16,7 +16,7 @@
   #--> SEAL
   [cpplibraries.SEAL]
   mode = 'cmake'              # standard/cmake
-  lib_type = 'static'          # static/shared
+  lib_type = 'static'         # static/shared
   # source_dir: dir with the top CMakeLists.txt.
   source_dir = 'Pyfhel/backend/SEAL'
   include_dirs = [
@@ -97,7 +97,7 @@ name = "Pyfhel"
 version = "3.1.1"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
-requires-python = ">=3.5"
+requires-python = ">=3.7"
 license = "GNU GPLv3"
 keywords = ["homomorphic" , "encryption", "cython", "cryptography"]
 author = {name = "Alberto Ibarrondo", email = "ibarrond@eurecom.fr"}

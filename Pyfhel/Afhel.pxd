@@ -26,6 +26,7 @@ cdef extern from "seal/plaintext.h" namespace "seal" nogil:
         Plaintext(const Plaintext &copy) except +
         bool is_zero() except +
         string to_string() except +
+        inline bool is_ntt_form()
         
 # SEAL ciphertext class        
 cdef extern from "seal/ciphertext.h" namespace "seal" nogil:
@@ -34,6 +35,7 @@ cdef extern from "seal/ciphertext.h" namespace "seal" nogil:
         Ciphertext(const Ciphertext &copy) except +
         int size_capacity() except +
         int size() except +
+        double scale() except +
 
 
 #===============================================================================
@@ -202,6 +204,7 @@ cdef extern from "Afhel/Afhel.h" nogil:
         size_t get_poly_modulus_degree() except +
         scheme_t get_scheme() except +
         int get_sec() except +
+        int total_coeff_modulus_bit_count() except +
 
         bool is_secretKey_empty() except+
         bool is_publicKey_empty() except+
@@ -229,6 +232,7 @@ cdef extern from "Afhel/Afseal.h" nogil:
     cdef cppclass AfsealCtxt(AfCtxt, Ciphertext):
         AfsealCtxt() except +
         AfsealCtxt(const AfsealCtxt &other) except +
+        void set_scale(double new_scale)
 
     cdef cppclass AfsealPtxt(AfPtxt, Plaintext):
         AfsealPtxt() except +
