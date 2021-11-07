@@ -241,6 +241,8 @@ cdef extern from "Afhel/Afseal.h" nogil:
     cdef cppclass Afseal(Afhel):
         Afseal() except +
         Afseal(const Afseal &other) except +
+        AfsealPoly get_publicKey_poly(size_t index) except +
+        AfsealPoly get_secretKey_poly() except +
 
     cdef cppclass AfsealPoly(AfPoly):
         AfsealPoly(Afseal &afseal, const AfsealCtxt &ref) except+

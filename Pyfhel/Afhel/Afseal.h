@@ -142,10 +142,14 @@ class AfsealPoly: public AfPoly {
   virtual ~AfsealPoly();
 
   /// Copy constructor
-  AfsealPoly(AfsealPoly &other);
+  AfsealPoly(const AfsealPoly &other);
 
   /// Copy operator
-  AfsealPoly &operator=(AfsealPoly &other);
+  AfsealPoly &operator=(const AfsealPoly &other);
+
+  /// Initializes a zero polynomial with sizes based on the parameters of Afseal
+  /// \param afseal Afseal object, used to access the context
+  AfsealPoly(Afseal &afseal);
 
   /// Initializes a zero polynomial with sizes based on the parameters of the current ciphertext
   /// \param afseal Afseal object, used to access the context
@@ -163,6 +167,11 @@ class AfsealPoly: public AfPoly {
   /// \param ptxt  Plaintext from which the polynomial should be copied
   /// \param ref Ciphertext used as a reference to get get, e.g., coeff_modulus_count
   AfsealPoly(Afseal &afseal, AfsealPtxt &ptxt, const AfsealCtxt &ref);
+
+  /// Creates a copy of polynomial in the Plaintext
+  /// \param afseal Afseal object, used to access the context
+  /// \param ptxt  Plaintext from which the polynomial should be copied
+  AfsealPoly(Afseal &afseal, AfsealPtxt &ptxt);
 
   //TODO: Constructor from a vector of complex values, defining the coefficients directly?
 
@@ -395,7 +404,9 @@ class Afseal: public Afhel {
   // I/O
   void poly_to_ciphertext(AfPoly &p, AfCtxt &ctxt, size_t i);
   void poly_to_plaintext(AfPoly &p, AfPtxt &ptxt);
-
+  AfsealPoly Afseal::get_publicKey_poly(size_t index);
+  AfsealPoly Afseal::get_secretKey_poly();
+  
   // Coefficient Access
   std::complex<double> get_coeff(AfPoly& poly, size_t i);
   void set_coeff(AfPoly& poly, std::complex<double> &val, size_t i);

@@ -589,9 +589,15 @@ std::vector<std::complex<double>> Afseal::to_coeff_list(AfPoly &poly) {
   return dynamic_cast<AfsealPoly&>(poly).to_coeff_list(*this);
 }
 
+AfsealPoly Afseal::get_publicKey_poly(size_t index) {
+  if (this->publicKey==NULL) { throw std::logic_error("<Afseal>: Public Key not initialized"); }
+  return AfsealPoly(*this, static_cast<AfsealCtxt&>(this->publicKey->data()), index);
+}
 
-
-
+AfsealPoly Afseal::get_secretKey_poly() {
+  if (this->secretKey==NULL) { throw std::logic_error("<Afseal>: Secret Key not initialized"); }
+  return AfsealPoly(*this, static_cast<AfsealPtxt&>(this->secretKey->data()));
+}
 
 
 // =============================================================================
@@ -599,7 +605,7 @@ std::vector<std::complex<double>> Afseal::to_coeff_list(AfPoly &poly) {
 // =============================================================================
 
 // ----------------------------- CLASS MANAGEMENT -----------------------------
-AfsealPoly::AfsealPoly(AfsealPoly &other) {
+AfsealPoly::AfsealPoly(const AfsealPoly &other) {
   parms_id = other.parms_id;
   mempool = other.mempool;
   coeff_count = other.coeff_count;
@@ -617,7 +623,7 @@ AfsealPoly::AfsealPoly(AfsealPoly &other) {
   coeff_repr_valid = false;
 }
 
-AfsealPoly &AfsealPoly::operator=(AfsealPoly &other) {
+AfsealPoly &AfsealPoly::operator=(const AfsealPoly &other) {
   if (&other!=this) {
     parms_id = other.parms_id;
     mempool = other.mempool;
@@ -639,8 +645,18 @@ AfsealPoly &AfsealPoly::operator=(AfsealPoly &other) {
   return *this;
 }
 
+
+AfsealPoly::AfsealPoly(Afseal &afseal) {
+  mempool = seal::MemoryManager::GetPool();
+  coeff_count = afseal.context->key_context_data()->parms().poly_modulus_degree();
+  coeff_modulus = afseal.context->key_context_data()->parms().coeff_modulus();
+  coeff_modulus_count = afseal.context->key_context_data()->parms().coeff_modulus().size();
+  eval_repr_coeff_iter = util::allocate_zero_poly(coeff_count, coeff_modulus_count, mempool);
+}
+
 AfsealPoly::AfsealPoly(Afseal &afseal, const AfsealCtxt &ref) {
   parms_id = ref.parms_id();
+  afseal.context->key_context_data();
   mempool = seal::MemoryManager::GetPool();
   coeff_count = ref.poly_modulus_degree();
   coeff_modulus = afseal.context->get_context_data(parms_id)->parms().coeff_modulus();
@@ -656,6 +672,14 @@ AfsealPoly::AfsealPoly(Afseal &afseal, AfsealCtxt &ctxt, size_t index) : AfsealP
   }
 }
 
+AfsealPoly::AfsealPoly(Afseal &afseal, AfsealPtxt &ptxt) : AfsealPoly(afseal) {
+// Copy coefficients from ptxt
+#pragma omp parallel for
+  for (size_t i = 0; i < coeff_modulus_count; i++) {
+    util::set_poly(ptxt.data() + (i*coeff_count), coeff_count, 1, eval_repr_coeff_iter + (i*coeff_count));
+  }
+}
+
 AfsealPoly::AfsealPoly(Afseal &afseal, AfsealPtxt &ptxt, const AfsealCtxt &ref) : AfsealPoly(afseal, ref) {
 // Copy coefficients from ptxt
 #pragma omp parallel for
@@ -663,6 +687,7 @@ AfsealPoly::AfsealPoly(Afseal &afseal, AfsealPtxt &ptxt, const AfsealCtxt &ref) 
     util::set_poly(ptxt.data() + (i*coeff_count), coeff_count, 1, eval_repr_coeff_iter + (i*coeff_count));
   }
 }
+
 
 AfsealPoly::~AfsealPoly() {};
 
