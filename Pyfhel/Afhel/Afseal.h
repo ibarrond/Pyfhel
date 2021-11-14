@@ -44,6 +44,7 @@
 #include <map>          /* map */
 
 #include "Afhel.h"
+#include "seal/dynarray.h"
 #include "seal/seal.h"
 #include "seal/util/polyarithsmallmod.h"
 
@@ -114,11 +115,11 @@ class AfsealPoly: public AfPoly {
   /// Pointer to the SEAL MemoryPool in which the polynomial is allocated
   seal::MemoryPoolHandle mempool;
 
-  /// Pointer to the last generated coeff_representation
-  seal::util::CoeffIter coeff_repr_coeff_iter;
+  /// The last generated coeff_representation
+  seal::DynArray<std::uint64_t> coeff_repr;
 
-  /// Pointer to the underlying ponomial
-  seal::util::CoeffIter eval_repr_coeff_iter;
+  /// The underlying ponomial
+  seal::DynArray<std::uint64_t> eval_repr;
 
   /// True iff the last generated coeff_representaton is still valid
   /// (no operations were performed since the last generation)
@@ -127,6 +128,7 @@ class AfsealPoly: public AfPoly {
   /// Degree of the polynomial / number of coefficients
   size_t coeff_count;
 
+  /// Vector of the different RNS coefficient moduli
   std::vector<seal::Modulus> coeff_modulus;
 
   /// The number of coefficient moduli q_i (i.e., coeff_modulus.size() )
@@ -142,12 +144,13 @@ class AfsealPoly: public AfPoly {
   virtual ~AfsealPoly();
 
   /// Copy constructor
-  AfsealPoly(const AfsealPoly &other);
+  AfsealPoly(const AfsealPoly &other) = default;
 
   /// Copy operator
-  AfsealPoly &operator=(const AfsealPoly &other);
+  AfsealPoly &operator=(const AfsealPoly &other) = default;
 
   /// Initializes a zero polynomial with sizes based on the parameters of Afseal
+  /// Specifically, this uses "first_parms_id" / "first_parms_data" from SEALContext
   /// \param afseal Afseal object, used to access the context
   AfsealPoly(Afseal &afseal);
 
@@ -166,7 +169,10 @@ class AfsealPoly: public AfPoly {
   /// \param afseal Afseal object, used to access the context
   /// \param ptxt  Plaintext from which the polynomial should be copied
   /// \param ref Ciphertext used as a reference to get get, e.g., coeff_modulus_count
-  AfsealPoly(Afseal &afseal, AfsealPtxt &ptxt, const AfsealCtxt &ref);
+  AfsealPoly(Afseal &afseal, AfsealPtxt &ptxt, const AfsealCtxt &ref) {
+    // TODO: Remove this, as it makes no sense! Can just get all info from ptxt and afseal.context!
+    throw std::runtime_error("FUNCTION REMOVED.");
+  }
 
   /// Creates a copy of polynomial in the Plaintext
   /// \param afseal Afseal object, used to access the context
@@ -404,8 +410,8 @@ class Afseal: public Afhel {
   // I/O
   void poly_to_ciphertext(AfPoly &p, AfCtxt &ctxt, size_t i);
   void poly_to_plaintext(AfPoly &p, AfPtxt &ptxt);
-  AfsealPoly Afseal::get_publicKey_poly(size_t index);
-  AfsealPoly Afseal::get_secretKey_poly();
+  AfsealPoly get_publicKey_poly(size_t index);
+  AfsealPoly get_secretKey_poly();
   
   // Coefficient Access
   std::complex<double> get_coeff(AfPoly& poly, size_t i);
