@@ -164,4 +164,3 @@ s = (m - b) * ~a # ~a = inverse of a
 
 
 # sphinx_gallery_thumbnail_path = 'static/thumbnails/helloworld.png'
-# %%
