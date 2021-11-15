@@ -4,7 +4,7 @@ include Pyfhel/*.cpp
 include Pyfhel/Afhel/*.cpp
 include Pyfhel/Afhel/*.h
 global-include Pyfhel/backend/SEAL/**
-global-include Pyfhel/backend/palisade/**
+global-exclude Pyfhel/backend/palisade/**
 
 include docs/_static/*
 

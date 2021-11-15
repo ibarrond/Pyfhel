@@ -156,6 +156,7 @@ class FlushCommand(Command):
     """Custom clean command to tidy up the project root."""
     CLEAN_FILES = "*/__pycache__ .eggs ./gmon.out ./build "\
                   "./dist ./*.pyc ./*.tgz ./*.egg-info".split(" ")
+    CLEAN_GITIGNORES = ["Pyfhel/backend/SEAL"]
     user_options = []
     def initialize_options(self):
         pass
@@ -175,6 +176,10 @@ class FlushCommand(Command):
                     os.remove(path)
                 else:
                     shutil.rmtree(path)
+        # Remove .gitignore files
+        for git_repo in self.CLEAN_GITIGNORES:
+            print('Emptying gitignored files in repo %s' % os.path.relpath(git_repo))
+            run_command(['git', 'clean', '-dfX'], cwd=Path(git_repo).absolute())
 
 
 # ==============================================================================
@@ -256,7 +261,6 @@ def _resolve_built_deps(lib_name: str, lib_conf: Dict) -> Tuple[str, Dict]:
 
 # ---------------------------- LIBRARY BUILDER ---------------------------------
 from setuptools.command.build_clib import build_clib
-from setuptools.dep_util import newer_pairwise_group
 from distutils import log
 
 class SuperBuildClib(build_clib):
@@ -409,17 +413,18 @@ class SuperBuildClib(build_clib):
 # Auxiliary methods
 def get_lib_suffix(lib_type: str) -> str:
     if lib_type == 'static':
-        if platform_system == 'Windows':  return '.lib'
-        else:                               return '.a'
+        if platform_system == 'Windows':
+            return '.lib'
+        else:
+            return '.a'
     else:  # shared
-        if platform_system == 'Windows':  return '.dll'
-        else:                               return '.so'
+        if platform_system == 'Windows':
+            return '.dll'
+        else:
+            return '.so'
 
 def get_lib_prefix() ->str:
     return 'lib' if platform_system!='Windows' else ''
-
-def get_lib_name(lib_file: Union[str, Path]) -> str:
-    """Extract prefix and suffix from lib_file"""
 
 def get_final_lib_folder():
     """Returns the name of a distutils build directory"""
@@ -449,10 +454,6 @@ def get_final_lib_folder():
 #   https://cython.readthedocs.io/en/latest/src/userguide/wrapping_CPlusPlus
 # ----------------------------- EXTENSION BUILDER ------------------------------
 from setuptools.command.build_ext import build_ext
-from distutils.sysconfig import customize_compiler, get_python_version
-from distutils.sysconfig import get_config_h_filename
-from distutils.dep_util import newer_group
-from distutils import log
 class SuperBuildExt(build_ext):
     def finalize_options(self):
         build_ext.finalize_options(self)

@@ -716,7 +716,6 @@ cdef class Pyfhel:
         Raise:
             TypeError: if the val_vec doesn't have a valid type.
         """
-        scale = _get_valid_scale(scale_bits, scale, self._scale)
         val_vec = np.array(val_vec)
         if (val_vec.ndim==0):     # nSlots = n in bfv, nSlots = n//2 in ckks
             val_vec = np.repeat(val_vec, self.n // (1 + (self.scheme==Scheme_t.ckks)))
@@ -728,6 +727,7 @@ cdef class Pyfhel:
             if self.scheme == Scheme_t.bfv:
                 return self.encodeInt(val_vec.astype(np.int64), ptxt)
             elif self.scheme == Scheme_t.ckks:
+                scale = _get_valid_scale(scale_bits, scale, self._scale)
                 if np.issubdtype(val_vec.dtype, np.complexfloating):
                     return self.encodeComplex(val_vec.astype(complex), ptxt, scale)
                 else:
