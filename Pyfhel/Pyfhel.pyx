@@ -24,6 +24,7 @@
 
 # -------------------------------- IMPORTS ------------------------------------
 from warnings import warn
+from pathlib import Path
 
 # Both numpy and the Cython declarations for numpy
 import numpy as np
@@ -77,13 +78,20 @@ cdef class Pyfhel:
             - Provide a pub_key_file and/or sec_key_file to load existing keys from saved files.
 
         Attributes:
-            context_params (dict, optional): dictionary of context parameters to run contextGen().
+            context_params (dict|str, optional): dictionary of context parameters to 
+                    run contextGen(), or alternatively a string with the name of a
+                    saved context, to ve loaded with load_context().    
             key_gen (bool, optional): generate a new public/secret key pair
-            pub_key_file (str, pathlib.Path, optional): Load public key from this file.
-            sec_key_file (str, pathlib.Path, optional): Load public key from this file.
+            pub_key_file (str|pathlib.Path, optional): Load public key from this file.
+            sec_key_file (str|pathlib.Path, optional): Load secret key from this file.
         """
         if context_params is not None:
-            self.contextGen(**context_params)
+            if isinstance(context_params, dict):
+                self.contextGen(**context_params)
+            elif isinstance(context_params, (str, Path)):
+                self.load_context(context_params)
+            else:
+                raise TypeError("context_params must be a dictionary or a string")
         if key_gen: # Overrides the key files
             self.keyGen()
         else:
