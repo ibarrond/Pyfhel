@@ -39,7 +39,7 @@ This project has been uploaded to [PyPI](https://pypi.org/project/Pyfhel/). In o
 
 Locally, you can clone this repository (use [`--recursive`](https://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) to download all submodules) and install it by running:
 
-	   > git clone --recursive https://github.com/ibarrond/Pyfhel.git
+	   > git clone --recursive --branch dev https://github.com/ibarrond/Pyfhel.git
 	   > pip install .
 
 To uninstall, just run:
