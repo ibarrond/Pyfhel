@@ -26,13 +26,13 @@ from Pyfhel.PyPoly cimport PyPoly
 cdef class Pyfhel:
     cdef Afhel* afseal           # The C++ methods are accessed via a pointer
     cdef int _sec
-    cdef vector[int] _qs
+    cdef vector[int] _qi
     cdef double _scale
     # =========================== CRYPTOGRAPHY =================================
     # CONTEXT & KEY GENERATION
     cpdef void contextGen(self,
-            str scheme, int n, int p_bits=*,int p=*, int sec=*,
-            double scale=*, int scale_bits=*,  vector[int] qs =*) 
+            str scheme, int n, int q=*, int t_bits=*,int t=*, int sec=*,
+            double scale=*, int scale_bits=*,  vector[int] qi =*) 
     cpdef void keyGen(self) 
     cpdef void relinKeyGen(self) 
     cpdef void rotateKeyGen(self) 

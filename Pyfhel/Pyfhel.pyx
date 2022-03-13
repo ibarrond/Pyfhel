@@ -62,7 +62,7 @@ cdef class Pyfhel:
                   pub_key_file=None,
                   sec_key_file=None):
         self.afseal = new Afseal()
-        self._qs = []
+        self._qi = []
         self._scale = 0
     
     def __init__(self,
@@ -130,7 +130,7 @@ cdef class Pyfhel:
                         f"n={self.n}, "\
                         f"p={self.p}, "\
                         f"sec={self.sec}, "\
-                        f"qs={self.qs}, "\
+                        f"qi={self.qi}, "\
                         f"scale={self.scale}, ")
 
     def __reduce__(self):
@@ -162,9 +162,9 @@ cdef class Pyfhel:
         return (<Afseal*>self.afseal).get_sec()
 
     @property
-    def qs(self):
+    def qi(self):
         """Chain of prime sizes (bits). Sets size of each prime in the coefficient modulis (q). Only applies to CKKS scheme."""
-        return self._qs
+        return self._qi
 
     @property
     def scale(self):
@@ -191,8 +191,8 @@ cdef class Pyfhel:
     # ....................... CONTEXT & KEY GENERATION ........................
     
     cpdef void contextGen(self,
-        str scheme, int n, int p_bits=0, int p=0, int sec=128,
-        double scale=0, int scale_bits=0, vector[int] qs = {}):
+        str scheme, int n, int q=0, int t_bits=0, int t=0, int sec=128,
+        double scale=0, int scale_bits=0, vector[int] qi = {}):
         """Generates Homomorphic Encryption context based on parameters.
         
         Creates a HE context based in parameters, as well as an appropriate
@@ -201,48 +201,56 @@ cdef class Pyfhel:
         (encryption/decryption,scheme/decoding, operations).
         
         *BFV scheme*: vectorized integer operations in Single Instruction Multiple
-            Data (SIMD) fashion. The scheme requires a plain_modulus p prime, with
-            p-1 being multiple of 2*n (n is the polynomial modulus degree). This 
-            p is generated automatically with size p_bits, and it will serve as
+            Data (SIMD) fashion. The scheme requires a plain_modulus t prime, with
+            t-1 being multiple of 2*n (n is the polynomial modulus degree). This 
+            tis generated automatically with size t_bits, and it will serve as
             plaintext modulo, the maximum value of all freshly encrypted plaintexts.
             The coefficient modulus (q) is chosen under the hood with the security
-            level sec, based on homomorphicencryption.org.
+            level sec, based on homomorphicencryption.org, although it can be set 
+            manually with the parameter q.
         
         *CKKS scheme*: vectorized approximate fixed point operations in SIMD. The
             underlying coefficient modulus (q) is set with a chain of prime sizes
-            qs, which is a vector of integers.
+            qi, which is an integer vector of moduli.
 
         Args:
             scheme (str): HE scheme ("bfv" or "ckks", for integer or float ops).
             n (int): Polynomial coefficient modulus m. (Poly: 1*x^n+1), directly
                      linked to the multiplication depth, (SEAL's poly_modulus_degree)
                      and equal to the number of slots (nSlots) in bfv.
+            q (int, optional): Coefficient modulus. (SEAL's poly_modulus). 
+                     Overriden by qi if scheme is "ckks" and sec if scheme is "bfv". 
+            
             -- Only for BFV scheme --
-            p(int, optional):  Only for bfv. Plaintext modulus. 
-            p_bits (int, optional):  Only for bfv. Plaintext modulus bit size. Overrides p.
+            t(int, optional):  Only for bfv. Plaintext modulus. (SEAL's plain_modulus) 
+            t_bits (int, optional):  Only for bfv. Plaintext modulus bit size. Overrides t.
             sec (int, optional): Only for bfv. Security level equivalent in AES.
                 128, 192 or 256. More means more security but also more costly. Sets q.
             -- Only for CKKS scheme --
             scale (int, optional): Upscale factor for fixed-point values. 
-            qs (list of ints, optional): Chain of prime sizes (#bits), to set q.
+            qi (list of ints, optional): Chain of prime sizes (#bits), to set q.
                       
         Return:
             None
         """
         s = to_Scheme_t(scheme)
         if s==Scheme_t.bfv:
-            assert (p_bits>0 or p>0), "BFV scheme requires p_bits > 0 or p > 0"
-            assert sec>0, "BFV scheme requires a security level (sec) to be set."
+            assert (t_bits>0 or t>0), "BFV scheme requires `t_bits` or `t` to be set"
+            if not qi.empty():  # Compress all moduli into one
+                q = np.prod(np.array(qi))
+                self._qi = qi
+            else:
+                self._qi = {}
+            assert (sec>0 or q>0), "BFV scheme requires `sec` or `q` to be set."
             self._scale = 0
-            self._qs = {}
         elif s==Scheme_t.ckks:
-            assert not qs.empty(), "CKKS scheme requires a list of prime sizes (qs) to be set."
+            assert not qi.empty(), "CKKS scheme requires a list of prime sizes (qi) to be set"
             if not scale>0 and not scale_bits>0:
                 warn("<Pyfhel Warning> initializing CKKS context without default scale."
                      "You will have to provide a scale for each encoding", RuntimeWarning)
             self._scale = 2**scale_bits if scale_bits>0 else scale
-            self._qs = qs
-        self.afseal.ContextGen(<scheme_t>s.value, n, p_bits * (p_bits>0), p, sec, qs)
+            self._qi = qi
+        self.afseal.ContextGen(<scheme_t>s.value, n, t_bits * (t_bits>0), t, sec, qi)
         
     cpdef void keyGen(self):
         """Generates a pair of secret/Public Keys.
@@ -1097,7 +1105,7 @@ cdef class Pyfhel:
         self.afseal.rescale_to_next(deref(ctxt._ptr_ctxt))
 
     def mod_switch_to_next(self, cipher_or_plain):
-        """Reduces the ciphertext/plaintext modulus with next prime in the qs chain.
+        """Reduces the ciphertext/plaintext modulus with next prime in the qi chain.
 
         Args:
             cipher_or_plain (PyCtxt|PyPtxt): Ciphertext to reduce.

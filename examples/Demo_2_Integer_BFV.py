@@ -1,24 +1,53 @@
 """
-Pyfhel Codecs
+Integer FHE with BFV scheme
 ========================================
 
-Encoding Demo for Pyfhel, covering the different ways of encoding
-and decodeing.
+Integer FHE Demo for Pyfhel, covering all the posibilities offered by 
+the BFV scheme (see https://eprint.iacr.org/2012/144.pdf).
 """
 
+import numpy as np
+from Pyfhel import Pyfhel
 
-from Pyfhel import Pyfhel, PyPtxt, PyPtxt
+# %%
+# 2. Context and key setup
+# ---------------------------
+# We now investigate the different parameters that can be set for the BFV scheme.
+HE = Pyfhel()           # Creating empty Pyfhel object
+bfv_params = {
+    'scheme': 'BFV',    # can also be 'bfv'
+    'n': 2**12,         # Polynomial modulus degree, the num. of slots per plaintext,
+                        #  of elements to be encoded in a single ciphertext. 
+                        #  Typ. 2^D for D in [10, 16]
+    't': 65537,         # Plaintext modulus. Encrypted operations happen modulo t
+                        #  Must be prime such that t-1 be divisible by 2^N.
+    't_bits': 16,       # Number of bits in t. Used to generate a suitable value 
+                        #  for t. Overrides the previous value.
+    'sec': 128,         # Security parameter. The equivalent length of AES key in bits.
+                        #  Sets the ciphertext modulus q, can be one of {128, 192, 256}
+                        #  More means more security but also slower computation.
+}
+HE.contextGen(**bfv_params)  # Generate context for bfv scheme
+HE.keyGen()             # Key Generation: generates a pair of public/secret keys
 
-print("==============================================================")
-print("====================== Pyfhel ENCODING =======================")
-print("==============================================================")
 
+# %%
+# 2. Integer Array Encryption
+# ---------------------------
+# we will define two integer arrays, encode and encrypt them:
+arr1 = np.arange(bfv_params['n'], dtype=np.int64)    # Max possible value is t/2-1. Use type int64!
+arr2 = np.array([-bfv_params['t']//2], dtype=np.int64)  # Min possible value is -t/2. 
 
-print("1. Creating Context and KeyGen in a Pyfhel Object ")
-HE = Pyfhel()                                       # Creating empty Pyfhel object
-HE.contextGen(p=65537, m=1024, flagBatching=True)   # Generating context. 
-# The values of p and m are chosen to enable batching (see Demo_Batching_SIMD.py)
-HE.keyGen()                                         # Key Generation.
+ptxt1 = HE.encodeInt(arr1)   # Creates a PyPtxt plaintext with the encoded arr1
+ptxt2 = HE.encodeInt(arr2)   # plaintexts created from arrays shorter than 'n' are filled with zeros.
+
+ctxt1 = HE.encryptPtxt(ptxt1) # Encrypts the plaintext ptxt1 and returns a PyCtxt
+ctxt2 = HE.encryptPtxt(ptxt2) #  Alternatively you can use HE.encryptInt(arr2)
+print("3. Integer Encryption, ")
+print("\tarr1 ", arr1,'\n\t==> ptxt1 ', ptxt1,'\n\t==> ctxt1 ', ctxt1)
+print("    arr2 ", arr2,'\n\t==> ptxt2 ', ptxt2,'\n\t==> ctxt2 ', ctxt2)
+
+# %% WIP!!!!!!!!!!!! CONTINUE HERE
 
 print("2. Encoding integers with encodeInt")
 integer1 = 45
@@ -105,3 +134,4 @@ array2 =   HE.decode(ptxt3)
 
 
 # sphinx_gallery_thumbnail_path = 'static/thumbnails/encoding.png'
+# %%

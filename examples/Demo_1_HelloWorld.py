@@ -10,22 +10,23 @@ the results.
 # 1. Imports
 # ---------------------------
 # We start by importing the library with the three main classes:
-# 
+#
 # * Pyfhel class contains most of the functions.
 # * PyPtxt is the plaintext class
 # * PyCtxt is the ciphertext class
-from Pyfhel import Pyfhel, PyPtxt, PyCtxt
-
+import numpy as np
+from Pyfhel import Pyfhel
+print("1. Import Pyfhel class, and numpy for the inputs to encrypt.")
 # %%
 # 2. Context and key setup
 # ---------------------------
 # We will start the Helloworld by generating a context and a public/secret key pair.
-# This is all managed by a Pyfhel instance under the hood. 
+# This is all managed by a Pyfhel instance under the hood.
 HE = Pyfhel()           # Creating empty Pyfhel object
-HE.contextGen(p=65537)  # Generating context. The p defines the plaintext modulo.
+HE.contextGen(scheme='bfv', n=2**14, t_bits=20)  # Generate context for 'bfv'/'ckks' scheme
+                        # The n defines the number of plaintext slots.
                         #  There are many configurable parameters on this step
-                        #  More info in Demo_ContextParameters, and
-                        #  in Pyfhel.contextGen()
+                        #  More info in Demo_2, Demo_3, and Pyfhel.contextGen()
 HE.keyGen()             # Key Generation: generates a pair of public/secret keys
 # %%
 # The best way to obtain information from a created Pyfhel object is to print it:
@@ -36,11 +37,11 @@ print(HE)
 # 3. Integer Encryption
 # ---------------------------
 # we will define two integers and encrypt them using `encryptInt`:
-integer1 = 127
-integer2 = -2
+integer1 = np.array([127])
+integer2 = np.array([-2])
 ctxt1 = HE.encryptInt(integer1) # Encryption makes use of the public key
 ctxt2 = HE.encryptInt(integer2) # For integers, encryptInt function is used.
-print("3. Integer Encryption")
+print("3. Integer Encryption, ")
 print("    int ",integer1,'-> ctxt1 ', type(ctxt1))
 print("    int ",integer2,'-> ctxt2 ', type(ctxt2))
 # %%
@@ -64,11 +65,11 @@ print(f"Mult:{ctxtMul}")
 # %%
 # 5.  Decrypting integers
 # ---------------------------
-# Once we're finished with the encrypted operations, we can use 
+# Once we're finished with the encrypted operations, we can use
 # the Pyfhel instance to decrypt the results using `decryptInt`:
 resSum = HE.decryptInt(ctxtSum) # Decryption must use the corresponding function
                                 #  decryptInt.
-resSub = HE.decryptInt(ctxtSub) 
+resSub = HE.decryptInt(ctxtSub)
 resMul = HE.decryptInt(ctxtMul)
 print("#. Decrypting result:")
 print("     addition:       decrypt(ctxt1 + ctxt2) =  ", resSum)
