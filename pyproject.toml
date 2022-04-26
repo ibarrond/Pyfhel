@@ -33,19 +33,20 @@
 
   ## CMake options: https://github.com/microsoft/SEAL/#basic-cmake-options
     [cpplibraries.SEAL.cmake_opts]
+    CMAKE_BUILD_TYPE = 'Release'
     SEAL_USE_INTEL_HEXL ='OFF'   # ON/OFF, use Intel HEXL for low-level kernels
     SEAL_USE_ALIGNED_ALLOC ='OFF'# ON/OFF, 64B aligned memory allocations, better perf with Intel HEXL.
     BUILD_SHARED_LIBS ='OFF'     # ON/OFF, build shared and not static library
 
   #--> Afhel
   [cpplibraries.Afhel]
-  mode = 'standard'       # standard/cmake
+  mode = 'standard'        # standard/cmake
   lib_type = 'shared'      # static/shared
   sources = ['Pyfhel/Afhel/Afseal.cpp',]
   include_dirs = ['Pyfhel/Afhel',]
   define_macros = []
   extra_compile_args = [
-    {Windows = ["/O2"]},
+    {Windows = ["/O2","/std:c++17"]},
     {Linux = ["-std=c++17","-O3","-fopenmp"]} ]
   extra_link_args = [
     {Windows = []},
@@ -61,11 +62,11 @@ define_macros = [
   ["__PYX_ENUM_CLASS_DECL", "enum"], # Support enums in cython
 ]
 extra_compile_args = [
-  {Windows = ["/O2","/openmp"]},
+  {Windows = ["/O2","/openmp","/std:c++17"]},
   {Linux = ["-std=c++17","-O3","-fopenmp"]},
 ]
 extra_link_args = [
-  {Windows = ["/openmp"]},
+  {Windows = []},
   {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
 ]
 libraries = []  # libraries to link with, cpplibraries above are added by default
@@ -94,19 +95,20 @@ sources=['Pyfhel/PyPoly.pyx']
 # Pyfhel's core metadata
 [project]
 name = "Pyfhel"
-version = "3.0.0b3"
+version = "3.0.0b4"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
 requires-python = ">=3.7"
-license = "GNU GPLv3"
+license = {text = "GNU GPLv3"}
 keywords = ["homomorphic" , "encryption", "cython", "cryptography"]
-author = {name = "Alberto Ibarrondo", email = "ibarrond@eurecom.fr"}
+authors = [
+  {name = "Alberto Ibarrondo", email = "ibarrond@eurecom.fr"},
+  {name = "Alexander Viand", email = "alexander.viand@inf.ethz.ch"},
+]
 classifiers = [
     "Programming Language :: C++",
     "Programming Language :: Cython",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -133,6 +135,7 @@ test = [
 ]
 
 [project.urls]
+homepage = "https://pyfhel.readthedocs.io"
 documentation = "https://pyfhel.readthedocs.io"
 repository = "https://github.com/ibarrond/github"
 
@@ -140,7 +143,7 @@ repository = "https://github.com/ibarrond/github"
 # Minimum requirements for the build system to execute.
 [build-system]
 requires = [
-  "setuptools>=50.0",
+  "setuptools<=60.9",
   "wheel",
   "cython>=3.0.0a9",
   "numpy>=1.20",
