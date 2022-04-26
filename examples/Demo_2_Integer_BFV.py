@@ -10,7 +10,7 @@ import numpy as np
 from Pyfhel import Pyfhel
 
 # %%
-# 2. Context and key setup
+# 1. Context and key setup
 # ---------------------------
 # We now investigate the different parameters that can be set for the BFV scheme.
 HE = Pyfhel()           # Creating empty Pyfhel object
@@ -22,7 +22,7 @@ bfv_params = {
     't': 65537,         # Plaintext modulus. Encrypted operations happen modulo t
                         #  Must be prime such that t-1 be divisible by 2^N.
     't_bits': 16,       # Number of bits in t. Used to generate a suitable value 
-                        #  for t. Overrides the previous value.
+                        #  for t. Overrides t if specified.
     'sec': 128,         # Security parameter. The equivalent length of AES key in bits.
                         #  Sets the ciphertext modulus q, can be one of {128, 192, 256}
                         #  More means more security but also slower computation.
@@ -32,10 +32,13 @@ HE.keyGen()             # Key Generation: generates a pair of public/secret keys
 
 
 # %%
-# 2. Integer Array Encryption
+# 2. Integer Array Encoding & Encryption
 # ---------------------------
 # we will define two integer arrays, encode and encrypt them:
-arr1 = np.arange(bfv_params['n'], dtype=np.int64)    # Max possible value is t/2-1. Use type int64!
+# arr1 = [0, 1, ... n-1] (length n)
+# arr2 = [-t//2] (length 1)
+
+arr1 = np.arange(bfv_params['n'], dtype=np.int64)    # Max possible value is t/2-1. Always use type int64!
 arr2 = np.array([-bfv_params['t']//2], dtype=np.int64)  # Min possible value is -t/2. 
 
 ptxt1 = HE.encodeInt(arr1)   # Creates a PyPtxt plaintext with the encoded arr1
@@ -43,49 +46,54 @@ ptxt2 = HE.encodeInt(arr2)   # plaintexts created from arrays shorter than 'n' a
 
 ctxt1 = HE.encryptPtxt(ptxt1) # Encrypts the plaintext ptxt1 and returns a PyCtxt
 ctxt2 = HE.encryptPtxt(ptxt2) #  Alternatively you can use HE.encryptInt(arr2)
-print("3. Integer Encryption, ")
-print("\tarr1 ", arr1,'\n\t==> ptxt1 ', ptxt1,'\n\t==> ctxt1 ', ctxt1)
-print("    arr2 ", arr2,'\n\t==> ptxt2 ', ptxt2,'\n\t==> ctxt2 ', ctxt2)
 
-# %% WIP!!!!!!!!!!!! CONTINUE HERE
+# Otherwise, a single call to `HE.encrypt` would detect the data type,
+#  encode it and encrypt it
+#> ctxt1 = HE.encrypt(arr1)
 
-print("2. Encoding integers with encodeInt")
-integer1 = 45
-integer2 = -32
-ptxt_i1 = HE.encodeInt(integer1)   # Encoding integer1 in a new PyPtxt
-ptxt_i2 = PyPtxt()                 # Empty plaintexts have no encoding type.
-print("    Empty created ptxt_i2: ",   str(ptxt_i2))
-HE.encodeInt(integer2, ptxt_i2)    # Encoding integer2 in an existing PyPtxt
-print("    int ",integer1,'-> ptxt_i1 ', str(ptxt_i1))
-print("    int ",integer2,'-> ptxt_i2 ', str(ptxt_i2))
+print("2. Integer Encoding & Encryption, ")
+print("->\tarr1 ", arr1,'\n\t==> ptxt1 ', ptxt1,'\n\t==> ctxt1 ', ctxt1)
+print("->\tarr2 ", arr2,'\n\t==> ptxt2 ', ptxt2,'\n\t==> ctxt2 ', ctxt2)
 
-print("3. Encoding floating point values with encodeFrac")
-float1 = 3.5
-float2 = -7.8
-ptxt_f1 = HE.encodeFrac(float1)     # Encoding float1 in a new PyPtxt with encodeFrac
-ptxt_f2 = PyPtxt()
-HE.encodeFrac(float2, ptxt_f2)     # Encoding float2 in an existing PyPtxt
-print("    float ",float1,'-> ptxt_f1 ', str(ptxt_f1))
-print("    float ",float2,'-> ptxt_f2 ', str(ptxt_f2))
+# %%
+# 3. Securely operating on encrypted ingeger arrays
+# ---------------------------
+# We try all the operations supported by Pyfhel.
+#  Note that, to operate, the ciphertexts/plaintexts must be built with the same
+#  context. Internal checks prevent ops between ciphertexts of different contexts.
 
-print("4. Encoding lists of integers using batching with encodeBatch")
-vector1 = [ 1, 2, 3, 4, 5, 6]
-vector2 = [-2, 3,-4,-3, 2,-1]
-ptxt_b1 = HE.encodeBatch(vector1)  # Encoding vector1 in a new PyPtxt with encodeBatch
-ptxt_b2 = PyPtxt()                 
-HE.encodeBatch(vector2, ptxt_f2)    # Encoding vector2 in an existing PyPtxt
-print("    list ",vector1,'-> ptxt_b1 ', str(ptxt_b1))
-print("    list ",vector2,'-> ptxt_b2 ', str(ptxt_b2))
+# Ciphertext-ciphertext ops:
+ccSum = ctxt1 + ctxt2       # Calls HE.add(ctxt1, ctxt2, in_new_ctxt=True)
+                            #  `ctxt1 += ctxt2` for inplace operation
+ccSub = ctxt1 - ctxt2       # Calls HE.sub(ctxt1, ctxt2, in_new_ctxt=True)
+                            #  `ctxt1 -= ctxt2` for inplace operation
+ccMul = ctxt1 * ctxt2       # Calls HE.multiply(ctxt1, ctxt2, in_new_ctxt=True)
+                            #  `ctxt1 *= ctxt2` for inplace operation
+cSq   = ctxt1**2            # Calls HE.square(ctxt1, in_new_ctxt=True)
+                            #  `ctxt1 **= 2` for inplace operation
+cPow  = ctxt1**3            # Calls HE.power(ctxt1, 3, in_new_ctxt=True)
+                            #  `ctxt1 **= 3` for inplace operation
+cRotR = ctxt1 >> 4          # Calls HE.rotate(ctxt1, k=4, in_new_ctxt=True)
+                            #  `ctxt1 >>= 4` for inplace operation
+cRotL = ctxt1 << 4          # Calls HE.rotate(ctxt1, k=-4, in_new_ctxt=True)
+                            #  `ctxt1 <<= 4` for inplace operation
 
-print("5. Encoding numpy 1D integer vectors using batching encodeArray")
-import numpy as np
-array1 = np.array([-6, -5, -4, -3, -2, -1],dtype=np.int64)
-array2 = np.array([12, 15, 18, 21, 24, 27],dtype=np.int64)
-ptxt_a1 = HE.encodeArray(array1)   # Encoding array1 in a new PyPtxt with encodeArray
-ptxt_a2 = PyPtxt()                
-HE.encodeArray(array2, ptxt_a2)    # Encoding vector2 in an existing PyPtxt
-print("    array ",array1,'-> ptxt_a1 ', str(ptxt_a1))
-print("    array ",array2,'-> ptxt_a2 ', str(ptxt_a2))
+# Ciphetext-plaintext ops
+cpSum = ctxt1 + ptxt2       # Calls HE.add_plain(ctxt1, ptxt2, in_new_ctxt=True)
+                            # `ctxt1 += ctxt2` for inplace operation
+cpSub = ctxt1 - ptxt2       # Calls HE.sub_plain(ctxt1, ptxt2, in_new_ctxt=True)
+                            # `ctxt1 -= ctxt2` for inplace operation
+cpMul = ctxt1 * ptxt2       # Calls HE.multiply_plain(ctxt1, ptxt2, in_new_ctxt=True)
+                            # `ctxt1 *= ctxt2` for inplace operation
+
+# %%
+# 4. Relinearization: What, why, when
+# ---------------------------
+# 
+print("4. Operating with encrypted integers")
+print(f"Sum: {ctxtSum}")
+print(f"Sub: {ctxtSub}")
+print(f"Mult:{ctxtMul}")
 
 print("6. Encrypting/Decrypting all plaintexts using encryptPtxt/decryptPtxt")
 print("      HE.encrypt could also do, detecting PyPtxt as a valid type")

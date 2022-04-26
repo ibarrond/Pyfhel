@@ -37,8 +37,8 @@ print(HE)
 # 3. Integer Encryption
 # ---------------------------
 # we will define two integers and encrypt them using `encryptInt`:
-integer1 = np.array([127])
-integer2 = np.array([-2])
+integer1 = np.array([127], dtype=np.int64)
+integer2 = np.array([-2], dtype=np.int64)
 ctxt1 = HE.encryptInt(integer1) # Encryption makes use of the public key
 ctxt2 = HE.encryptInt(integer2) # For integers, encryptInt function is used.
 print("3. Integer Encryption, ")
@@ -54,9 +54,9 @@ print(ctxt2)
 # --------------------------------------
 # Relying on the context defined before, we will now operate
 # (addition, substaction, multiplication) the two ciphertexts:
-ctxtSum = ctxt1 + ctxt2         # `ctxt1 += ctxt2` for quicker inplace operation
-ctxtSub = ctxt1 - ctxt2         # `ctxt1 -= ctxt2` for quicker inplace operation
-ctxtMul = ctxt1 * ctxt2         # `ctxt1 *= ctxt2` for quicker inplace operation
+ctxtSum = ctxt1 + ctxt2         # `ctxt1 += ctxt2` for inplace operation
+ctxtSub = ctxt1 - ctxt2         # `ctxt1 -= ctxt2` for inplace operation
+ctxtMul = ctxt1 * ctxt2         # `ctxt1 *= ctxt2` for inplace operation
 print("4. Operating with encrypted integers")
 print(f"Sum: {ctxtSum}")
 print(f"Sub: {ctxtSub}")
