@@ -44,8 +44,8 @@ FLOAT_T = (float, np.float16, np.float32, np.float64)
 INT_T =   (int, np.int16, np.int32, np.int64, np.int_, np.intc)
 
 # Import utility functions
-include "util/utils.pxi"
-include "util/type_converters.pxi"
+include "utils/utils.pxi"
+include "utils/type_converters.pxi"
 
 # ------------------------- PYTHON IMPLEMENTATION -----------------------------
 cdef class Pyfhel:

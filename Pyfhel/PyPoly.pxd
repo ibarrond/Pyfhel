@@ -11,10 +11,10 @@ from libcpp cimport bool
 from Pyfhel.Pyfhel cimport *
 
 # Import our own wrapper for iostream classes, used for I/O ops
-from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, binary
+from Pyfhel.utils.iostream cimport ifstream, ofstream, ostringstream, stringstream, binary
 
 # Import AfsealPoly class
-from Pyfhel.Afhel cimport AfPoly, AfsealPoly, scheme_t, backend_t, cy_complex
+from Pyfhel.Afhel.Afhel cimport AfPoly, AfsealPoly, scheme_t, backend_t, cy_complex
 
 # ------------------------------- DECLARATION ---------------------------------
 

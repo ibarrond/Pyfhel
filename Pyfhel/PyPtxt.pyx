@@ -6,14 +6,14 @@
 # -------------------------------- IMPORTS ------------------------------------
 # Used for all kinds of operations. Includes utility functions
 from Pyfhel.Pyfhel cimport *
-from .util.Scheme_t import Scheme_t
-from .util.Backend_t import Backend_t
+from .utils.Scheme_t import Scheme_t
+from .utils.Backend_t import Backend_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
 
 # Import Abstract Plaintext class
-from Pyfhel.Afhel cimport *
+from Pyfhel.Afhel.Afhel cimport *
 
 import numpy as np
 

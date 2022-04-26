@@ -7,8 +7,8 @@
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
 
-from .util.Scheme_t import Scheme_t
-from .util.Backend_t import Backend_t
+from .utils.Scheme_t import Scheme_t
+from .utils.Backend_t import Backend_t
 
 # ----------------------------- IMPLEMENTATION --------------------------------
 cdef class PyPoly:
