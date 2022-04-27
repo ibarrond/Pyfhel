@@ -3,7 +3,7 @@
 	url = https://github.com/shaih/helib
 [submodule "PALISADE"]
 	path = Pyfhel/PALISADE
-	url = https://git.njit.edu/palisade/PALISADE
+	url = https://gitlab.com/palisade/palisade-release
 
 [submodule "SEAL"]
 	path = Pyfhel/SEAL
