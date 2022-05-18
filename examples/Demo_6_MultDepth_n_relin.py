@@ -20,6 +20,9 @@ several strategies to deal with high noise.
 # sphinx_gallery_thumbnail_path = 'static/thumbnails/multDepth.jpg'
 
 
+# TODO: update this demo -> it is focusing an old version of Pyfhel
+exit(0)
+
 # %%
 # We start by importing the library with the three main classes:
 # 

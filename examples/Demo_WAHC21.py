@@ -119,19 +119,19 @@ for f in ["mypk.pk", "mycontext.con", "ctxt_a.ctxt", "ctxt_b.ctxt", "cr.ctxt"]:
 # -----------------------------------------------------
 from Pyfhel import PyCtxt, Pyfhel, PyPtxt
 HE = Pyfhel()
-HE.contextGen(scheme='CKKS', n=16384, qs=[30,30,30,30,30])
+HE.contextGen(scheme='CKKS', n=16384, qi=[30,30,30,30,30], scale=1)
 HE.keyGen()
 ctxt_x = HE.encrypt(3.1, scale=2 ** 30) # implicit encode
 ctxt_y = HE.encrypt(4.1, scale=2 ** 30)
 ctxt_z = HE.encrypt(5.9, scale=2 ** 30)
 
-ctxtSum = ctxt_x + ctxt_y
-ctxtProd = ctxt_z * 5
-ctxt_t = ctxtSum * ctxtProd
+ctxtSum = HE.add(ctxt_x, ctxt_y)
+ctxtProd = HE.multiply_plain(ctxt_z, HE.encode(5))
+ctxt_t = HE.multiply(ctxtSum, ctxtProd)
 
 ptxt_ten = HE.encode(10, scale=2 ** 30)
 try:
-    ctxt_result = ctxt_t + ptxt_ten #error: mismatched scales
+    ctxt_result = HE.add_plain(ctxt_t, ptxt_ten) #error: mismatched scales
 except ValueError as e:
     assert str(e) == "scale mismatch"
     print("Mismatched scales detected!")
@@ -145,7 +145,13 @@ HE.mod_switch_to_next(ctxt_d) # match first rescale
 HE.mod_switch_to_next(ctxt_d) # match second rescale
 
 ctxt_t.set_scale(2**30)
-ctxt_result = ctxt_t + ctxt_d # final result
+ctxt_result = HE.add(ctxt_t, ctxt_d) # final result
+
+# NOTE: The original code (substituting `HE.multiply` and  `HE.add`
+#  by `+` and `*`) no longer generates an error: scales are 
+#  automatically aligned using HE.align_mod_n_scale when using 
+#  operator overloads `+`, `-`, `*` and `/`.
+
 
 # %% --------------------------------------------------
 # 6. Implementing Key-Recovery for CKKS (Sec. 5.2)
