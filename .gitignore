@@ -15,6 +15,7 @@
 # Pyfhel building
 Pyfhel/*.pyc
 Pyfhel/*.cpp
+examples/playground
 **/build
 **.eggs
 **.egg-info
