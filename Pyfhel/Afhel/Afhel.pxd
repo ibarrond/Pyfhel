@@ -12,7 +12,7 @@ from libcpp cimport bool
 from numpy cimport int64_t, uint64_t, uint8_t
         
 # Import our own wrapper for iostream classes, used for I/O ops
-from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream       
+from Pyfhel.utils.iostream cimport istream, ostream, ifstream, ofstream       
 
 ctypedef c_complex[double] cy_complex
 
@@ -27,6 +27,7 @@ cdef extern from "seal/plaintext.h" namespace "seal" nogil:
         bool is_zero() except +
         string to_string() except +
         inline bool is_ntt_form()
+        double scale() except +
         
 # SEAL ciphertext class        
 cdef extern from "seal/ciphertext.h" namespace "seal" nogil:
@@ -237,6 +238,7 @@ cdef extern from "Afseal.h" nogil:
     cdef cppclass AfsealPtxt(AfPtxt, Plaintext):
         AfsealPtxt() except +
         AfsealPtxt(const AfsealPtxt &other) except +
+        void set_scale(double new_scale)
 
     cdef cppclass Afseal(Afhel):
         Afseal() except +

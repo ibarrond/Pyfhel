@@ -84,7 +84,7 @@ cdef class PyPtxt:
         Can be set to: 0-none, 1-bfv, 2-ckks
 
         See Also:
-            :func:`~Pyfhel.util.to_Scheme_t`
+            :func:`~Pyfhel.utils.to_Scheme_t`
 
         :meta public:
         """
@@ -100,19 +100,44 @@ cdef class PyPtxt:
     @scheme.deleter
     def scheme(self):
         self._scheme = scheme_t.none
-              
+
+    @property
+    def scale(self):
+        """double: multiplying factor to encode values in ckks."""
+        return (<AfsealPtxt*>(self._ptr_ptxt)).scale()
+    @scale.setter
+    def scale(self, new_scale):
+        self.set_scale(new_scale)
+
+    @property
+    def scale_bits(self):
+        """int: number of bits in scale to encode values in ckks"""
+        return <int>np.log2( (<AfsealPtxt*>(self._ptr_ptxt)).scale() )
         
     @property
-    def pyfhel(self):
+    def _pyfhel(self):
         """A pyfhel instance, used for operations"""
         return self._pyfhel
-
-    @pyfhel.setter
-    def pyfhel(self, new_pyfhel):
+    @_pyfhel.setter
+    def _pyfhel(self, new_pyfhel):
         if not isinstance(new_pyfhel, Pyfhel):
             raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
-        self._pyfhel = new_pyfhel 
+        self._pyfhel = new_pyfhel
+
+    @property
+    def mod_level(self):
+        """mod_level: returns the number of moduli consumed so far.
         
+        Only usable in ckks.
+        """
+        return self._mod_level
+    @mod_level.setter
+    def mod_level(self, newlevel):  
+        self._mod_level = newlevel
+    @mod_level.deleter
+    def mod_level(self):
+        self._mod_level = 0
+
     cpdef bool is_zero(self):
         """bool: Flag to quickly check if it is empty"""
         return (<AfsealPtxt*>self._ptr_ptxt).is_zero()
@@ -179,7 +204,7 @@ cdef class PyPtxt:
             None
 
         See Also:
-            :func:`~Pyfhel.util.to_Scheme_t`
+            :func:`~Pyfhel.utils.to_Scheme_t`
         """
         cdef ifstream* inputter
         cdef string bFileName = _to_valid_file_str(fileName, check=True).encode('utf8')
@@ -228,10 +253,13 @@ cdef class PyPtxt:
         else:
             poly_s = str(self.to_poly_string())
             poly_s = poly_s[:25] + ('...' if len(poly_s)>25 else '')
-        return "<Pyfhel Plaintext, scheme={}, poly={}, is_ntt={}>".format(
+        return "<Pyfhel Plaintext at {}, scheme={}, poly={}, is_ntt={}{}>".format(
+                hex(id(self)),
                 self.scheme.name,
                 poly_s,
-                "Y" if self.is_ntt_form() else "-")
+                "Y" if self.is_ntt_form() else "-",
+                ", mod_level={}".format(self.mod_level) if self.scheme==Scheme_t.ckks else ''
+                )
 
     def encode(self, value):
         """encode(value)
@@ -263,4 +291,14 @@ cdef class PyPtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.decode`
         """
-        return self._pyfhel.decode(self)
+        return self._pyfhel.decode(self)    
+        
+    cpdef void set_scale (self, double new_scale):
+        """set_scale(double new_scale)
+
+        Sets the scale of the ciphertext.
+        
+        Args:
+            scale (double): new scale of the ciphertext.
+        """
+        (<AfsealPtxt*>(self._ptr_ptxt)).set_scale(new_scale)

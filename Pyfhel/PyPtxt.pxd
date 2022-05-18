@@ -22,6 +22,7 @@ cdef class PyPtxt:
     cdef Pyfhel _pyfhel
     cdef scheme_t _scheme
     cdef backend_t _backend
+    cdef int _mod_level
     cpdef bool is_zero(self)
     cpdef bool is_ntt_form(self)
     cpdef string to_poly_string(self)
@@ -29,3 +30,4 @@ cdef class PyPtxt:
     cpdef void load(self, str fileName, object scheme)
     cpdef bytes to_bytes(self, str compr_mode=*)
     cpdef void from_bytes(self, bytes content, object scheme)
+    cpdef void set_scale (self, double new_scale)

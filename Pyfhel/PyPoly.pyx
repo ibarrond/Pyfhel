@@ -1,7 +1,7 @@
 # distutils: language = c++
 #cython: language_level=3, boundscheck=False
 
-"""PyPtxt. Plaintext of Pyfhel, Python For Homomorphic Encryption Libraries.
+"""PyPoly. Internal Polynomial of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
 # Dereferencing pointers in Cython in a secure way
@@ -78,7 +78,7 @@ cdef class PyPoly:
         Can be set to: 0-None, 1-BFV, 2-CKKS
 
         See Also:
-            :func:`~Pyfhel.util.to_scheme_t`
+            :func:`~Pyfhel.utils.to_scheme_t`
 
         :meta public:
         """
@@ -167,7 +167,7 @@ cdef class PyPoly:
             None
 
         See Also:
-            :func:`~Pyfhel.util.to_scheme_t`
+            :func:`~Pyfhel.utils.to_scheme_t`
         """
         raise NotImplementedError("No PyPoly Serialization avaliable yet")
 

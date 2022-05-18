@@ -85,6 +85,9 @@ class AfsealPtxt: public AfPtxt, public seal::Plaintext{
  public:
   using seal::Plaintext::Plaintext;
   virtual ~AfsealPtxt() = default;
+  void set_scale(double new_scale){
+    this->scale() = new_scale;
+  };
 };
 
 
