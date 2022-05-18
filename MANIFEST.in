@@ -1,6 +1,5 @@
 include Pyfhel/*.pxd
 include Pyfhel/*.pyx
-include Pyfhel/*.cpp
 include Pyfhel/Afhel/*.cpp
 include Pyfhel/Afhel/*.h
 global-include Pyfhel/backend/SEAL/**
