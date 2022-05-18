@@ -14,6 +14,7 @@ API reference
     Pyfhel
     PyCtxt
     PyPtxt
+    PyPoly
 
 .. rubric:: Utils
 
@@ -21,5 +22,5 @@ API reference
     :recursive:
     :toctree: ../_autosummary
 
-    util.to_ENCODING_t
-    util.ENCODING_t
+    utils.Scheme_t
+    utils.Backend_t

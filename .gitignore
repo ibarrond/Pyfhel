@@ -14,17 +14,16 @@
 
 # Pyfhel building
 Pyfhel/*.pyc
+Pyfhel/*.cpp
+examples/playground
 **/build
+**.eggs
 **.egg-info
 **/dist
+**/gmon.out
 
 # Makefiles
 **/Makefile
-
-# SEAL
-Pyfhel/SEAL/*
-!Pyfhel/SEAL/.gitkeep
-!Pyfhel/SEAL/config.h
 
 # Pyfhel saved objects
 **.pycon
@@ -38,7 +37,6 @@ Pyfhel/SEAL/*
 
 # ipython checkpoints
 **.ipynb
-Pyfhel/Scratchpad
 **.ipynb_checkpoints
 **/__pycache__
 

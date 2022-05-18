@@ -1,3 +1,0 @@
-cython>=0.29.2
-numpy>=1.16.0
-setuptools>=45.0.0
