@@ -1,7 +1,10 @@
 include Pyfhel/*.pxd
 include Pyfhel/*.pyx
+include Pyfhel/*.py
+include Pyfhel/utils/**
 include Pyfhel/Afhel/*.cpp
 include Pyfhel/Afhel/*.h
+include Pyfhel/Afhel/*.pxd
 global-include Pyfhel/backend/SEAL/**
 global-exclude Pyfhel/backend/palisade/**
 

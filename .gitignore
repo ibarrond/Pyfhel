@@ -21,6 +21,7 @@ examples/playground
 **.egg-info
 **/dist
 **/gmon.out
+**/venv
 
 # Makefiles
 **/Makefile
