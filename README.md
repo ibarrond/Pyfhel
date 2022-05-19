@@ -14,7 +14,7 @@
 <<<<<<< HEAD
 * **_Version_**: 3.1.2
 =======
-* **_Version_**: 3.1.0
+* **_Version_**: 3.1.2
 >>>>>>> ed8629f68e6b0a233734ca058e57cec48b178d70
 * **_Status_**: STABLE
 * **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.

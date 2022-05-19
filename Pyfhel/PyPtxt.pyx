@@ -33,10 +33,7 @@ cdef class PyPtxt:
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
-<<<<<<< HEAD
                   bytestring=None,
-=======
->>>>>>> ed8629f68e6b0a233734ca058e57cec48b178d70
                   scheme=None):
         if (copy_ptxt): # If there is a PyPtxt to copy, override all arguments and copy
             self._ptr_ptxt = new AfsealPtxt(deref(<AfsealPtxt*>copy_ptxt._ptr_ptxt))
