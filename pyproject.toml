@@ -95,7 +95,7 @@ sources=['Pyfhel/PyPoly.pyx']
 # Pyfhel's core metadata
 [project]
 name = "Pyfhel"
-version = "3.1.1"
+version = "3.1.2"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
 requires-python = ">=3.7"

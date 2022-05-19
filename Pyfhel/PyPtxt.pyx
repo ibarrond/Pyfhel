@@ -33,6 +33,7 @@ cdef class PyPtxt:
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
+                  bytestring=None,
                   scheme=None):
         if (copy_ptxt): # If there is a PyPtxt to copy, override all arguments and copy
             self._ptr_ptxt = new AfsealPtxt(deref(<AfsealPtxt*>copy_ptxt._ptr_ptxt))
@@ -40,20 +41,26 @@ cdef class PyPtxt:
             if (copy_ptxt._pyfhel):
                 self._pyfhel = copy_ptxt._pyfhel
         else:
-            self._ptr_ptxt = new AfsealPtxt()  
-            if fileName:
-                if not scheme:
-                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid scheme")    
-                self.from_file(fileName, scheme)
-            else:
-                self._scheme = to_Scheme_t(scheme) if scheme else scheme_t.none
-            if (pyfhel):
+            self._ptr_ptxt = new AfsealPtxt()
+            if pyfhel:
                 self._pyfhel = pyfhel
+                self._scheme = self._pyfhel.afseal.get_scheme()
+            elif scheme:
+                self._scheme = (to_Scheme_t(scheme) if scheme else Scheme_t.none).value
+            if fileName:
+                if self._scheme is scheme_t.none:
+                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid scheme")    
+                self.load(fileName, to_Scheme_t(self._scheme))
+            elif bytestring:
+                if self._scheme is scheme_t.none:
+                    raise TypeError("<Pyfhel ERROR> PyCtxt initialization from bytestring requires valid scheme")    
+                self.from_bytes(bytestring, to_Scheme_t(self._scheme))
                 
     def __init__(self,
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
+                  bytestring=None,
                   scheme=None):
         """__init__(PyPtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, scheme=None)
 
