@@ -6,7 +6,7 @@ This demo shows an example of Client-Server interaction, where the client sends
 an encrypted vector and the server answers with the weighted average based on his
 weights.
 
-To run with real Client/Server separation (using flask and Demo_5bis_CS_Server.py),
+To run with real Client/Server separation (using `flask` and Demo_5bis_CS_Server.py),
 change the flag below to True.
 """
 
@@ -56,7 +56,7 @@ if(USE_REAL_SERVER):
     import time
     time.sleep(6)       # Wait for server initialization
 else:
-    print(f"[Server] started!...")
+    print(f"[Server] mock started!...")
 print("[Client] server initialized...")
 
 # %% 3. Launch a request to the server
@@ -69,8 +69,8 @@ if(USE_REAL_SERVER):
             'rlk':s_relin_key.decode('cp437'),
             'rtk':s_rotate_key.decode('cp437'),
             'cx': s_cx.decode('cp437'),
-        }
-    )
+        })
+    c_res = PyCtxt(pyfhel=HE_client, bytestring=r.text.encode('cp437'))
 else: # Mocking server code (from Demo_5bis_CS_Server.py)
     # Read all bytestrings
     HE_server = Pyfhel()
@@ -92,9 +92,10 @@ else: # Mocking server code (from Demo_5bis_CS_Server.py)
     c_mean += (c_mean >> 2)   # element [3] contains the result
     print(f"[Server] Average computed! Responding: {c_mean=}")
 
+    c_res = PyCtxt(copy_ctxt=c_mean)
+
 # %% 4. Process Response
 # Decrypting result
-c_res = PyCtxt(pyfhel=HE_client, bytestring=r.text.encode('cp437'))
 res = HE_client.decryptFrac(c_res)
 
 # Checking result

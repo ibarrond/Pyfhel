@@ -40,7 +40,7 @@ HE.keyGen()             # Key Generation: generates a pair of public/secret keys
 
 
 # %%
-# 2. Integer Array Encoding & Encryption
+# 2. Float Array Encoding & Encryption
 # ---------------------------
 # we will define two integer arrays, encode and encrypt them:
 # arr_x = [1, 2, -3] (length 3)
