@@ -11,11 +11,7 @@
 
 **Pyfhel**: **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries.
 
-<<<<<<< HEAD
 * **_Version_**: 3.1.2
-=======
-* **_Version_**: 3.1.2
->>>>>>> ed8629f68e6b0a233734ca058e57cec48b178d70
 * **_Status_**: STABLE
 * **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
 * **_Language_**: Python (3.7+) & Cython on top of C++17.
@@ -118,9 +114,13 @@ This library was created originally for the project "Privacy for Big Data Analyt
 Pyfhel can be used, modified, copied in any way you see fit. This project is Open Source under the GNU GPLv3 License (LICENSE file), therefore developers that use Pyfhel MUST comply with the following:
 
 <<<<<<< HEAD
+<<<<<<< HEAD
    1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Alberto Ibarrondo (IDEMIA & EURECOM) and Alexander Viand (ETH Zurich)`.
 =======
    1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Alberto Ibarrondo (IDEMIA & EURECOM) and Alexander Viand (ETH Zurich)` (maybe even cite the paper!).
 >>>>>>> ed8629f68e6b0a233734ca058e57cec48b178d70
+=======
+   1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Alberto Ibarrondo (IDEMIA & EURECOM) and Alexander Viand (ETH Zurich)` (maybe even cite the paper!).
+>>>>>>> 4726e4f2b2542216871c0d3c846865311ca51d5f
 
    2. Offer the exact same License, allowing legal permission to copy, distribute and/or modify any SW using Pyfhel. Hence, **any software using Pyfhel must remain Open Source**.
