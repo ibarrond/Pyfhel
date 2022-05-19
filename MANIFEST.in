@@ -8,7 +8,7 @@ include Pyfhel/Afhel/*.pxd
 global-include Pyfhel/backend/SEAL/**
 global-exclude Pyfhel/backend/palisade/**
 
-include docs/_static/*
+include docs/static/*
 
 include examples/*.py
 

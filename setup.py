@@ -486,7 +486,7 @@ class SuperBuildClib(build_clib):
 
         # Run compilation with j jobs. Set "Release" build in Windows.
         run_command(['cmake', '--build',  '.', '-j', str(n_jobs)] +\
-                    ['--config', 'Release'] if platform_system=="Windows" else [], cwd=build_dir)
+                    (['--config', 'Release'] if platform_system=="Windows" else []), cwd=build_dir)
 ############################################################################
 # Auxiliary methods
 def get_lib_suffix(lib_type: str) -> str:

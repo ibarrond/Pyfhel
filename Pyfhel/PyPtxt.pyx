@@ -60,10 +60,7 @@ cdef class PyPtxt:
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
-<<<<<<< HEAD
                   bytestring=None,
-=======
->>>>>>> ed8629f68e6b0a233734ca058e57cec48b178d70
                   scheme=None):
         """__init__(PyPtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, scheme=None)
 
