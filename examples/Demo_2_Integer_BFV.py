@@ -10,8 +10,8 @@ import numpy as np
 from Pyfhel import Pyfhel
 
 # %%
-# 1. Context and key setup
-# ---------------------------
+# 1. BFV context and key setup
+# ------------------------------------------------------------------------------
 # We take a look at the different parameters that can be set for the BFV scheme.
 HE = Pyfhel()           # Creating empty Pyfhel object
 bfv_params = {
@@ -36,7 +36,7 @@ print(f"\t{HE}")
 
 # %%
 # 2. Integer Array Encoding & Encryption
-# ---------------------------
+# ------------------------------------------------------------------------------
 # we will define two 1D integer arrays, encode and encrypt them:
 # arr1 = [0, 1, ... n-1] (length n)
 # arr2 = [-t//2, -1, 1]  (length 3) --> Encoding fills the rest of the array with zeros
@@ -60,7 +60,7 @@ print("->\tarr2 ", arr2,'\n\t==> ptxt2 ', ptxt2,'\n\t==> ctxt2 ', ctxt2)
 
 # %%
 # 3. Securely operating on encrypted ingeger arrays
-# ---------------------------
+# ------------------------------------------------------------------------------
 # We try all the operations supported by Pyfhel.
 #  Note that, to operate, the ciphertexts/plaintexts must be built with the same
 #  context. Internal checks prevent ops between ciphertexts of different contexts.
@@ -113,8 +113,8 @@ print("->\tctxt1 * ptxt2 = cpMul: ", cpMul)
 
           
 # %%
-# 4. Relinearization: What, why, when
-# ---------------------------
+# 4. BFV Relinearization: What, why, when
+# ------------------------------------------------------------------------------
 # Ciphertext-ciphertext multiplications increase the size of the polynoms 
 #  representing the resulting ciphertext. To prevent this growth, the 
 #  relinearization technique is used (typically right after each c-c mult) to 
@@ -134,7 +134,7 @@ print(f"cPow after 2 mult&relin rounds:  (size {cPow.size()}): {cPow}")
 
 # %%
 # 5. Decrypt & Decode results
-# ---------------------------
+# ------------------------------------------------------------------------------
 # Time to decrypt results! We use HE.decryptInt for this. 
 #  HE.decrypt() could also be used, in which case the decryption type would be
 #  inferred from the ciphertext metadata. 

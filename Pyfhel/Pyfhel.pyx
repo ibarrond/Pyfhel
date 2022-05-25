@@ -73,7 +73,7 @@ cdef class Pyfhel:
         """Initializes an empty Pyfhel object, the base for all operations.
         
         To fill the Pyfhel object during initialization you can:
-            - Provide a dictionary of context parameters to run Pyfhel.contextGen(**context_params). 
+            - Provide a dictionary of context parameters to run Pyfhel.contextGen(\*\*context_params). 
             - Set key_gen to True in order to generate a new public/secret key pair.
             - Provide a pub_key_file and/or sec_key_file to load existing keys from saved files.
 
@@ -127,7 +127,7 @@ cdef class Pyfhel:
                 "-" if self.is_relin_key_empty() else f"Y",
                 "-" if self.is_context_empty() else \
                         f"n={self.n}, "\
-                        f"p={self.p}, "\
+                        f"t={self.t}, "\
                         f"sec={self.sec}, "\
                         f"qi={self.qi}, "\
                         f"scale={self.scale}, ")
@@ -137,15 +137,17 @@ cdef class Pyfhel:
             - A callable object that will be called to create the initial version of the object.
             - A tuple of arguments for the callable object.
         """
-        context_params={"scheme": self.scheme,
-                        "plain_modulus": self.plain_modulus,
-                        "poly_modulus_degree": self.poly_modulus_degree,
-                        "sec": self.sec}
+        context_params={"scheme": self.scheme.name,
+                        "n": self.n,
+                        "t": self.t,
+                        "sec": self.sec,
+                        "scale": self.scale,
+                        "qi": self.qi,}
         return (Pyfhel, (context_params, False, None, None))
 
     @property
-    def p(self):
-        """p, plaintext modulus."""
+    def t(self):
+        """t, plaintext modulus."""
         return self.get_plain_modulus()
 
     @property
@@ -190,7 +192,7 @@ cdef class Pyfhel:
     # ....................... CONTEXT & KEY GENERATION ........................
     
     cpdef void contextGen(self,
-        str scheme, int n, int q=0, int t_bits=0, int t=0, int sec=128,
+        str scheme, int n, int64_t q=0, int t_bits=0, int64_t t=0, int sec=128,
         double scale=1, int scale_bits=0, vector[int] qi = {}):
         """Generates Homomorphic Encryption context based on parameters.
         
@@ -1135,9 +1137,9 @@ cdef class Pyfhel:
         
         Only applies to CKKS. Alligns the scales of the `this` ciphertext and
         the `other` ciphertext/plaintext by aligning the scale and mod_level:
-            - Rescales the ciphertext with the highest mod_level to the next qi/s 
-            - Mod switches the second ciphertext/plaintext to the next qi/s
-            - At the end, rounds the scale of the rescaled ciphertext
+        - Rescales the ciphertext with the highest mod_level to the next qi/s 
+        - Mod switches the second ciphertext/plaintext to the next qi/s
+        - At the end, rounds the scale of the rescaled ciphertext
 
         Arguments:
             this (PyCtxt): Ciphertext to align.

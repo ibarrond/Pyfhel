@@ -39,9 +39,9 @@ print("\nA1. BFV context generation")
 print(f"\t{HE}")
 
 # %%
-# 2. Integer Array Encoding & Encryption
-# ---------------------------
-# we will define two 1D integer arrays, encode and encrypt them:
+# 2. BFV Array Encoding & Encryption
+# -----------------------------------------
+# We will define two 1D integer arrays, encode and encrypt them:
 # arr1 = [0, 1, ... n-1]
 # arr2 = [-t//2, -1, 1, 0, 0..., 0]  
 
@@ -58,10 +58,10 @@ print("->\tarr2 ", arr2,'\n\t==> ctxt2 ', ctxt2)
 
 # %%
 # 3. BFV: Securely multiplying as much as we can
-# ---------------------------
+# -------------------------------------------------
 # You can measure the noise level using HE.noise_level(ctxt).
 # IMPORTANT! To get the noise Level you need the private key! otherwise the only
-#  way to know if above the noise is to decrypt the ciphertext and check the result.
+# way to know if above the noise is to decrypt the ciphertext and check the result.
 
 print("A3. Securely multiplying as much as we can")
 step = 0
@@ -81,8 +81,8 @@ print("---------------------------------------")
 # B) CKKS - MULTIPLICATIVE DEPTH WITH FIXED-POINTS
 # ---------------------------------------------------------------------------- #
 # In this case we don't have a noise_level operation to check the current noise,
-#  since the noise is considered as part of the encoding and adds up to a loss in
-#  precision of the encoded values.
+# since the noise is considered as part of the encoding and adds up to a loss in
+# precision of the encoded values.
 # However, we can precisely control the maximum # of multiplications by setting qi.
 #
 # B1. Context and key setup
@@ -107,8 +107,8 @@ print("\nB1. CKKS context generation")
 print(f"\t{HE}")
 
 # %%
-# B2. Float Array Encoding & Encryption
-# ---------------------------
+# B2. CKKS Array Encoding & Encryption
+# ----------------------------------------
 arr_x = np.array([1.1, 2.2, -3.3], dtype=np.float64) 
 arr_y = np.array([1, -1, 1], dtype=np.float64)
 
@@ -121,9 +121,9 @@ print("->\tarr_y ", arr_y,'\n\t==> ctxt_y ', ctxt_y)
 
 # %%
 # B3. Multiply n_mult times!
-# ---------------------------
+# -----------------------------
 # Besides rescaling, we also need to perform rescaling & mod switching. Luckily 
-#  Pyfhel does it for us by calling HE.align_mod_n_scale() before each operation.
+# Pyfhel does it for us by calling HE.align_mod_n_scale() before each operation.
 
 _r = lambda x: np.round(x, decimals=6)[:4]
 print(f"B3. Securely multiplying {n_mults} times!")

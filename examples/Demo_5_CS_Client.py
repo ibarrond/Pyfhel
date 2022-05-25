@@ -12,7 +12,9 @@ change the flag below to True.
 
 USE_REAL_SERVER: bool = False
 
-# %% 1. Setup Client
+# %%
+# 1. Setup Client
+# --------------------------
 import numpy as np
 from Pyfhel import Pyfhel, PyCtxt
 try:
@@ -42,7 +44,9 @@ s_cx         = cx.to_bytes()
 print(f"[Client] sending {HE_client=} and {cx=}")
 
 
-# %% 2. Setup Server
+# %%
+# 2. Setup Server
+# -----------------------
 
 print(f"[Client] launching server (could be launched separately)...")
 if(USE_REAL_SERVER):
@@ -59,7 +63,9 @@ else:
     print(f"[Server] mock started!...")
 print("[Client] server initialized...")
 
-# %% 3. Launch a request to the server
+# %%
+# 3. Launch a request to the server
+# ----------------------------------------
 #  We map the bytes into strings based on https://stackoverflow.com/a/27527728
 if(USE_REAL_SERVER):
     r = requests.post('http://127.0.0.1:5000/fhe_mse',
@@ -94,7 +100,9 @@ else: # Mocking server code (from Demo_5bis_CS_Server.py)
 
     c_res = PyCtxt(copy_ctxt=c_mean)
 
-# %% 4. Process Response
+# %%
+# 4. Process Response
+# --------------------------
 # Decrypting result
 res = HE_client.decryptFrac(c_res)
 

@@ -7,17 +7,19 @@ the CKKS scheme (https://eprint.iacr.org/2016/421.pdf)
 """
 
 # %%
-# 1. Context and key setup
-# ---------------------------
+# 1. CKKS context and key setup
+# -------------------------------
 # We take a look at the different parameters that can be set for the CKKS scheme.
 # A generally good strategy to choose `qi` (bitsize for each prime moduli) for
-#  the CKKS scheme is as follows:
-#   (1) Choose a 60-bit prime as the first prime in coeff_modulus. This will
-#         give the highest precision when decrypting;
-#   (2) Choose another 60-bit prime as the last element of coeff_modulus, as
-#         this will be used as the special prime and should be as large as the
-#         largest of the other primes;
-#   (3) Choose the intermediate primes to be close to each other.
+# the CKKS scheme is as follows:
+#
+# 1. Choose a 60-bit prime as the first prime in coeff_modulus. This will
+#    give the highest precision when decrypting;
+# 2. Choose another 60-bit prime as the last element of coeff_modulus, as
+#    this will be used as the special prime and should be as large as the
+#    largest of the other primes;
+# 3. Choose the intermediate primes to be close to each other.
+#
 import numpy as np
 from Pyfhel import Pyfhel
 
@@ -41,7 +43,7 @@ HE.keyGen()             # Key Generation: generates a pair of public/secret keys
 
 # %%
 # 2. Float Array Encoding & Encryption
-# ---------------------------
+# ----------------------------------------
 # we will define two integer arrays, encode and encrypt them:
 # arr_x = [1, 2, -3] (length 3)
 # arr_y = [-1.5, 2.3, 4.7] (length 3)
@@ -65,10 +67,10 @@ print("->\tarr_y ", arr_y,'\n\t==> ptxt_y ', ptxt_y,'\n\t==> ctxt_y ', ctxt_y)
 
 # %%
 # 3. Securely operating on encrypted fixed-point arrays
-# ---------------------------
+# -------------------------------------------------------
 # We try all the operations supported by Pyfhel.
-#  Note that, to operate, the ciphertexts/plaintexts must be built with the same
-#  context. Internal checks prevent ops between ciphertexts of different contexts.
+# Note that, to operate, the ciphertexts/plaintexts must be built with the same
+# context. Internal checks prevent ops between ciphertexts of different contexts.
 
 # Ciphertext-ciphertext ops:
 ccSum = ctxt_x + ctxt_y       # Calls HE.add(ctxt_x, ctxt_y, in_new_ctxt=True)
@@ -113,16 +115,16 @@ print("->\tctxt_x * ptxt_y = cpMul: ", cpMul)
 
           
 # %%
-# 4. Relinearization: What, why, when
-# ---------------------------
+# 4. CKKS relinearization: What, why, when
+# -----------------------------------------
 # Ciphertext-ciphertext multiplications increase the size of the polynoms 
-#  representing the resulting ciphertext. To prevent this growth, the 
-#  relinearization technique is used (typically right after each c-c mult) to 
-#  reduce the size of a ciphertext back to the minimal size (two polynoms c0 & c1).
-#  For this, a special type of public key called Relinearization Key is used.
+# representing the resulting ciphertext. To prevent this growth, the 
+# relinearization technique is used (typically right after each c-c mult) to 
+# reduce the size of a ciphertext back to the minimal size (two polynoms c0 & c1).
+# For this, a special type of public key called Relinearization Key is used.
 #
 # In Pyfhel, you can either generate a relin key with HE.RelinKeyGen() or skip it
-#  and call HE.relinearize() directly, in which case a warning is issued.
+# and call HE.relinearize() directly, in which case a warning is issued.
 
 print("\n4. Relinearization-> Right after each multiplication.")
 print(f"ccMul before relinearization (size {ccMul.size()}): {ccMul}")
@@ -132,10 +134,10 @@ print(f"ccMul after relinearization (size {ccMul.size()}): {ccMul}")
 
 # %%
 # 5. Rescaling & Mod Switching
-# ---------------------------
+# -------------------------------
 # More complex operations with CKKS require keeping track of the CKKS scale. 
 # Operating with two CKKS ciphertexts (or a ciphertext and a plaintext) requires
-#  them to have the same scale and the same modulus level. 
+# them to have the same scale and the same modulus level. 
 # 
 # -> Scale: Multiplications yield a new scale, which is the product of the scales
 #  of the two operands. To scale down a ciphertext, the HE.rescale_to_next(ctxt)
@@ -147,14 +149,15 @@ print(f"ccMul after relinearization (size {ccMul.size()}): {ccMul}")
 #  rescaling. This is achieved by the HE.mod_switch_to_next(ctxt) function.
 #
 # To ease the life of the user, Pyfhel provides `HE.align_mod_n_scale(this, other)`,
-#  which automatically does the rescaling and mod switching. All the 2-input
-#  overloaded operators (+, -, *, /) of PyCtxt automatically call this function.
-#  The respective HE.add, HE.sub, HE.multiply don't.
+# which automatically does the rescaling and mod switching. All the 2-input
+# overloaded operators (+, -, \*, /) of PyCtxt automatically call this function.
+# The respective HE.add, HE.sub, HE.multiply don't.
+#
 # NOTE: For more information, check the SEAL example #4_ccks_basics.cpp
-
+# 
 # In this example we will compute the mean squared error, treating the average of
 # the two ciphertexts as the true distribution. We check the scale and mod-level
-#  step by step:
+# step by step:
 
 #  1. Mean
 c_mean = (ctxt_x + ctxt_y) / 2
@@ -175,7 +178,7 @@ print("->\tMSE: ", c_mse)
 
 # %%
 # 6. Decrypt & Decode results
-# ---------------------------
+# ------------------------------
 # Time to decrypt results! We use HE.decryptFrac for this. 
 #  HE.decrypt() could also be used, in which case the decryption type would be
 #  inferred from the ciphertext metadata. 

@@ -30,6 +30,7 @@ cdef class PyCtxt:
                   bytestring=None,
                   scheme=None):
         self._mod_level = 0
+        self._scheme = scheme_t.none
         if copy_ctxt: # If there is a PyCtxt to copy, override other args
             self._ptr_ctxt = new AfsealCtxt(deref(<AfsealCtxt*>copy_ctxt._ptr_ctxt))
             self._mod_level = copy_ctxt._mod_level
@@ -45,13 +46,13 @@ cdef class PyCtxt:
             elif scheme:
                 self._scheme = (to_Scheme_t(scheme) if scheme else Scheme_t.none).value
             if fileName:
-                if self._scheme is scheme_t.none:
+                if self._scheme == scheme_t.none:
                     raise TypeError("<Pyfhel ERROR> PyCtxt initialization with fileName requires valid scheme")    
-                self.load(fileName, to_Scheme_t(self._scheme))
+                self.load(fileName)
             elif bytestring:
-                if self._scheme is scheme_t.none:
+                if self._scheme == scheme_t.none:
                     raise TypeError("<Pyfhel ERROR> PyCtxt initialization from bytestring requires valid scheme")    
-                self.from_bytes(bytestring, to_Scheme_t(self._scheme))
+                self.from_bytes(bytestring)
             
     def __dealloc__(self):
         if self._ptr_ctxt != NULL:
@@ -91,8 +92,6 @@ cdef class PyCtxt:
 
         See Also:
             :func:`~Pyfhel.utils.to_Scheme_t`
-
-        :meta public:
         """
         return Scheme_t(self._scheme)
     @scheme.setter
@@ -198,7 +197,7 @@ cdef class PyCtxt:
             - A callable object that will be called to create the initial version of the object.
             - A tuple of arguments for the callable object.
         """
-        return (PyCtxt, (None, None, None, self.to_bytes(), self.scheme))
+        return (PyCtxt, (None, self._pyfhel, None, self.to_bytes(), self.scheme.name))
 
     cpdef void save(self, str fileName, str compr_mode="zstd"):
         """save(str fileName)
@@ -213,6 +212,8 @@ cdef class PyCtxt:
         Return:
             None            
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> ciphertext saving requires a Pyfhel instance")
         cdef ofstream* outputter
         cdef string bFileName = _to_valid_file_str(fileName).encode('utf8')
         cdef string bcompr_mode = compr_mode.lower().encode('utf8')
@@ -233,12 +234,14 @@ cdef class PyCtxt:
         Return:
             bytes: serialized ciphertext
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> ciphertext serializing requires a Pyfhel instance")
         cdef ostringstream outputter
         cdef string bcompr_mode = compr_mode.encode('utf8')
         self._pyfhel.afseal.save_ciphertext(outputter, bcompr_mode, deref(self._ptr_ctxt))
         return outputter.str()
 
-    cpdef void load(self, str fileName, object scheme):
+    cpdef void load(self, str fileName, object scheme=None):
         """load(self, str fileName, scheme)
         
         Load the ciphertext from a file.
@@ -249,7 +252,6 @@ cdef class PyCtxt:
 
                 * ('int', 'INTEGER', int, 1, Scheme_t.bfv) -> integer scheme.
                 * ('float', 'FRACTIONAL', float, 2, Scheme_t.ckks) -> fractional scheme.
-
               
         Return:
             None
@@ -257,6 +259,8 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.utils.to_Scheme_t`
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> ciphertext loading requires a Pyfhel instance")
         cdef ifstream* inputter
         cdef string bFileName = _to_valid_file_str(fileName, check=True).encode('utf8')
         inputter = new ifstream(bFileName, binary)
@@ -264,9 +268,10 @@ cdef class PyCtxt:
             self._pyfhel.afseal.load_ciphertext(deref(inputter), deref(self._ptr_ctxt))
         finally:
             del inputter
-        self.scheme = to_Scheme_t(scheme)
+        if scheme is not None:
+            self._scheme = to_Scheme_t(scheme).value
 
-    cpdef void from_bytes(self, bytes content, object scheme):
+    cpdef void from_bytes(self, bytes content, object scheme=None):
         """from_bytes(bytes content, scheme)
 
         Recover the serialized ciphertext from a binary/bytes string.
@@ -284,10 +289,13 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.utils.to_Scheme_t`
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> ciphertext loading requires a Pyfhel instance")
         cdef stringstream inputter
         inputter.write(content,len(content))
         self._pyfhel.afseal.load_ciphertext(inputter, deref(self._ptr_ctxt))
-        self.scheme = to_Scheme_t(scheme)
+        if scheme is not None:
+            self._scheme = to_Scheme_t(scheme).value
 
             
     # =========================================================================

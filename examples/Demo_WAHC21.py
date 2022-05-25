@@ -17,11 +17,12 @@ This demo includes all the code snippets from the WAHC21 Pyfhel paper (correspon
 from Pyfhel import Pyfhel, PyPtxt, PyCtxt
 
 HE = Pyfhel()           # Creating empty Pyfhel object
-HE.contextGen(scheme='BFV', n=4096, p_bits=20, sec=128)  # Generating context. The p defines the plaintext modulo.
+HE.contextGen(scheme='BFV', n=4096, t_bits=20, sec=128)  # Generating context. The p defines the plaintext modulo.
                         #  There are many configurable parameters on this step
                         #  More info in Demo_ContextParameters, and
                         #  in Pyfhel.contextGen()
 HE.keyGen()             # Key Generation: generates a pair of public/secret keys
+print("-----------------------------------------------------")
 print("1. Setup: ", HE)
 
 
@@ -39,9 +40,9 @@ array_ptxt = HE.encode(np_array)    # Accepts list too
 array_ctxt = HE.encrypt(array_ptxt) # PyCtxt
 
 # Decrypt and Decode
-ptxt_dec = HE.decrypt(int_ctxt)   # PyPtxt
+ptxt_dec = HE.decrypt(int_ctxt, decode=False)   # PyPtxt
 integer_dec = HE.decode(ptxt_dec) # integer
-
+print("-----------------------------------------------------")
 print("2. Encryption & Decryption: ")
 print("Encrypting integer: ", integer, " -> ", int_ptxt , " -> ", int_ctxt)
 print("Decrypting integer: ", int_ctxt, " -> ", ptxt_dec, " -> ", integer_dec[:3],"...")
@@ -83,7 +84,7 @@ import os # to cleanup files
 
 ##### CLIENT
 HE = Pyfhel()
-HE.contextGen(scheme='BFV', n=4096, p_bits=0, p=65537, sec=128)
+HE.contextGen(scheme='BFV', n=4096, t_bits=0, t=65537, sec=128)
 HE.keyGen() # Generates public and private key
 # Save context and public key only
 HE.save_public_key("mypk.pk")
@@ -108,7 +109,8 @@ cr.save("cr.ctxt")
 ##### CLIENT 
 # Load and decrypt result
 c_res = PyCtxt(pyfhel=HE, fileName="cr.ctxt")
-print(c_res.decrypt())
+print("-----------------------------------------------------")
+print("Client_server result:", c_res.decrypt())
 for f in ["mypk.pk", "mycontext.con", "ctxt_a.ctxt", "ctxt_b.ctxt", "cr.ctxt"]:
     os.remove(f)
 
@@ -117,6 +119,7 @@ for f in ["mypk.pk", "mycontext.con", "ctxt_a.ctxt", "ctxt_b.ctxt", "cr.ctxt"]:
 # %% --------------------------------------------------
 # 5. Exploring CKKS pitfalls (Sec. 5.1)
 # -----------------------------------------------------
+print("-----------------------------------------------------")
 from Pyfhel import PyCtxt, Pyfhel, PyPtxt
 HE = Pyfhel()
 HE.contextGen(scheme='CKKS', n=16384, qi=[30,30,30,30,30], scale=1)
@@ -134,7 +137,7 @@ try:
     ctxt_result = HE.add_plain(ctxt_t, ptxt_ten) #error: mismatched scales
 except ValueError as e:
     assert str(e) == "scale mismatch"
-    print("Mismatched scales detected!")
+    print("CKKS: Mismatched scales detected!")
     
 ptxt_d = HE.encode(10, 2 ** 30)
 ctxt_d = HE.encrypt(ptxt_d)
@@ -158,7 +161,7 @@ ctxt_result = HE.add(ctxt_t, ctxt_d) # final result
 # -----------------------------------------------------
 # Setup: Encrypt, Decrypt, Decode
 ctxt = HE.encrypt(0, scale=2**40)
-ptxt_dec = HE.decrypt(ctxt)
+ptxt_dec = HE.decryptPtxt(ctxt)
 values = HE.decodeComplex(ptxt_dec)
 
 # Attack
@@ -167,7 +170,7 @@ a = HE.poly_from_ciphertext(ctxt,1) # PyPoly
 b = HE.poly_from_ciphertext(ctxt,0) # or b = ctxt[0]
 m = HE.poly_from_plaintext(ctxt, ptxt_re) # PyPoly
 s = (m - b) * ~a # ~a = inverse of a
-
+print("-----------------------------------------------------")
 
 # sphinx_gallery_thumbnail_path = 'static/thumbnails/helloworld.png'
 # %%

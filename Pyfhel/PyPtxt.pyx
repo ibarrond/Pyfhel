@@ -48,12 +48,12 @@ cdef class PyPtxt:
             elif scheme:
                 self._scheme = (to_Scheme_t(scheme) if scheme else Scheme_t.none).value
             if fileName:
-                if self._scheme is scheme_t.none:
+                if self._scheme == scheme_t.none:
                     raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid scheme")    
                 self.load(fileName, to_Scheme_t(self._scheme))
             elif bytestring:
-                if self._scheme is scheme_t.none:
-                    raise TypeError("<Pyfhel ERROR> PyCtxt initialization from bytestring requires valid scheme")    
+                if self._scheme == scheme_t.none:
+                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization from bytestring requires valid scheme")    
                 self.from_bytes(bytestring, to_Scheme_t(self._scheme))
                 
     def __init__(self,
@@ -92,8 +92,6 @@ cdef class PyPtxt:
 
         See Also:
             :func:`~Pyfhel.utils.to_Scheme_t`
-
-        :meta public:
         """
         return to_Scheme_t(self._scheme)
     
@@ -174,6 +172,8 @@ cdef class PyPtxt:
         Return:
             None            
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> plaintext saving requires a Pyfhel instance")
         cdef ofstream* outputter
         cdef string bFileName = _to_valid_file_str(fileName).encode('utf8')
         cdef string bcompr_mode = compr_mode.encode('utf8')
@@ -194,12 +194,14 @@ cdef class PyPtxt:
         Return:
             bytes: serialized plaintext
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> plaintext serialization requires a Pyfhel instance")
         cdef ostringstream outputter
         cdef string bcompr_mode = compr_mode.encode('utf8')
         self._pyfhel.afseal.save_plaintext(outputter, bcompr_mode, deref(self._ptr_ptxt))
         return outputter.str()
 
-    cpdef void load(self, str fileName, object scheme):
+    cpdef void load(self, str fileName, object scheme=None):
         """load(self, str fileName, scheme)
         
         Load the plaintext from a file.
@@ -213,6 +215,8 @@ cdef class PyPtxt:
         See Also:
             :func:`~Pyfhel.utils.to_Scheme_t`
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> plaintext loading requires a Pyfhel instance")
         cdef ifstream* inputter
         cdef string bFileName = _to_valid_file_str(fileName, check=True).encode('utf8')
         inputter = new ifstream(bFileName, binary)
@@ -220,9 +224,10 @@ cdef class PyPtxt:
             self._pyfhel.afseal.load_plaintext(deref(inputter), deref(self._ptr_ptxt))
         finally:
             del inputter
-        self._scheme = to_Scheme_t(scheme)
+        if scheme is not None:
+            self.scheme = to_Scheme_t(scheme)
 
-    cpdef void from_bytes(self, bytes content, object scheme):
+    cpdef void from_bytes(self, bytes content, object scheme=None):
         """from_bytes(bytes content)
 
         Recover the serialized plaintext from a binary/bytes string.
@@ -233,10 +238,13 @@ cdef class PyPtxt:
               * ('int', 'integer', int, 1, scheme_t.bfv) -> integer scheme.
               * ('float', 'double', float, 2, scheme_t.ckks) -> fractional scheme.
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> plaintext loading requires a Pyfhel instance")
         cdef stringstream inputter
         inputter.write(content,len(content))
         self._pyfhel.afseal.load_plaintext(inputter, deref(self._ptr_ptxt))
-        self._scheme = to_Scheme_t(scheme)
+        if scheme is not None:
+            self.scheme = to_Scheme_t(scheme)
 
 
 
