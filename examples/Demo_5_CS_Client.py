@@ -41,7 +41,7 @@ s_relin_key  = HE_client.to_bytes_relin_key()
 s_rotate_key = HE_client.to_bytes_rotate_key()
 s_cx         = cx.to_bytes()
 
-print(f"[Client] sending {HE_client=} and {cx=}")
+print(f"[Client] sending HE_client={HE_client} and cx={cx}")
 
 
 # %%
@@ -85,7 +85,7 @@ else: # Mocking server code (from Demo_5bis_CS_Server.py)
     HE_server.from_bytes_relin_key(s_relin_key)
     HE_server.from_bytes_rotate_key(s_rotate_key)
     cx = PyCtxt(pyfhel=HE_server, bytestring=s_cx)
-    print(f"[Server] received {HE_server=} and {cx=}")
+    print(f"[Server] received HE_server={HE_server} and cx={cx}")
 
     # Encode weights in plaintext
     w = np.array([0.5, -1.5,   4,  5])
@@ -96,7 +96,7 @@ else: # Mocking server code (from Demo_5bis_CS_Server.py)
     c_mean /= 4  # 4
     c_mean += (c_mean >> 1)   # cumulative sum
     c_mean += (c_mean >> 2)   # element [3] contains the result
-    print(f"[Server] Average computed! Responding: {c_mean=}")
+    print(f"[Server] Average computed! Responding: c_mean={c_mean}")
 
     c_res = PyCtxt(copy_ctxt=c_mean)
 

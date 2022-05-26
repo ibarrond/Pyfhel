@@ -30,7 +30,7 @@ def post():
     HE_server.from_bytes_relin_key(request.json.get('rlk').encode('cp437'))
     HE_server.from_bytes_rotate_key(request.json.get('rtk').encode('cp437'))
     cx = PyCtxt(pyfhel=HE_server, bytestring=request.json.get('cx').encode('cp437'))
-    print(f"[Server] received {HE_server=} and {cx=}")
+    print(f"[Server] received HE_server={HE_server} and cx={cx}")
 
     # Encode weights in plaintext
     ptxt_w = HE_server.encode(w)
@@ -40,7 +40,7 @@ def post():
     c_mean /= 4  # 4
     c_mean += (c_mean >> 1)   # cumulative sum
     c_mean += (c_mean >> 2)   # element [3] contains the result
-    print(f"[Server] Average computed! Responding: {c_mean=}")
+    print(f"[Server] Average computed! Responding: c_mean={c_mean}")
 
     # Serialize encrypted result and answer it back
     return c_mean.to_bytes().decode('cp437')
