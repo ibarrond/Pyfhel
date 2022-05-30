@@ -99,7 +99,8 @@ build-backend = "setuptools.build_meta"
     SEAL_USE_INTEL_HEXL ='OFF'   # ON/OFF, use Intel HEXL for low-level kernels
     SEAL_USE_ALIGNED_ALLOC ='OFF'# ON/OFF, 64B aligned memory allocations, better perf with Intel HEXL.
     BUILD_SHARED_LIBS ='OFF'     # ON/OFF, build shared and not static library
-
+    SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT='ON' # ON/OFF, runtime error when multiplying a ctxt with a zeroed plaintext.
+    
   #--> Afhel
   [cpplibraries.Afhel]
   mode = 'standard'        # standard/cmake
