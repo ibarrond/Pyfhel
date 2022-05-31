@@ -18,17 +18,17 @@
 * **_OS_**: Windows (tested with `MSVC2017`, `MSVC2019`, and `gcc6` for WSL) and Linux (tested on `gcc6`). MacOS not supported.
 
 	:warning: _REQUIRED: Python must have been compiled with C++17: `g++>=6` | `MSVC 2017+`_ :warning:
-	
+
 * **_Docs_**: For now, only the API is documented [[link](https://pyfhel.readthedocs.io/en/latest/)]. Examples are heavily commented.
 * **_Dependencies_**: There are two possible backends (both shipped alongside Pyfhel), HE libraries in C++:
-   
+
    1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies, default).
    2. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies) __WIP__
 
 ## Summary
-**PY**thon **F**or **H**momorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
+**PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
 
-**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**momorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all backends. Additionally, this project contains a large series of Demos & Tests for **SEAL**, **Afhel** & **Pyfhel**.
+**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**omomorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all backends. Additionally, this project contains a large series of Demos & Tests for **SEAL**, **Afhel** & **Pyfhel**.
 
 Last but not least, we a `CMakeLists.txt` to compile and install **SEAL** and **Afhel** as shared libraries in Ubuntu, which can then be linked to other C++ programs using the tags `-lseal` and `-lafhel`.
 
@@ -43,9 +43,9 @@ Locally, you can clone this repository (use [`--recursive`](https://stackoverflo
 	   > pip install .
 
 To uninstall, just run:
-	
+
 	   > pip uninstall Pyfhel
-       
+
 ### Contribute/Development notice
 This is the process to develop/contribute to Pyfhel:
 1. _Code a new feature/fix a bug_. Since this project is built using Cython, please refer to [cython documentation](https://cython.readthedocs.io/en/latest/) if you want to help develop it.
@@ -77,8 +77,8 @@ python3 Pyfhel/test.py
 
 	OK
 ```
- 
-5. _Update the version_. To update it, just change the version number on the `pyproject.toml` file. Bugfixes and minor corrections should increase _C_. New features should increase _B_. Backwards incompatible changes should increase _A_. 
+
+5. _Update the version_. To update it, just change the version number on the `pyproject.toml` file. Bugfixes and minor corrections should increase _C_. New features should increase _B_. Backwards incompatible changes should increase _A_.
 
 6. _Optional: Update the docs_. WIP (automatic generation with sphinx).
 
@@ -87,7 +87,7 @@ You're ready to go! Just create a pull request to the original repo.
 ## Project contents
 - `docs/` Documentation, generated automatically using sphinx and pushed to [readthedocs](https://pyfhel.readthedocs.io)
 - `examples/` Demos and small programs to showcase multiple functionalities. Check `Pyfhel/test.py` for further cases!
-- `Pyfhel/` contains the source code for Pyfhel and Afhel. 
+- `Pyfhel/` contains the source code for Pyfhel and Afhel.
 - `Pyfhel/backend`, underlying C++ libraries SEAL & PALISADE.
 
 ## Authors, Citing & Acknowledgements
@@ -113,14 +113,6 @@ This library was created originally for the project "Privacy for Big Data Analyt
 
 Pyfhel can be used, modified, copied in any way you see fit. This project is Open Source under the GNU GPLv3 License (LICENSE file), therefore developers that use Pyfhel MUST comply with the following:
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-   1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Alberto Ibarrondo (IDEMIA & EURECOM) and Alexander Viand (ETH Zurich)`.
-=======
    1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Alberto Ibarrondo (IDEMIA & EURECOM) and Alexander Viand (ETH Zurich)` (maybe even cite the paper!).
->>>>>>> ed8629f68e6b0a233734ca058e57cec48b178d70
-=======
-   1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Alberto Ibarrondo (IDEMIA & EURECOM) and Alexander Viand (ETH Zurich)` (maybe even cite the paper!).
->>>>>>> 4726e4f2b2542216871c0d3c846865311ca51d5f
 
    2. Offer the exact same License, allowing legal permission to copy, distribute and/or modify any SW using Pyfhel. Hence, **any software using Pyfhel must remain Open Source**.
