@@ -315,9 +315,10 @@ class SuperBuildClib(build_clib):
         build_dir = Path(self.build_clib).absolute() / project_name / lib_name
         build_dir.mkdir(parents=True, exist_ok=True)
         source_dir = build_info.get('source_dir')
-        
+        cmake_opts = build_info.get('cmake_opts')
+
         # Actual build
-        self.run_cmake_cli(source_dir, build_dir)
+        self.run_cmake_cli(source_dir, build_dir, cmake_opts)
         
         # Post build -> register as built lib/s
         lib_dir = build_dir / build_info.get('built_library_dir')
@@ -470,7 +471,7 @@ class SuperBuildClib(build_clib):
         build_info.update({'built_lib_files': lib_files})
         built_libs.update({lib_name: build_info})
 
-    def run_cmake_cli(self, source_dir, build_dir, n_jobs=4):
+    def run_cmake_cli(self, source_dir, build_dir, cmake_opts={}, n_jobs=4):
         """Runs `cmake` and `cmake --build` on selected directories."""
         #TODO: change n_jobs to max number of processors
         # Check cmake version
@@ -478,15 +479,22 @@ class SuperBuildClib(build_clib):
                         check=True, capture_output=True, text=True).stdout
         cmake_ver = v_parse(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
 
+        cmake_cli_opts = []
+        # Parse CMake options
+        cmake_config = cmake_opts.pop('CMAKE_BUILD_TYPE', 'Release')
+        for k, v in cmake_opts.items():
+            cmake_cli_opts.append(f"-D{k}={v}")
+
         # Run cmake to configure build
         if cmake_ver >= v_parse('3.14'):
-            run_command(['cmake', '-S', source_dir, '-B', build_dir], cwd=build_dir)
+            run_command(['cmake', '-S', source_dir, '-B', build_dir] + cmake_cli_opts
+            , cwd=build_dir)
         else:
-            run_command(['cmake', source_dir], cwd=build_dir)
+            run_command(['cmake', source_dir] + cmake_cli_opts, cwd=build_dir)
 
         # Run compilation with j jobs. Set "Release" build in Windows.
         run_command(['cmake', '--build',  '.', '-j', str(n_jobs)] +\
-                    (['--config', 'Release'] if platform_system=="Windows" else []), cwd=build_dir)
+                    (['--config', cmake_config] if platform_system=="Windows" else []), cwd=build_dir)
 ############################################################################
 # Auxiliary methods
 def get_lib_suffix(lib_type: str) -> str:
