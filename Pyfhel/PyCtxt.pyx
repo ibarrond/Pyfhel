@@ -432,7 +432,9 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.multiply`
         """
-        other = self.encode_operand(other)
+        other_ = self.encode_operand(other)
+        _, other_ = self._pyfhel.align_mod_n_scale(self, other_,
+                                copy_other=(other_ is other), only_mod=True)
         if isinstance(other, PyCtxt):
             return self._pyfhel.multiply(self, other, in_new_ctxt=True)
         elif isinstance(other, PyPtxt):
@@ -456,7 +458,9 @@ cdef class PyCtxt:
         Raise:
             TypeError: if other doesn't have a valid type.
         """
-        other = self.encode_operand(other)
+        other_ = self.encode_operand(other)
+        _, other_ = self._pyfhel.align_mod_n_scale(self, other_,copy_this=False,
+                                copy_other=(other_ is other), only_mod=True)
         if isinstance(other, PyCtxt):
             self._pyfhel.multiply(self, other, in_new_ctxt=False)
             return self

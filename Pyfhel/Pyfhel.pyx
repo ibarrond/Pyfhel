@@ -1131,7 +1131,8 @@ cdef class Pyfhel:
     
     def align_mod_n_scale(self,
         this: PyCtxt, other: Union[PyCtxt, PyPtxt],
-        copy_this: bool = True, copy_other: bool = True
+        copy_this: bool = True, copy_other: bool = True,
+        only_mod: bool = False,
     ) -> Tuple[PyCtxt, Union[PyCtxt, PyPtxt]]:
         """Aligns the scales & mod_levels of `this` and `other`.
         
@@ -1144,9 +1145,12 @@ cdef class Pyfhel:
         Arguments:
             this (PyCtxt): Ciphertext to align.
             other (PyCtxt|PyPtxt): Ciphertext|plaintext to align with.
+            copy_this (bool): Copy the `this` ciphertext before aligning.
+            copy_other (bool): Copy the `other` ciphertext|plaintext before aligning.
+            only_mod (bool): If True, only mod_level is aligned.
             
         Return:
-            None
+            Tuple[PyCtxt, Union[PyCtxt, PyPtxt]]: inputs with aligned scale & mod_level.
         """
         if not((isinstance(other, (PyCtxt, PyPtxt))  and\
                  (this.scheme == Scheme_t.ckks)  and\
@@ -1162,7 +1166,7 @@ cdef class Pyfhel:
             else:
                 other_ = PyPtxt(copy_ptxt=other) if copy_other else other
             # Align SCALES
-            if (this_.scale != other_.scale):
+            if ((this_.scale != other_.scale) or not only_mod):
                 # Just missing an approximation?
                 if this_.scale_bits == other_.scale_bits:
                     if 2**this_.scale_bits != this_.scale: this_.round_scale()
