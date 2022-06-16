@@ -435,10 +435,10 @@ cdef class PyCtxt:
         other_ = self.encode_operand(other)
         _, other_ = self._pyfhel.align_mod_n_scale(self, other_,
                                 copy_other=(other_ is other), only_mod=True)
-        if isinstance(other, PyCtxt):
-            return self._pyfhel.multiply(self, other, in_new_ctxt=True)
-        elif isinstance(other, PyPtxt):
-            return self._pyfhel.multiply_plain(self, other, in_new_ctxt=True)
+        if isinstance(other_, PyCtxt):
+            return self._pyfhel.multiply(self, other_, in_new_ctxt=True)
+        elif isinstance(other_, PyPtxt):
+            return self._pyfhel.multiply_plain(self, other_, in_new_ctxt=True)
         else:
             raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt, PyPtxt or numerical"
                             "(is %s instead)"%(type(other)))
@@ -461,11 +461,11 @@ cdef class PyCtxt:
         other_ = self.encode_operand(other)
         _, other_ = self._pyfhel.align_mod_n_scale(self, other_,copy_this=False,
                                 copy_other=(other_ is other), only_mod=True)
-        if isinstance(other, PyCtxt):
-            self._pyfhel.multiply(self, other, in_new_ctxt=False)
+        if isinstance(other_, PyCtxt):
+            self._pyfhel.multiply(self, other_, in_new_ctxt=False)
             return self
-        elif isinstance(other, PyPtxt):
-            self._pyfhel.multiply_plain(self, other, in_new_ctxt=False)
+        elif isinstance(other_, PyPtxt):
+            self._pyfhel.multiply_plain(self, other_, in_new_ctxt=False)
             return self
         raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt,"
                         " PyPtxt, int|float or 1D np.array"
