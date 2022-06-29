@@ -92,9 +92,10 @@ def _pl(args: List[Union[str,dict]]) -> List[str]:
         else:   args_pl.append(arg)
     return args_pl
 
-def _path(args: List[str]) -> List[Path]:
+def _path(args: List[str], base_dir=None) -> List[Path]:
     """_path: Turns all string elements into absolute paths with pathlib.Path"""
-    return  [str(Path(arg).absolute()) if isinstance(arg, str) else arg for arg in args]
+    base_dir = Path('') if base_dir is None else base_dir
+    return  [(base_dir/arg).absolute().as_posix() if isinstance(arg, (str, Path)) else arg for arg in args]
 
 def _tupl(args: List[List[str]]) -> List[Tuple[str, str]]:
     """_tupl: Picks elements and turns them into tuples"""
@@ -156,6 +157,7 @@ class FlushCommand(Command):
     """Custom clean command to tidy up the project root."""
     CLEAN_FILES = "*/__pycache__ .eggs ./gmon.out ./build "\
                   "./dist ./*.pyc ./*.tgz ./*.egg-info".split(" ")
+    CLEAN_GITIGNORES = ["Pyfhel/backend/SEAL"]
     user_options = []
     def initialize_options(self):
         pass
@@ -175,6 +177,10 @@ class FlushCommand(Command):
                     os.remove(path)
                 else:
                     shutil.rmtree(path)
+        # Remove .gitignore files
+        for git_repo in self.CLEAN_GITIGNORES:
+            print('Emptying gitignored files in repo %s' % os.path.relpath(git_repo))
+            run_command(['git', 'clean', '-dfX'], cwd=Path(git_repo).absolute())
 
 
 # ==============================================================================
@@ -246,7 +252,8 @@ def _resolve_built_deps(lib_name: str, lib_conf: Dict) -> Tuple[str, Dict]:
 
             # Add the real library dirs
             lib_conf['library_dirs'].extend(list(set(
-                [str(Path(l).absolute().parent) for l in built_libs[lib]['built_lib_files']])))
+                [Path(l).parent.absolute().as_posix() \
+                    for l in built_libs[lib]['built_lib_files']])))
 
         elif built_libs.get(lib,{}).get('mode') == 'standard':
             # INCLUDE the compilation headers
@@ -308,15 +315,10 @@ class SuperBuildClib(build_clib):
         build_dir = Path(self.build_clib).absolute() / project_name / lib_name
         build_dir.mkdir(parents=True, exist_ok=True)
         source_dir = build_info.get('source_dir')
-        
+        cmake_opts = build_info.get('cmake_opts')
+
         # Actual build
-        cmake_ver_str = subprocess.run(['cmake', '--version'], check=True, capture_output=True, text=True).stdout
-        cmake_ver = v_parse(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
-        if cmake_ver >= v_parse('3.14'):
-            run_command(['cmake', '-S', source_dir, '-B', build_dir], cwd=build_dir)
-        else:
-            run_command(['cmake', source_dir], cwd=build_dir)
-        run_command(['cmake', '--build',  '.', '-j', str(n_jobs)], cwd=build_dir)
+        self.run_cmake_cli(source_dir, build_dir, cmake_opts)
         
         # Post build -> register as built lib/s
         lib_dir = build_dir / build_info.get('built_library_dir')
@@ -326,7 +328,7 @@ class SuperBuildClib(build_clib):
         build_info.update({
             'built_lib_files': built_lib_files,
             'built_libraries': [lib_file_to_name(Path(f).name) for f in built_lib_files],
-            'built_include_dirs':  [str(build_dir / d) for d in build_info.get('built_include_dirs')],
+            'built_include_dirs':  _path(build_info.get('built_include_dirs'), base_dir=build_dir),
         })
         built_libs.update({lib_name: build_info})
 
@@ -373,6 +375,9 @@ class SuperBuildClib(build_clib):
         global built_libs
         log.info("building '%s' shared library", lib_name)
 
+        if platform_system=='Windows':
+            self.build_mocked_cmake_lib(lib_name, build_info)
+            return
         # First, compile the source code to object files in the temp directory. 
         sources = build_info.get('sources')
         objects = self.compiler.compile(
@@ -404,6 +409,92 @@ class SuperBuildClib(build_clib):
         })
         built_libs.update({lib_name: build_info})
 
+    def build_mocked_cmake_lib(self, lib_name, build_info):
+        '''Replicate the "build_shared_lib" function using CMake. 
+        
+        Populate a mock CMakeLists.txt to perform the exact same compilation and
+        linking, then execute it. Only necessary when creating a dynamic library
+        in Windows, to automatically export all the symbols exposed in it.
+        '''
+        global built_libs
+
+        # Create cmake project and CMakeLists.txt
+        # Build configuration
+        build_dir = Path(self.build_temp).absolute() / project_name / f"cmake_{lib_name}"
+        build_dir.mkdir(parents=True, exist_ok=True)
+        source_dir = '.'
+        
+        with open(build_dir/"CMakeLists.txt", 'w') as f:
+            f.write("cmake_minimum_required(VERSION 3.8)\n")
+            f.write(f"project(mocked_cmake_shared_lib_{lib_name})\n")
+
+            # Export all symbols in dll --> This is why Windows needs CMake
+            f.write("set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)\n")
+
+            # Output files to a fixed directory
+            output_dir = Path(self.build_temp).absolute().as_posix()
+            f.write(f"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY $<1:{output_dir}>)\n") # Linux
+            f.write(f"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:{output_dir}>)\n") # Windows
+            f.write(f"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $<1:{output_dir}>)\n") # Windows
+ 
+            # Add all compile/link options sequentially
+            extra_c_args = ' '.join(build_info['extra_compile_args'])
+            if extra_c_args:
+                f.write(f"add_compile_options({extra_c_args})\n")
+            for d in build_info['include_dirs']:
+                f.write(f"include_directories({d})\n")
+            macros = [f"-d{m[0]}={m[1]}" for m in build_info['macros']]
+            if macros:
+                f.write(f"add_compile_options({' '.join(macros)})\n")
+            extra_l_args = ' '.join(build_info['extra_link_args'])
+            if extra_l_args:
+                f.write(f"add_link_options({extra_l_args})\n")
+            lib_type = build_info['lib_type'].upper()
+            sources = ' '.join(build_info['sources'])
+            f.write(f"add_library({lib_name} {lib_type} {sources})\n")
+            lib_paths = ' '.join([str(p) for p in build_info['library_dirs']])
+            if build_info['libraries']:
+                lib_cmake_var_names = [cmake_varify_lib_name(l)
+                                  for l in build_info['libraries']]
+                for l, lib_cmake_var in zip(build_info['libraries'], lib_cmake_var_names):
+                    f.write(f"find_library({lib_cmake_var} {l} PATHS {lib_paths})\n")
+                lib_cmake_vars = ' '.join([f"${{{var}}}" for var in lib_cmake_var_names])
+                f.write(f"target_link_libraries({lib_name} {lib_cmake_vars})\n")
+            # TODO: add args from standard compilation (self.compiler)
+
+        # Build cmake project
+        self.run_cmake_cli(source_dir, build_dir)
+
+        # Post build
+        lib_files = [lf.absolute() for lf in
+                     Path(output_dir).glob(f'{get_lib_prefix()}{lib_name}*')]
+        build_info.update({'built_lib_files': lib_files})
+        built_libs.update({lib_name: build_info})
+
+    def run_cmake_cli(self, source_dir, build_dir, cmake_opts={}, n_jobs=4):
+        """Runs `cmake` and `cmake --build` on selected directories."""
+        #TODO: change n_jobs to max number of processors
+        # Check cmake version
+        cmake_ver_str = subprocess.run(['cmake', '--version'], 
+                        check=True, capture_output=True, text=True).stdout
+        cmake_ver = v_parse(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
+
+        cmake_cli_opts = []
+        # Parse CMake options
+        cmake_config = cmake_opts.pop('CMAKE_BUILD_TYPE', 'Release')
+        for k, v in cmake_opts.items():
+            cmake_cli_opts.append(f"-D{k}={v}")
+
+        # Run cmake to configure build
+        if cmake_ver >= v_parse('3.14'):
+            run_command(['cmake', '-S', source_dir, '-B', build_dir] + cmake_cli_opts
+            , cwd=build_dir)
+        else:
+            run_command(['cmake', source_dir] + cmake_cli_opts, cwd=build_dir)
+
+        # Run compilation with j jobs. Set "Release" build in Windows.
+        run_command(['cmake', '--build',  '.', '-j', str(n_jobs)] +\
+                    (['--config', cmake_config] if platform_system=="Windows" else []), cwd=build_dir)
 ############################################################################
 # Auxiliary methods
 def get_lib_suffix(lib_type: str) -> str:
@@ -421,8 +512,8 @@ def get_lib_suffix(lib_type: str) -> str:
 def get_lib_prefix() ->str:
     return 'lib' if platform_system!='Windows' else ''
 
-def get_final_lib_folder():
-    """Returns the name of a distutils build directory"""
+def get_final_lib_folder()-> str:
+    """Returns the name of the default distutils build directory"""
     f = "{dirname}.{platform}-{version[0]}.{version[1]}"
     dir_name = f.format(
         dirname='lib',
@@ -430,6 +521,20 @@ def get_final_lib_folder():
         version=sys.version_info)
     return str((Path('build') / dir_name / project_name).absolute())
 
+def cmake_varify_lib_name(filename: str) -> str:
+    """Turns a filename into a valid CMake variable name"""
+    # Create a composed regular expression from a dictionary keys
+    sub_table = {
+        r'-': r'\_',
+        r'\.': r'',
+        r' ': r'',
+        r' ': r'',
+    }
+    regex = re.compile("(%s)" % "|".join(map(re.escape, sub_table.keys())))
+
+    # For each match, look-up corresponding value in dictionary
+    regex.sub(lambda mo: sub_table[mo.string[mo.start():mo.end()]], filename)    
+    return filename.upper()
 
 # def get_extra_link_args_for_static_bundle(lib_files: List[Union[str, Path]]) -> List:
 #     """Add static library to dynamic library for shipping. 
@@ -466,14 +571,21 @@ class SuperBuildExt(build_ext):
                 if d is not None]
         
     def build_extensions(self):
-        # Removing CMake-built lib names, adding the real built libs.
+        # Windows: substituting list of compiler libraries with 'built_lib_files', 
+        #  to add the folder containing them (otherwise all libraries are treated
+        #  as static and searched with '.lib' extension)
+        # Linux: substituting cmake-based lib names with the actual built lib files.
         global built_libs
         libs = set(self.compiler.libraries)
-        built_lib_names = set([l for (_, b_info) in built_libs.items() \
-            for l in b_info.get('built_libraries',[]) if b_info.get('mode') == 'cmake'])
-        cmake_lib_names = set([l_name for (l_name, b_info) in built_libs.items()\
-             if b_info.get('mode') == 'cmake'])
-        self.compiler.libraries = list(libs ^ cmake_lib_names | built_lib_names)
+        if platform_system == 'Windows':    
+            self.compiler.libraries = [os.path.splitext(l)[0] for (_, b_info) \
+                in built_libs.items() for l in b_info.get('built_lib_files',[])]
+        else:
+            cmake_built_lib_names = set([l for (_, b_info) in built_libs.items() \
+                for l in b_info.get('built_libraries',[]) if b_info.get('mode') == 'cmake'])
+            cmake_lib_names = set([l_name for (l_name, b_info) in built_libs.items()\
+                if b_info.get('mode') == 'cmake'])
+            self.compiler.libraries = list(libs ^ cmake_lib_names | cmake_built_lib_names)
         build_ext.build_extensions(self)
 
 # ----------------------------- EXTENSION CONFIG -------------------------------
@@ -536,8 +648,8 @@ setup(
     # Metadata
     name            = project_name,
     version         = VERSION,
-    author          = project_config['author']['name'],
-    author_email    = project_config['author']['email'],
+    author          = ', '.join([n['name'] for n in project_config['authors']]),
+    author_email    = ', '.join([n['email'] for n in project_config['authors']]),
     url             = project_config['urls']['documentation'],
     description     = project_config['description'],
     long_description= long_description,
@@ -546,7 +658,7 @@ setup(
     classifiers     = project_config['classifiers'],
     platforms       = project_config['platforms'],
     keywords        = ', '.join(project_config['description']),
-    license         = project_config['license'],
+    license         = project_config['license']['text'],
     # Options
     install_requires=project_config['dependencies'],
     python_requires =project_config['requires-python'],

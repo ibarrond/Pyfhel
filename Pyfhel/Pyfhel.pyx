@@ -24,6 +24,7 @@
 
 # -------------------------------- IMPORTS ------------------------------------
 from warnings import warn
+from pathlib import Path
 
 # Both numpy and the Cython declarations for numpy
 import numpy as np
@@ -43,8 +44,8 @@ FLOAT_T = (float, np.float16, np.float32, np.float64)
 INT_T =   (int, np.int16, np.int32, np.int64, np.int_, np.intc)
 
 # Import utility functions
-include "util/utils.pxi"
-include "util/type_converters.pxi"
+include "utils/utils.pxi"
+include "utils/type_converters.pxi"
 
 # ------------------------- PYTHON IMPLEMENTATION -----------------------------
 cdef class Pyfhel:
@@ -61,8 +62,8 @@ cdef class Pyfhel:
                   pub_key_file=None,
                   sec_key_file=None):
         self.afseal = new Afseal()
-        self._qs = []
-        self._scale = 0
+        self._qi = []
+        self._scale = 1
     
     def __init__(self,
                   context_params=None,
@@ -72,19 +73,25 @@ cdef class Pyfhel:
         """Initializes an empty Pyfhel object, the base for all operations.
         
         To fill the Pyfhel object during initialization you can:
-            - Provide a dictionary of context parameters to run Pyfhel.contextGen(**context_params). 
+            - Provide a dictionary of context parameters to run Pyfhel.contextGen(\*\*context_params). 
             - Set key_gen to True in order to generate a new public/secret key pair.
             - Provide a pub_key_file and/or sec_key_file to load existing keys from saved files.
 
         Attributes:
-            context_params (dict, optional): dictionary of context parameters to run contextGen().
+            context_params (dict|str|pathlib.Path, optional): dictionary of context
+                    parameters to run contextGen(), or alternatively a string with the name of a saved context, to ve loaded with load_context().    
             key_gen (bool, optional): generate a new public/secret key pair
-            pub_key_file (str, pathlib.Path, optional): Load public key from this file.
-            sec_key_file (str, pathlib.Path, optional): Load public key from this file.
+            pub_key_file (str|pathlib.Path, optional): Load public key from this file.
+            sec_key_file (str|pathlib.Path, optional): Load secret key from this file.
         """
         if context_params is not None:
-            self.contextGen(**context_params)
-        if key_gen: # Overrides the key files
+            if isinstance(context_params, dict):
+                self.contextGen(**context_params)
+            elif isinstance(context_params, (str, Path)):
+                self.load_context(context_params)
+            else:
+                raise TypeError("context_params must be a dictionary or a string")
+        if key_gen: # Generates new keys
             self.keyGen()
         else:
             if pub_key_file is not None:
@@ -120,9 +127,9 @@ cdef class Pyfhel:
                 "-" if self.is_relin_key_empty() else f"Y",
                 "-" if self.is_context_empty() else \
                         f"n={self.n}, "\
-                        f"p={self.p}, "\
+                        f"t={self.t}, "\
                         f"sec={self.sec}, "\
-                        f"qs={self.qs}, "\
+                        f"qi={self.qi}, "\
                         f"scale={self.scale}, ")
 
     def __reduce__(self):
@@ -130,15 +137,17 @@ cdef class Pyfhel:
             - A callable object that will be called to create the initial version of the object.
             - A tuple of arguments for the callable object.
         """
-        context_params={"scheme": self.scheme,
-                        "plain_modulus": self.plain_modulus,
-                        "poly_modulus_degree": self.poly_modulus_degree,
-                        "sec": self.sec}
+        context_params={"scheme": self.scheme.name,
+                        "n": self.n,
+                        "t": self.t,
+                        "sec": self.sec,
+                        "scale": self.scale,
+                        "qi": self.qi,}
         return (Pyfhel, (context_params, False, None, None))
 
     @property
-    def p(self):
-        """p, plaintext modulus."""
+    def t(self):
+        """t, plaintext modulus."""
         return self.get_plain_modulus()
 
     @property
@@ -154,9 +163,9 @@ cdef class Pyfhel:
         return (<Afseal*>self.afseal).get_sec()
 
     @property
-    def qs(self):
+    def qi(self):
         """Chain of prime sizes (bits). Sets size of each prime in the coefficient modulis (q). Only applies to CKKS scheme."""
-        return self._qs
+        return self._qi
 
     @property
     def scale(self):
@@ -183,8 +192,8 @@ cdef class Pyfhel:
     # ....................... CONTEXT & KEY GENERATION ........................
     
     cpdef void contextGen(self,
-        str scheme, int n, int p_bits=0, int p=0, int sec=128,
-        double scale=0, int scale_bits=0, vector[int] qs = {}):
+        str scheme, int n, int64_t q=0, int t_bits=0, int64_t t=0, int sec=128,
+        double scale=1, int scale_bits=0, vector[int] qi = {}):
         """Generates Homomorphic Encryption context based on parameters.
         
         Creates a HE context based in parameters, as well as an appropriate
@@ -193,48 +202,60 @@ cdef class Pyfhel:
         (encryption/decryption,scheme/decoding, operations).
         
         *BFV scheme*: vectorized integer operations in Single Instruction Multiple
-            Data (SIMD) fashion. The scheme requires a plain_modulus p prime, with
-            p-1 being multiple of 2*n (n is the polynomial modulus degree). This 
-            p is generated automatically with size p_bits, and it will serve as
+            Data (SIMD) fashion. The scheme requires a plain_modulus t prime, with
+            t-1 being multiple of 2*n (n is the polynomial modulus degree). This 
+            tis generated automatically with size t_bits, and it will serve as
             plaintext modulo, the maximum value of all freshly encrypted plaintexts.
             The coefficient modulus (q) is chosen under the hood with the security
-            level sec, based on homomorphicencryption.org.
+            level sec, based on homomorphicencryption.org, although it can be set 
+            manually with the parameter q.
         
         *CKKS scheme*: vectorized approximate fixed point operations in SIMD. The
             underlying coefficient modulus (q) is set with a chain of prime sizes
-            qs, which is a vector of integers.
+            qi (bit sizes), which is an integer vector of moduli.
 
         Args:
             scheme (str): HE scheme ("bfv" or "ckks", for integer or float ops).
             n (int): Polynomial coefficient modulus m. (Poly: 1*x^n+1), directly
                      linked to the multiplication depth, (SEAL's poly_modulus_degree)
                      and equal to the number of slots (nSlots) in bfv.
+            q (int, optional): Coefficient modulus. (SEAL's poly_modulus). 
+                     Overriden by qi if scheme is "ckks" and sec if scheme is "bfv". 
+            
             -- Only for BFV scheme --
-            p(int, optional):  Only for bfv. Plaintext modulus. 
-            p_bits (int, optional):  Only for bfv. Plaintext modulus bit size. Overrides p.
+            t(int, optional):  Only for bfv. Plaintext modulus. (SEAL's plain_modulus) 
+            t_bits (int, optional):  Only for bfv. Plaintext modulus bit size. Overrides t.
             sec (int, optional): Only for bfv. Security level equivalent in AES.
                 128, 192 or 256. More means more security but also more costly. Sets q.
             -- Only for CKKS scheme --
             scale (int, optional): Upscale factor for fixed-point values. 
-            qs (list of ints, optional): Chain of prime sizes (#bits), to set q.
+            qi (list of ints, optional): Chain of prime sizes (#bits), to set q.
                       
         Return:
             None
         """
         s = to_Scheme_t(scheme)
         if s==Scheme_t.bfv:
-            assert (p_bits>0 or p>0), "BFV scheme requires p_bits > 0 or p > 0"
-            assert sec>0, "BFV scheme requires a security level (sec) to be set."
-            self._scale = 0
-            self._qs = {}
+            assert (t_bits>0 or t>0), "BFV scheme requires `t_bits` or `t` to be set"
+            if not qi.empty():  # Compress all moduli into one
+                q = np.prod(np.array(qi))
+                self._qi = qi
+            else:
+                self._qi = {}
+            assert (sec>0 or q>0), "BFV scheme requires `sec` or `q` to be set."
+            self._scale = 1
         elif s==Scheme_t.ckks:
-            assert not qs.empty(), "CKKS scheme requires a list of prime sizes (qs) to be set."
-            if not scale>0 and not scale_bits>0:
+            assert not qi.empty(), "CKKS scheme requires a list of prime sizes (qi) to be set"
+            if not scale>1 and not scale_bits>0:
                 warn("<Pyfhel Warning> initializing CKKS context without default scale."
                      "You will have to provide a scale for each encoding", RuntimeWarning)
             self._scale = 2**scale_bits if scale_bits>0 else scale
-            self._qs = qs
-        self.afseal.ContextGen(<scheme_t>s.value, n, p_bits * (p_bits>0), p, sec, qs)
+            self._qi = qi
+            # Check if scale matches at least one available rescaling
+            available_rescalings = np.cumsum(np.triu(np.tile(qi, (len(qi), 1)), k=1), axis=1)
+            if <int>np.log2(self._scale) not in available_rescalings:
+                warn("<Pyfhel Warning> qi {} do not support rescaling for scale {}.".format(qi, self._scale))
+        self.afseal.ContextGen(<scheme_t>s.value, n, t_bits * (t_bits>0), t, sec, qi)
         
     cpdef void keyGen(self):
         """Generates a pair of secret/Public Keys.
@@ -539,7 +560,7 @@ cdef class Pyfhel:
         raise NotImplementedError("<Pyfhel ERROR> decryptAComplex not implemented")
     cpdef np.ndarray[object, ndim=1] decryptAPtxt(self, PyCtxt ctxt):
         raise NotImplementedError("<Pyfhel ERROR> decryptAPtxt not implemented")
-    def decrypt(self, PyCtxt ctxt, bool decode=False, PyPtxt ptxt=None):
+    def decrypt(self, PyCtxt ctxt, bool decode=True, PyPtxt ptxt=None):
         """Decrypts any valid PyCtxt into either a PyPtxt ciphertext or a value.
         
         Decrypts a PyCtxt ciphertext using the current secret key, based on
@@ -554,7 +575,7 @@ cdef class Pyfhel:
         
         Args:
             ctxt (PyCtxt): ciphertext to decrypt.
-            decode (bool: False): return value or return PyPtxt.
+            decode (bool: True): return value or return PyPtxt.
             ptxt (PyPtxt, optional): Optional destination PyPtxt.  
             
         Return:
@@ -599,17 +620,10 @@ cdef class Pyfhel:
         """Relinearizes a ciphertext.
         
         Relinearizes a ciphertext. This functions relinearizes ctxt,
-        reducing its size down to 2. If the size of encrypted is K+1, the
-        given evaluation keys need to have size at least K-1. 
-        
-        To relinearize a ciphertext of size M >= 2 back to size 2, we
-        actually need M-2 evaluation keys. Attempting to relinearize a too
-        large ciphertext with too few evaluation keys will result in an
-        exception being thrown.
+        reducing its size down to 2. 
         
         Args:
-            bitCount (int): The bigger the faster but noisier (will require
-                            relinearization). Needs to be within [1, 60]
+            ctxt (PyCtxt): the ciphertext to relinearize in-place
                       
         Return:
             None
@@ -640,8 +654,7 @@ cdef class Pyfhel:
         ptxt._scheme = scheme_t.bfv
         return ptxt
     
-    cpdef PyPtxt encodeFrac(
-        self, double[::1] arr, PyPtxt ptxt=None,
+    cpdef PyPtxt encodeFrac(self, double[::1] arr, PyPtxt ptxt=None,
         double scale=0, int scale_bits=0) :
         """Encodes a float vector into a PyPtxt plaintext.
         
@@ -662,6 +675,7 @@ cdef class Pyfhel:
         vec.assign(&arr[0], &arr[0]+<Py_ssize_t>arr.size)
         self.afseal.encode_f(vec, scale, deref(ptxt._ptr_ptxt))
         ptxt._scheme = scheme_t.ckks
+        ptxt._pyfhel = self
         return ptxt
 
     cpdef PyPtxt encodeComplex(
@@ -686,6 +700,7 @@ cdef class Pyfhel:
         vec.assign(&arr[0], &arr[0]+<Py_ssize_t>arr.size)
         self.afseal.encode_c(vec, scale, deref(ptxt._ptr_ptxt))
         ptxt._scheme = scheme_t.ckks
+        ptxt._pyfhel = self
         return ptxt 
 
     cpdef np.ndarray[object, ndim=1] encodeAInt(self, int[:,::1] arr):
@@ -716,7 +731,6 @@ cdef class Pyfhel:
         Raise:
             TypeError: if the val_vec doesn't have a valid type.
         """
-        scale = _get_valid_scale(scale_bits, scale, self._scale)
         val_vec = np.array(val_vec)
         if (val_vec.ndim==0):     # nSlots = n in bfv, nSlots = n//2 in ckks
             val_vec = np.repeat(val_vec, self.n // (1 + (self.scheme==Scheme_t.ckks)))
@@ -728,6 +742,7 @@ cdef class Pyfhel:
             if self.scheme == Scheme_t.bfv:
                 return self.encodeInt(val_vec.astype(np.int64), ptxt)
             elif self.scheme == Scheme_t.ckks:
+                scale = _get_valid_scale(scale_bits, scale, self._scale)
                 if np.issubdtype(val_vec.dtype, np.complexfloating):
                     return self.encodeComplex(val_vec.astype(complex), ptxt, scale)
                 else:
@@ -856,6 +871,7 @@ cdef class Pyfhel:
         if (in_new_ctxt):
             ctxt = PyCtxt(ctxt)
         self.afseal.square(deref(ctxt._ptr_ctxt))
+        ctxt.mod_level += 1
         return ctxt
         
     cpdef PyCtxt negate(self, PyCtxt ctxt, bool in_new_ctxt=False):
@@ -998,9 +1014,11 @@ cdef class Pyfhel:
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.multiply(deref(new_ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+            new_ctxt.mod_level += 1         # Next modulus in qi
             return new_ctxt
         else:
             self.afseal.multiply(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
+            ctxt.mod_level += 1
             return ctxt
         
     cpdef PyCtxt multiply_plain (self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False):
@@ -1022,7 +1040,8 @@ cdef class Pyfhel:
                                 " ({ctxt._scheme} VS {ptxt._scheme})")   
         if (in_new_ctxt):
             ctxt = PyCtxt(ctxt)
-        self.afseal.multiply_plain(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))     
+        self.afseal.multiply_plain(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
+        ctxt.mod_level += 1
         return ctxt
         
     cpdef PyCtxt rotate(self, PyCtxt ctxt, int k, bool in_new_ctxt=False):
@@ -1065,6 +1084,9 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, the input transformed or a new one
         """
+        if self.is_relin_key_empty():
+            warn("<Pyfhel Warning> relin_key empty, generating it for relinearization.", RuntimeWarning)
+            self.relinKeyGen()
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
             self.afseal.exponentiate(deref(new_ctxt._ptr_ctxt), expon)  
@@ -1089,7 +1111,7 @@ cdef class Pyfhel:
         self.afseal.rescale_to_next(deref(ctxt._ptr_ctxt))
 
     def mod_switch_to_next(self, cipher_or_plain):
-        """Reduces the ciphertext/plaintext modulus with next prime in the qs chain.
+        """Reduces the ciphertext/plaintext modulus with next prime in the qi chain.
 
         Args:
             cipher_or_plain (PyCtxt|PyPtxt): Ciphertext to reduce.
@@ -1098,12 +1120,87 @@ cdef class Pyfhel:
             None
         """
         if isinstance(cipher_or_plain, PyCtxt):
+            cipher_or_plain.mod_level += 1
             self.afseal.mod_switch_to_next(deref((<PyCtxt>cipher_or_plain)._ptr_ctxt))
         elif isinstance(cipher_or_plain, PyPtxt):
+            cipher_or_plain.mod_level += 1
             self.afseal.mod_switch_to_next_plain(deref((<PyPtxt>cipher_or_plain)._ptr_ptxt))
         else:
             raise TypeError("<Pyfhel ERROR> Expected PyCtxt or PyPtxt for mod switching.")
+    
+    
+    def align_mod_n_scale(self,
+        this: PyCtxt, other: Union[PyCtxt, PyPtxt],
+        copy_this: bool = True, copy_other: bool = True,
+        only_mod: bool = False,
+    ) -> Tuple[PyCtxt, Union[PyCtxt, PyPtxt]]:
+        """Aligns the scales & mod_levels of `this` and `other`.
         
+        Only applies to CKKS. Alligns the scales of the `this` ciphertext and
+        the `other` ciphertext/plaintext by aligning the scale and mod_level:
+        - Rescales the ciphertext with the highest mod_level to the next qi/s 
+        - Mod switches the second ciphertext/plaintext to the next qi/s
+        - At the end, rounds the scale of the rescaled ciphertext
+
+        Arguments:
+            this (PyCtxt): Ciphertext to align.
+            other (PyCtxt|PyPtxt): Ciphertext|plaintext to align with.
+            copy_this (bool): Copy the `this` ciphertext before aligning.
+            copy_other (bool): Copy the `other` ciphertext|plaintext before aligning.
+            only_mod (bool): If True, only mod_level is aligned.
+            
+        Return:
+            Tuple[PyCtxt, Union[PyCtxt, PyPtxt]]: inputs with aligned scale & mod_level.
+        """
+        if not((isinstance(other, (PyCtxt, PyPtxt))  and\
+                 (this.scheme == Scheme_t.ckks)  and\
+                 (other.scheme == Scheme_t.ckks))):
+            return this, other
+        elif (this.scale == other.scale) and (this.mod_level == other.mod_level):
+            return this, other
+        else: # Time to align!
+            # Copy?
+            this_ = PyCtxt(copy_ctxt=this) if copy_this else this
+            if isinstance(other, PyCtxt):
+                other_ = PyCtxt(copy_ctxt=other) if copy_other else other
+            else:
+                other_ = PyPtxt(copy_ptxt=other) if copy_other else other
+            # Align SCALES
+            if ((this_.scale != other_.scale) or not only_mod):
+                # Just missing an approximation?
+                if this_.scale_bits == other_.scale_bits:
+                    if 2**this_.scale_bits != this_.scale: this_.round_scale()
+                    if 2**other_.scale_bits != other_.scale: other_.round_scale()
+
+                else: # Try to do rescaling + mod switching
+                    # Who's rescaling and who's mod-switching
+                    (c_rescale, c_mod_switch)  = (this_, other_)\
+                        if (this_.scale_bits > other_.scale_bits) else (other_, this_)
+                    scale_bits_diff = c_rescale.scale_bits - c_mod_switch.scale_bits
+                    # But can we do it?
+                    available_rescalings =\
+                        np.cumsum(self.qi[1+c_mod_switch.mod_level:
+                                          1+c_rescale.mod_level])
+                    if (scale_bits_diff) not in available_rescalings:
+                        warn("Cannot align scales {} and {} (available rescalings: {})".format(this_.scale_bits, other_.scale_bits, available_rescalings))
+                        return this_, other_
+                    else: # Rescale + mod switching
+                        n_rescalings = list(available_rescalings).index(scale_bits_diff)+1
+                        for _ in range(n_rescalings):
+                            self.rescale_to_next(c_rescale)
+                            self.mod_switch_to_next(c_mod_switch)
+                        c_rescale.round_scale()     # Final approximation
+            # Align MOD LEVELS
+            if (this_.mod_level != other_.mod_level):
+                # Who's mod-switching?
+                (c, c_mod_switch)  = (this_, other_)\
+                    if (this_.mod_level > other_.mod_level) else (other_, this_)
+                # mod switching
+                for _ in range(c.mod_level - c_mod_switch.mod_level):
+                    self.mod_switch_to_next(c_mod_switch)
+            return this_, other_
+
+
     # =========================================================================
     # ================================ I/O ====================================
     # =========================================================================   
@@ -1121,8 +1218,9 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ofstream outputter = ofstream(f_name, binary)
-        return self.afseal.save_context(outputter, compr_mode.encode())
+        cdef ofstream ostr = ofstream(f_name, binary)
+        _write_cy_attributes(self, ostr)
+        return self.afseal.save_context(ostr, compr_mode.encode())
     
     cpdef size_t load_context(self, fileName):
         """Restores context from a file
@@ -1134,8 +1232,9 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ifstream inputter = ifstream(f_name, binary)
-        return self.afseal.load_context(inputter)
+        cdef ifstream istr = ifstream(f_name, binary)
+        _read_cy_attributes(self, istr)
+        return self.afseal.load_context(istr)
 
     cpdef size_t save_public_key(self, fileName, str compr_mode="zstd"):
         """Saves current public key in a file
@@ -1148,8 +1247,8 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ofstream outputter = ofstream(f_name, binary)
-        return self.afseal.save_public_key(outputter, compr_mode.encode())
+        cdef ofstream ostr = ofstream(f_name, binary)
+        return self.afseal.save_public_key(ostr, compr_mode.encode())
             
     cpdef size_t load_public_key(self, fileName):
         """Restores current public key from a file
@@ -1161,8 +1260,8 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ifstream inputter = ifstream(f_name, binary)
-        return self.afseal.load_public_key(inputter)
+        cdef ifstream istr = ifstream(f_name, binary)
+        return self.afseal.load_public_key(istr)
 
     cpdef size_t save_secret_key(self, fileName, str compr_mode="zstd"):
         """Saves current secret key in a file
@@ -1175,8 +1274,8 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ofstream outputter = ofstream(f_name, binary)
-        return self.afseal.save_secret_key(outputter, compr_mode.encode())
+        cdef ofstream ostr = ofstream(f_name, binary)
+        return self.afseal.save_secret_key(ostr, compr_mode.encode())
     
     cpdef size_t load_secret_key(self, fileName):
         """Restores current secret key from a file
@@ -1188,8 +1287,8 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ifstream inputter = ifstream(f_name, binary)
-        return self.afseal.load_secret_key(inputter)
+        cdef ifstream istr = ifstream(f_name, binary)
+        return self.afseal.load_secret_key(istr)
     
     cpdef size_t save_relin_key(self, fileName, str compr_mode="zstd"):
         """Saves current relinearization keys in a file
@@ -1202,8 +1301,8 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ofstream outputter = ofstream(f_name, binary)
-        return self.afseal.save_relin_keys(outputter, compr_mode.encode())
+        cdef ofstream ostr = ofstream(f_name, binary)
+        return self.afseal.save_relin_keys(ostr, compr_mode.encode())
     
     cpdef size_t load_relin_key(self, fileName):
         """Restores current relinearization keys from a file
@@ -1215,8 +1314,8 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ifstream inputter = ifstream(f_name, binary)
-        return self.afseal.load_relin_keys(inputter)
+        cdef ifstream istr = ifstream(f_name, binary)
+        return self.afseal.load_relin_keys(istr)
     
     cpdef size_t save_rotate_key(self, fileName, str compr_mode="zstd"):
         """Saves current rotation Keys from a file
@@ -1229,8 +1328,8 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ofstream outputter = ofstream(f_name, binary)
-        return self.afseal.save_rotate_keys(outputter, compr_mode.encode())
+        cdef ofstream ostr = ofstream(f_name, binary)
+        return self.afseal.save_rotate_keys(ostr, compr_mode.encode())
     
     cpdef size_t load_rotate_key(self, fileName):
         """Restores current rotation Keys from a file
@@ -1242,8 +1341,8 @@ cdef class Pyfhel:
             bool: Result, True if OK, False otherwise.
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
-        cdef ifstream inputter = ifstream(f_name, binary)
-        return self.afseal.load_rotate_keys(inputter)
+        cdef ifstream istr = ifstream(f_name, binary)
+        return self.afseal.load_rotate_keys(istr)
     
     
     # BYTES
@@ -1257,9 +1356,10 @@ cdef class Pyfhel:
         Return:
             bytes: Serialized Context.
         """
-        cdef ostringstream outputter
-        self.afseal.save_context(outputter, compr_mode.encode())
-        return outputter.str()
+        cdef ostringstream ostr
+        _write_cy_attributes(self, ostr)
+        self.afseal.save_context(ostr, compr_mode.encode())
+        return ostr.str()
     
     cpdef size_t from_bytes_context(self, bytes content):
         """Restores current context from a bytes object
@@ -1270,9 +1370,10 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef stringstream inputter
-        inputter.write(content,len(content))
-        return self.afseal.load_context(inputter)
+        cdef stringstream istr
+        istr.write(content,len(content))
+        _read_cy_attributes(self, istr)
+        return self.afseal.load_context(istr)
 
     cpdef bytes to_bytes_public_key(self, str compr_mode="zstd"):
         """Saves current public key in a bytes string
@@ -1283,9 +1384,9 @@ cdef class Pyfhel:
         Return:
             bytes: Serialized public key.
         """
-        cdef ostringstream outputter
-        self.afseal.save_public_key(outputter, compr_mode.encode())
-        return outputter.str()
+        cdef ostringstream ostr
+        self.afseal.save_public_key(ostr, compr_mode.encode())
+        return ostr.str()
             
     cpdef size_t from_bytes_public_key(self, bytes content):
         """Restores current public key from a bytes object
@@ -1296,9 +1397,9 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef stringstream inputter
-        inputter.write(content,len(content))
-        return self.afseal.load_public_key(inputter)
+        cdef stringstream istr
+        istr.write(content,len(content))
+        return self.afseal.load_public_key(istr)
 
     cpdef bytes to_bytes_secret_key(self, str compr_mode="zstd"):
         """Saves current secret key in a bytes string
@@ -1309,9 +1410,9 @@ cdef class Pyfhel:
         Return:
             bytes: Serialized secret key.
         """
-        cdef ostringstream outputter
-        self.afseal.save_secret_key(outputter, compr_mode.encode())
-        return outputter.str()
+        cdef ostringstream ostr
+        self.afseal.save_secret_key(ostr, compr_mode.encode())
+        return ostr.str()
     
     cpdef size_t from_bytes_secret_key(self, bytes content):
         """Restores current secret key from a bytes object
@@ -1322,9 +1423,9 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef stringstream inputter
-        inputter.write(content,len(content))
-        return self.afseal.load_secret_key(inputter)
+        cdef stringstream istr
+        istr.write(content,len(content))
+        return self.afseal.load_secret_key(istr)
     
     cpdef bytes to_bytes_relin_key(self, str compr_mode="zstd"):
         """Saves current relinearization key in a bytes string
@@ -1335,9 +1436,9 @@ cdef class Pyfhel:
         Return:
             bytes: Serialized relinearization key.
         """
-        cdef ostringstream outputter
-        self.afseal.save_relin_keys(outputter, compr_mode.encode())
-        return outputter.str()
+        cdef ostringstream ostr
+        self.afseal.save_relin_keys(ostr, compr_mode.encode())
+        return ostr.str()
     
     cpdef size_t from_bytes_relin_key(self, bytes content):
         """Restores current relin key from a bytes object
@@ -1348,9 +1449,9 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef stringstream inputter
-        inputter.write(content,len(content))
-        return self.afseal.load_relin_keys(inputter)
+        cdef stringstream istr
+        istr.write(content,len(content))
+        return self.afseal.load_relin_keys(istr)
     
     cpdef bytes to_bytes_rotate_key(self, str compr_mode="zstd"):
         """Saves current context in a bytes string
@@ -1361,9 +1462,9 @@ cdef class Pyfhel:
         Return:
             bytes: Serialized rotation key.
         """
-        cdef ostringstream outputter
-        self.afseal.save_rotate_keys(outputter, compr_mode.encode())
-        return outputter.str()
+        cdef ostringstream ostr
+        self.afseal.save_rotate_keys(ostr, compr_mode.encode())
+        return ostr.str()
     
     cpdef size_t from_bytes_rotate_key(self, bytes content):
         """Restores current rotation key from a bytes object
@@ -1374,9 +1475,9 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef stringstream inputter
-        inputter.write(content,len(content))
-        return self.afseal.load_rotate_keys(inputter)
+        cdef stringstream istr
+        istr.write(content,len(content))
+        return self.afseal.load_rotate_keys(istr)
          
     
     # =========================================================================

@@ -13,9 +13,9 @@ from libcpp cimport bool
 from numpy cimport int64_t, uint64_t
 
 # Import our own wrapper for iostream classes, used for I/O ops
-from Pyfhel.iostream cimport istream, ostream, ifstream, ofstream, ostringstream, stringstream, binary
+from Pyfhel.utils.iostream cimport istream, ostream, ifstream, ofstream, ostringstream, stringstream, binary
 
-from Pyfhel.Afhel cimport *
+from Pyfhel.Afhel.Afhel cimport *
 
 # Import the Cython Plaintext, Ciphertext and Poly classes
 from Pyfhel.PyPtxt cimport PyPtxt
@@ -26,13 +26,13 @@ from Pyfhel.PyPoly cimport PyPoly
 cdef class Pyfhel:
     cdef Afhel* afseal           # The C++ methods are accessed via a pointer
     cdef int _sec
-    cdef vector[int] _qs
+    cdef vector[int] _qi
     cdef double _scale
     # =========================== CRYPTOGRAPHY =================================
     # CONTEXT & KEY GENERATION
     cpdef void contextGen(self,
-            str scheme, int n, int p_bits=*,int p=*, int sec=*,
-            double scale=*, int scale_bits=*,  vector[int] qs =*) 
+            str scheme, int n, int64_t q=*, int t_bits=*, int64_t t=*, int sec=*,
+            double scale=*, int scale_bits=*,  vector[int] qi =*) 
     cpdef void keyGen(self) 
     cpdef void relinKeyGen(self) 
     cpdef void rotateKeyGen(self) 

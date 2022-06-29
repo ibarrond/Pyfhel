@@ -6,14 +6,14 @@
 # -------------------------------- IMPORTS ------------------------------------
 # Used for all kinds of operations. Includes utility functions
 from Pyfhel.Pyfhel cimport *
-from .util.Scheme_t import Scheme_t
-from .util.Backend_t import Backend_t
+from .utils.Scheme_t import Scheme_t
+from .utils.Backend_t import Backend_t
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
 
 # Import Abstract Plaintext class
-from Pyfhel.Afhel cimport *
+from Pyfhel.Afhel.Afhel cimport *
 
 import numpy as np
 
@@ -33,6 +33,7 @@ cdef class PyPtxt:
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
+                  bytestring=None,
                   scheme=None):
         if (copy_ptxt): # If there is a PyPtxt to copy, override all arguments and copy
             self._ptr_ptxt = new AfsealPtxt(deref(<AfsealPtxt*>copy_ptxt._ptr_ptxt))
@@ -40,20 +41,26 @@ cdef class PyPtxt:
             if (copy_ptxt._pyfhel):
                 self._pyfhel = copy_ptxt._pyfhel
         else:
-            self._ptr_ptxt = new AfsealPtxt()  
-            if fileName:
-                if not scheme:
-                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid scheme")    
-                self.from_file(fileName, scheme)
-            else:
-                self._scheme = to_Scheme_t(scheme) if scheme else scheme_t.none
-            if (pyfhel):
+            self._ptr_ptxt = new AfsealPtxt()
+            if pyfhel:
                 self._pyfhel = pyfhel
+                self._scheme = self._pyfhel.afseal.get_scheme()
+            elif scheme:
+                self._scheme = (to_Scheme_t(scheme) if scheme else Scheme_t.none).value
+            if fileName:
+                if self._scheme == scheme_t.none:
+                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid scheme")    
+                self.load(fileName, to_Scheme_t(self._scheme))
+            elif bytestring:
+                if self._scheme == scheme_t.none:
+                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization from bytestring requires valid scheme")    
+                self.from_bytes(bytestring, to_Scheme_t(self._scheme))
                 
     def __init__(self,
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
+                  bytestring=None,
                   scheme=None):
         """__init__(PyPtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, scheme=None)
 
@@ -84,9 +91,7 @@ cdef class PyPtxt:
         Can be set to: 0-none, 1-bfv, 2-ckks
 
         See Also:
-            :func:`~Pyfhel.util.to_Scheme_t`
-
-        :meta public:
+            :func:`~Pyfhel.utils.to_Scheme_t`
         """
         return to_Scheme_t(self._scheme)
     
@@ -100,19 +105,44 @@ cdef class PyPtxt:
     @scheme.deleter
     def scheme(self):
         self._scheme = scheme_t.none
-              
+
+    @property
+    def scale(self):
+        """double: multiplying factor to encode values in ckks."""
+        return (<AfsealPtxt*>(self._ptr_ptxt)).scale()
+    @scale.setter
+    def scale(self, new_scale):
+        self.set_scale(new_scale)
+
+    @property
+    def scale_bits(self):
+        """int: number of bits in scale to encode values in ckks"""
+        return <int>np.log2( (<AfsealPtxt*>(self._ptr_ptxt)).scale() )
         
     @property
-    def pyfhel(self):
+    def _pyfhel(self):
         """A pyfhel instance, used for operations"""
         return self._pyfhel
-
-    @pyfhel.setter
-    def pyfhel(self, new_pyfhel):
+    @_pyfhel.setter
+    def _pyfhel(self, new_pyfhel):
         if not isinstance(new_pyfhel, Pyfhel):
             raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
-        self._pyfhel = new_pyfhel 
+        self._pyfhel = new_pyfhel
+
+    @property
+    def mod_level(self):
+        """mod_level: returns the number of moduli consumed so far.
         
+        Only usable in ckks.
+        """
+        return self._mod_level
+    @mod_level.setter
+    def mod_level(self, newlevel):  
+        self._mod_level = newlevel
+    @mod_level.deleter
+    def mod_level(self):
+        self._mod_level = 0
+
     cpdef bool is_zero(self):
         """bool: Flag to quickly check if it is empty"""
         return (<AfsealPtxt*>self._ptr_ptxt).is_zero()
@@ -142,6 +172,8 @@ cdef class PyPtxt:
         Return:
             None            
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> plaintext saving requires a Pyfhel instance")
         cdef ofstream* outputter
         cdef string bFileName = _to_valid_file_str(fileName).encode('utf8')
         cdef string bcompr_mode = compr_mode.encode('utf8')
@@ -162,12 +194,14 @@ cdef class PyPtxt:
         Return:
             bytes: serialized plaintext
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> plaintext serialization requires a Pyfhel instance")
         cdef ostringstream outputter
         cdef string bcompr_mode = compr_mode.encode('utf8')
         self._pyfhel.afseal.save_plaintext(outputter, bcompr_mode, deref(self._ptr_ptxt))
         return outputter.str()
 
-    cpdef void load(self, str fileName, object scheme):
+    cpdef void load(self, str fileName, object scheme=None):
         """load(self, str fileName, scheme)
         
         Load the plaintext from a file.
@@ -179,8 +213,10 @@ cdef class PyPtxt:
             None
 
         See Also:
-            :func:`~Pyfhel.util.to_Scheme_t`
+            :func:`~Pyfhel.utils.to_Scheme_t`
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> plaintext loading requires a Pyfhel instance")
         cdef ifstream* inputter
         cdef string bFileName = _to_valid_file_str(fileName, check=True).encode('utf8')
         inputter = new ifstream(bFileName, binary)
@@ -188,9 +224,10 @@ cdef class PyPtxt:
             self._pyfhel.afseal.load_plaintext(deref(inputter), deref(self._ptr_ptxt))
         finally:
             del inputter
-        self._scheme = to_Scheme_t(scheme)
+        if scheme is not None:
+            self.scheme = to_Scheme_t(scheme)
 
-    cpdef void from_bytes(self, bytes content, object scheme):
+    cpdef void from_bytes(self, bytes content, object scheme=None):
         """from_bytes(bytes content)
 
         Recover the serialized plaintext from a binary/bytes string.
@@ -201,10 +238,13 @@ cdef class PyPtxt:
               * ('int', 'integer', int, 1, scheme_t.bfv) -> integer scheme.
               * ('float', 'double', float, 2, scheme_t.ckks) -> fractional scheme.
         """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> plaintext loading requires a Pyfhel instance")
         cdef stringstream inputter
         inputter.write(content,len(content))
         self._pyfhel.afseal.load_plaintext(inputter, deref(self._ptr_ptxt))
-        self._scheme = to_Scheme_t(scheme)
+        if scheme is not None:
+            self.scheme = to_Scheme_t(scheme)
 
 
 
@@ -228,10 +268,13 @@ cdef class PyPtxt:
         else:
             poly_s = str(self.to_poly_string())
             poly_s = poly_s[:25] + ('...' if len(poly_s)>25 else '')
-        return "<Pyfhel Plaintext, scheme={}, poly={}, is_ntt={}>".format(
+        return "<Pyfhel Plaintext at {}, scheme={}, poly={}, is_ntt={}{}>".format(
+                hex(id(self)),
                 self.scheme.name,
                 poly_s,
-                "Y" if self.is_ntt_form() else "-")
+                "Y" if self.is_ntt_form() else "-",
+                ", mod_level={}".format(self.mod_level) if self.scheme==Scheme_t.ckks else ''
+                )
 
     def encode(self, value):
         """encode(value)
@@ -263,4 +306,14 @@ cdef class PyPtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.decode`
         """
-        return self._pyfhel.decode(self)
+        return self._pyfhel.decode(self)    
+        
+    cpdef void set_scale (self, double new_scale):
+        """set_scale(double new_scale)
+
+        Sets the scale of the ciphertext.
+        
+        Args:
+            scale (double): new scale of the ciphertext.
+        """
+        (<AfsealPtxt*>(self._ptr_ptxt)).set_scale(new_scale)

@@ -11,10 +11,10 @@ from libcpp.cast cimport dynamic_cast
 from Pyfhel.Pyfhel cimport *
 
 # Import our own wrapper for iostream classes, used for I/O ops
-from Pyfhel.iostream cimport ifstream, ofstream, ostringstream, stringstream, binary
+from Pyfhel.utils.iostream cimport ifstream, ofstream, ostringstream, stringstream, binary
 
 # Import Abstract Ciphertext class
-from Pyfhel.Afhel cimport *
+from Pyfhel.Afhel.Afhel cimport *
 
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class PyCtxt:
@@ -22,10 +22,11 @@ cdef class PyCtxt:
     cdef Pyfhel _pyfhel
     cdef scheme_t _scheme
     cdef backend_t _backend
+    cdef int _mod_level
     cpdef int size(self)
     cpdef void set_scale(self, double scale)
     cpdef void round_scale(self)
     cpdef void save(self, str fileName, str compr_mode=*)
-    cpdef void load(self, str fileName, object scheme)
+    cpdef void load(self, str fileName, object scheme=*)
     cpdef bytes to_bytes(self, str compr_mode=*)
-    cpdef void from_bytes(self, bytes content, object scheme)
+    cpdef void from_bytes(self, bytes content, object scheme=*)

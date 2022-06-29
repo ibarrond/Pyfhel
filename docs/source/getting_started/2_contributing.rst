@@ -15,7 +15,7 @@ This is the process to develop/contribute to Pyfhel:
         Compiling Pyfhel/PyPtxt.pyx because it depends on ./Pyfhel/iostream.pxd.
         [1/2] Cythonizing Pyfhel/Pyfhel.pyx
         [2/2] Cythonizing Pyfhel/PyPtxt.pyx
-        Pyfhel-2.0.2
+        Pyfhel-3.0.1
 
 3. *Reinstall Pyfhel locally*. Use either `pip install .` or `python3 setup.py build` (for verbose output and fine control. Run `python3 setup.py --help` for further options).
 

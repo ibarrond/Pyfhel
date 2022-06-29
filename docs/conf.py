@@ -213,7 +213,7 @@ sphinx_gallery_conf = {
     'examples_dirs': '../examples',   # path to your example scripts
     'gallery_dirs': '_autoexamples',  # path to where to save gallery generated output
     'filename_pattern': r'Demo_*',
-    'ignore_pattern': r'__init__\.py',
+    'ignore_pattern': r'__init__\.py|.*bis.*.py',
     'min_reported_time': 0,
     'remove_config_comments': True,
     'expected_failing_examples': [],

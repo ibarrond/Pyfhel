@@ -3,6 +3,68 @@
 #  the following sections:
 #  - [cpplibraries.SEAL.cmake-opts]
 
+#===============================================================================
+#============================== PROJECT METADATA ===============================
+#===============================================================================
+# Pyfhel's core metadata
+[project]
+name = "Pyfhel"
+version = "3.1.4"
+description = "Python for Homomorphic Encryption Libraries"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "GNU GPLv3"}
+keywords = ["homomorphic" , "encryption", "cython", "cryptography"]
+authors = [
+  {name = "Alberto Ibarrondo", email = "ibarrond@eurecom.fr"},
+  {name = "Alexander Viand", email = "alexander.viand@inf.ethz.ch"},
+]
+classifiers = [
+    "Programming Language :: C++",
+    "Programming Language :: Cython",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: Unix",
+    "Operating System :: POSIX",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Security",
+    "Topic :: Security :: Cryptography",
+]
+
+dependencies = [
+  "numpy>=1.20"
+]
+
+platforms = ["Linux", "Windows"]
+
+[project.optional-dependencies]
+test = [
+  "pytest >= 6.0.0",
+]
+
+[project.urls]
+homepage = "https://pyfhel.readthedocs.io"
+documentation = "https://pyfhel.readthedocs.io"
+repository = "https://github.com/ibarrond/github"
+
+
+# Minimum requirements for the build system to execute.
+[build-system]
+requires = [
+  "setuptools<=60.9",
+  "wheel",
+  "cython>=3.0.0a9",
+  "numpy>=1.20",
+  "cmake>=3.15",
+  "toml>=0.10"
+]
+build-backend = "setuptools.build_meta"
 
 #===============================================================================
 #========================= COMPILATION CONFIGURATION ===========================
@@ -33,19 +95,21 @@
 
   ## CMake options: https://github.com/microsoft/SEAL/#basic-cmake-options
     [cpplibraries.SEAL.cmake_opts]
+    CMAKE_BUILD_TYPE = 'Release'
     SEAL_USE_INTEL_HEXL ='OFF'   # ON/OFF, use Intel HEXL for low-level kernels
     SEAL_USE_ALIGNED_ALLOC ='OFF'# ON/OFF, 64B aligned memory allocations, better perf with Intel HEXL.
     BUILD_SHARED_LIBS ='OFF'     # ON/OFF, build shared and not static library
-
+    SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT='ON' # ON/OFF, runtime error when multiplying a ctxt with a zeroed plaintext.
+    
   #--> Afhel
   [cpplibraries.Afhel]
-  mode = 'standard'       # standard/cmake
+  mode = 'standard'        # standard/cmake
   lib_type = 'shared'      # static/shared
   sources = ['Pyfhel/Afhel/Afseal.cpp',]
   include_dirs = ['Pyfhel/Afhel',]
   define_macros = []
   extra_compile_args = [
-    {Windows = ["/O2"]},
+    {Windows = ["/O2","/std:c++17"]},
     {Linux = ["-std=c++17","-O3","-fopenmp"]} ]
   extra_link_args = [
     {Windows = []},
@@ -61,11 +125,11 @@ define_macros = [
   ["__PYX_ENUM_CLASS_DECL", "enum"], # Support enums in cython
 ]
 extra_compile_args = [
-  {Windows = ["/O2","/openmp"]},
+  {Windows = ["/O2","/openmp","/std:c++17"]},
   {Linux = ["-std=c++17","-O3","-fopenmp"]},
 ]
 extra_link_args = [
-  {Windows = ["/openmp"]},
+  {Windows = []},
   {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
 ]
 libraries = []  # libraries to link with, cpplibraries above are added by default
@@ -86,65 +150,3 @@ sources=['Pyfhel/PyPtxt.pyx']
 [extensions.PyPoly]
 fullname='Pyfhel.PyPoly'    
 sources=['Pyfhel/PyPoly.pyx']
-  
-
-#===============================================================================
-#============================== PROJECT METADATA ===============================
-#===============================================================================
-# Pyfhel's core metadata
-[project]
-name = "Pyfhel"
-version = "3.1.1"
-description = "Python for Homomorphic Encryption Libraries"
-readme = "README.md"
-requires-python = ">=3.7"
-license = "GNU GPLv3"
-keywords = ["homomorphic" , "encryption", "cython", "cryptography"]
-author = {name = "Alberto Ibarrondo", email = "ibarrond@eurecom.fr"}
-classifiers = [
-    "Programming Language :: C++",
-    "Programming Language :: Cython",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Operating System :: Unix",
-    "Operating System :: POSIX",
-    "Operating System :: Microsoft :: Windows",
-    "Topic :: Security",
-    "Topic :: Security :: Cryptography",
-]
-
-dependencies = [
-  "numpy>=1.20"
-]
-
-platforms = ["Linux", "Windows"]
-
-[project.optional-dependencies]
-test = [
-  "pytest >= 6.0.0",
-]
-
-[project.urls]
-documentation = "https://pyfhel.readthedocs.io"
-repository = "https://github.com/ibarrond/github"
-
-
-# Minimum requirements for the build system to execute.
-[build-system]
-requires = [
-  "setuptools>=50.0",
-  "wheel",
-  "cython>=3.0.0a9",
-  "numpy>=1.20",
-  "cmake>=3.15",
-  "toml>=0.10"
-]
-build-backend = "setuptools.build_meta"

@@ -1,3 +1,4 @@
+# This can be used to build locally Afhel and test demos.  
 cmake_minimum_required (VERSION 3.9...3.17)
 
 project(Afhel)
