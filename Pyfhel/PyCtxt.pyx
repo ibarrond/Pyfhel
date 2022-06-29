@@ -1,5 +1,5 @@
-# distutils: language = c++
-# cython: language_level=3, boundscheck=False
+# distutils: language = c++, define_macros=CYTHON_TRACE=1
+# cython: language_level=3, boundscheck=False, linetrace=True
 """PyCtxt. Ciphertext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------

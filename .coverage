@@ -2,7 +2,7 @@
 plugins = Cython.Coverage
 source = Pyfhel
 omit =
-    Pyfhel/test
-    Pyfhel/backend
     Pyfhel/Afhel
+    Pyfhel/backend
+    Pyfhel/test
     *__init__.py
