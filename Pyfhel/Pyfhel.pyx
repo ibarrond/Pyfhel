@@ -798,7 +798,7 @@ cdef class Pyfhel:
             raise RuntimeError('<Pyfhel ERROR> PyPtxt scheme must be ckks')
         cdef vector[double] output_vector
         self.afseal.decode_f(deref(ptxt._ptr_ptxt), output_vector)
-        return np.copy(<double [:output_vector.size()]>output_vector.data())
+        return vec_to_array_f(output_vector)
     
 
     cpdef np.ndarray[complex, ndim=1] decodeComplex(self, PyPtxt ptxt):
