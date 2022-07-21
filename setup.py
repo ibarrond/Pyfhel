@@ -75,6 +75,10 @@ try:
 except ImportError:
     pass    # Cython not available, reverting to previously cythonized C++ files
 
+# Config to run coverage tests, if there is a .cov file in the base dir.
+COVERAGE = False
+if '.cov' in os.listdir():
+    COVERAGE = True
 
 # ==============================================================================
 # ======================== AUXILIARY FUNCS & COMMANDS ==========================
@@ -156,7 +160,8 @@ from distutils.cmd import Command
 class FlushCommand(Command):
     """Custom clean command to tidy up the project root."""
     CLEAN_FILES = "*/__pycache__ .eggs ./gmon.out ./build "\
-                  "./dist ./*.pyc ./*.tgz ./*.egg-info".split(" ")
+                  "./dist ./*.pyc ./*.tgz ./*.egg-info Pyfhel/*.pyd "\
+                  "Pyfhel/*.lib Pyfhel/*.dll Pyfhel/*.exp".split(" ")
     CLEAN_GITIGNORES = ["Pyfhel/backend/SEAL"]
     user_options = []
     def initialize_options(self):
@@ -600,6 +605,10 @@ extra_link_args     =  _pl(config_all.get('extra_link_args', []))
 libraries           =  _pl(config_all.get('libraries', []))
 library_dirs        =  _path(_pl(config_all.get('library_dirs', [])))
 
+# Add config for coverage tests
+if COVERAGE:
+    define_macros += [('CYTHON_TRACE', 1), ('CYTHON_TRACE_NOGIL', 1)]
+
 ext_modules = []
 for ext_name, ext_conf in extensions.items():
     ext_modules.append(Extension(
@@ -626,6 +635,7 @@ if CYTHONIZE:
         'c_string_encoding': 'ascii',
         'wraparound': False,
         'initializedcheck': False,
+        'linetrace': COVERAGE,
     }
     ext_modules=cythonize(
         ext_modules,
@@ -656,7 +666,7 @@ setup(
     long_description_content_type="text/markdown",
     download_url    = project_config['urls']['repository'], 
     classifiers     = project_config['classifiers'],
-    platforms       = project_config['platforms'],
+    platforms       = config['platforms']['platforms'],
     keywords        = ', '.join(project_config['description']),
     license         = project_config['license']['text'],
     # Options
@@ -664,6 +674,7 @@ setup(
     python_requires =project_config['requires-python'],
     zip_safe        =False,
     packages        =find_packages(),
+    package_data    ={'': ['*.pyx', '*.pxd', '*.h', '*.cpp']},
     ext_modules     =ext_modules,
     libraries       =cpplibraries,
     cmdclass        ={'flush': FlushCommand,
