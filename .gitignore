@@ -14,6 +14,10 @@
 
 # Pyfhel building
 Pyfhel/*.pyc
+Pyfhel/*.pyd
+Pyfhel/*.lib
+Pyfhel/*.dll
+Pyfhel/*.exp
 Pyfhel/*.cpp
 examples/playground
 **/build
@@ -22,6 +26,9 @@ examples/playground
 **/dist
 **/gmon.out
 **/venv
+.cov
+.coverage
+htmlcov
 
 # Makefiles
 **/Makefile

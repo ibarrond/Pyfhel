@@ -1,8 +1,0 @@
-[run]
-plugins = Cython.Coverage
-source = Pyfhel
-omit =
-    Pyfhel/Afhel
-    Pyfhel/backend
-    Pyfhel/test
-    *__init__.py
