@@ -61,15 +61,16 @@ class AfsealPoly;
 
 
 // Enum converters
-static std::map<seal::compr_mode_type, std::string> compr_mode_str {
-   {compr_mode_type::none, "none"},
-   {compr_mode_type::zlib, "zlib"},
-   {compr_mode_type::zstd, "zstd"},
-};
 static std::map<std::string, seal::compr_mode_type> compr_mode_map {
-   {"none", compr_mode_type::none},
-   {"zlib", compr_mode_type::zlib},
-   {"zstd", compr_mode_type::zstd},
+    {"none", compr_mode_type::none},
+#ifdef SEAL_USE_ZLIB
+    // Use ZLIB compression
+    {"zlib", compr_mode_type::zlib},
+#endif
+#ifdef SEAL_USE_ZSTD
+    // Use Zstandard compression
+    {"zstd", compr_mode_type::zstd},
+#endif
 };
 static std::map<seal::scheme_type, scheme_t> scheme_map {
    {seal::scheme_type::none, scheme_t::none},
