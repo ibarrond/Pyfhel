@@ -39,7 +39,7 @@ ckks_params = {
 }
 HE.contextGen(**ckks_params)  # Generate context for bfv scheme
 HE.keyGen()             # Key Generation: generates a pair of public/secret keys
-
+HE.rotateKeyGen()
 
 # %%
 # 2. Float Array Encoding & Encryption

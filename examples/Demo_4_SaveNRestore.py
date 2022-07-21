@@ -64,7 +64,7 @@ p_f = PyPtxt(pyfhel=HE_f, fileName=tmp_dir_name + "/p.ptxt", scheme='bfv')
 
 print("2b. Loading everything from files into a new environment.")
 # Some checks
-assert HE_f.decryptInt(HE_f.encryptInt(np.array([42])))[0]==42, "Incorrect encryption"
+assert HE_f.decryptInt(HE_f.encrypt(np.array([42])))[0]==42, "Incorrect encryption"
 assert HE_f.decryptInt(c_f)[0]==42, "Incorrect decryption/ciphertext"
 assert HE_f.decodeInt(p_f)[0]==-1, "Incorrect decoding"
 assert HE_f.decryptInt(c_f >> 1)[1]==42, "Incorrect Rotation"
@@ -112,7 +112,7 @@ p_b = PyPtxt(pyfhel=HE_b, bytestring=s_p)
 
 print("3b. Loading everything from bytestrings.")
 # Some checks
-assert HE_b.decryptInt(HE_b.encryptInt(np.array([42])))[0]==42, "Incorrect encryption"
+assert HE_b.decryptInt(HE_b.encryptInt(np.array([42], dtype=np.int64)))[0]==42, "Incorrect encryption"
 assert HE_b.decryptInt(c_b)[0]==42, "Incorrect decryption/ciphertext"
 assert HE_b.decodeInt(p_b)[0]==-1, "Incorrect decoding"
 assert HE_b.decryptInt(c_b >> 1)[1]==42, "Incorrect Rotation"
