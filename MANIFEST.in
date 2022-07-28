@@ -7,6 +7,7 @@ include Pyfhel/Afhel/*.h
 include Pyfhel/Afhel/*.pxd
 global-include Pyfhel/backend/SEAL/**
 global-exclude Pyfhel/backend/palisade/**
+global-include *.pyx *.pxd *.h
 
 include docs/static/*
 
