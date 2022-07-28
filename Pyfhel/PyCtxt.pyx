@@ -1,13 +1,10 @@
-# distutils: language = c++, define_macros=CYTHON_TRACE=1
-# cython: language_level=3, boundscheck=False, linetrace=True
 """PyCtxt. Ciphertext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
 # Import Pyfhel and PyPtxt for operations
 from .Pyfhel import Pyfhel
 from .PyPtxt import PyPtxt
-from .utils.Scheme_t import Scheme_t
-from .utils.Backend_t import Backend_t
+from .utils import Scheme_t, Backend_t, _to_valid_file_str
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
@@ -32,14 +29,14 @@ cdef class PyCtxt:
         self._mod_level = 0
         self._scheme = scheme_t.none
         if copy_ctxt: # If there is a PyCtxt to copy, override other args
-            self._ptr_ctxt = new AfsealCtxt(deref(<AfsealCtxt*>copy_ctxt._ptr_ctxt))
+            self._ptr_ctxt = make_shared[AfsealCtxt](deref(dyn_cast[AfsealCtxt,AfCtxt](copy_ctxt._ptr_ctxt)))
             self._mod_level = copy_ctxt._mod_level
             self._scheme = copy_ctxt._scheme
             if (copy_ctxt._pyfhel):
                 self._pyfhel = copy_ctxt._pyfhel
         
         else:
-            self._ptr_ctxt = new AfsealCtxt()
+            self._ptr_ctxt = make_shared[AfsealCtxt]()
             if pyfhel:
                 self._pyfhel = pyfhel
                 self._scheme = self._pyfhel.afseal.get_scheme()
@@ -55,9 +52,11 @@ cdef class PyCtxt:
                 self.from_bytes(bytestring)
             
     def __dealloc__(self):
-        if self._ptr_ctxt != NULL:
-            del self._ptr_ctxt
-    
+        ## No need to free the pointer anymore (advantages of shared_ptr!)
+        # if self._ptr_ctxt != NULL:
+        #    del self._ptr_ctxt
+        pass
+
     def __init__(self,
                   PyCtxt copy_ctxt=None,
                   Pyfhel pyfhel=None,
@@ -96,9 +95,7 @@ cdef class PyCtxt:
         return Scheme_t(self._scheme)
     @scheme.setter
     def scheme(self, newscheme):
-        new_scheme = to_Scheme_t(newscheme)
-        if not isinstance(newscheme, Scheme_t):
-            raise TypeError("<Pyfhel ERROR> scheme type of PyCtxt must be Scheme_t")        
+        new_scheme = to_Scheme_t(newscheme)     
         self._scheme = new_scheme.value
     @scheme.deleter
     def scheme(self):
@@ -127,28 +124,26 @@ cdef class PyCtxt:
         if not isinstance(new_pyfhel, Pyfhel):
             raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
         self._pyfhel = new_pyfhel 
+    @_pyfhel.deleter
+    def _pyfhel(self):
+        self._pyfhel = None 
      
     cpdef int size(self):
         """Current size of the ciphertext.
         
         Return:
             int: size of this ciphertext"""
-        return (<AfsealCtxt*>(self._ptr_ctxt)).size()
+        return <int>(deref(_dyn_c(self._ptr_ctxt))).size()
 
     @property    
     def capacity(self):
         """int: Maximum size the ciphertext can hold."""
-        return (<AfsealCtxt*>(self._ptr_ctxt)).size_capacity()
-
-    @property
-    def size(self):
-        """int: Actual size of the ciphertext."""
-        return (<AfsealCtxt*>(self._ptr_ctxt)).size()
+        return <int>(deref(_dyn_c(self._ptr_ctxt))).size_capacity()
 
     @property
     def scale(self):
         """double: multiplying factor to encode values in ckks."""
-        return (<AfsealCtxt*>(self._ptr_ctxt)).scale()
+        return (deref(_dyn_c(self._ptr_ctxt))).scale()
     @scale.setter
     def scale(self, new_scale):
         self.set_scale(new_scale)
@@ -156,7 +151,7 @@ cdef class PyCtxt:
     @property
     def scale_bits(self):
         """int: number of bits in scale to encode values in ckks"""
-        return <int>np.log2( (<AfsealCtxt*>(self._ptr_ctxt)).scale() )
+        return <int>np.log2( (deref(_dyn_c(self._ptr_ctxt))).scale() )
 
     @property
     def noiseBudget(self):
@@ -178,14 +173,14 @@ cdef class PyCtxt:
         Args:
             scale (double): new scale of the ciphertext.
         """
-        (<AfsealCtxt*>(self._ptr_ctxt)).set_scale(new_scale)
+        (deref(_dyn_c(self._ptr_ctxt))).set_scale(new_scale)
 
     cpdef void round_scale(self):
         """round_scale()
 
         Rounds the scale of the ciphertext to the nearest power of 2.
         """
-        self.set_scale( pow(2, <int>np.round(np.log2( (<AfsealCtxt*>(self._ptr_ctxt)).scale() ))) )
+        self.set_scale( pow(2, <int>np.round(np.log2( (deref(_dyn_c(self._ptr_ctxt))).scale() ))) )
 
     # =========================================================================
     # ================================== I/O ==================================
@@ -306,8 +301,7 @@ cdef class PyCtxt:
         
         Negates this ciphertext.
         """
-        self._pyfhel.negate(self, in_new_ctxt=True)
-        return self
+        return self._pyfhel.negate(self, in_new_ctxt=True)
         
     def __add__(self, other):
         """__add__(other)
@@ -480,31 +474,21 @@ cdef class PyCtxt:
         This operation can only be done with plaintexts. Division between two Ciphertexts is not possible.
 
         For bfv Integer Scheme, the inverse is calculated as:
-            inverse -> (divisor * inverse) mod p = 1
+            inverse -> (divisor * inverse) mod t = 1
 
         For ckks Fractional scheme, the inverse is calculated as 1/divisor.
 
         Args:
             divisor (int, float, PyPtxt): divisor for the operation.
         """
-        if isinstance(divisor, PyPtxt):
+        if not isinstance(divisor, (int, float, list, np.ndarray, PyPtxt)):
+            raise TypeError("<Pyfhel ERROR> divisor must be float, int, array|list "
+                            "or PyPtxt with bfv/ckks scheme (is %s instead)"
+                            %(type(divisor)))
+        if isinstance(divisor, PyPtxt):  # If ptxt, decode to get inverse
             divisor = divisor.decode()
-        if not isinstance(divisor, (int, float)):
-            raise TypeError("<Pyfhel ERROR> divisor must be float, int"
-                            "or PyPtxt with bfv/ckks scheme (is %s:%s instead)"
-                            %(str(divisor),type(divisor)))
         # Compute inverse. Int: https://stackoverflow.com/questions/4798654
-        if self.scheme == Scheme_t.bfv:
-            divisor = np.int64(divisor)
-            p = self._pyfhel.getp()
-            inverse = pow(divisor, p-2, p)
-            inversePtxt = self.encode_operand(inverse)
-        elif self.scheme == Scheme_t.ckks: # float. Standard inverse
-            inverse = 1/np.float64(divisor)
-            inversePtxt = self.encode_operand(inverse)
-        else:
-            raise TypeError("<Pyfhel ERROR> dividend scheme doesn't support"
-                            "division (%s)"%(self.scheme))
+        inversePtxt = self.get_multiplicative_inverse(divisor)
         self_, _ = self._pyfhel.align_mod_n_scale(self, inversePtxt,
                                           copy_this=True, copy_other=False)
         return self_._pyfhel.multiply_plain(self_, inversePtxt, in_new_ctxt=False)
@@ -516,31 +500,20 @@ cdef class PyCtxt:
         two Ciphertexts is not possible.
 
         For bfv Integer Scheme, the inverse is calculated as:
-            inverse -> (divisor * inverse) mod p = 1
+            inverse -> (divisor * inverse) mod t = 1
 
         For ckks Fractional scheme, the inverse is calculated as 1/divisor.
 
         Args:
             divisor (int, float, PyPtxt): divisor for the operation.
         """
-        if isinstance(divisor, PyPtxt):
+        if not isinstance(divisor, (int, float, list, np.ndarray, PyPtxt)):
+            raise TypeError("<Pyfhel ERROR> divisor must be float, int, array|list "
+                            "or PyPtxt with bfv/ckks scheme (is %s instead)"
+                            %(type(divisor)))
+        if isinstance(divisor, PyPtxt): # If ptxt, decode to get inverse
             divisor = divisor.decode()
-        if not isinstance(divisor, (int, float)):
-            raise TypeError("<Pyfhel ERROR> divisor must be float, int"
-                            "or PyPtxt with bfv/ckks scheme (is %s:%s instead)"
-                            %(str(divisor),type(divisor)))
-        # Compute inverse. Int: https://stackoverflow.com/questions/4798654
-        if self.scheme == Scheme_t.bfv:
-            divisor = np.int64(divisor)
-            p = self._pyfhel.getp()
-            inverse = pow(divisor, p-2, p)
-            inversePtxt = self.encode_operand(inverse)
-        elif self.scheme == Scheme_t.ckks: # float. Standard inverse
-            inverse = 1/np.float64(divisor)
-            inversePtxt = self.encode_operand(inverse)
-        else:
-            raise TypeError("<Pyfhel ERROR> dividend scheme doesn't support"
-                            "division (%s)"%(self.scheme))
+        inversePtxt = self.get_multiplicative_inverse(divisor)
         self_, _ = self._pyfhel.align_mod_n_scale(self, inversePtxt,
                                           copy_this=False, copy_other=False)
         return self_._pyfhel.multiply_plain(self_, inversePtxt, in_new_ctxt=False)
@@ -639,7 +612,7 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.PyCtxt.size`
         """
-        return (<AfsealCtxt*>(self._ptr_ctxt)).size()
+        return <int64_t>(deref(_dyn_c(self._ptr_ctxt))).size()
     
     def __repr__(self):
         """__repr__()
@@ -713,18 +686,96 @@ cdef class PyCtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.encode`
         """
-        if isinstance(other, (int, float, list, np.ndarray)):
+        if isinstance(other, (int, float, list, complex, np.ndarray)):
+            # nSlots=n in bfv, nSlots=n//2 in ckks
+            nslots = self._pyfhel.n // (1 + (self.scheme==Scheme_t.ckks))
             other = np.array(other)
-            if (other.ndim==0):     # nSlots = n in bfv, nSlots = n//2 in ckks
-                other = np.repeat(other, self._pyfhel.n // (1 + (self.scheme==Scheme_t.ckks)))
+            if (other.ndim==0):
+                other = np.repeat(other, nslots)
             if (other.ndim==1) and \
                 (np.issubdtype(other.dtype, np.number)):
                 if self.scheme == Scheme_t.bfv:
-                    return self._pyfhel.encodeInt(other.astype(np.int64))
+                    return self._pyfhel.encodeInt(other.astype(np.int64)[:nslots])
                 elif self.scheme == Scheme_t.ckks:
                     if np.issubdtype(other.dtype, np.complexfloating):
-                        return self._pyfhel.encodeComplex(other.astype(complex), ptxt=None)
+                        return self._pyfhel.encodeComplex(other.astype(complex)[:nslots])
                     else:
-                        return self._pyfhel.encodeFrac(other.astype(np.float64), ptxt=None)
+                        return self._pyfhel.encodeFrac(other.astype(np.float64)[:nslots])
         else:
             return other
+
+    def get_multiplicative_inverse(self, other):
+        """get_multiplicative_inverse(other)
+        
+        Returns the inverse of the given Value/s.
+        
+        Arguments:
+            other (int|float|np.array): Value/s to invert
+            
+        Return:
+            PyPtxt: Inverse of the given Value/s, encoded to operate with self.
+        """
+        other = np.array(other)
+        if other.ndim == 0:           # If scalar, replicate
+            other = other.reshape([1])
+        # Compute inverse. Int: https://stackoverflow.com/questions/4798654
+        if self.scheme == Scheme_t.bfv:
+            other = other.astype(np.int64)
+            t = self._pyfhel.t
+            inverse = np.array([pow(int(other[i]), t-2, t)for i in range(other.shape[0])])
+        elif self.scheme == Scheme_t.ckks: # float. Standard inverse
+            inverse = 1/other.astype(np.float64)
+        else:
+            raise TypeError("<Pyfhel ERROR> dividend scheme doesn't support"
+                            " inversion (%s)"%(self.scheme))
+        return self.encode_operand(inverse)
+
+def cumsum(PyCtxt[:] c_arr):
+    """cumsum(PyCtxt[:] c_arr)
+    
+    Returns the cumulative sum of the given ciphertext array.
+    
+    Arguments:
+        c_arr (PyCtxt[:] c_arr): Ciphertext array to sum
+        
+    Return:
+        PyCtxt[:] c_arr: Cumulative sum of the given ciphertext array
+    """
+    res = PyCtxt(copy_ctxt=c_arr[0])
+    for i in range(1, len(c_arr)):
+        res += c_arr[i]
+    return res
+
+
+# cdef class PyArrayCtxt:
+#     cdef vector[int] vec
+#     cdef Py_ssize_t shape[1]
+#     cdef Py_ssize_t strides[1]
+
+#     # constructor and destructor are fairly unimportant now since
+#     # vec will be destroyed automatically.
+
+#     cdef set_data(self, vector[int]& data):
+#        self.vec = move(data)
+#        # @ead suggests `self.vec.swap(data)` instead
+#        # to avoid having to wrap move
+
+#     # now implement the buffer protocol for the class
+#     # which makes it generally useful to anything that expects an array
+#     def __getbuffer__(self, Py_buffer *buffer, int flags):
+#         # relevant documentation http://cython.readthedocs.io/en/latest/src/userguide/buffer.html#a-matrix-class
+#         cdef Py_ssize_t itemsize = sizeof(self.vec[0])
+
+#         self.shape[0] = self.vec.size()
+#         self.strides[0] = sizeof(int)
+#         buffer.buf = <char *>&(self.vec[0])
+#         buffer.format = 'i'
+#         buffer.internal = NULL
+#         buffer.itemsize = itemsize
+#         buffer.len = self.v.size() * itemsize   # product(shape) * itemsize
+#         buffer.ndim = 1
+#         buffer.obj = self
+#         buffer.readonly = 0
+#         buffer.shape = self.shape
+#         buffer.strides = self.strides
+#         buffer.suboffsets = NULL

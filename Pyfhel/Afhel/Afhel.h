@@ -112,38 +112,38 @@ class Afhel {
   // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
   // NEGATE
   virtual void negate(AfCtxt &cipher1) = 0;
-  virtual void negate(std::vector<AfCtxt*> &cipherV) = 0;
+  virtual void negate_v(std::vector<AfCtxt*> &cipherV) = 0;
 
   // SQUARE
   virtual void square(AfCtxt &cipher1) = 0;
-  virtual void square(std::vector<AfCtxt*> &cipherV) = 0;
+  virtual void square_v(std::vector<AfCtxt*> &cipherV) = 0;
 
   // ADDITION
   virtual void add(AfCtxt &cipherInOut, AfCtxt &cipher2) = 0;
   virtual void add_plain(AfCtxt &cipherInOut, AfPtxt &plain2) = 0;
-  virtual void add(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2) = 0;
-  virtual void add(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
+  virtual void add_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2) = 0;
+  virtual void add_plain_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
 
   // SUBTRACTION
   virtual void sub(AfCtxt &cipherInOut, AfCtxt &cipher2) = 0;
   virtual void sub_plain(AfCtxt &cipherInOut, AfPtxt &plain2) = 0;
-  virtual void sub(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2) = 0;
-  virtual void sub(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
+  virtual void sub_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2) = 0;
+  virtual void sub_plain_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
 
 
   // MULTIPLICATION
   virtual void multiply(AfCtxt &cipherVInOut, AfCtxt &cipher2) = 0;
   virtual void multiply_plain(AfCtxt &cipherVInOut, AfPtxt &plain1) = 0;
-  virtual void multiply(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2) = 0;
-  virtual void multiply(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
+  virtual void multiply_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2) = 0;
+  virtual void multiply_plain_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
 
   // ROTATE
   virtual void rotate(AfCtxt &cipher1, int &k) = 0;
-  virtual void rotate(std::vector<AfCtxt*> &cipherV, int &k) = 0;
+  virtual void rotate_v(std::vector<AfCtxt*> &cipherV, int &k) = 0;
 
   // POWER
   virtual void exponentiate(AfCtxt &cipher1, uint64_t &expon) = 0;
-  virtual void exponentiate(std::vector<AfCtxt*> &cipherV, uint64_t &expon) = 0;
+  virtual void exponentiate_v(std::vector<AfCtxt*> &cipherV, uint64_t &expon) = 0;
 
   // CKKS -> Rescaling and mod switching
   virtual void rescale_to_next(AfCtxt &cipher1) = 0;

@@ -1,13 +1,9 @@
-# distutils: language = c++, define_macros=CYTHON_TRACE=1
-#cython: language_level=3, boundscheck=False, linetrace=True
-
 """PyPtxt. Plaintext of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
 # Used for all kinds of operations. Includes utility functions
-from Pyfhel.Pyfhel cimport *
-from .utils.Scheme_t import Scheme_t
-from .utils.Backend_t import Backend_t
+from .Pyfhel import Pyfhel
+from .utils import Scheme_t, Backend_t, _to_valid_file_str
 
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
@@ -94,14 +90,10 @@ cdef class PyPtxt:
             :func:`~Pyfhel.utils.to_Scheme_t`
         """
         return to_Scheme_t(self._scheme)
-    
     @scheme.setter
     def scheme(self, new_scheme):
-        new_scheme = to_Scheme_t(new_scheme)
-        if not isinstance(new_scheme, Scheme_t):
-            raise TypeError("<Pyfhel ERROR> Scheme type of PyPtxt must be Scheme_t")        
+        new_scheme = to_Scheme_t(new_scheme)    
         self._scheme = new_scheme.value
-        
     @scheme.deleter
     def scheme(self):
         self._scheme = scheme_t.none
@@ -253,15 +245,17 @@ cdef class PyPtxt:
     # =========================================================================
 
     def __int__(self):
+        """returns the integer in the first slot of the plaintext"""
         if (self._scheme != scheme_t.bfv):
             raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not bfv)")
-        return self._pyfhel.decodeInt(self)
+        return int(np.array(self._pyfhel.decodeInt(self))[0])
 
     def __float__(self):
+        """returns the float in the first slot of the plaintext"""
         if (self._scheme != scheme_t.ckks):
             raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not ckks)")
-        return self._pyfhel.decodeFrac(self)
-    
+        return float(np.array(self._pyfhel.decodeFrac(self))[0])
+
     def __repr__(self):
         if self.is_ntt_form():
             poly_s = "?"
@@ -290,7 +284,7 @@ cdef class PyPtxt:
         See Also:
             :func:`~Pyfhel.Pyfhel.encode`
         """
-        return self._pyfhel.encode(value, self)
+        return self._pyfhel.encode(val_vec=value, ptxt=self)
     
     def decode(self):
         """decode()

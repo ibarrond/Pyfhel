@@ -1,6 +1,3 @@
-#distutils: language = c++, define_macros=CYTHON_TRACE=1
-#cython: language_level=3, boundscheck=False, wraparound=False, linetrace=True
-
 #   --------------------------------------------------------------------
 #   Pyfhel.pyx
 #   Author: Alberto Ibarrondo
@@ -44,8 +41,9 @@ FLOAT_T = (float, np.float16, np.float32, np.float64)
 INT_T =   (int, np.int16, np.int32, np.int64, np.int_, np.intc)
 
 # Import utility functions
-include "utils/utils.pxi"
-include "utils/type_converters.pxi"
+from Pyfhel.utils import _to_valid_file_str
+include "utils/cy_utils.pxi"
+include "utils/cy_type_converters.pxi"
 
 # ------------------------- PYTHON IMPLEMENTATION -----------------------------
 cdef class Pyfhel:
@@ -102,9 +100,6 @@ cdef class Pyfhel:
     def __dealloc__(self):
         if self.afseal != NULL:
             del self.afseal
-    
-    def __iter__(self):
-        return self
 
     def __repr__(self):
         """A printable string with all the information about the Pyfhel object
@@ -184,7 +179,7 @@ cdef class Pyfhel:
 
     @property
     def total_coeff_modulus_bit_count(self):
-        """Scheme of the current context."""
+        """Total number of bits in the coefficient modulus (sum(bits(q_i)))."""
         return (<Afseal*>self.afseal).total_coeff_modulus_bit_count()
     # =========================================================================
     # ============================ CRYPTOGRAPHY ===============================
@@ -703,7 +698,7 @@ cdef class Pyfhel:
         ptxt._pyfhel = self
         return ptxt 
 
-    cpdef np.ndarray[object, ndim=1] encodeAInt(self, int[:,::1] arr):
+    cpdef np.ndarray[object, ndim=1] encodeAInt(self, int64_t[:,::1] arr):
         raise NotImplementedError("<Pyfhel ERROR> encodeAFrac not implemented")
 
     cpdef np.ndarray[object, ndim=1] encodeAFrac(self, double[:,::1] arr, double scale=0, int scale_bits=0):
@@ -736,7 +731,7 @@ cdef class Pyfhel:
             val_vec = np.repeat(val_vec, self.n // (1 + (self.scheme==Scheme_t.ckks)))
         if (val_vec.ndim > 2) or \
             (not np.issubdtype(val_vec.dtype, np.number)):
-            raise TypeError('<Pyfhel ERROR> Plaintext numpy array is not'
+            raise TypeError('<Pyfhel ERROR> Plaintext numpy array is not '
                             '1D vector of numeric values, cannot encrypt.')
         elif val_vec.ndim == 1:
             if self.scheme == Scheme_t.bfv:
@@ -745,7 +740,7 @@ cdef class Pyfhel:
                 scale = _get_valid_scale(scale_bits, scale, self._scale)
                 if np.issubdtype(val_vec.dtype, np.complexfloating):
                     return self.encodeComplex(val_vec.astype(complex), ptxt, scale)
-                else:
+                else: # all other numeric types
                     return self.encodeFrac(val_vec.astype(np.float64), ptxt, scale)
         elif val_vec.ndim == 2:
             if np.issubdtype(val_vec.dtype, np.integer):
@@ -754,8 +749,6 @@ cdef class Pyfhel:
                 return self.encryptAFrac(val_vec.astype(np.float64), scale)
             elif np.issubdtype(val_vec.dtype, np.complexfloating):
                 return self.encryptAComplex(val_vec.astype(complex), scale)
-        raise TypeError('<Pyfhel ERROR> Value/Vector type ['+str(type(val_vec))+
-                        '] not supported for scheme')
 
     # ................................ DECODE .................................
     cpdef np.ndarray[int64_t, ndim=1] decodeInt(self, PyPtxt ptxt):
@@ -798,7 +791,7 @@ cdef class Pyfhel:
             raise RuntimeError('<Pyfhel ERROR> PyPtxt scheme must be ckks')
         cdef vector[double] output_vector
         self.afseal.decode_f(deref(ptxt._ptr_ptxt), output_vector)
-        return np.copy(<double [:output_vector.size()]>output_vector.data())
+        return vec_to_array_f(output_vector)
     
 
     cpdef np.ndarray[complex, ndim=1] decodeComplex(self, PyPtxt ptxt):
@@ -1231,7 +1224,7 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
+        cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
         _read_cy_attributes(self, istr)
         return self.afseal.load_context(istr)
@@ -1259,7 +1252,7 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
+        cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
         return self.afseal.load_public_key(istr)
 
@@ -1286,7 +1279,7 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
+        cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
         return self.afseal.load_secret_key(istr)
     
@@ -1313,7 +1306,7 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
+        cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
         return self.afseal.load_relin_keys(istr)
     
@@ -1340,7 +1333,7 @@ cdef class Pyfhel:
         Return:
             bool: Result, True if OK, False otherwise.
         """
-        cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
+        cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
         return self.afseal.load_rotate_keys(istr)
     
@@ -1537,8 +1530,8 @@ cdef class Pyfhel:
         return (<Afseal*>self.afseal).batchEnabled()
     
 
-    cpdef int get_nSlots(self):
-        """Maximum number of slots fitting in a ciphertext in BATCH mode.
+    cpdef size_t get_nSlots(self):
+        """Maximum number of slots fitting in a ciphertext.
         
         Generally it matches with `m`.
 

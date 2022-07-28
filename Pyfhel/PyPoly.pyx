@@ -1,6 +1,3 @@
-# distutils: language = c++
-#cython: language_level=3, boundscheck=False
-
 """PyPoly. Internal Polynomial of Pyfhel, Python For Homomorphic Encryption Libraries.
 """
 # -------------------------------- IMPORTS ------------------------------------
@@ -34,15 +31,15 @@ cdef class PyPoly:
             assert ref is not None and ref._pyfhel is not None and ref._pyfhel.afseal is not NULL,\
                 "Missing reference PyCtxt `ref` with initialized _pyfhel member"
             if index is not None:   # Construct from selected Poly in PyCtxt `ref`
-                self._afpoly = new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealCtxt*>ref._ptr_ctxt), <size_t>index)  
+                self._afpoly = new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(_dyn_c(ref._ptr_ctxt)), <size_t>index)  
                 self._pyfhel = ref._pyfhel
             elif ptxt is not None:  # Construct from Poly in PyPtxt `ptxt`
                 self._afpoly =\
-                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealPtxt*>ptxt._ptr_ptxt), <AfsealCtxt>deref(<AfsealCtxt*>ref._ptr_ctxt))  
+                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealPtxt*>ptxt._ptr_ptxt), deref(_dyn_c(ref._ptr_ctxt)))  
                 self._pyfhel = ptxt._pyfhel
             else:                   # Base constructor
                 self._afpoly =\
-                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealCtxt*>ref._ptr_ctxt))  
+                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(_dyn_c(ref._ptr_ctxt)))  
                 self._pyfhel = ref._pyfhel
                 
     def __init__(
