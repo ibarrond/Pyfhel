@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 from Pyfhel import Pyfhel, PyCtxt
+from Pyfhel.PyCtxt import cumsum
 from Pyfhel.utils import Scheme_t
 
 ################################################################################
@@ -204,3 +205,7 @@ class TestPyCtxt:
             res = HE.decryptComplex(c)
             assert np.round(np.real(res[0]))==2
             assert np.round(np.imag(res[1]))==1
+            
+    def test_PyCtxt_cumsum(self, HE):
+        cs = cumsum(np.array([HE.encrypt(1), HE.encrypt(2), HE.encrypt(3)]))
+        assert np.round(HE.decrypt(cs)[0])==6

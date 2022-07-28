@@ -132,6 +132,8 @@ def scan_ftypes(folder: Union[str, Path],   ftypes: List[str],
 
 def shutil_copy_same_ok(src_list: List[Union[str, Path]], dst: Union[str, Path]):
     """Copy file, avoid error if it is the same file"""
+    if not Path(dst).exists() or not Path(dst).is_dir():
+        Path(dst).mkdir(parents=True)
     for src in src_list:
         try:
             shutil.copy(src, dst)
@@ -159,9 +161,9 @@ def run_command(command, **kwargs):
 from distutils.cmd import Command
 class FlushCommand(Command):
     """Custom clean command to tidy up the project root."""
-    CLEAN_FILES = "*/__pycache__ .eggs ./gmon.out ./build "\
+    CLEAN_FILES = "*/__pycache__ .eggs ./gmon.out ./build ./.pytest_cache "\
                   "./dist ./*.pyc ./*.tgz ./*.egg-info Pyfhel/*.pyd "\
-                  "Pyfhel/*.lib Pyfhel/*.dll Pyfhel/*.exp".split(" ")
+                  "Pyfhel/*.lib Pyfhel/*.dll Pyfhel/*.exp .coverage".split(" ")
     CLEAN_GITIGNORES = ["Pyfhel/backend/SEAL"]
     user_options = []
     def initialize_options(self):
@@ -273,7 +275,8 @@ from distutils import log
 class SuperBuildClib(build_clib):
     def finalize_options(self):
         build_clib.finalize_options(self)
-        self.final_lib_folder = get_final_lib_folder()
+        self.final_lib_folder = os.path.join(
+            self.build_temp.replace("temp.", "lib."), project_name)
 
     def build_libraries(self, libraries):
         """Overriding setuptools/distutils to include cmake libs and shared libs"""
@@ -517,15 +520,6 @@ def get_lib_suffix(lib_type: str) -> str:
 def get_lib_prefix() ->str:
     return 'lib' if platform_system!='Windows' else ''
 
-def get_final_lib_folder()-> str:
-    """Returns the name of the default distutils build directory"""
-    f = "{dirname}.{platform}-{version[0]}.{version[1]}"
-    dir_name = f.format(
-        dirname='lib',
-        platform=sysconfig.get_platform(),
-        version=sys.version_info)
-    return str((Path('build') / dir_name / project_name).absolute())
-
 def cmake_varify_lib_name(filename: str) -> str:
     """Turns a filename into a valid CMake variable name"""
     # Create a composed regular expression from a dictionary keys
@@ -593,6 +587,18 @@ class SuperBuildExt(build_ext):
             self.compiler.libraries = list(libs ^ cmake_lib_names | cmake_built_lib_names)
         build_ext.build_extensions(self)
 
+    def copy_extensions_to_source(self):
+        ## modified to also copy built libs to package dir
+        # Copy extensions (default behavior)
+        build_ext.build_extensions(self)
+        # Copy built libraries
+        global built_libs
+        package = '.'.join(self.get_ext_fullname(self.extensions[0].name).split('.')[:-1])
+        package_dir = self.get_finalized_command('build_py').get_package_dir(package)
+        for lib in self.libraries:
+            shutil_copy_same_ok(built_libs[lib]['built_lib_files'], package_dir)
+
+
 # ----------------------------- EXTENSION CONFIG -------------------------------
 # Generic compile & link arguments for extensions. Can be modified.
 extensions          = config.pop('extensions', {})
@@ -613,7 +619,7 @@ ext_modules = []
 for ext_name, ext_conf in extensions.items():
     ext_modules.append(Extension(
         name            = ext_conf.pop('fullname', f"{project_name}.{ext_name}"),
-        sources         = _path(_pl(ext_conf.pop('sources', []))),
+        sources         =      (_pl(ext_conf.pop('sources', []))),
         include_dirs    = _path(_pl(ext_conf.pop('include_dirs', [])))      + include_dirs,
         define_macros   = _tupl(_pl(ext_conf.pop('include_dirs', [])))      + define_macros,
         language        = "c++",
@@ -674,7 +680,7 @@ setup(
     python_requires =project_config['requires-python'],
     zip_safe        =False,
     packages        =find_packages(),
-    package_data    ={'': ['*.pyx', '*.pxd', '*.h', '*.cpp']},
+    include_package_data=False,
     ext_modules     =ext_modules,
     libraries       =cpplibraries,
     cmdclass        ={'flush': FlushCommand,

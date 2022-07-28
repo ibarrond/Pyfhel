@@ -9,7 +9,7 @@
 # Pyfhel's core metadata
 [project]
 name = "Pyfhel"
-version = "3.1.4"
+version = "3.2.0"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -43,7 +43,8 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-  "pytest >= 6.0.0",
+  "pytest >= 6",
+  "coverage >= 6.4"
 ]
 
 [project.urls]
@@ -75,9 +76,12 @@ omit =[
     "setup.py",
     "Pyfhel/Afhel",
     "Pyfhel/backend",
-    "Pyfhel/test*",
+    "Pyfhel/test/*",
     "examples/*",
     "*__init__*",
+    "*.pxi",
+    "Pyfhel/utils/*",
+    "Pyfhel/PyPoly.pyx",
 ]
 
 [platforms]

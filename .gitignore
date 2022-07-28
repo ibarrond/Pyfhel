@@ -28,6 +28,7 @@ examples/playground
 **/venv
 .cov
 .coverage
+.pytest_cache
 htmlcov
 
 # Makefiles
