@@ -26,10 +26,13 @@ examples/playground
 **/dist
 **/gmon.out
 **/venv
+
+# Coverage
 .cov
 .coverage
 .pytest_cache
 htmlcov
+coverage.xml
 
 # Makefiles
 **/Makefile
