@@ -36,7 +36,7 @@ jobs:
         python -m pip install -v .[test]
     - name: Test with pytest
       run: |
-        python -m pip install pytest-cov
+        python -m pip install cython==3.0.0a11 pytest-cov
         pytest --cov .
     - name: Codecov
       uses: codecov/codecov-action@v3.1.0
