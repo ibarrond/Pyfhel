@@ -1043,7 +1043,7 @@ void AfsealPoly::set_coeff(Afhel &afhel, std::complex<double> &val, size_t i)
 void AfsealPoly::add_inplace(const AfPoly &other)
 {
 #pragma omp parallel for
-  for (int j = 0; j < coeff_modulus.size(); j++)
+  for (int j = 0; j < (int)coeff_modulus.size(); j++)
   {
     util::add_poly_coeffmod(&eval_repr[j * coeff_count],
                             &dynamic_cast<const AfsealPoly &>(other).eval_repr[j * coeff_count],
@@ -1058,7 +1058,7 @@ void AfsealPoly::add_inplace(const AfPoly &other)
 void AfsealPoly::subtract_inplace(const AfPoly &other)
 {
 #pragma omp parallel for
-  for (int j = 0; j < coeff_modulus.size(); j++)
+  for (int j = 0; j < (int)coeff_modulus.size(); j++)
   {
     util::sub_poly_coeffmod(&eval_repr[j * coeff_count],
                             &dynamic_cast<const AfsealPoly &>(other).eval_repr[j * coeff_count],
@@ -1074,7 +1074,7 @@ void AfsealPoly::multiply_inplace(const AfPoly &other)
 {
   const AfsealPoly *o_p = dynamic_cast<const AfsealPoly *>(&other);
 #pragma omp parallel for
-  for (int j = 0; j < coeff_modulus.size(); j++)
+  for (int j = 0; j < (int)coeff_modulus.size(); j++)
   {
     util::dyadic_product_coeffmod(&eval_repr[j * coeff_count],
                                   &(*o_p).eval_repr[j * coeff_count],
@@ -1113,7 +1113,7 @@ bool AfsealPoly::invert_inplace()
       }
     }
   }
-  for (int j = 0; j < coeff_modulus.size(); j++)
+  for (int j = 0; j < (int)coeff_modulus.size(); j++)
   {
     // invalidate the coeff_repr
     coeff_repr_valid = false;
