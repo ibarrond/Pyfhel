@@ -9,10 +9,6 @@ on:
   pull_request:
     branches: [ "master" ]
 
-defaults:
- run:
-  working-directory: $GITHUB_WORKSPACE/Pyfhel
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,7 +31,7 @@ jobs:
         submodules: recursive
     - name: Install package in test mode
       run: |
-        cd $GITHUB_WORKSPACE/Pyfhel
+        cd ${GITHUB_WORKSPACE}/Pyfhel
         pwd
         touch .cov
         python -m pip install -v .[test]
