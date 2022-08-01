@@ -44,7 +44,8 @@ dependencies = [
 [project.optional-dependencies]
 test = [
   "pytest >= 6",
-  "coverage >= 6.4"
+  "coverage >= 6.4",
+  "pytest-cov >= 3.0",
 ]
 
 [project.urls]
