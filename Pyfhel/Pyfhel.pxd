@@ -9,6 +9,7 @@ cimport numpy as np
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.cast cimport reinterpret_cast
+from libcpp.memory cimport shared_ptr, dynamic_pointer_cast
 from libcpp cimport bool
 from numpy cimport int64_t, uint64_t
 
@@ -74,7 +75,7 @@ cdef class Pyfhel:
     cpdef PyPtxt encodeComplex(self, complex[::1] arr, PyPtxt ptxt=*,
                                 double scale=*, int scale_bits=*) 
     # vectorized
-    cpdef np.ndarray[object, ndim=1] encodeAInt(self, int[:,::1] arr) 
+    cpdef np.ndarray[object, ndim=1] encodeAInt(self, int64_t[:,::1] arr) 
     cpdef np.ndarray[object, ndim=1] encodeAFrac(self, double[:,::1] arr, 
                                     double scale=*, int scale_bits=*) 
     cpdef np.ndarray[object, ndim=1] encodeAComplex(self, complex[:,::1] arr,
@@ -145,7 +146,7 @@ cdef class Pyfhel:
 
     # GETTERS
     cpdef bool batchEnabled(self) 
-    cpdef int get_nSlots(self) 
+    cpdef size_t get_nSlots(self) 
     cpdef uint64_t get_plain_modulus(self) 
     cpdef size_t get_poly_modulus_degree(self) 
     cpdef scheme_t get_scheme(self) 
@@ -174,6 +175,6 @@ cdef class Pyfhel:
 # --------------------------------- UTILS --------------------------------------
 cpdef to_Scheme_t(object scheme)
 cpdef to_Backend_t(object backend)
-cpdef str _to_valid_file_str(fileName, bool check=*)
 cpdef np.ndarray[dtype=np.int64_t, ndim=1] vec_to_array_i(vector[int64_t] vec)
 cpdef np.ndarray[dtype=double, ndim=1] vec_to_array_f(vector[double] vec)
+cdef shared_ptr[AfsealCtxt] _dyn_c(shared_ptr[AfCtxt] c)
