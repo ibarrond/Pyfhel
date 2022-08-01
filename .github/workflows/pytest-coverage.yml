@@ -31,9 +31,8 @@ jobs:
         submodules: recursive
     - name: Install package in test mode
       run: |
-        cd ${GITHUB_WORKSPACE}/Pyfhel
-        pwd
         touch .cov
+        ls -a
         python -m pip install -v .[test]
     - name: Test with pytest
       run: |
