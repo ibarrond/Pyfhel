@@ -484,7 +484,7 @@ void Afseal::rescale_to_next(AfCtxt &ctxt)
 }
 void Afseal::rescale_to_next_v(vector<AfCtxt *> &ctxtV)
 {
-  auto &ev = this->get_evaluator();
+  auto ev = this->get_evaluator();
   if (this->get_scheme() == scheme_t::ckks)
   {
     vectorize(ctxtV,
@@ -503,7 +503,7 @@ void Afseal::mod_switch_to_next(AfCtxt &ctxt)
 }
 void Afseal::mod_switch_to_next_v(vector<AfCtxt *> &ctxtV)
 {
-  auto &ev = this->get_evaluator();
+  auto ev = this->get_evaluator();
   vectorize(ctxtV,
             [ev](AfCtxt c)
             { ev->mod_switch_to_next_inplace(_dyn_c(c)); });
@@ -515,7 +515,7 @@ void Afseal::mod_switch_to_next_plain(AfPtxt &ptxt)
 }
 void Afseal::mod_switch_to_next_plain_v(vector<AfPtxt *> &plainV)
 {
-  auto &ev = this->get_evaluator();
+  auto ev = this->get_evaluator();
   vectorize(plainV,
             [ev](AfPtxt p)
             { ev->mod_switch_to_next_inplace(_dyn_p(p)); });
