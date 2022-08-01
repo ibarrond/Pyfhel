@@ -32,7 +32,7 @@ jobs:
     - name: Install package in test mode
       run: |
         touch .cov
-        ls -a
+        ls
         python -m pip install -v .[test]
     - name: Test with pytest
       run: |
