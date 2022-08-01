@@ -9,9 +9,12 @@ on:
   pull_request:
     branches: [ "master" ]
 
+defaults:
+ run:
+  working-directory: $GITHUB_WORKSPACE/Pyfhel
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -32,11 +35,12 @@ jobs:
         submodules: recursive
     - name: Install package in test mode
       run: |
-        cd Pyfhel
+        cd $GITHUB_WORKSPACE/Pyfhel
+        pwd
+        touch .cov
         python -m pip install -v .[test]
     - name: Test with pytest
       run: |
-        touch .cov
         pytest --cov .
     - name: Codecov
       uses: codecov/codecov-action@v3.1.0
