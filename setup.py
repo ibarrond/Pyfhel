@@ -78,6 +78,7 @@ except ImportError:
 # Config to run coverage tests, if there is a .cov file in the base dir.
 COVERAGE = False
 if '.cov' in os.listdir():
+    print("  [COVERAGE=True] `.cov` file detected. Building with coverage support.")
     COVERAGE = True
 
 # ==============================================================================
