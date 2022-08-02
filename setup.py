@@ -163,7 +163,7 @@ from distutils.cmd import Command
 class FlushCommand(Command):
     """Custom clean command to tidy up the project root."""
     CLEAN_FILES = "*/__pycache__ .eggs ./gmon.out ./build ./.pytest_cache "\
-                  "./dist ./*.pyc ./*.tgz ./*.egg-info Pyfhel/*.pyd "\
+                  "./dist ./*.pyc ./*.tgz ./*.egg-info Pyfhel/*.pyd coverage.xml ./htmlcov **/__pycache__ "\
                   "Pyfhel/*.lib Pyfhel/*.dll Pyfhel/*.exp .coverage".split(" ")
     CLEAN_GITIGNORES = ["Pyfhel/backend/SEAL"]
     user_options = []
