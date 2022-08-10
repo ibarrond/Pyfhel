@@ -23,17 +23,21 @@ enum class scheme_t : std::uint8_t{
   // Brakerski/Fan-Vercauteren scheme
   bfv = 0x1,
   // Cheon-Kim-Kim-Song scheme
-  ckks = 0x2
+  ckks = 0x2,
+  // Brakerski-Gentry-Vaikunthanathan scheme
+  bgv = 0x3
 };
 
 static std::map<scheme_t, std::string> scheme_t_str {
    {scheme_t::none, "none"},
    {scheme_t::bfv,  "bfv"},
+   {scheme_t::bgv,  "bgv"},
    {scheme_t::ckks, "ckks"},
 };
 static std::map<std::string, scheme_t> scheme_t_map {
    {"none", scheme_t::none},
    {"bfv",  scheme_t::bfv},
+   {"bgv",  scheme_t::bgv},
    {"ckks", scheme_t::ckks},
 };
 
@@ -95,6 +99,8 @@ class Afhel {
   // ENCODE
   // bfv
   virtual void encode_i(std::vector<int64_t> &values, AfPtxt &plainOut) = 0;
+  // bgv
+  virtual void encode_g(std::vector<int64_t> &values, AfPtxt &plainOut) = 0;
   // ckks
   virtual void encode_f(std::vector<double> &values, double scale, AfPtxt &plainVOut) = 0;
   virtual void encode_c(std::vector<std::complex<double>> &values, double scale, AfPtxt &plainVOut) = 0;
@@ -102,6 +108,8 @@ class Afhel {
   // DECODE
   // bfv
   virtual void decode_i(AfPtxt &plain1, std::vector<int64_t> &valueVOut) = 0;
+  // bgv
+  virtual void decode_g(AfPtxt &plain1, std::vector<int64_t> &valueVOut) = 0;
   // ckks
   virtual void decode_f(AfPtxt &plain1, std::vector<double> &valueVOut) = 0;
   virtual void decode_c(AfPtxt &plain1, std::vector<std::complex<double>> &valueVOut) = 0;

@@ -1,0 +1,6 @@
+setuptools<=60.9
+wheel
+cython>=3.0.0a9
+numpy>=1.20
+cmake>=3.15
+toml>=0.10

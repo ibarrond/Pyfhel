@@ -74,6 +74,7 @@ static std::map<std::string, seal::compr_mode_type> compr_mode_map {
 static std::map<seal::scheme_type, scheme_t> scheme_map {
    {seal::scheme_type::none, scheme_t::none},
    {seal::scheme_type::bfv,  scheme_t::bfv},
+   {seal::scheme_type::bgv,  scheme_t::bgv},
    {seal::scheme_type::ckks, scheme_t::ckks},
 };
 
@@ -223,6 +224,7 @@ class Afseal: public Afhel {
 
   std::shared_ptr<seal::SEALContext> context = NULL;     /**< Context. Used for init*/
   std::shared_ptr<seal::BatchEncoder> bfvEncoder = NULL; /**< Rotation in Batching. */
+  std::shared_ptr<seal::BatchEncoder> bgvEncoder = NULL; /**< Rotation in Batching. */
   std::shared_ptr<seal::CKKSEncoder> ckksEncoder = NULL; /**< Rotation in Batching. */
   
   std::shared_ptr<seal::KeyGenerator> keyGenObj = NULL;  /**< Key Generator Object.*/
@@ -275,6 +277,8 @@ class Afseal: public Afhel {
   // ENCODE
   // bfv
   void encode_i(std::vector<int64_t> &values, AfPtxt &plainOut);
+  // bgv
+  void encode_g(std::vector<int64_t> &values, AfPtxt &plainOut);
   // ckks
   void encode_f(std::vector<double> &values, double scale, AfPtxt &plainVOut);
   void encode_c(std::vector<std::complex<double>> &values, double scale, AfPtxt &plainVOut);
@@ -282,6 +286,8 @@ class Afseal: public Afhel {
   // DECODE
   // bfv
   void decode_i(AfPtxt &plain1, vector<int64_t> &valueVOut);
+  // bgv
+  void decode_g(AfPtxt &plain1, vector<int64_t> &valueVOut);
   // ckks
   void decode_f(AfPtxt &plain1, std::vector<double> &valueVOut);
   void decode_c(AfPtxt &plain1, std::vector<std::complex<double>> &valueVOut);
