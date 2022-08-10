@@ -9,11 +9,14 @@ from libcpp.string cimport string
 from libcpp.map cimport map as cpp_map
 from libcpp.complex cimport complex as c_complex
 from libcpp cimport bool
-from numpy cimport int64_t, uint64_t, uint8_t
+#from numpy cimport int64_t, uint64_t, uint8_t
         
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.utils.iostream cimport istream, ostream, ifstream, ofstream       
 
+ctypedef long long int64_t
+ctypedef unsigned long long uint64_t
+ctypedef unsigned char uint8_t
 ctypedef c_complex[double] cy_complex
 
 #===============================================================================

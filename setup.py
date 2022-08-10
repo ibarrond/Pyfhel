@@ -26,16 +26,22 @@ from pkg_resources import parse_version as v_parse
 # Create Extension modules written in C for Python
 from setuptools import setup, Extension, find_packages
 
+
+os.environ["CC"] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/gcc-12"
+os.environ["CXX"] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/g++-12"
+os.environ["LDSHARED"] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/g++-12 -Wl,-x -dynamiclib -undefined dynamic_lookup"
+#os.environ["CC"] = "/usr/local/Cellar/llvm/14.0.6/bin/clang"
+#os.environ["CXX"] = "/usr/local/Cellar/llvm/14.0.6/bin/clang++"
+
 # # Check that Python version is 3.7+
 # v_maj, v_min = sys.version_info[:2]
 # assert (v_maj, v_min) >= (3,7),\
 #     "Pyfhel requires Python 3.7+ (your version is {}.{}).".format(v_maj, v_min)
 
+
 # Get platform system
 platform_system = platform.system()
-if platform_system == 'Darwin': # MacOS
-    raise SystemError("Pyfhel is not supported in MacOS (see issue #59)."
-                      "Please use a Linux VM or Docker.")
+
 
 # Read config file
 config = toml.load("pyproject.toml")
@@ -282,7 +288,7 @@ class SuperBuildClib(build_clib):
                               
         # CMAKE LIBS BUILD
         for (lib_name, build_info) in self.cmake_libs:
-            self.build_cmake_lib(lib_name, build_info)
+        	self.build_cmake_lib(lib_name, build_info)
 
         # STANDARD LIBS BUILD
         for (lib_name, build_info) in self.standard_libs:
@@ -294,7 +300,7 @@ class SuperBuildClib(build_clib):
             if build_info.get('lib_type')   == 'static':
                 self.build_static_lib(lib_name, build_info)
             elif build_info.get('lib_type') == 'shared':
-                self.build_shared_lib(lib_name, build_info)
+            	self.build_shared_lib(lib_name, build_info)
             else:
                 raise ValueError(f"Wrong {lib_name} library type {build_info.get('lib_type')}")
 
@@ -344,6 +350,7 @@ class SuperBuildClib(build_clib):
         sources = build_info.get('sources')
         expected_objects = \
             self.compiler.object_filenames(sources,output_dir=self.build_temp,)
+        
         self.compiler.compile(
             sources             = sources,
             output_dir          = self.build_temp,
@@ -363,6 +370,7 @@ class SuperBuildClib(build_clib):
             extra_postargs      = build_info['extra_link_args'],
             debug               = self.debug,
         )
+
         # Post build -> register by adding to built_libs
         lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('static')}"
         build_info.update({
@@ -371,6 +379,15 @@ class SuperBuildClib(build_clib):
         built_libs.update({lib_name: build_info})
 
     def build_shared_lib(self, lib_name, build_info):
+        #vars = sysconfig.get_config_vars()
+        #sysconfig.get_config_vars()['BLDSHARED'] = vars['BLDSHARED'].replace('-bundle', '-dynamiclib')
+        #sysconfig.get_config_vars()['LDCXXSHARED'] = vars['LDCXXSHARED'].replace('-bundle', '-dynamiclib')
+        #sysconfig.get_config_vars()['LDSHARED'] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/g++-12 -Wl,-x -dynamiclib -undefined dynamic_lookup"
+        #sysconfig.get_config_vars()['CCSHARED'] = "-dynamiclib"
+        #sysconfig.get_config_vars()['SO'] = ".dylib"
+        #os.environ["LDSHARED"] = sysconfig.get_config_vars()['LDSHARED']
+        #self.compiler.executables['linker_so'] = ['/usr/local/Cellar/gcc@12/12.1.0_1/bin/g++-12']
+        
         """Based on https://github.com/realead/commonso/blob/master/setup.py"""
         global built_libs
         log.info("building '%s' shared library", lib_name)
@@ -378,8 +395,10 @@ class SuperBuildClib(build_clib):
         if platform_system=='Windows':
             self.build_mocked_cmake_lib(lib_name, build_info)
             return
+        
         # First, compile the source code to object files in the temp directory. 
         sources = build_info.get('sources')
+        
         objects = self.compiler.compile(
             sources             = sources,
             output_dir          = self.build_temp,
@@ -388,11 +407,11 @@ class SuperBuildClib(build_clib):
             extra_postargs      = build_info['extra_compile_args'],
             debug               = self.debug
             )
-
+            
         # Now link shared object
         language = self.compiler.detect_language(sources)
         lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('shared')}"
-
+        
         self.compiler.link_shared_object(
             objects,                     
             lib_file,
@@ -403,6 +422,7 @@ class SuperBuildClib(build_clib):
             extra_postargs      = build_info['extra_link_args'],
             build_temp          = self.build_temp,
         )
+        
         # Post build
         build_info.update({
             'built_lib_files': [str(Path(self.build_clib).absolute() / lib_file)]
@@ -447,6 +467,7 @@ class SuperBuildClib(build_clib):
             if macros:
                 f.write(f"add_compile_options({' '.join(macros)})\n")
             extra_l_args = ' '.join(build_info['extra_link_args'])
+
             if extra_l_args:
                 f.write(f"add_link_options({extra_l_args})\n")
             lib_type = build_info['lib_type'].upper()
@@ -506,6 +527,8 @@ def get_lib_suffix(lib_type: str) -> str:
     else:  # shared
         if platform_system == 'Windows':
             return '.dll'
+        elif platform_system == 'Darwin':
+        	return '.dylib'
         else:
             return '.so'
 
@@ -597,6 +620,7 @@ include_dirs        =  _path(_pl(config_all.get('include_dirs', [])))
 define_macros       =  _tupl(_pl(config_all.get('define_macros', [])))
 extra_compile_args  =  _pl(config_all.get('extra_compile_args', []))
 extra_link_args     =  _pl(config_all.get('extra_link_args', []))
+
 libraries           =  _pl(config_all.get('libraries', []))
 library_dirs        =  _path(_pl(config_all.get('library_dirs', [])))
 
@@ -613,7 +637,6 @@ for ext_name, ext_conf in extensions.items():
         libraries       =       _pl(ext_conf.pop('libraries', []))          + libraries,
         library_dirs    = _path(_pl(ext_conf.pop('library_dirs', [])))      + library_dirs,
     ))
-
 
 # Try cythonizing if cython is available
 if CYTHONIZE:

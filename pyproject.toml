@@ -110,9 +110,15 @@ build-backend = "setuptools.build_meta"
   define_macros = []
   extra_compile_args = [
     {Windows = ["/O2","/std:c++17"]},
+    #{Darwin = ["-std=c++17","-O3","-fopenmp","-DLLVM_BUILD_LLVM_DYLIB=ON"]},
+    #{Darwin = ["-std=c++17","-O3"]},
+    {Darwin = ["-std=c++17","-O3","-fopenmp"]},
     {Linux = ["-std=c++17","-O3","-fopenmp"]} ]
   extra_link_args = [
     {Windows = []},
+    #{Darwin = ["-fopenmp","-DLLVM_LINK_LLVM_DYLIB=ON","-dynamiclib"]},
+    {Darwin = ["-fopenmp","-dynamiclib"]},
+    #{Darwin = ["-dynamiclib"]},
     {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]} ]
   libraries = ['SEAL']
 
@@ -126,10 +132,14 @@ define_macros = [
 ]
 extra_compile_args = [
   {Windows = ["/O2","/openmp","/std:c++17"]},
+  {Darwin = ["-std=c++17","-O3","-fopenmp"]},
+  #{Darwin = ["-std=c++17","-O3"]},
   {Linux = ["-std=c++17","-O3","-fopenmp"]},
 ]
 extra_link_args = [
   {Windows = []},
+  {Darwin = ["-fopenmp","-dynamiclib"]},
+  #{Darwin = ["-dynamiclib"]},
   {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
 ]
 libraries = []  # libraries to link with, cpplibraries above are added by default

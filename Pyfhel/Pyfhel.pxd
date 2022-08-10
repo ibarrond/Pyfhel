@@ -10,7 +10,10 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.cast cimport reinterpret_cast
 from libcpp cimport bool
-from numpy cimport int64_t, uint64_t
+#from numpy cimport int64_t, uint64_t
+
+ctypedef long long int64_t
+ctypedef unsigned long long uint64_t
 
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.utils.iostream cimport istream, ostream, ifstream, ofstream, ostringstream, stringstream, binary
