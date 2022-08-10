@@ -686,7 +686,7 @@ setup(
     long_description_content_type="text/markdown",
     download_url    = project_config['urls']['repository'], 
     classifiers     = project_config['classifiers'],
-    platforms       = project_config['platforms'],
+    platforms       = config['platforms']['platforms'],
     keywords        = ', '.join(project_config['description']),
     license         = project_config['license']['text'],
     # Options
