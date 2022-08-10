@@ -7,6 +7,7 @@
 
 # Compiled Dynamic libraries
 **.so*
+**.dylib*
 
 # Compiled Static libraries
 **.a
@@ -14,17 +15,6 @@
 
 # Executables
 **_x
-
-# Pyfhel building
-Pyfhel/*.pyc
-Pyfhel/*.cpp
-examples/playground
-**/build
-**.eggs
-**.egg-info
-**/dist
-**/gmon.out
-**/venv
 
 # Makefiles
 **/Makefile
@@ -51,3 +41,25 @@ docs/_autoexamples
 **.pickle
 docs/html
 docs/doctrees
+
+# Pyfhel building
+Pyfhel/*.pyc
+Pyfhel/*.pyd
+Pyfhel/*.lib
+Pyfhel/*.dll
+Pyfhel/*.exp
+Pyfhel/*.cpp
+examples/playground
+**/build
+**.eggs
+**.egg-info
+**/dist
+**/gmon.out
+**/venv
+
+# Coverage
+.cov
+.coverage
+.pytest_cache
+htmlcov
+coverage.xml

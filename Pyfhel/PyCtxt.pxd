@@ -6,6 +6,7 @@
 from libcpp.string cimport string
 from libcpp cimport bool
 from libcpp.cast cimport dynamic_cast
+from libcpp.memory cimport shared_ptr, make_shared, dynamic_pointer_cast as dyn_cast
 
 # Used for all kinds of operations. Includes utility functions
 from Pyfhel.Pyfhel cimport *
@@ -18,7 +19,7 @@ from Pyfhel.Afhel.Afhel cimport *
 
 # ---------------------------- CYTHON DECLARATION ------------------------------
 cdef class PyCtxt:
-    cdef AfCtxt* _ptr_ctxt
+    cdef shared_ptr[AfCtxt] _ptr_ctxt
     cdef Pyfhel _pyfhel
     cdef scheme_t _scheme
     cdef backend_t _backend
@@ -30,3 +31,7 @@ cdef class PyCtxt:
     cpdef void load(self, str fileName, object scheme=*)
     cpdef bytes to_bytes(self, str compr_mode=*)
     cpdef void from_bytes(self, bytes content, object scheme=*)
+
+# ---------------------------- VECTOR/ARRAY CLASS ------------------------------
+cdef extern from "<utility>" namespace "std" nogil:
+    vector[void*] move(vector[void*])

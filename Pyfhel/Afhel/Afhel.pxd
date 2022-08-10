@@ -6,6 +6,7 @@
 # Import from Cython libs required C/C++ types for the Afhel API
 from libcpp.vector cimport vector
 from libcpp.string cimport string
+from libcpp.memory cimport shared_ptr, dynamic_pointer_cast
 from libcpp.map cimport map as cpp_map
 from libcpp.complex cimport complex as c_complex
 from libcpp cimport bool
@@ -92,77 +93,79 @@ cdef extern from "Afhel.h" nogil:
         void rotateKeyGen() except +
 
         # ENCRYPTION
-        void encrypt(AfPtxt& plain1, AfCtxt& cipherOut) except +
-        void encrypt_v(vector[AfPtxt]& plainV, vector[AfCtxt]& cipherVOut) except +
+        void encrypt(AfPtxt& ptxt, AfCtxt& ctxtOut) except +
+        void encrypt_v(vector[AfPtxt]& plainV, vector[AfCtxt]& ctxtVOut) except +
         
         # DECRYPTION
-        void decrypt(AfCtxt &cipher1, AfPtxt &plainOut) except +
-        void decrypt_v(vector[AfCtxt] &cipherV, vector[AfPtxt] &plainVOut) except +
+        void decrypt(AfCtxt &ctxtInOut, AfPtxt &plainOut) except +
+        void decrypt_v(vector[AfCtxt] &ctxtV, vector[AfPtxt] &plainVOut) except +
         
         # NOISE LEVEL
-        int noise_level(AfCtxt& cipher1) except +
+        int noise_level(AfCtxt& ctxtInOut) except +
 
         # ------------------------------ CODEC ---------------------------------
         # ENCODE
         # bfv
         void encode_i(vector[int64_t] &values, AfPtxt &plainOut) except +
         # ckks
-        void encode_f(vector[double] &values, double scale, AfPtxt &plainVOut);
-        void encode_c(vector[cy_complex] &values, double scale, AfPtxt &plainVOut);
+        void encode_f(vector[double] &values, double scale, AfPtxt &plainVOut) except +
+        void encode_c(vector[cy_complex] &values, double scale, AfPtxt &plainVOut) except +
         
         # DECODE
         # bfv
-        void decode_i(AfPtxt &plain1, vector[int64_t] &valueVOut) except +
+        void decode_i(AfPtxt &ptxt, vector[int64_t] &valueVOut) except +
         # ckks
-        void decode_f(AfPtxt &plain1, vector[double] &valueVOut) except +
-        void decode_c(AfPtxt &plain1, vector[cy_complex] &valueVOut) except +
+        void decode_f(AfPtxt &ptxt, vector[double] &valueVOut) except +
+        void decode_c(AfPtxt &ptxt, vector[cy_complex] &valueVOut) except +
 
         # AUXILIARY
         void data(AfPtxt &ptxt, uint64_t *dest) except +
         void allocate_zero_poly(uint64_t n, uint64_t coeff_mod_count, uint64_t *dest) except +
         
         # -------------------------- RELINEARIZATION ---------------------------
-        void relinearize(AfCtxt& cipher1) except +
+        void relinearize(AfCtxt& ctxtInOut) except +
 
         # ---------------------- HOMOMORPHIC OPERATIONS ------------------------
         # Negate
-        void negate(AfCtxt& cipher1) except +
-        # void negate(vector[AfCtxt]& cipherV) except +
+        void negate(AfCtxt& ctxtInOut) except +
+        void negate_v(vector[AfCtxt]& ctxtV) except +
         # Square
-        void square(AfCtxt& cipher1) except +
-        # void square(vector[AfCtxt]& cipherV) except +
+        void square(AfCtxt& ctxtInOut) except +
+        void square_v(vector[AfCtxt]& ctxtV) except +
         # Add
-        void add(AfCtxt& cipher1, AfCtxt& cipher2) except +
-        void add_plain(AfCtxt& cipher1, AfPtxt& plain2) except +
-        # void add(vector[AfCtxt]& cipherVInOut, vector[AfCtxt]& cipherV2) except +
-        # void add(vector[AfCtxt]& cipherVInOut, vector[AfPtxt]& plainV2) except +
-        void cumsum(vector[AfCtxt]& cipherV, AfCtxt& cipherOut) except +
+        void add(AfCtxt& ctxtInOut, AfCtxt& ctxt) except +
+        void add_plain(AfCtxt& ctxtInOut, AfPtxt& plain2) except +
+        void add_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
+        void add_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except +
+        void cumsum_v(vector[AfCtxt]& ctxtV, AfCtxt& ctxtOut) except +
 
         # Subtract
-        void sub(AfCtxt& cipher1, AfCtxt& cipher2) except +
-        void sub_plain(AfCtxt& cipher1, AfPtxt& plain2) except +
-        # void sub(vector[AfCtxt]& cipherVInOut, vector[AfCtxt]& cipherV2) except +
-        # void sub(vector[AfCtxt]& cipherVInOut, vector[AfPtxt]& plainV2) except +
+        void sub(AfCtxt& ctxtInOut, AfCtxt& ctxt) except +
+        void sub_plain(AfCtxt& ctxtInOut, AfPtxt& plain2) except +
+        void sub_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
+        void sub_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except +
 
         # Multiply
-        void multiply(AfCtxt& cipher1, AfCtxt& cipher2) except +
-        void multiply_plain(AfCtxt& cipher1, AfPtxt& plain1) except +
-        # void multiply(vector[AfCtxt]& cipherVInOut, vector[AfCtxt]& cipherV2) except +
-        # void multiply(vector[AfCtxt]& cipherVInOut, vector[AfPtxt]& plainV2) except +        
-        void cumprod(vector[AfCtxt]& cipherV1, AfCtxt& cipherOut) except +
+        void multiply(AfCtxt& ctxtInOut, AfCtxt& ctxt) except +
+        void multiply_plain(AfCtxt& ctxtInOut, AfPtxt& ptxt) except +
+        void multiply_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
+        void multiply_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except + 
 
         # Rotate
-        void rotate(AfCtxt& cipher1, int& k) except +
-        # void rotate(vector[AfCtxt]& cipherV, int& k) except +
+        void rotate(AfCtxt& ctxtInOut, int& k) except +
+        void rotate_v(vector[AfCtxt]& ctxtV, int& k) except +
 
         # Power
-        void exponentiate(AfCtxt& cipher1, uint64_t& expon) except +
-        # void exponentiate(vector[AfCtxt]& cipherV, uint64_t& expon) except +
+        void exponentiate(AfCtxt& ctxtInOut, uint64_t& expon) except +
+        void exponentiate_v(vector[AfCtxt]& ctxtV, uint64_t& expon) except +
 
         # ckks -> rescale and mod switching
-        void rescale_to_next(AfCtxt &cipher1) except +
-        void mod_switch_to_next(AfCtxt &cipher1) except +
-        void mod_switch_to_next_plain(AfPtxt &ptxt) except +
+        void rescale_to_next(AfCtxt &ctxtInOut) except +
+        void rescale_to_next_v(vector[AfCtxt]& ctxtVInOut) except +
+        void mod_switch_to_next(AfCtxt &ctxtInOut) except +
+        void mod_switch_to_next_v(vector[AfCtxt]& ctxtVInOut) except +
+        void mod_switch_to_next_plain(AfPtxt &ptxtInOut) except +
+        void mod_switch_to_next_plain_v(vector[AfPtxt]& ptxtVInOut) except +
 
         # -------------------------------- I/O --------------------------------
         # SAVE/LOAD CONTEXT
@@ -202,7 +205,8 @@ cdef extern from "Afhel.h" nogil:
 
         # GETTERS
         bool batchEnabled() except +
-        int get_nSlots() except +
+        size_t get_nSlots() except +
+        int get_nRots() except +
         uint64_t get_plain_modulus() except +
         size_t get_poly_modulus_degree() except +
         scheme_t get_scheme() except +

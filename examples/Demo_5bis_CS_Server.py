@@ -4,6 +4,11 @@ Client/Server demo with Pyfhel
 
 Context Parameters shows how several parameters affect performance.
 """
+USE_REAL_SERVER: bool = False
+
+if not USE_REAL_SERVER:
+    exit() # skip demo if not running on real server mode
+
 import numpy as np
 from Pyfhel import Pyfhel, PyCtxt
 from base64 import decodebytes

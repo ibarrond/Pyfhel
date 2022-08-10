@@ -30,6 +30,8 @@ bfv_params = {
 }
 HE.contextGen(**bfv_params)  # Generate context for bfv scheme
 HE.keyGen()             # Key Generation: generates a pair of public/secret keys
+HE.rotateKeyGen()       # Rotate key generation --> Allows rotation/shifting
+HE.relinKeyGen()        # Relinearization key generation
 
 print("\n1. Pyfhel FHE context generation")
 print(f"\t{HE}")

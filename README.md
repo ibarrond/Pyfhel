@@ -1,6 +1,6 @@
 <img width="70%" align="left"  src="/docs/static/logo_title.png"><img width="17%" height="17%" align="right"  src="/docs/static/logo.png">
 
-[![Build Status](https://travis-ci.org/ibarrond/Pyfhel.svg?branch=master)](https://travis-ci.org/ibarrond/Pyfhel)
+[![iCodecov](https://codecov.io/gh/ibarrond/Pyfhel/branch/dev/graph/badge.svg?token=S8J8Jlp1Fc)](https://codecov.io/gh/ibarrond/Pyfhel)
 [![Documentation Status](https://readthedocs.org/projects/pyfhel/badge/?version=latest)](https://pyfhel.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://GitHub.com/ibarrond/Pyfhel/graphs/commit-activity)
@@ -11,7 +11,7 @@
 
 **Pyfhel**: **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries.
 
-* **_Version_**: 3.1.4
+* **_Version_**: 3.2.1
 * **_Status_**: STABLE
 * **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
 * **_Language_**: Python (3.7+) & Cython on top of C++17.

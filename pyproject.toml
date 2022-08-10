@@ -9,7 +9,7 @@
 # Pyfhel's core metadata
 [project]
 name = "Pyfhel"
-version = "3.1.4"
+version = "3.2.1"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -38,14 +38,14 @@ classifiers = [
 ]
 
 dependencies = [
-  "numpy>=1.20"
+  "numpy==1.21"
 ]
-
-platforms = ["Linux", "Windows"]
 
 [project.optional-dependencies]
 test = [
-  "pytest >= 6.0.0",
+  "pytest >= 6",
+  "coverage >= 6.4",
+  "pytest-cov >= 3.0",
 ]
 
 [project.urls]
@@ -59,12 +59,34 @@ repository = "https://github.com/ibarrond/github"
 requires = [
   "setuptools<=60.9",
   "wheel",
-  "cython>=3.0.0a9",
-  "numpy>=1.20",
+  "cython==3.0.0a10",
+  "numpy==1.21",
   "cmake>=3.15",
   "toml>=0.10"
 ]
 build-backend = "setuptools.build_meta"
+
+# Tests config
+[tool.pytest.ini_options]
+testpaths = ["Pyfhel/test"]
+
+[tool.coverage.run]
+plugins = ["Cython.Coverage"]
+source = ["Pyfhel"]
+omit =[
+    "setup.py",
+    "Pyfhel/Afhel",
+    "Pyfhel/backend",
+    "Pyfhel/test/*",
+    "examples/*",
+    "*__init__*",
+    "*.pxi",
+    "Pyfhel/utils/*",
+    "Pyfhel/PyPoly.pyx",
+]
+
+[platforms]
+platforms = ["Linux", "Windows"]
 
 #===============================================================================
 #========================= COMPILATION CONFIGURATION ===========================
@@ -100,6 +122,9 @@ build-backend = "setuptools.build_meta"
     SEAL_USE_ALIGNED_ALLOC ='OFF'# ON/OFF, 64B aligned memory allocations, better perf with Intel HEXL.
     BUILD_SHARED_LIBS ='OFF'     # ON/OFF, build shared and not static library
     SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT='ON' # ON/OFF, runtime error when multiplying a ctxt with a zeroed plaintext.
+    SEAL_USE_MSGSL = 'ON'       # ON/OFF,	Build with Microsoft GSL support.
+    SEAL_USE_ZLIB	= 'ON'        # ON/OFF,	Build with ZLIB support.
+    SEAL_USE_ZSTD	= 'ON'        # ON/OFF,	Build with Zstandard support.
     
   #--> Afhel
   [cpplibraries.Afhel]
@@ -107,18 +132,17 @@ build-backend = "setuptools.build_meta"
   lib_type = 'shared'      # static/shared
   sources = ['Pyfhel/Afhel/Afseal.cpp',]
   include_dirs = ['Pyfhel/Afhel',]
-  define_macros = []
+  define_macros = [
+    # ["SEAL_USE_ZLIB","0"],
+    # ["SEAL_USE_ZSTD","0"],
+  ]
   extra_compile_args = [
-    {Windows = ["/O2","/std:c++17"]},
-    #{Darwin = ["-std=c++17","-O3","-fopenmp","-DLLVM_BUILD_LLVM_DYLIB=ON"]},
-    #{Darwin = ["-std=c++17","-O3"]},
+    {Windows = ["/O2","/std:c++17","/openmp"]},
     {Darwin = ["-std=c++17","-O3","-fopenmp"]},
     {Linux = ["-std=c++17","-O3","-fopenmp"]} ]
   extra_link_args = [
     {Windows = []},
-    #{Darwin = ["-fopenmp","-DLLVM_LINK_LLVM_DYLIB=ON","-dynamiclib"]},
     {Darwin = ["-fopenmp","-dynamiclib"]},
-    #{Darwin = ["-dynamiclib"]},
     {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]} ]
   libraries = ['SEAL']
 
@@ -133,13 +157,11 @@ define_macros = [
 extra_compile_args = [
   {Windows = ["/O2","/openmp","/std:c++17"]},
   {Darwin = ["-std=c++17","-O3","-fopenmp"]},
-  #{Darwin = ["-std=c++17","-O3"]},
   {Linux = ["-std=c++17","-O3","-fopenmp"]},
 ]
 extra_link_args = [
   {Windows = []},
   {Darwin = ["-fopenmp","-dynamiclib"]},
-  #{Darwin = ["-dynamiclib"]},
   {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
 ]
 libraries = []  # libraries to link with, cpplibraries above are added by default

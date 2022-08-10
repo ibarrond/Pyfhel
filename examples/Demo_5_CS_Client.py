@@ -17,11 +17,12 @@ USE_REAL_SERVER: bool = False
 # --------------------------
 import numpy as np
 from Pyfhel import Pyfhel, PyCtxt
-try:
-    import requests
-except ImportError:
-    print("This demo requires the `requests` python module (install with pip). Exiting.")
-    exit(0)
+if USE_REAL_SERVER:
+    try:
+        import requests
+    except ImportError:
+        print("This demo requires the `requests` python module (install with pip). Exiting.")
+        exit(0)
 
 # Generate Pyfhel session
 print(f"[Client] Initializing Pyfhel session and data...")

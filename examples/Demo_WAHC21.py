@@ -70,6 +70,7 @@ ctxt_m_p = ctxt_a * ptxt_b # or ctxt_a * 34
 # maintenance operations
 HE.relinKeyGen()        # bfv only
 HE.relinearize(ctxt_s)  # requires relinKey
+HE.rotateKeyGen()
 # HE.rescale_to_next(ctxt_r) # ckks only
 
 # rotations (length n)
@@ -122,7 +123,7 @@ for f in ["mypk.pk", "mycontext.con", "ctxt_a.ctxt", "ctxt_b.ctxt", "cr.ctxt"]:
 print("-----------------------------------------------------")
 from Pyfhel import PyCtxt, Pyfhel, PyPtxt
 HE = Pyfhel()
-HE.contextGen(scheme='CKKS', n=16384, qi=[30,30,30,30,30], scale=1)
+HE.contextGen(scheme='CKKS', n=16384, qi=[30,30,30,30,30], scale=2 ** 30)
 HE.keyGen()
 ctxt_x = HE.encrypt(3.1, scale=2 ** 30) # implicit encode
 ctxt_y = HE.encrypt(4.1, scale=2 ** 30)
@@ -173,4 +174,3 @@ s = (m - b) * ~a # ~a = inverse of a
 print("-----------------------------------------------------")
 
 # sphinx_gallery_thumbnail_path = 'static/thumbnails/helloworld.png'
-# %%
