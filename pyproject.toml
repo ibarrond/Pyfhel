@@ -86,7 +86,7 @@ omit =[
 ]
 
 [platforms]
-platforms = ["Linux", "Windows"]
+platforms = ["Linux", "Windows", "Darwin"]
 
 #===============================================================================
 #========================= COMPILATION CONFIGURATION ===========================
@@ -138,9 +138,11 @@ platforms = ["Linux", "Windows"]
   ]
   extra_compile_args = [
     {Windows = ["/O2","/std:c++17","/openmp"]},
+    {Darwin = ["-std=c++17","-O3","-fopenmp"]},
     {Linux = ["-std=c++17","-O3","-fopenmp"]} ]
   extra_link_args = [
     {Windows = []},
+    {Darwin = ["-fopenmp","-dynamiclib"]},
     {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]} ]
   libraries = ['SEAL']
 
@@ -154,10 +156,12 @@ define_macros = [
 ]
 extra_compile_args = [
   {Windows = ["/O2","/openmp","/std:c++17"]},
+  {Darwin = ["-std=c++17","-O3","-fopenmp"]},
   {Linux = ["-std=c++17","-O3","-fopenmp"]},
 ]
 extra_link_args = [
   {Windows = []},
+  {Darwin = ["-fopenmp","-dynamiclib"]},
   {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
 ]
 libraries = []  # libraries to link with, cpplibraries above are added by default

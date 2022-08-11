@@ -34,8 +34,9 @@ from setuptools import setup, Extension, find_packages
 # Get platform system
 platform_system = platform.system()
 if platform_system == 'Darwin': # MacOS
-    raise SystemError("Pyfhel is not supported in MacOS (see issue #59)."
-                      "Please use a Linux VM or Docker.")
+    os.environ["CC"] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/gcc-12 -I/usr/local/include/"
+    os.environ["CXX"] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/g++-12 -I/usr/local/include/"
+    os.environ["LDSHARED"] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/g++-12 -Wl,-x -dynamiclib -undefined dynamic_lookup"
 
 # Read config file
 config = toml.load("pyproject.toml")
@@ -515,6 +516,8 @@ def get_lib_suffix(lib_type: str) -> str:
     else:  # shared
         if platform_system == 'Windows':
             return '.dll'
+        elif platform_system == 'Darwin':
+            return '.dylib'
         else:
             return '.so'
 
