@@ -23,18 +23,22 @@ enum class scheme_t : std::uint8_t{
   // Brakerski/Fan-Vercauteren scheme
   bfv = 0x1,
   // Cheon-Kim-Kim-Song scheme
-  ckks = 0x2
+  ckks = 0x2,
+  // Brakerski-Gentry-Vaikunthanathan scheme
+  bgv = 0x3
 };
 
 static std::map<scheme_t, std::string> scheme_t_str {
    {scheme_t::none, "none"},
    {scheme_t::bfv,  "bfv"},
    {scheme_t::ckks, "ckks"},
+   {scheme_t::bgv,  "bgv"},
 };
 static std::map<std::string, scheme_t> scheme_t_map {
    {"none", scheme_t::none},
    {"bfv",  scheme_t::bfv},
    {"ckks", scheme_t::ckks},
+   {"bgv",  scheme_t::bgv},
 };
 
 //------------------------------- FHE backend ----------------------------------
@@ -98,6 +102,8 @@ class Afhel {
   // ckks
   virtual void encode_f(std::vector<double> &values, double scale, AfPtxt &plainVOut) = 0;
   virtual void encode_c(std::vector<std::complex<double>> &values, double scale, AfPtxt &plainVOut) = 0;
+  // bgv
+  virtual void encode_g(std::vector<int64_t> &values, AfPtxt &plainOut) = 0;
 
   // DECODE
   // bfv
@@ -105,6 +111,8 @@ class Afhel {
   // ckks
   virtual void decode_f(AfPtxt &plain1, std::vector<double> &valueVOut) = 0;
   virtual void decode_c(AfPtxt &plain1, std::vector<std::complex<double>> &valueVOut) = 0;
+  // bgv
+  virtual void decode_g(AfPtxt &plain1, std::vector<int64_t> &valueVOut) = 0;
   
   // -------------------------- RELINEARIZATION -------------------------
   virtual void relinearize(AfCtxt &cipher1) = 0;
