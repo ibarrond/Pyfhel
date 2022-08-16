@@ -50,8 +50,9 @@ cdef extern from "Afhel.h" nogil:
     # FHE Scheme
     cdef enum class scheme_t(uint8_t):
         none,
-        bfv
-        ckks
+        bfv,
+        ckks,
+        bgv
     cdef cpp_map scheme_t_str[scheme_t, string]
 
     # FHE backend
@@ -107,6 +108,8 @@ cdef extern from "Afhel.h" nogil:
         # ENCODE
         # bfv
         void encode_i(vector[int64_t] &values, AfPtxt &plainOut) except +
+        # bgv
+        void encode_g(vector[int64_t] &values, AfPtxt &plainOut) except +
         # ckks
         void encode_f(vector[double] &values, double scale, AfPtxt &plainVOut) except +
         void encode_c(vector[cy_complex] &values, double scale, AfPtxt &plainVOut) except +
@@ -114,6 +117,8 @@ cdef extern from "Afhel.h" nogil:
         # DECODE
         # bfv
         void decode_i(AfPtxt &ptxt, vector[int64_t] &valueVOut) except +
+        # bgv
+        void decode_g(AfPtxt &ptxt, vector[int64_t] &valueVOut) except +
         # ckks
         void decode_f(AfPtxt &ptxt, vector[double] &valueVOut) except +
         void decode_c(AfPtxt &ptxt, vector[cy_complex] &valueVOut) except +

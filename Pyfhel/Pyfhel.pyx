@@ -204,13 +204,15 @@ cdef class Pyfhel:
             The coefficient modulus (q) is chosen under the hood with the security
             level sec, based on homomorphicencryption.org, although it can be set 
             manually with the parameter q.
+            
+        *BGV scheme*: //TODO
         
         *CKKS scheme*: vectorized approximate fixed point operations in SIMD. The
             underlying coefficient modulus (q) is set with a chain of prime sizes
             qi (bit sizes), which is an integer vector of moduli.
 
         Args:
-            scheme (str): HE scheme ("bfv" or "ckks", for integer or float ops).
+            scheme (str): HE scheme ("bfv", "bgv" or "ckks", for integer or float ops).
             n (int): Polynomial coefficient modulus m. (Poly: 1*x^n+1), directly
                      linked to the multiplication depth, (SEAL's poly_modulus_degree)
                      and equal to the number of slots (nSlots) in bfv.
@@ -232,6 +234,15 @@ cdef class Pyfhel:
         s = to_Scheme_t(scheme)
         if s==Scheme_t.bfv:
             assert (t_bits>0 or t>0), "BFV scheme requires `t_bits` or `t` to be set"
+            if not qi.empty():  # Compress all moduli into one
+                q = np.prod(np.array(qi))
+                self._qi = qi
+            else:
+                self._qi = {}
+            assert (sec>0 or q>0), "BFV scheme requires `sec` or `q` to be set."
+            self._scale = 1
+        elif s==Scheme_t.bgv:
+            assert (t_bits>0 or t>0), "BGV scheme requires `t_bits` or `t` to be set"
             if not qi.empty():  # Compress all moduli into one
                 q = np.prod(np.array(qi))
                 self._qi = qi
@@ -324,6 +335,29 @@ cdef class Pyfhel:
         ctxt._pyfhel = self
         return ctxt
     
+    cpdef PyCtxt encryptBGV(self, int64_t[:] arr, PyCtxt ctxt=None):
+        """Encrypts a 1D vector of int values into a PyCtxt ciphertext.
+        
+        If provided a ciphertext, encrypts the value inside it. 
+        
+        Args:
+            value (int): value to encrypt.
+            ctxt (PyCtxt, optional): Optional destination ciphertext.  
+            
+        Return:
+            PyCtxt: the ciphertext containing the encrypted plaintext
+        """
+        if ctxt is None:
+            ctxt = PyCtxt(pyfhel=self)
+        cdef vector[int64_t] vec
+        cdef AfsealPtxt ptxt
+        vec.assign(&arr[0], &arr[0]+<Py_ssize_t>arr.size)
+        self.afseal.encode_g(vec, ptxt)
+        self.afseal.encrypt(ptxt, deref(ctxt._ptr_ctxt))
+        ctxt._scheme = scheme_t.bgv
+        ctxt._pyfhel = self
+        return ctxt
+        
     cpdef PyCtxt encryptFrac(self, 
         double[:] arr, PyCtxt ctxt=None, 
         double scale=0, int scale_bits=0):
@@ -416,6 +450,9 @@ cdef class Pyfhel:
     cpdef np.ndarray[object, ndim=1] encryptAInt(self, int64_t[:,::1] arr):
         raise NotImplementedError("<Pyfhel ERROR> encryptAInt not implemented")
 
+    cpdef np.ndarray[object, ndim=1] encryptABGV(self, int64_t[:,::1] arr):
+        raise NotImplementedError("<Pyfhel ERROR> encryptABGV not implemented")
+        
     cpdef np.ndarray[object, ndim=1] encryptAFrac(self, double[:,::1] arr, double scale=0, int scale_bits=0):
         raise NotImplementedError("<Pyfhel ERROR> encryptAFrac not implemented")
         
@@ -478,6 +515,29 @@ cdef class Pyfhel:
         cdef AfsealPtxt ptxt
         self.afseal.decrypt(deref(ctxt._ptr_ctxt), ptxt)
         self.afseal.decode_i(ptxt, vec)
+        return np.asarray(<list>vec)
+        
+    cpdef np.ndarray[int64_t, ndim=1] decryptBGV(self, PyCtxt ctxt):
+        """Decrypts a PyCtxt ciphertext into a single int value.
+        
+        Decrypts a PyCtxt ciphertext using the current secret key, based on
+        the current context. PyCtxt scheme must be bfv.
+        
+        Args:
+            ctxt (PyCtxt, optional): ciphertext to decrypt. 
+            
+        Return:
+            int: the decrypted integer value
+            
+        Raise:
+            RuntimeError: if the ctxt scheme isn't Scheme_t.bgv
+        """
+        if (ctxt._scheme != scheme_t.bgv):
+            raise RuntimeError("<Pyfhel ERROR> wrong scheme type in PyCtxt")
+        cdef vector[int64_t] vec
+        cdef AfsealPtxt ptxt
+        self.afseal.decrypt(deref(ctxt._ptr_ctxt), ptxt)
+        self.afseal.decode_g(ptxt, vec)
         return np.asarray(<list>vec)
 
     cpdef np.ndarray[double, ndim=1] decryptFrac(self, PyCtxt ctxt):
@@ -549,6 +609,8 @@ cdef class Pyfhel:
     # vectorized
     cpdef np.ndarray[int64_t, ndim=2] decryptAInt(self, PyCtxt ctxt):
         raise NotImplementedError("<Pyfhel ERROR> decryptAInt not implemented")
+    cpdef np.ndarray[int64_t, ndim=2] decryptABGV(self, PyCtxt ctxt):
+        raise NotImplementedError("<Pyfhel ERROR> decryptABGV not implemented")
     cpdef np.ndarray[double, ndim=2] decryptAFrac(self, PyCtxt ctxt):
         raise NotImplementedError("<Pyfhel ERROR> decryptAFrac not implemented")
     cpdef np.ndarray[double, ndim=2] decryptAComplex(self, PyCtxt ctxt):
@@ -582,6 +644,8 @@ cdef class Pyfhel:
         if (decode):
             if (ctxt._scheme == scheme_t.ckks):
                 return self.decryptFrac(ctxt)
+            elif (ctxt._scheme == scheme_t.bgv):
+                return self.decryptBGV(ctxt)
             elif (ctxt._scheme == scheme_t.bfv):
                 return self.decryptInt(ctxt)
             else:
@@ -649,6 +713,26 @@ cdef class Pyfhel:
         ptxt._scheme = scheme_t.bfv
         return ptxt
     
+    cpdef PyPtxt encodeBGV(self, int64_t[::1] arr, PyPtxt ptxt=None):
+        """Encodes an integer vector into a PyPtxt plaintext.
+        
+        Encodes a vector of integer values based on the current context.
+        If provided a plaintext, encodes the values inside it. 
+        
+        Args:
+            arr (np.array[int]): values to encode.
+            
+        Return:
+            PyPtxt: the plaintext containing the encoded values
+        """
+        if ptxt is None:
+            ptxt = PyPtxt(pyfhel=self)
+        cdef vector[int64_t] vec
+        vec.assign(&arr[0], &arr[0]+<Py_ssize_t>arr.size)
+        self.afseal.encode_g(vec, deref(ptxt._ptr_ptxt))
+        ptxt._scheme = scheme_t.bgv
+        return ptxt
+        
     cpdef PyPtxt encodeFrac(self, double[::1] arr, PyPtxt ptxt=None,
         double scale=0, int scale_bits=0) :
         """Encodes a float vector into a PyPtxt plaintext.
@@ -699,13 +783,16 @@ cdef class Pyfhel:
         return ptxt 
 
     cpdef np.ndarray[object, ndim=1] encodeAInt(self, int64_t[:,::1] arr):
-        raise NotImplementedError("<Pyfhel ERROR> encodeAFrac not implemented")
-
+        raise NotImplementedError("<Pyfhel ERROR> encodeAInt not implemented")
+        
+    cpdef np.ndarray[object, ndim=1] encodeABGV(self, int64_t[:,::1] arr):
+        raise NotImplementedError("<Pyfhel ERROR> encodeABGV not implemented")
+        
     cpdef np.ndarray[object, ndim=1] encodeAFrac(self, double[:,::1] arr, double scale=0, int scale_bits=0):
         raise NotImplementedError("<Pyfhel ERROR> encodeAFrac not implemented")
 
     cpdef np.ndarray[object, ndim=1] encodeAComplex(self, complex[:,::1] arr, double scale=0, int scale_bits=0):
-        raise NotImplementedError("<Pyfhel ERROR> encodeAFrac not implemented")
+        raise NotImplementedError("<Pyfhel ERROR> encodeAComplex not implemented")
 
     def encode(self, val_vec not None, double scale=0, int scale_bits=0, PyPtxt ptxt=None):
         """Encodes any valid value/vector into a PyPtxt plaintext.
@@ -736,6 +823,8 @@ cdef class Pyfhel:
         elif val_vec.ndim == 1:
             if self.scheme == Scheme_t.bfv:
                 return self.encodeInt(val_vec.astype(np.int64), ptxt)
+            elif self.scheme == Scheme_t.bgv:
+                return self.encodeBGV(val_vec.astype(np.int64), ptxt)
             elif self.scheme == Scheme_t.ckks:
                 scale = _get_valid_scale(scale_bits, scale, self._scale)
                 if np.issubdtype(val_vec.dtype, np.complexfloating):
@@ -744,7 +833,10 @@ cdef class Pyfhel:
                     return self.encodeFrac(val_vec.astype(np.float64), ptxt, scale)
         elif val_vec.ndim == 2:
             if np.issubdtype(val_vec.dtype, np.integer):
-                return self.encryptAInt(val_vec.astype(np.int64))
+                if self.scheme == Scheme_t.bfv:
+                    return self.encryptAInt(val_vec.astype(np.int64))
+                elif self.scheme == Scheme_t.bgv:
+                    return self.encryptABGV(val_vec.astype(np.int64))
             elif np.issubdtype(val_vec.dtype, np.floating):
                 return self.encryptAFrac(val_vec.astype(np.float64), scale)
             elif np.issubdtype(val_vec.dtype, np.complexfloating):
@@ -772,6 +864,27 @@ cdef class Pyfhel:
         self.afseal.decode_i(deref(ptxt._ptr_ptxt), output_vector)
         return vec_to_array_i(output_vector)
     
+    cpdef np.ndarray[int64_t, ndim=1] decodeBGV(self, PyPtxt ptxt):
+        """Decodes a PyPtxt plaintext into a single int value.
+        
+        Decodes a PyPtxt plaintext into a single int value based on
+        the current context. PyPtxt scheme must be bgv.
+        
+        Args:
+            ptxt (PyPtxt, optional): plaintext to decode. 
+            
+        Return:
+            int: the decoded integer value
+            
+        Raise:
+            RuntimeError: if the ciphertext scheme isn't Scheme_t.bgv
+        """
+        if ptxt._scheme != scheme_t.bgv:
+            raise RuntimeError('<Pyfhel ERROR> PyPtxt scheme must be bgv')
+        cdef vector[int64_t] output_vector
+        self.afseal.decode_g(deref(ptxt._ptr_ptxt), output_vector)
+        return vec_to_array_i(output_vector)
+        
     cpdef np.ndarray[double, ndim=1] decodeFrac(self, PyPtxt ptxt):
         """Decodes a PyPtxt plaintext into a single float value.
         
@@ -817,12 +930,15 @@ cdef class Pyfhel:
     
     cpdef np.ndarray[int64_t, ndim=2] decodeAInt(self, PyPtxt[:] ptxt):
         raise NotImplementedError("<Pyfhel ERROR> decodeAInt not implemented")
-
+        
+    cpdef np.ndarray[int64_t, ndim=2] decodeABGV(self, PyPtxt[:] ptxt):
+        raise NotImplementedError("<Pyfhel ERROR> decodeABGV not implemented")
+        
     cpdef np.ndarray[double, ndim=2] decodeAFrac(self, PyPtxt[:] ptxt):
         raise NotImplementedError("<Pyfhel ERROR> decodeAFrac not implemented")
         
     cpdef np.ndarray[complex, ndim=2] decodeAComplex(self, PyPtxt[:] ptxt):
-        raise NotImplementedError("<Pyfhel ERROR> decodeAFrac not implemented")
+        raise NotImplementedError("<Pyfhel ERROR> decodeAComplex not implemented")
 
     def decode(self, PyPtxt ptxt):
         """Decodes any valid PyPtxt into a value or vector.
@@ -843,6 +959,8 @@ cdef class Pyfhel:
         """
         if (ptxt._scheme == scheme_t.ckks):
             return self.decodeFrac(ptxt)
+        elif (ptxt._scheme == scheme_t.bgv):
+            return self.decodeBGV(ptxt)
         elif (ptxt._scheme == scheme_t.bfv):
             return self.decodeInt(ptxt)
         else:

@@ -84,7 +84,7 @@ cdef class PyPtxt:
     def scheme(self):
         """scheme: returns the scheme type.
         
-        Can be set to: 0-none, 1-bfv, 2-ckks
+        Can be set to: 0-none, 1-bfv, 2-ckks, 3-bgv
 
         See Also:
             :func:`~Pyfhel.utils.to_Scheme_t`
@@ -228,6 +228,7 @@ cdef class PyPtxt:
             content: (:obj:`bytes`) Python bytes object containing the PyPtxt.
             scheme: (:obj: `str`) String or type describing the scheme:
               * ('int', 'integer', int, 1, scheme_t.bfv) -> integer scheme.
+              * ('int', 'integer', int, 1, scheme_t.bgv) -> integer scheme.
               * ('float', 'double', float, 2, scheme_t.ckks) -> fractional scheme.
         """
         if self._pyfhel is None:
@@ -248,6 +249,8 @@ cdef class PyPtxt:
         """returns the integer in the first slot of the plaintext"""
         if (self._scheme != scheme_t.bfv):
             raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not bfv)")
+        elif (self._scheme != scheme_t.bgv):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not bgv)")
         return int(np.array(self._pyfhel.decodeInt(self))[0])
 
     def __float__(self):

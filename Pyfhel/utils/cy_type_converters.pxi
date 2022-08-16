@@ -2,26 +2,28 @@ from Pyfhel.utils.Scheme_t import Scheme_t
 from Pyfhel.utils.Backend_t import Backend_t
 
 cpdef to_Scheme_t(object scheme):
-    """Turns `scheme` into an scheme_t.{bfv, ckks} enum.
+    """Turns `scheme` into an scheme_t.{bfv, bgv, ckks} enum.
     
     Arguments:
         scheme (str, type, int, scheme_t): One of the following:
 
-            * (str): ('int', 'integer', 'bfv') for bfv scheme, 
+            * (str): ('int', 'integer', 'bfv') for bfv scheme,
+                     ('int', 'integer', 'bgv') for bgv scheme, 
                      ('float', 'double', 'ckks') for ckks scheme.
 
-            * Python class: (int) for bfv scheme, (float) for ckks scheme.
+            * Python class: (int) for bfv, bgv schemes, (float) for ckks scheme.
 
-            * (int): (1) for bfv scheme, (2) for ckks scheme.
+            * (int): (1) for bfv, bgv schemes, (2) for ckks scheme.
 
             * (scheme_t) Enum (does nothing)
 
     Returns:
-        scheme_t: bfv or ckks.
+        scheme_t: bfv, bgv or ckks.
     """
     if type(scheme) is type: scheme = scheme.__class__.__name__
     if type(scheme) is str:
         if scheme.lower() in ('int', 'integer', 'bfv'):     scheme = "bfv"
+        elif scheme.lower() in ('int', 'integer', 'bgv'):   scheme = "bgv"
         elif scheme.lower() in ('float', 'double', 'ckks'): scheme = "ckks"
         return Scheme_t[scheme]
     elif isinstance(scheme, (int, float)):

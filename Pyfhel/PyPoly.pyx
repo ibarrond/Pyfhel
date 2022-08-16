@@ -72,7 +72,7 @@ cdef class PyPoly:
     def _scheme(self):
         """_scheme: returns the scheme type.
         
-        Can be set to: 0-None, 1-BFV, 2-CKKS
+        Can be set to: 0-None, 1-BFV, 2-CKKS, 3-BGV.
 
         See Also:
             :func:`~Pyfhel.utils.to_scheme_t`
