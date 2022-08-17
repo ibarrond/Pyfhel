@@ -8,12 +8,12 @@ cpdef to_Scheme_t(object scheme):
         scheme (str, type, int, scheme_t): One of the following:
 
             * (str): ('int', 'integer', 'bfv') for bfv scheme,
-                     ('int', 'integer', 'bgv') for bgv scheme,
-                     ('float', 'double', 'ckks') for ckks scheme.
+                     ('float', 'double', 'ckks') for ckks scheme,
+                     ('bgv') for bgv scheme.
 
             * Python class: (int) for bfv, bgv schemes, (float) for ckks scheme.
 
-            * (int): (1) for bfv, bgv schemes, (2) for ckks scheme.
+            * (int): (1) for bfv, (2) for ckks, (3) for bgv schemes.
 
             * (scheme_t) Enum (does nothing)
 
@@ -23,8 +23,8 @@ cpdef to_Scheme_t(object scheme):
     if type(scheme) is type: scheme = scheme.__class__.__name__
     if type(scheme) is str:
         if scheme.lower() in ('int', 'integer', 'bfv'):     scheme = "bfv"
-        elif scheme.lower() in ('int', 'integer', 'bgv'):   scheme = "bgv"
         elif scheme.lower() in ('float', 'double', 'ckks'): scheme = "ckks"
+        elif scheme.lower() == 'bgv': scheme = "bgv"
         return Scheme_t[scheme]
     elif isinstance(scheme, (int, float)):
         return Scheme_t(int(scheme))

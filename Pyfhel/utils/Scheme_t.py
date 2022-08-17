@@ -12,4 +12,4 @@ class Scheme_t(Enum):
     """Fractional encoding, used with encryptFrac/decryptFrac and encodeFrac/decodeFrac."""
 
     bgv=0x3
-    """Integer encoding, used with encryptInt/decryptInt and encodeInt/decodeInt."""
+    """Integer encoding, used with encryptBGV/decryptBGV and encodeBGV/decodeBGV."""

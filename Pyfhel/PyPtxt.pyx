@@ -228,8 +228,8 @@ cdef class PyPtxt:
             content: (:obj:`bytes`) Python bytes object containing the PyPtxt.
             scheme: (:obj: `str`) String or type describing the scheme:
               * ('int', 'integer', int, 1, scheme_t.bfv) -> integer scheme.
-              * ('int', 'integer', int, 1, scheme_t.bgv) -> integer scheme.
               * ('float', 'double', float, 2, scheme_t.ckks) -> fractional scheme.
+              * (3, scheme_t.bgv) -> integer scheme.
         """
         if self._pyfhel is None:
             raise ValueError("<Pyfhel ERROR> plaintext loading requires a Pyfhel instance")
@@ -247,10 +247,8 @@ cdef class PyPtxt:
 
     def __int__(self):
         """returns the integer in the first slot of the plaintext"""
-        if (self._scheme != scheme_t.bfv):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not bfv)")
-        elif (self._scheme != scheme_t.bgv):
-            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not bgv)")
+        if (self._scheme != scheme_t.bfv and self._scheme != scheme_t.bgv):
+            raise RuntimeError("<Pyfhel ERROR> wrong PyPtxt scheme for automatic encoding (not bfv/bfv)")
         return int(np.array(self._pyfhel.decodeInt(self))[0])
 
     def __float__(self):

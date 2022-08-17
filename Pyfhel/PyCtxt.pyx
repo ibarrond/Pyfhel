@@ -246,8 +246,8 @@ cdef class PyCtxt:
             scheme (str, type, int, Scheme_t): One of the following:
 
                 * ('int', 'INTEGER', int, 1, Scheme_t.bfv) -> integer scheme.
-                * ('int', 'INTEGER', int, 1, Scheme_t.bgv) -> integer scheme.
                 * ('float', 'FRACTIONAL', float, 2, Scheme_t.ckks) -> fractional scheme.
+                * (3, Scheme_t.bgv) -> integer scheme.
 
         Return:
             None
@@ -619,10 +619,7 @@ cdef class PyCtxt:
         """__repr__()
 
         Prints information about the current ciphertext"""
-        if self.scheme==Scheme_t.bfv:
-            scheme_dep_info = 'noiseBudget=' + str(self.noiseBudget) \
-                                            if self.noiseBudget!=-1 else "?"
-        elif self.scheme==Scheme_t.bgv:
+        if self.scheme==Scheme_t.bfv or self.scheme==Scheme_t.bgv:
             scheme_dep_info = 'noiseBudget=' + str(self.noiseBudget) \
                                             if self.noiseBudget!=-1 else "?"
         elif self.scheme==Scheme_t.ckks:
@@ -725,11 +722,7 @@ cdef class PyCtxt:
         if other.ndim == 0:           # If scalar, replicate
             other = other.reshape([1])
         # Compute inverse. Int: https://stackoverflow.com/questions/4798654
-        if self.scheme == Scheme_t.bfv:
-            other = other.astype(np.int64)
-            t = self._pyfhel.t
-            inverse = np.array([pow(int(other[i]), t-2, t)for i in range(other.shape[0])])
-        elif self.scheme == Scheme_t.bgv:
+        if self.scheme == Scheme_t.bfv or self.scheme == Scheme_t.bgv:
             other = other.astype(np.int64)
             t = self._pyfhel.t
             inverse = np.array([pow(int(other[i]), t-2, t)for i in range(other.shape[0])])

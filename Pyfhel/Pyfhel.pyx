@@ -248,7 +248,7 @@ cdef class Pyfhel:
                 self._qi = qi
             else:
                 self._qi = {}
-            assert (sec>0 or q>0), "BFV scheme requires `sec` or `q` to be set."
+            assert (sec>0 or q>0), "BGV scheme requires `sec` or `q` to be set."
             self._scale = 1
         elif s==Scheme_t.ckks:
             assert not qi.empty(), "CKKS scheme requires a list of prime sizes (qi) to be set"
