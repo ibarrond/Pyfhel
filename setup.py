@@ -34,14 +34,15 @@ from setuptools import setup, Extension, find_packages
 # Get platform system
 platform_system = platform.system()
 if platform_system == 'Darwin': # MacOS
-    """
-    % cat ~/.zshrc
-    alias gcc="/usr/local/Cellar/gcc/12.1.0/bin/gcc-12"
-    alias g++="/usr/local/Cellar/gcc/12.1.0/bin/g++-12"
-    """
-    os.environ["CC"] = os.environ["gcc"] + " -I/usr/local/include/"
-    os.environ["CXX"] = os.environ["gxx"] + " -I/usr/local/include/"
-    os.environ["LDSHARED"] = os.environ["gxx"] + " -Wl,-x -dynamiclib -undefined dynamic_lookup"
+    if "gcc" in os.environ and "gxx" in os.environ:
+        os.environ["CC"] = os.environ["gcc"]
+        os.environ["CXX"] = os.environ["gxx"]
+        os.environ["LDSHARED"] = os.environ["gxx"] + " -Wl,-x -dynamiclib -undefined dynamic_lookup"
+    else:
+        print("Please setup your enviroment variables gcc/gxx with your GCC/CLANG path")
+        print("e.g.\texport gcc=\"/usr/local/Cellar/gcc/12.1.0/bin/gcc-12\"")
+        print("\texport g++=\"/usr/local/Cellar/gcc/12.1.0/bin/g++-12\"")
+        exit(1)
 
 # Read config file
 config = toml.load("pyproject.toml")
