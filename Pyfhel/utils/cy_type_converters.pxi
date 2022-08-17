@@ -3,12 +3,12 @@ from Pyfhel.utils.Backend_t import Backend_t
 
 cpdef to_Scheme_t(object scheme):
     """Turns `scheme` into an scheme_t.{bfv, bgv, ckks} enum.
-    
+
     Arguments:
         scheme (str, type, int, scheme_t): One of the following:
 
             * (str): ('int', 'integer', 'bfv') for bfv scheme,
-                     ('int', 'integer', 'bgv') for bgv scheme, 
+                     ('int', 'integer', 'bgv') for bgv scheme,
                      ('float', 'double', 'ckks') for ckks scheme.
 
             * Python class: (int) for bfv, bgv schemes, (float) for ckks scheme.
@@ -35,7 +35,7 @@ cpdef to_Scheme_t(object scheme):
 
 cpdef to_Backend_t(object backend):
     """Turns `backend` into a backend_t.{seal, palisade} enum.
-    
+
     Arguments:
         backend (str, backend_t): One of the following:
 

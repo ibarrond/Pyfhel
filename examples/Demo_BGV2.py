@@ -21,7 +21,7 @@ bgv_params = {
                         #  Typ. 2^D for D in [10, 16]
     't': 65537,         # Plaintext modulus. Encrypted operations happen modulo t
                         #  Must be prime such that t-1 be divisible by 2^N.
-    't_bits': 20,       # Number of bits in t. Used to generate a suitable value 
+    't_bits': 20,       # Number of bits in t. Used to generate a suitable value
                         #  for t. Overrides t if specified.
     'sec': 128,         # Security parameter. The equivalent length of AES key in bits.
                         #  Sets the ciphertext modulus q, can be one of {128, 192, 256}
@@ -43,7 +43,7 @@ print(f"\t{HE}")
 # arr2 = [-t//2, -1, 1]  (length 3) --> Encoding fills the rest of the array with zeros
 
 arr1 = np.arange(bgv_params['n'], dtype=np.int64)    # Max possible value is t/2-1. Always use type int64!
-arr2 = np.array([-bgv_params['t']//2, -1, 1], dtype=np.int64)  # Min possible value is -t/2. 
+arr2 = np.array([-bgv_params['t']//2, -1, 1], dtype=np.int64)  # Min possible value is -t/2.
 
 ptxt1 = HE.encodeBGV(arr1)   # Creates a PyPtxt plaintext with the encoded arr1
 ptxt2 = HE.encodeBGV(arr2)   # plaintexts created from arrays shorter than 'n' are filled with zeros.
@@ -76,7 +76,7 @@ ccMul = ctxt1 * ctxt2       # Calls HE.multiply(ctxt1, ctxt2, in_new_ctxt=True)
 cSq   = ctxt1**2            # Calls HE.square(ctxt1, in_new_ctxt=True)
                             #  `ctxt1 **= 2` for inplace operation
 cNeg  = -ctxt1              # Calls HE.negate(ctxt1, in_new_ctxt=True)
-                            # 
+                            #
 cPow  = ctxt1**3            # Calls HE.power(ctxt1, 3, in_new_ctxt=True)
                             #  `ctxt1 **= 3` for inplace operation
 cRotR = ctxt1 >> 2          # Calls HE.rotate(ctxt1, k=2, in_new_ctxt=True)
@@ -112,19 +112,19 @@ print("->\tctxt1 + ptxt2 = cpSum: ", cpSum)
 print("->\tctxt1 - ptxt2 = cpSub: ", cpSub)
 print("->\tctxt1 * ptxt2 = cpMul: ", cpMul)
 
-          
+
 # %%
 # 4. BGV Relinearization: What, why, when
 # ------------------------------------------------------------------------------
-# Ciphertext-ciphertext multiplications increase the size of the polynoms 
-#  representing the resulting ciphertext. To prevent this growth, the 
-#  relinearization technique is used (typically right after each c-c mult) to 
+# Ciphertext-ciphertext multiplications increase the size of the polynoms
+#  representing the resulting ciphertext. To prevent this growth, the
+#  relinearization technique is used (typically right after each c-c mult) to
 #  reduce the size of a ciphertext back to the minimal size (two polynoms c0 & c1).
 #  For this, a special type of public key called Relinearization Key is used.
 #
 # In Pyfhel, you can either generate a relin key with HE.RelinKeyGen() or skip it
 #  and call HE.relinearize() directly, in which case a warning is issued.
-# 
+#
 # Note that HE.power performs relinearization after every multiplication.
 
 print("\n4. Relinearization-> Right after each multiplication.")
@@ -136,9 +136,9 @@ print(f"cPow after 2 mult&relin rounds:  (size {cPow.size()}): {cPow}")
 # %%
 # 5. Decrypt & Decode results
 # ------------------------------------------------------------------------------
-# Time to decrypt results! We use HE.decryptInt for this. 
+# Time to decrypt results! We use HE.decryptInt for this.
 #  HE.decrypt() could also be used, in which case the decryption type would be
-#  inferred from the ciphertext metadata. 
+#  inferred from the ciphertext metadata.
 r1     = HE.decryptBGV(ctxt1)
 r2     = HE.decryptBGV(ctxt2)
 rccSum = HE.decryptBGV(ccSum)

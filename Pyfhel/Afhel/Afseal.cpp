@@ -134,7 +134,7 @@ void Afseal::ContextGen(scheme_t scheme,
     {
       parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, qs));
     }
-    
+
     if (plain_modulus_bit_size > 0)
     {
       parms.set_plain_modulus(PlainModulus::Batching((size_t)poly_modulus_degree, (int)plain_modulus_bit_size));
@@ -146,7 +146,7 @@ void Afseal::ContextGen(scheme_t scheme,
     this->context = make_shared<SEALContext>(parms);
     // Codec
     this->bgvEncoder = make_shared<BatchEncoder>(*context);
-  } 
+  }
   else
   {
     throw invalid_argument("scheme must be bfv, bgv or ckks");
@@ -755,13 +755,13 @@ shared_ptr<CKKSEncoder> inline Afseal::get_ckks_encoder()
   return (this->ckksEncoder);
 }
 shared_ptr<BatchEncoder> inline Afseal::get_bgv_encoder()
-{  
+{
   if (this->encryptor == NULL)
   {
     throw std::logic_error("<Afseal>: BGV context not initialized");
   }
-  return (this->bgvEncoder);  
-} 
+  return (this->bgvEncoder);
+}
 shared_ptr<SecretKey> inline Afseal::get_secretKey()
 {
   if (this->secretKey == NULL)

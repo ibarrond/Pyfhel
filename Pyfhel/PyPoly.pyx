@@ -13,9 +13,9 @@ cdef class PyPoly:
 
     Attributes:
         other_ptxt (PyPtxt, optional): Other PyPtxt to deep copy
-    
+
     """
-    
+
     def __cinit__(
         self,
         PyPoly other=None,
@@ -31,17 +31,17 @@ cdef class PyPoly:
             assert ref is not None and ref._pyfhel is not None and ref._pyfhel.afseal is not NULL,\
                 "Missing reference PyCtxt `ref` with initialized _pyfhel member"
             if index is not None:   # Construct from selected Poly in PyCtxt `ref`
-                self._afpoly = new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(_dyn_c(ref._ptr_ctxt)), <size_t>index)  
+                self._afpoly = new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(_dyn_c(ref._ptr_ctxt)), <size_t>index)
                 self._pyfhel = ref._pyfhel
             elif ptxt is not None:  # Construct from Poly in PyPtxt `ptxt`
                 self._afpoly =\
-                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealPtxt*>ptxt._ptr_ptxt), deref(_dyn_c(ref._ptr_ctxt)))  
+                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(<AfsealPtxt*>ptxt._ptr_ptxt), deref(_dyn_c(ref._ptr_ctxt)))
                 self._pyfhel = ptxt._pyfhel
             else:                   # Base constructor
                 self._afpoly =\
-                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(_dyn_c(ref._ptr_ctxt)))  
+                    new AfsealPoly(deref(<Afseal*>ref._pyfhel.afseal), deref(_dyn_c(ref._ptr_ctxt)))
                 self._pyfhel = ref._pyfhel
-                
+
     def __init__(
         self,
         PyPoly other=None,
@@ -50,10 +50,10 @@ cdef class PyPoly:
         size_t index=0,
     ):
         """Initializes a PyPoly polynomial.
-        
+
         To fill the polynomial during initialization you can either:
-            - Provide a PyPoly to deep copy. 
-            - Provide a reference PyCtxt and (optionally) an index for the i-th 
+            - Provide a PyPoly to deep copy.
+            - Provide a reference PyCtxt and (optionally) an index for the i-th
                     polynomial in the cipertext or (optionally) a source PyPtxt.
 
         Attributes:
@@ -67,11 +67,11 @@ cdef class PyPoly:
     def __dealloc__(self):
         if self._afpoly != NULL:
             del self._afpoly
-            
+
     @property
     def _scheme(self):
         """_scheme: returns the scheme type.
-        
+
         Can be set to: 0-None, 1-BFV, 2-CKKS, 3-BGV.
 
         See Also:
@@ -80,18 +80,18 @@ cdef class PyPoly:
         :meta public:
         """
         return Scheme_t(self._scheme)
-    
+
     @_scheme.setter
     def _scheme(self, new_scheme):
         if not isinstance(new_scheme, scheme_t):
-            raise TypeError("<Pyfhel ERROR> Scheme type of PyPoly must be scheme_t")        
+            raise TypeError("<Pyfhel ERROR> Scheme type of PyPoly must be scheme_t")
         self._scheme = new_scheme
-        
+
     @_scheme.deleter
     def _scheme(self):
         self._scheme = Scheme_t.none
-              
-        
+
+
     @property
     def _pyfhel(self):
         """A pyfhel instance, used for operations"""
@@ -100,8 +100,8 @@ cdef class PyPoly:
     @_pyfhel.setter
     def _pyfhel(self, new_pyfhel):
         if not isinstance(new_pyfhel, Pyfhel):
-            raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
-        self._pyfhel = new_pyfhel 
+            raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")
+        self._pyfhel = new_pyfhel
 
     @property
     def coeff_modulus_count(self):
@@ -118,16 +118,16 @@ cdef class PyPoly:
         """List of complex coefficients of the polynomial"""
         self.check_afpoly()
         return self._afpoly.to_coeff_list(deref(<Afseal*>self._pyfhel.afseal))
-    
 
 
-    
+
+
     # =========================================================================
     # ================================== I/O ==================================
     # =========================================================================
     cpdef void save(self, str fileName):
         """save(str fileName)
-        
+
         Save the polynomial into a file. The file can new one or
         exist already, in which case it will be overwriten.
 
@@ -135,7 +135,7 @@ cdef class PyPoly:
             fileName: (str) File where the polynomial will be stored.
 
         Return:
-            None            
+            None
         """
         raise NotImplementedError("No PyPoly Serialization avaliable yet")
 
@@ -151,7 +151,7 @@ cdef class PyPoly:
 
     cpdef void load(self, str fileName, encoding):
         """load(self, str fileName, encoding)
-        
+
         Load the polynomial from a file.
 
         Args:
@@ -159,7 +159,7 @@ cdef class PyPoly:
             encoding: (str, type, int, scheme_t) One of the following:
               * ('int', 'integer', int, 1, scheme_t.INTEGER) -> integer encoding.
               * ('float', 'double', float, 2, scheme_t.FRACTIONAL) -> fractional encoding.
-              
+
         Return:
             None
 
@@ -190,9 +190,9 @@ cdef class PyPoly:
 
     def __list__(self):
         return self.to_coeff_list()
-    
+
     # def __repr__(self):
-    
+
     def __len__(self):
         self.check_afpoly()
         return self._afpoly.get_coeff_count()
@@ -202,7 +202,7 @@ cdef class PyPoly:
         if i >= self.__len__():
             raise IndexError("PyPoly error: coefficient index out of bounds")
         return self._afpoly.get_coeff(deref(<Afseal*>self._pyfhel.afseal), i)
-    
+
     def __setitem__(self, size_t i, cy_complex coeff):
         """"""
         self.check_afpoly()
@@ -217,10 +217,10 @@ cdef class PyPoly:
 
     cpdef cy_complex get_coeff(self, size_t i):
         """Gets the chosen coefficient in position i.
-        
+
         Arguments:
             i (int): coefficient position
-            
+
         Return:
             complex: coefficient value
         """
@@ -228,25 +228,25 @@ cdef class PyPoly:
 
     cpdef void set_coeff(self, cy_complex &coeff, size_t i):
         """Sets the given complex value as coefficient in position i.
-        
+
         Arguments:
             coeff (complex): new coefficient value
-            
+
         Return:
             None
         """
         self.check_afpoly()
         self._afpoly.set_coeff(deref(<Afseal*>self._pyfhel.afseal), coeff, i)
-    
+
     cpdef void from_coeff_list(self, vector[cy_complex] coeff_list, PyCtxt ref):
         """Sets all the coefficients at once.
-        
+
         Arguments:
             coeff_list (List(complex)): list of coefficients
-            
+
         Return:
             int, float, np.array: value decrypted.
-   
+
         See Also:
             :func:`~Pyfhel.Pyfhel.decode`
         """
@@ -261,10 +261,10 @@ cdef class PyPoly:
     # =========================================================================
     # ============================= OPERATIONS ================================
     # =========================================================================
-        
+
     def __add__(self, PyPoly other):
         """Sums this pollynomial with another polynomial.
-        
+
         Sums with a PyPoly, storing the result in a new PyPoly.
 
         Args:
@@ -277,11 +277,11 @@ cdef class PyPoly:
             :func:`~Pyfhel.Pyfhel.poly_add`
         """
         return self._pyfhel.poly_add(self, other, in_new_poly=True)
-    
+
     def __radd__(self, other): return self.__add__(other)
     def __iadd__(self, other):
         """Sums this pollynomial with another polynomial inplace.
-        
+
         Sums with a PyPoly, storing the result in this PyPoly.
 
         Args:
@@ -298,7 +298,7 @@ cdef class PyPoly:
 
     def __sub__(self, other):
         """Subtracts other polynomial from this polynomial.
-        
+
         Subtracts with a PyPoly, storing the result in this PyPoly.
 
         Args:
@@ -311,11 +311,11 @@ cdef class PyPoly:
             :func:`~Pyfhel.Pyfhel.poly_subtract`
         """
         return self._pyfhel.poly_subtract(self, other, in_new_poly=False)
-    
+
     def __rsub__(self, other): return self.__sub__(other)
-    def __isub__(self, other): 
+    def __isub__(self, other):
         """Subtracts other pollynomial from this polynomial inplace.
-        
+
         Subtracts with a PyPoly, storing the result in this PyPoly.
 
         Args:
@@ -328,10 +328,10 @@ cdef class PyPoly:
             :func:`~Pyfhel.Pyfhel.poly_subtract`
         """
         return self._pyfhel.poly_subtract(self, other, in_new_poly=False)
-                        
+
     def __mul__(self, other):
         """Multiplies this polynomial with another polynomial.
-        
+
         Multiplies with a PyPoly, storing the result in a new PyPoly.
 
         Args:
@@ -344,11 +344,11 @@ cdef class PyPoly:
             :func:`~Pyfhel.Pyfhel.poly_multiply`
         """
         return self._pyfhel.poly_multiply(self, other, in_new_poly=True)
-     
+
     def __rmul__(self, other): return self.__mul__(other)
-    def __imul__(self, other): 
+    def __imul__(self, other):
         """Multiplies this polynomial with another polynomial inplace.
-        
+
         Multiplies with a PyPoly, storing the result in this PyPoly.
 
         Args:

@@ -13,4 +13,3 @@ class Scheme_t(Enum):
 
     bgv=0x3
     """Integer encoding, used with encryptInt/decryptInt and encodeInt/decodeInt."""
-

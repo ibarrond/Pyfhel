@@ -76,7 +76,7 @@ class Afhel {
   // ----------------------------- CRYPTOGRAPHY --------------------------------
   // CONTEXT GENERATION
   virtual void ContextGen(
-    scheme_t scheme, uint64_t poly_modulus_degree, uint64_t plain_modulus_bit_size, uint64_t plain_modulus, 
+    scheme_t scheme, uint64_t poly_modulus_degree, uint64_t plain_modulus_bit_size, uint64_t plain_modulus,
     int sec, std::vector<int> qs = {}) = 0;
 
   // KEY GENERATION
@@ -113,7 +113,7 @@ class Afhel {
   virtual void decode_c(AfPtxt &plain1, std::vector<std::complex<double>> &valueVOut) = 0;
   // bgv
   virtual void decode_g(AfPtxt &plain1, std::vector<int64_t> &valueVOut) = 0;
-  
+
   // -------------------------- RELINEARIZATION -------------------------
   virtual void relinearize(AfCtxt &cipher1) = 0;
 

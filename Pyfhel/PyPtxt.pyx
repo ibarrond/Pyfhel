@@ -17,15 +17,15 @@ import numpy as np
 cdef class PyPtxt:
     """Plaintext class of Pyfhel, contains a value/vector of encoded ints/double.
 
-    This class references SEAL, PALISADE and HElib plaintexts, using the one 
+    This class references SEAL, PALISADE and HElib plaintexts, using the one
     corresponding to the backend selected in Pyfhel (SEAL by default).
 
     Attributes:
         other_ptxt (PyPtxt, optional): Other PyPtxt to deep copy
-    
+
     """
-    
-    def __cinit__(self, 
+
+    def __cinit__(self,
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
                   fileName=None,
@@ -45,13 +45,13 @@ cdef class PyPtxt:
                 self._scheme = (to_Scheme_t(scheme) if scheme else Scheme_t.none).value
             if fileName:
                 if self._scheme == scheme_t.none:
-                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid scheme")    
+                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization with loading requires valid scheme")
                 self.load(fileName, to_Scheme_t(self._scheme))
             elif bytestring:
                 if self._scheme == scheme_t.none:
-                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization from bytestring requires valid scheme")    
+                    raise TypeError("<Pyfhel ERROR> PyPtxt initialization from bytestring requires valid scheme")
                 self.from_bytes(bytestring, to_Scheme_t(self._scheme))
-                
+
     def __init__(self,
                   PyPtxt copy_ptxt=None,
                   Pyfhel pyfhel=None,
@@ -61,9 +61,9 @@ cdef class PyPtxt:
         """__init__(PyPtxt copy_ctxt=None, Pyfhel pyfhel=None, fileName=None, scheme=None)
 
         Initializes an empty PyPtxt encoded plaintext.
-        
+
         To fill the plaintext during initialization you can:
-            - Provide a PyPtxt to deep copy. 
+            - Provide a PyPtxt to deep copy.
             - Provide a pyfhel instance to act as its backend.
             - Provide a fileName and an scheme to load the data from a saved file.
 
@@ -79,11 +79,11 @@ cdef class PyPtxt:
     def __dealloc__(self):
         if self._ptr_ptxt != NULL:
             del self._ptr_ptxt
-            
+
     @property
     def scheme(self):
         """scheme: returns the scheme type.
-        
+
         Can be set to: 0-none, 1-bfv, 2-ckks, 3-bgv
 
         See Also:
@@ -92,7 +92,7 @@ cdef class PyPtxt:
         return to_Scheme_t(self._scheme)
     @scheme.setter
     def scheme(self, new_scheme):
-        new_scheme = to_Scheme_t(new_scheme)    
+        new_scheme = to_Scheme_t(new_scheme)
         self._scheme = new_scheme.value
     @scheme.deleter
     def scheme(self):
@@ -110,7 +110,7 @@ cdef class PyPtxt:
     def scale_bits(self):
         """int: number of bits in scale to encode values in ckks"""
         return <int>np.log2( (<AfsealPtxt*>(self._ptr_ptxt)).scale() )
-        
+
     @property
     def _pyfhel(self):
         """A pyfhel instance, used for operations"""
@@ -118,18 +118,18 @@ cdef class PyPtxt:
     @_pyfhel.setter
     def _pyfhel(self, new_pyfhel):
         if not isinstance(new_pyfhel, Pyfhel):
-            raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")       
+            raise TypeError("<Pyfhel ERROR> new_pyfhel needs to be a Pyfhel class object")
         self._pyfhel = new_pyfhel
 
     @property
     def mod_level(self):
         """mod_level: returns the number of moduli consumed so far.
-        
+
         Only usable in ckks.
         """
         return self._mod_level
     @mod_level.setter
-    def mod_level(self, newlevel):  
+    def mod_level(self, newlevel):
         self._mod_level = newlevel
     @mod_level.deleter
     def mod_level(self):
@@ -142,18 +142,18 @@ cdef class PyPtxt:
     cpdef string to_poly_string(self):
         """str: Polynomial representation of the plaintext"""
         return (<AfsealPtxt*>self._ptr_ptxt).to_string()
-    
+
     cpdef bool is_ntt_form(self):
         """bool: Flag to quickly check if it is in NTT form"""
         return (<AfsealPtxt*>self._ptr_ptxt).is_ntt_form()
-    
-    
+
+
     # =========================================================================
     # ================================== I/O ==================================
     # =========================================================================
     cpdef void save(self, str fileName, str compr_mode="zstd"):
         """save(str fileName)
-        
+
         Save the plaintext into a file. The file can new one or
         exist already, in which case it will be overwriten.
 
@@ -162,7 +162,7 @@ cdef class PyPtxt:
             compr_mode: (str) Compression mode. One of "none", "zlib", "zstd".
 
         Return:
-            None            
+            None
         """
         if self._pyfhel is None:
             raise ValueError("<Pyfhel ERROR> plaintext saving requires a Pyfhel instance")
@@ -195,12 +195,12 @@ cdef class PyPtxt:
 
     cpdef void load(self, str fileName, object scheme=None):
         """load(self, str fileName, scheme)
-        
+
         Load the plaintext from a file.
 
         Args:
             fileName: (str) Valid file where the plaintext is retrieved from.
-              
+
         Return:
             None
 
@@ -275,41 +275,41 @@ cdef class PyPtxt:
 
     def encode(self, value):
         """encode(value)
-        
+
         Encodes the given value using _pyfhel.
-        
+
         Arguments:
             value (int, float, np.array): Encodes accordingly to the tipe
-            
+
         Return:
             None
-            
+
         See Also:
             :func:`~Pyfhel.Pyfhel.encode`
         """
         return self._pyfhel.encode(val_vec=value, ptxt=self)
-    
+
     def decode(self):
         """decode()
-        
+
         Decodes itself using _pyfhel.
-        
+
         Arguments:
             None
-            
+
         Return:
             int, float, np.array: value decrypted.
-   
+
         See Also:
             :func:`~Pyfhel.Pyfhel.decode`
         """
-        return self._pyfhel.decode(self)    
-        
+        return self._pyfhel.decode(self)
+
     cpdef void set_scale (self, double new_scale):
         """set_scale(double new_scale)
 
         Sets the scale of the ciphertext.
-        
+
         Args:
             scale (double): new scale of the ciphertext.
         """

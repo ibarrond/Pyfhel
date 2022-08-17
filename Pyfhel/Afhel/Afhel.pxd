@@ -11,9 +11,9 @@ from libcpp.map cimport map as cpp_map
 from libcpp.complex cimport complex as c_complex
 from libcpp cimport bool
 #from numpy cimport int64_t, uint64_t, uint8_t
-        
+
 # Import our own wrapper for iostream classes, used for I/O ops
-from Pyfhel.utils.iostream cimport istream, ostream, ifstream, ofstream       
+from Pyfhel.utils.iostream cimport istream, ostream, ifstream, ofstream
 
 ctypedef long long int64_t
 ctypedef unsigned long long uint64_t
@@ -23,7 +23,7 @@ ctypedef c_complex[double] cy_complex
 #===============================================================================
 #============================ SEAL - C++ API ===================================
 #===============================================================================
-# SEAL plaintext class        
+# SEAL plaintext class
 cdef extern from "seal/plaintext.h" namespace "seal" nogil:
     cdef cppclass Plaintext:
         Plaintext() except +
@@ -32,8 +32,8 @@ cdef extern from "seal/plaintext.h" namespace "seal" nogil:
         string to_string() except +
         inline bool is_ntt_form()
         double scale() except +
-        
-# SEAL ciphertext class        
+
+# SEAL ciphertext class
 cdef extern from "seal/ciphertext.h" namespace "seal" nogil:
     cdef cppclass Ciphertext:
         Ciphertext() except +
@@ -86,7 +86,7 @@ cdef extern from "Afhel.h" nogil:
 
         # -------------------------- CRYPTOGRAPHY ------------------------------
         # CONTEXT & KEY GENERATION
-        void ContextGen(scheme_t scheme, size_t poly_modulus_degree, 
+        void ContextGen(scheme_t scheme, size_t poly_modulus_degree,
                         uint64_t plain_modulus_bit_size, uint64_t plain_modulus,
                         int sec, vector[int] qs) except +
         void KeyGen() except +
@@ -96,11 +96,11 @@ cdef extern from "Afhel.h" nogil:
         # ENCRYPTION
         void encrypt(AfPtxt& ptxt, AfCtxt& ctxtOut) except +
         void encrypt_v(vector[AfPtxt]& plainV, vector[AfCtxt]& ctxtVOut) except +
-        
+
         # DECRYPTION
         void decrypt(AfCtxt &ctxtInOut, AfPtxt &plainOut) except +
         void decrypt_v(vector[AfCtxt] &ctxtV, vector[AfPtxt] &plainVOut) except +
-        
+
         # NOISE LEVEL
         int noise_level(AfCtxt& ctxtInOut) except +
 
@@ -113,7 +113,7 @@ cdef extern from "Afhel.h" nogil:
         # ckks
         void encode_f(vector[double] &values, double scale, AfPtxt &plainVOut) except +
         void encode_c(vector[cy_complex] &values, double scale, AfPtxt &plainVOut) except +
-        
+
         # DECODE
         # bfv
         void decode_i(AfPtxt &ptxt, vector[int64_t] &valueVOut) except +
@@ -126,7 +126,7 @@ cdef extern from "Afhel.h" nogil:
         # AUXILIARY
         void data(AfPtxt &ptxt, uint64_t *dest) except +
         void allocate_zero_poly(uint64_t n, uint64_t coeff_mod_count, uint64_t *dest) except +
-        
+
         # -------------------------- RELINEARIZATION ---------------------------
         void relinearize(AfCtxt& ctxtInOut) except +
 
@@ -154,7 +154,7 @@ cdef extern from "Afhel.h" nogil:
         void multiply(AfCtxt& ctxtInOut, AfCtxt& ctxt) except +
         void multiply_plain(AfCtxt& ctxtInOut, AfPtxt& ptxt) except +
         void multiply_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
-        void multiply_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except + 
+        void multiply_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except +
 
         # Rotate
         void rotate(AfCtxt& ctxtInOut, int& k) except +

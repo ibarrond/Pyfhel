@@ -231,7 +231,7 @@ class Afseal: public Afhel {
   std::shared_ptr<seal::BatchEncoder> bfvEncoder = NULL;
   std::shared_ptr<seal::CKKSEncoder> ckksEncoder = NULL;
   std::shared_ptr<seal::BatchEncoder> bgvEncoder = NULL;
-  
+
   std::shared_ptr<seal::KeyGenerator> keyGenObj = NULL;  /**< Key Generator Object.*/
   std::shared_ptr<seal::SecretKey> secretKey = NULL;     /**< Secret key.*/
   std::shared_ptr<seal::PublicKey> publicKey = NULL;     /**< Public key.*/
@@ -258,8 +258,8 @@ class Afseal: public Afhel {
   // -------------------------- CRYPTOGRAPHY ---------------------------
   // CONTEXT GENERATION
   void ContextGen(
-    scheme_t scheme, uint64_t poly_modulus_degree = 2048, 
-    uint64_t plain_modulus_bit_size = 20, uint64_t plain_modulus = 0, 
+    scheme_t scheme, uint64_t poly_modulus_degree = 2048,
+    uint64_t plain_modulus_bit_size = 20, uint64_t plain_modulus = 0,
     int sec = 128, vector<int> qs = {});
 
   // KEY GENERATION
@@ -300,7 +300,7 @@ class Afseal: public Afhel {
   // AUXILIARY
   void data(AfPtxt &ptxt, uint64_t *dest);
   void allocate_zero_poly(uint64_t n, uint64_t coeff_mod_count, uint64_t *dest);
-  
+
   // -------------------------- RELINEARIZATION -------------------------
   void relinearize(AfCtxt &ctxt);
   void relinearize_v(vector<AfCtxt*> ctxtV);
@@ -351,7 +351,7 @@ class Afseal: public Afhel {
   void mod_switch_to_next_v(vector<AfCtxt*> &ctxtV);
   void mod_switch_to_next_plain(AfPtxt &ptxt);
   void mod_switch_to_next_plain_v(vector<AfPtxt*> &ptxtV);
-  
+
   // --------------------------- VECTORIZATION --------------------------
   void vectorize(vector<AfCtxt*> &ctxtVInOut,
                     function<void(AfCtxt)> f);
@@ -411,7 +411,7 @@ class Afseal: public Afhel {
   scheme_t get_scheme();
   int get_sec();
   int total_coeff_modulus_bit_count();
-  
+
   bool is_secretKey_empty() { return secretKey==NULL; }
   bool is_publicKey_empty() { return publicKey==NULL; }
   bool is_rotKey_empty() { return rotateKeys==NULL; }
@@ -449,7 +449,7 @@ class Afseal: public Afhel {
   void poly_to_plaintext(AfPoly &p, AfPtxt &ptxt);
   AfsealPoly get_publicKey_poly(size_t index);
   AfsealPoly get_secretKey_poly();
-  
+
   // Coefficient Access
   std::complex<double> get_coeff(AfPoly& poly, size_t i);
   void set_coeff(AfPoly& poly, std::complex<double> &val, size_t i);
