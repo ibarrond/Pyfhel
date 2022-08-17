@@ -34,9 +34,14 @@ from setuptools import setup, Extension, find_packages
 # Get platform system
 platform_system = platform.system()
 if platform_system == 'Darwin': # MacOS
-    os.environ["CC"] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/gcc-12 -I/usr/local/include/"
-    os.environ["CXX"] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/g++-12 -I/usr/local/include/"
-    os.environ["LDSHARED"] = "/usr/local/Cellar/gcc@12/12.1.0_1/bin/g++-12 -Wl,-x -dynamiclib -undefined dynamic_lookup"
+    """
+    % cat ~/.zshrc
+    alias gcc="/usr/local/Cellar/gcc/12.1.0/bin/gcc-12"
+    alias g++="/usr/local/Cellar/gcc/12.1.0/bin/g++-12"
+    """
+    os.environ["CC"] = os.environ["gcc"] + " -I/usr/local/include/"
+    os.environ["CXX"] = os.environ["gxx"] + " -I/usr/local/include/"
+    os.environ["LDSHARED"] = os.environ["gxx"] + " -Wl,-x -dynamiclib -undefined dynamic_lookup"
 
 # Read config file
 config = toml.load("pyproject.toml")
