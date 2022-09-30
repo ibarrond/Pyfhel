@@ -647,6 +647,13 @@ int Afseal::get_sec()
   return static_cast<std::underlying_type<sec_level_type>::type>(
       this->get_context()->first_context_data()->qualifiers().sec_level);
 }
+std::vector<uint64_t> Afseal::get_qi_values()
+{ 
+  std::vector<uint64_t> qi;
+  for (auto &modulus : this->get_context()->first_context_data()->parms().coeff_modulus()){
+    qi.push_back(modulus.value());
+  }
+}
 // GETTERS
 shared_ptr<SEALContext> inline Afseal::get_context()
 {

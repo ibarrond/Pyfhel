@@ -398,6 +398,7 @@ class Afseal: public Afhel {
 
   // GETTERS
   bool batchEnabled();
+  std::vector<uint64_t> get_qi_values();
   size_t get_nSlots();
   int get_nRots();
   uint64_t get_plain_modulus();

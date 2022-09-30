@@ -9,6 +9,15 @@ cpdef np.ndarray[dtype=np.int64_t, ndim=1] vec_to_array_i(vector[int64_t] vec):
 
 @cython.wraparound(False)
 @cython.boundscheck(False)
+cpdef np.ndarray[dtype=np.uint64_t, ndim=1] vec_to_array_u(vector[uint64_t] vec):
+    cdef np.ndarray[dtype=np.uint64_t, ndim=1] arr = np.empty(vec.size(), dtype=np.uint64)
+    cdef int64_t i
+    for i in range(vec.size()):
+        arr[i]=vec[i]
+    return arr
+
+@cython.wraparound(False)
+@cython.boundscheck(False)
 cpdef np.ndarray[dtype=double, ndim=1] vec_to_array_f(vector[double] vec):
     cdef int64_t l = <int64_t>(vec.size())
     cdef np.ndarray[dtype=double, ndim=1] arr = np.empty(l, dtype=np.float64)

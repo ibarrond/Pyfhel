@@ -182,6 +182,7 @@ class Afhel {
 
   // ----------------------------- AUXILIARY ----------------------------
   // GETTERS
+  virtual std::vector<uint64_t> get_qi_values() = 0;
   virtual uint64_t get_plain_modulus() = 0;
   virtual size_t get_poly_modulus_degree() = 0;
   virtual scheme_t get_scheme() = 0;
