@@ -355,6 +355,12 @@ cdef class PyCtxt:
             raise TypeError("<Pyfhel ERROR> other summand must be numeric, array, PyCtxt or PyPtxt")
         return self
 
+    def __pos__(self):
+        """__pos__()
+        
+        Computes the cumulative addition over all the slots of the ciphertext.
+        """
+        return self._pyfhel.cumul_add(self, in_new_ctxt=True)
 
     def __sub__(self, other):
         """__sub__(other)
@@ -465,6 +471,57 @@ cdef class PyCtxt:
                         " PyPtxt, int|float or 1D np.array"
                         "(is %s instead)"%(type(other)))
 
+    def __matmul__(self, other):
+        """Performs the scalar product with another ciphertext
+        
+        The result is stored in a new ciphertext.
+
+        Args:
+            other (PyCtxt): Ciphertext to perform the scalar product with.
+
+        Returns:
+            PyCtxt: Ciphertext resulting of scalar product, with the first slot
+                    containing the result.
+
+        Raise:
+            TypeError: if other doesn't have a valid type.
+            
+        See Also:
+            :func:`~Pyfhel.Pyfhel.scalar_prod`
+        """
+        other_ = self.encode_operand(other)
+        _, other_ = self._pyfhel.align_mod_n_scale(self, other_,copy_this=False,
+                                copy_other=(other_ is other), only_mod=True)
+        if isinstance(other_, PyCtxt):
+            return self._pyfhel.scalar_prod(self, other_, in_new_ctxt=True)
+        elif isinstance(other_, PyPtxt):
+            return self._pyfhel.scalar_prod_plain(self, other_, in_new_ctxt=True)
+    def __imatmul__(self, other):
+        """Performs the in-place scalar product with another ciphertext
+        
+        The result is stored in a new ciphertext.
+
+        Args:
+            other (PyCtxt): Ciphertext to perform the scalar product with.
+
+        Returns:
+            PyCtxt: Ciphertext resulting of scalar product, with the first slot
+                    containing the result.
+
+        Raise:
+            TypeError: if other doesn't have a valid type.
+            
+        See Also:
+            :func:`~Pyfhel.Pyfhel.multiply`
+        """
+        other_ = self.encode_operand(other)
+        _, other_ = self._pyfhel.align_mod_n_scale(self, other_,copy_this=False,
+                                copy_other=(other_ is other), only_mod=True)
+        if isinstance(other_, PyCtxt):
+            self._pyfhel.scalar_prod(self, other_, in_new_ctxt=False)
+        elif isinstance(other_, PyPtxt):
+            self._pyfhel.scalar_prod_plain(self, other_, in_new_ctxt=False)
+        return self
 
     def __truediv__(self, divisor):
         """__truediv__(divisor)

@@ -148,9 +148,11 @@ cdef extern from "Afhel.h" nogil:
         void multiply_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
         void multiply_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except + 
 
-        # Rotate
-        void rotate(AfCtxt& ctxtInOut, int& k) except +
-        void rotate_v(vector[AfCtxt]& ctxtV, int& k) except +
+        # Rotate & flip
+        void rotate(AfCtxt& ctxtInOut, int k) except +
+        void rotate_v(vector[AfCtxt]& ctxtV, int k) except +
+        void flip(AfCtxt& ctxtInOut) except +
+        void flip_v(vector[AfCtxt]& ctxtV) except +
 
         # Power
         void exponentiate(AfCtxt& ctxtInOut, uint64_t& expon) except +

@@ -933,6 +933,57 @@ cdef class Pyfhel:
         self.afseal.add_plain(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
         return ctxt
 
+    cpdef PyCtxt cumul_add(self, PyCtxt ctxt, bool in_new_ctxt=False, size_t n_elements=0):
+        """Performs cumulative addition over the first n_elements of a PyCtxt.
+        
+        Runs log2(n_elements) additions and rotations to obtain the cumulative 
+        sum in the first element of the result. For correct results use a power
+        of 2 for n_elements. If n_elements is 0, it will use the size (nSlots) 
+        of the ciphertext.
+    
+        Args:
+            ctxt (PyCtxt): ciphertext whose values are rotated.
+            n_elements (int): number of elements to rotate. If 0, uses the 
+                ciphertext's nSlots.
+            in_new_ctxt (bool): result in a newly created ciphertext
+            
+        Return:
+            PyCtxt: resulting ciphertext, the input transformed or a new one
+        """
+        if self.is_rotate_key_empty():
+            warn("<Pyfhel Warning> rot_key empty, initializing it for rotation.", RuntimeWarning)
+            self.rotateKeyGen()
+
+        # Check n_elements validity
+        cdef size_t n_slots = self.get_nSlots()
+        if (n_elements == 0):
+            n_elements = n_slots
+        elif (n_elements > n_slots):
+            raise RuntimeError(f"<Pyfhel ERROR> n_elements ({n_elements}) > nSlots ({self.nSlots})")
+
+        # New or existing ciphertext
+        if (in_new_ctxt):
+            ctxt = PyCtxt(ctxt)
+        
+        # Auxiliary ciphertext
+        aux = PyCtxt(copy_ctxt=ctxt)
+
+        # Add the second row in bfv
+        if self.scheme == Scheme_t.bfv and (n_elements > n_slots // 2):
+            self.afseal.flip(deref(ctxt._ptr_ctxt))
+            self.afseal.add(deref(ctxt._ptr_ctxt), deref(aux._ptr_ctxt))
+            n_elements = n_slots // 2  # loop over the entire vector in the next step
+            aux._ptr_ctxt = make_shared[AfsealCtxt](deref(dyn_cast[AfsealCtxt,AfCtxt](ctxt._ptr_ctxt)))
+
+        # Cumulative addition
+        cdef int k = 1
+        while (k < n_elements):
+            self.afseal.rotate(deref(ctxt._ptr_ctxt), -k)
+            self.afseal.add(deref(ctxt._ptr_ctxt), deref(aux._ptr_ctxt))
+            aux._ptr_ctxt = make_shared[AfsealCtxt](deref(dyn_cast[AfsealCtxt,AfCtxt](ctxt._ptr_ctxt)))
+            k *= 2
+        return ctxt
+            
             
     cpdef PyCtxt sub(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=False):
         """Substracts one PyCtxt ciphertext from another.
@@ -1036,7 +1087,83 @@ cdef class Pyfhel:
         self.afseal.multiply_plain(deref(ctxt._ptr_ctxt), deref(ptxt._ptr_ptxt))
         ctxt.mod_level += 1
         return ctxt
+    
+    cpdef PyCtxt scalar_prod(self, 
+        PyCtxt ctxt, PyCtxt ctxt_other,
+        bool with_relin=True,
+        bool with_mod_switch=True,
+        bool in_new_ctxt=False,
+        size_t n_elements=0
+    ):
+        """Performs a scalar product between two PyCtxt ciphertexts.
+
+        Performs a scalar product between two ciphertexts. Encoding must be the same.
+        Requires same context and encryption with same public key.
+
+        Args:
+            ctxt (PyCtxt): ciphertext multiplied with ctxt_other.   
+            ctxt_other (PyCtxt): ciphertext left untouched.  
+            n_elements (size_t): number of elements to be considered on each vector.
+                If 0, the full encrypted vectors are considered (get_n_slots/ctxt.size).
+            with_relin (bool): whether to perform relinearization after multiplication.
+            with_mod_switch (bool): whether to perform modulus switching after multiplication.
+            in_new_ctxt (bool): result in a newly created ciphertext.
+
+        Return:
+            PyCtxt: resulting ciphertext, the input transformed or a new one
+        """
+        if self.is_rotate_key_empty():
+            warn("<Pyfhel Warning> rot_key empty, initializing it for rotation.", RuntimeWarning)
+            self.rotateKeyGen()
+
+        # Multiply ctxt with ctxt_other
+        ctxt = self.multiply(ctxt, ctxt_other, in_new_ctxt=in_new_ctxt)
+        if (with_relin):
+            self.relinearize(ctxt)
+        if (with_mod_switch and self.scheme == Scheme_t.ckks):
+            self.mod_switch_to_next_ctxt(ctxt)
         
+        # Return cumulative addition
+        return self.cumul_add(ctxt, in_new_ctxt=False, n_elements=n_elements)
+
+    cpdef PyCtxt scalar_prod_plain(self, 
+        PyCtxt ctxt, PyPtxt ptxt_other,
+        bool with_relin=True,
+        bool with_mod_switch=True,
+        bool in_new_ctxt=False,
+        size_t n_elements=0
+    ):
+        """Performs a scalar product between two PyCtxt ciphertexts.
+
+        Performs a scalar product between two ciphertexts. Encoding must be the same.
+        Requires same context and encryption with same public key.
+
+        Args:
+            ctxt (PyCtxt): ciphertext multiplied with ctxt_other.   
+            ptxt_other (PyPtxt): plaintext left untouched.  
+            n_elements (size_t): number of elements to be considered on each vector.
+                If 0, the full encrypted vectors are considered (get_n_slots/ctxt.size).
+            with_relin (bool): whether to perform relinearization after multiplication.
+            with_mod_switch (bool): whether to perform modulus switching after multiplication.
+            in_new_ctxt (bool): result in a newly created ciphertext.
+
+        Return:
+            PyCtxt: resulting ciphertext, the input transformed or a new one
+        """
+        if self.is_rotate_key_empty():
+            warn("<Pyfhel Warning> rot_key empty, initializing it for rotation.", RuntimeWarning)
+            self.rotateKeyGen()
+
+        # Multiply ctxt with ctxt_other
+        self.multiply_plain(ctxt, ptxt_other)
+        if (with_relin):
+            self.relinearize(ctxt)
+        if (with_mod_switch and self.scheme == Scheme_t.ckks):
+            self.mod_switch_to_next_ctxt(ctxt)
+        
+        # Return cumulative addition
+        return self.cumul_add(ctxt, in_new_ctxt=False, n_elements=n_elements)
+
     cpdef PyCtxt rotate(self, PyCtxt ctxt, int k, bool in_new_ctxt=False):
         """Rotates cyclically PyCtxt ciphertext values k positions.
         
@@ -1062,6 +1189,29 @@ cdef class Pyfhel:
             self.afseal.rotate(deref(ctxt._ptr_ctxt), k)
             return ctxt
         
+    cpdef PyCtxt flip(self, PyCtxt ctxt, bool in_new_ctxt=False):
+        """Swaps the two rows of a PyCtxt ciphertext with BFV scheme.
+        
+        Requires previously initialized rotation keys with rotateKeyGen().
+    
+        Args:
+            ctxt (PyCtxt): ciphertext whose values are rotated.
+            in_new_ctxt (bool): result in a newly created ciphertext
+            
+        Return:
+            PyCtxt: resulting ciphertext, the input transformed or a new one
+        """
+        if self.is_rotate_key_empty():
+            warn("<Pyfhel Warning> rot_key empty, initializing it for rotation.", RuntimeWarning)
+            self.rotateKeyGen()
+        if (in_new_ctxt):
+            new_ctxt = PyCtxt(ctxt)
+            self.afseal.flip(deref(new_ctxt._ptr_ctxt))
+            return new_ctxt
+        else:
+            self.afseal.flip(deref(ctxt._ptr_ctxt))
+            return ctxt
+
     cpdef PyCtxt power(self, PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=False):
         """Exponentiates PyCtxt ciphertext value/s to expon power.
         
@@ -1103,7 +1253,39 @@ cdef class Pyfhel:
             raise RuntimeError("<Pyfhel ERROR> Scheme must be CKKS for rescaling")
         self.afseal.rescale_to_next(deref(ctxt._ptr_ctxt))
 
-    def mod_switch_to_next(self, cipher_or_plain):
+    cpdef PyCtxt mod_switch_to_next_ctxt(self, PyCtxt ctxt, bool in_new_ctxt=False):
+        """Reduces the ciphertext modulus with next prime in the qi chain.
+
+        Args:
+            ctxt (PyCtxt): Ciphertext to reduce.
+            in_new_ctxt (bool): result in a newly created ciphertext
+
+        Return:
+            PyCtxt: resulting ciphertext, the input transformed or a new one
+        """
+        new_ctxt = PyCtxt(ctxt) if (in_new_ctxt) else ctxt
+        if new_ctxt.scheme == Scheme_t.ckks:
+            new_ctxt.mod_level += 1
+            self.afseal.mod_switch_to_next(deref(new_ctxt._ptr_ctxt))
+        return new_ctxt
+
+    cpdef PyPtxt mod_switch_to_next_ptxt(self, PyPtxt ptxt, bool in_new_ptxt=True):
+        """Reduces the plaintext modulus with next prime in the qi chain.
+
+        Args:
+            ptxt (PyPtxt): Plaintext to reduce.
+            in_new_ptxt (bool): result in a newly created plaintext
+
+        Return:
+            PyPtxt: resulting plaintext, the input transformed or a new one
+        """
+        new_ptxt = PyPtxt(ptxt) if (in_new_ptxt) else ptxt
+        if new_ptxt.scheme == Scheme_t.ckks:
+            new_ptxt.mod_level += 1
+            self.afseal.mod_switch_to_next_plain(deref(new_ptxt._ptr_ptxt))
+        return new_ptxt
+
+    def mod_switch_to_next(self, cipher_or_plain, in_new_obj=False):
         """Reduces the ciphertext/plaintext modulus with next prime in the qi chain.
 
         Args:
@@ -1113,11 +1295,9 @@ cdef class Pyfhel:
             None
         """
         if isinstance(cipher_or_plain, PyCtxt):
-            cipher_or_plain.mod_level += 1
-            self.afseal.mod_switch_to_next(deref((<PyCtxt>cipher_or_plain)._ptr_ctxt))
+            return self.mod_switch_to_next_ctxt(cipher_or_plain, in_new_obj)
         elif isinstance(cipher_or_plain, PyPtxt):
-            cipher_or_plain.mod_level += 1
-            self.afseal.mod_switch_to_next_plain(deref((<PyPtxt>cipher_or_plain)._ptr_ptxt))
+            return self.mod_switch_to_next_ptxt(cipher_or_plain, in_new_obj)
         else:
             raise TypeError("<Pyfhel ERROR> Expected PyCtxt or PyPtxt for mod switching.")
     

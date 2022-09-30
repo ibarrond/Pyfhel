@@ -329,8 +329,8 @@ class Afseal: public Afhel {
   void multiply_plain_v(vector<AfCtxt*> &ctxtVInOut, vector<AfPtxt*> &ptxtV2);
 
   // ROTATE
-  void rotate(AfCtxt &ctxt, int &k);
-  void rotate_v(vector<AfCtxt*> &ctxtV, int &k);
+  void rotate(AfCtxt &ctxt, int k);
+  void rotate_v(vector<AfCtxt*> &ctxtV, int k);
   void flip(AfCtxt &ctxt);
   void flip_v(vector<AfCtxt*> &ctxtV);
 

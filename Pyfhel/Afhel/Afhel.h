@@ -138,8 +138,10 @@ class Afhel {
   virtual void multiply_plain_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
 
   // ROTATE
-  virtual void rotate(AfCtxt &cipher1, int &k) = 0;
-  virtual void rotate_v(std::vector<AfCtxt*> &cipherV, int &k) = 0;
+  virtual void rotate(AfCtxt &cipher1, int k) = 0;
+  virtual void rotate_v(std::vector<AfCtxt*> &cipherV, int k) = 0;
+  virtual void flip(AfCtxt &ctxt) = 0;
+  virtual void flip_v(std::vector<AfCtxt*> &ctxtV) = 0;
 
   // POWER
   virtual void exponentiate(AfCtxt &cipher1, uint64_t &expon) = 0;

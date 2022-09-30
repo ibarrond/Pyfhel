@@ -393,7 +393,7 @@ void Afseal::multiply_plain_v(vector<AfCtxt *> &ctxtVInOut, vector<AfPtxt *> &pt
 }
 
 // ROTATION
-void Afseal::rotate(AfCtxt &ctxt, int &k)
+void Afseal::rotate(AfCtxt &ctxt, int k)
 {
   if (this->get_scheme() == scheme_t::bfv)
   {
@@ -408,7 +408,7 @@ void Afseal::rotate(AfCtxt &ctxt, int &k)
     throw std::logic_error("<Afseal>: Scheme not supported for rotation");
   }
 }
-void Afseal::rotate_v(vector<AfCtxt *> &ctxtV, int &k)
+void Afseal::rotate_v(vector<AfCtxt *> &ctxtV, int k)
 {
   auto ev = this->get_evaluator();
   auto &rtk = *(this->get_rotateKeys());
