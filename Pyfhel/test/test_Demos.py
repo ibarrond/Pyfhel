@@ -52,5 +52,8 @@ def test_Demo_5_CS_Client():
 def test_Demo_6_MultDepth():
     execfile(EXAMPLES_FOLDER / 'Demo_6_MultDepth.py')
 
+def test_Demo_7_ScalarProd():
+    execfile(EXAMPLES_FOLDER / 'Demo_7_ScalarProd.py')
+
 def test_Demo_WAHC21():
     execfile(EXAMPLES_FOLDER / 'Demo_WAHC21.py')
