@@ -71,14 +71,13 @@ Afseal::~Afseal(){};
 // ------------------------------ CRYPTOGRAPHY ---------------------------------
 // -----------------------------------------------------------------------------
 // CONTEXT GENERATION
-void Afseal::ContextGen(scheme_t scheme,
+string Afseal::ContextGen(scheme_t scheme,
                         uint64_t poly_modulus_degree,
                         uint64_t plain_modulus_bit_size,
                         uint64_t plain_modulus,
                         int sec,
                         std::vector<int> qs)
 {
-
   // BFV
   if (scheme == scheme_t::bfv)
   {
@@ -113,18 +112,33 @@ void Afseal::ContextGen(scheme_t scheme,
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, qs));
     this->context = make_shared<SEALContext>(parms, true, sec_map[sec]);
-    // Codec
-    this->ckksEncoder = make_shared<CKKSEncoder>(*context);
   }
   else
   {
     throw invalid_argument("scheme must be bfv or ckks");
   }
-  // Evaluator
-  this->evaluator = make_shared<Evaluator>(*context);
-  // Key generator
-  this->keyGenObj = make_shared<KeyGenerator>(*context);
+  
+  // Build codec, keygen and evaluator only if context is valid
+  if (this->context->parameters_set())
+  {
+    // Codec
+    if (scheme == scheme_t::bfv)
+    {
+      this->bfvEncoder = make_shared<BatchEncoder>(*context);
+    } 
+    else
+    {
+      this->ckksEncoder = make_shared<CKKSEncoder>(*context);
+    }
+    // Evaluator
+    this->evaluator = make_shared<Evaluator>(*context);
+    // Key generator
+    this->keyGenObj = make_shared<KeyGenerator>(*context);
+  }
+  return string(this->context->parameter_error_name())  + ": " +
+                this->context->parameter_error_message();
 }
+
 
 // KEY GENERATION
 void Afseal::KeyGen()

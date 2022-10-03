@@ -31,7 +31,7 @@ cdef class Pyfhel:
     cdef double _scale
     # =========================== CRYPTOGRAPHY =================================
     # CONTEXT & KEY GENERATION
-    cpdef void contextGen(self,
+    cpdef string contextGen(self,
             str scheme, int n, int64_t q=*, int t_bits=*, int64_t t=*, int sec=*,
             double scale=*, int scale_bits=*,  vector[int] qi =*) 
     cpdef void keyGen(self) 

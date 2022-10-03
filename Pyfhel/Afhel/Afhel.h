@@ -71,7 +71,7 @@ class Afhel {
 
   // ----------------------------- CRYPTOGRAPHY --------------------------------
   // CONTEXT GENERATION
-  virtual void ContextGen(
+  virtual std::string ContextGen(
     scheme_t scheme, uint64_t poly_modulus_degree, uint64_t plain_modulus_bit_size, uint64_t plain_modulus, 
     int sec, std::vector<int> qs = {}) = 0;
 

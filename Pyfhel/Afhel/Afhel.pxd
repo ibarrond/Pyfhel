@@ -82,7 +82,7 @@ cdef extern from "Afhel.h" nogil:
 
         # -------------------------- CRYPTOGRAPHY ------------------------------
         # CONTEXT & KEY GENERATION
-        void ContextGen(scheme_t scheme, size_t poly_modulus_degree, 
+        string ContextGen(scheme_t scheme, size_t poly_modulus_degree, 
                         uint64_t plain_modulus_bit_size, uint64_t plain_modulus,
                         int sec, vector[int] qs) except +
         void KeyGen() except +

@@ -79,6 +79,7 @@ static std::map<seal::scheme_type, scheme_t> scheme_map {
 };
 
   std::map<int, sec_level_type> sec_map{
+      {0, seal::sec_level_type::none},
       {128, seal::sec_level_type::tc128},
       {192, seal::sec_level_type::tc192},
       {256, seal::sec_level_type::tc256},
@@ -222,6 +223,7 @@ class AfsealPoly: public AfPoly {
 // =============================================================================
 // ================== ABSTRACTION FOR HOMOMORPHIC ENCR. LIBS ===================
 // =============================================================================
+
 // DYNAMIC CASTING
 inline AfsealCtxt& _dyn_c(AfCtxt& c){return dynamic_cast<AfsealCtxt&>(c);};
 inline AfsealPtxt& _dyn_p(AfPtxt& p){return dynamic_cast<AfsealPtxt&>(p);};
@@ -260,7 +262,7 @@ class Afseal: public Afhel {
 
   // -------------------------- CRYPTOGRAPHY ---------------------------
   // CONTEXT GENERATION
-  void ContextGen(
+  string ContextGen(
     scheme_t scheme, uint64_t poly_modulus_degree = 2048, 
     uint64_t plain_modulus_bit_size = 20, uint64_t plain_modulus = 0, 
     int sec = 128, vector<int> qs = {});

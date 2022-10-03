@@ -187,7 +187,7 @@ cdef class Pyfhel:
     # =========================================================================
     # ....................... CONTEXT & KEY GENERATION ........................
     
-    cpdef void contextGen(self,
+    cpdef string contextGen(self,
         str scheme, int n, int64_t q=0, int t_bits=0, int64_t t=0, int sec=128,
         double scale=1, int scale_bits=0, vector[int] qi = {}):
         """Generates Homomorphic Encryption context based on parameters.
@@ -253,7 +253,7 @@ cdef class Pyfhel:
             available_rescalings = np.cumsum(np.triu(np.tile(qi, (len(qi), 1)), k=1), axis=1)
             if <int>np.log2(self._scale) not in available_rescalings:
                 warn("<Pyfhel Warning> qi {} do not support rescaling for scale {}.".format(qi, self._scale))
-        self.afseal.ContextGen(<scheme_t>s.value, n, t_bits * (t_bits>0), t, sec, qi)
+        return self.afseal.ContextGen(<scheme_t>s.value, n, t_bits, t, sec, qi)
         
     cpdef void keyGen(self):
         """Generates a pair of secret/Public Keys.
