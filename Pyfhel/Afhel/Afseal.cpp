@@ -103,9 +103,7 @@ void Afseal::ContextGen(scheme_t scheme,
     {
       parms.set_plain_modulus(plain_modulus);
     }
-    this->context = make_shared<SEALContext>(parms);
-    // Codec
-    this->bfvEncoder = make_shared<BatchEncoder>(*context);
+    this->context = make_shared<SEALContext>(parms, true, sec_map[sec]);
   }
   // CKKS
   else if (scheme == scheme_t::ckks)
@@ -114,7 +112,7 @@ void Afseal::ContextGen(scheme_t scheme,
     // Context generation
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, qs));
-    this->context = make_shared<SEALContext>(parms);
+    this->context = make_shared<SEALContext>(parms, true, sec_map[sec]);
     // Codec
     this->ckksEncoder = make_shared<CKKSEncoder>(*context);
   }
@@ -530,11 +528,11 @@ size_t Afseal::save_context(ostream &out_stream, string &compr_mode)
   return (size_t)this->get_context()->key_context_data()->parms().save(
       out_stream, compr_mode_map[compr_mode]);
 }
-size_t Afseal::load_context(istream &in_stream)
+size_t Afseal::load_context(istream &in_stream, int sec)
 {
   EncryptionParameters parms;
   size_t loaded_bytes = (size_t)parms.load(in_stream);
-  this->context = make_shared<SEALContext>(parms);
+  this->context = make_shared<SEALContext>(parms, true, sec_map[sec]);
   if (parms.scheme() == scheme_type::bfv)
   {
     this->bfvEncoder = make_shared<BatchEncoder>(*context);
@@ -627,11 +625,6 @@ bool Afseal::batchEnabled()
 }
 long Afseal::maxBitCount(long poly_modulus_degree, int sec_level)
 {
-  std::map<int, sec_level_type> sec_map{
-      {128, sec_level_type::tc128},
-      {192, sec_level_type::tc192},
-      {256, sec_level_type::tc256},
-  };
   return CoeffModulus::MaxBitCount(poly_modulus_degree, sec_map[sec_level]);
 }
 double Afseal::scale(AfCtxt &ctxt)

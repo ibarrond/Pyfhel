@@ -78,6 +78,11 @@ static std::map<seal::scheme_type, scheme_t> scheme_map {
    {seal::scheme_type::ckks, scheme_t::ckks},
 };
 
+  std::map<int, sec_level_type> sec_map{
+      {128, seal::sec_level_type::tc128},
+      {192, seal::sec_level_type::tc192},
+      {256, seal::sec_level_type::tc256},
+  };
 
 // =============================================================================
 // ======================= ABSTRACTION FOR PLAINTEXTS ==========================
@@ -363,7 +368,7 @@ class Afseal: public Afhel {
 
   // SAVE/LOAD CONTEXT
   size_t save_context(ostream &out_stream, string &compr_mode);
-  size_t load_context(istream &in_stream);
+  size_t load_context(istream &in_stream, int sec=128);
 
   // SAVE/LOAD PUBLICKEY
   size_t save_public_key(ostream &out_stream, string &compr_mode);

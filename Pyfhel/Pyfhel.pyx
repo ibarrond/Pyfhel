@@ -62,6 +62,7 @@ cdef class Pyfhel:
         self.afseal = new Afseal()
         self._qi = []
         self._scale = 1
+        self._sec = 128   # Default security: 128 bits
     
     def __init__(self,
                   context_params=None,
@@ -154,7 +155,7 @@ cdef class Pyfhel:
     
     @property
     def sec(self):
-        """Security (bits). Sets an appropriate coefficient modulus (q). Only applies to BFV scheme."""
+        """Security (bits). Sets an appropriate coefficient modulus (q)."""
         return (<Afseal*>self.afseal).get_sec()
 
     @property
@@ -216,12 +217,12 @@ cdef class Pyfhel:
                      and equal to the number of slots (nSlots) in bfv.
             q (int, optional): Coefficient modulus. (SEAL's poly_modulus). 
                      Overriden by qi if scheme is "ckks" and sec if scheme is "bfv". 
+            sec (int, optional): Security level equivalent in AES. 128, 192 or 256.
+                More means more security but also more costly. Sets q if scheme is "bfv".
             
             -- Only for BFV scheme --
             t(int, optional):  Only for bfv. Plaintext modulus. (SEAL's plain_modulus) 
             t_bits (int, optional):  Only for bfv. Plaintext modulus bit size. Overrides t.
-            sec (int, optional): Only for bfv. Security level equivalent in AES.
-                128, 192 or 256. More means more security but also more costly. Sets q.
             -- Only for CKKS scheme --
             scale (int, optional): Upscale factor for fixed-point values. 
             qi (list of ints, optional): Chain of prime sizes (#bits), to set q.
@@ -230,6 +231,8 @@ cdef class Pyfhel:
             None
         """
         s = to_Scheme_t(scheme)
+        assert sec in {0, 128, 192, 256}, "Pyfhel schemes require `sec` to be 0 (unset), 128, 192 or 256"
+        self._sec = sec
         if s==Scheme_t.bfv:
             assert (t_bits>0 or t>0), "BFV scheme requires `t_bits` or `t` to be set"
             if not qi.empty():  # Compress all moduli into one
@@ -1407,7 +1410,7 @@ cdef class Pyfhel:
         cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
         _read_cy_attributes(self, istr)
-        return self.afseal.load_context(istr)
+        return self.afseal.load_context(istr, self._sec)
 
     cpdef size_t save_public_key(self, fileName, str compr_mode="zstd"):
         """Saves current public key in a file
@@ -1546,7 +1549,7 @@ cdef class Pyfhel:
         cdef stringstream istr
         istr.write(content,len(content))
         _read_cy_attributes(self, istr)
-        return self.afseal.load_context(istr)
+        return self.afseal.load_context(istr, self._sec)
 
     cpdef bytes to_bytes_public_key(self, str compr_mode="zstd"):
         """Saves current public key in a bytes string

@@ -169,7 +169,7 @@ cdef extern from "Afhel.h" nogil:
         # -------------------------------- I/O --------------------------------
         # SAVE/LOAD CONTEXT
         size_t save_context(ostream &out_stream, string &compr_mode) except +
-        size_t load_context(istream &in_stream) except +
+        size_t load_context(istream &in_stream, int sec) except +
 
         # SAVE/LOAD PUBLICKEY
         size_t save_public_key(ostream &out_stream, string &compr_mode) except +

@@ -156,7 +156,7 @@ class Afhel {
   // -------------------------------- I/O -------------------------------
   // SAVE/LOAD CONTEXT
   virtual size_t save_context(std::ostream &out_stream, std::string &compr_mode) = 0;
-  virtual size_t load_context(std::istream &in_stream) = 0;
+  virtual size_t load_context(std::istream &in_stream, int sec) = 0;
 
   // SAVE/LOAD PUBLICKEY
   virtual size_t save_public_key(std::ostream &out_stream, std::string &compr_mode) = 0;
