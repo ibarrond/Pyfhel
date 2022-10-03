@@ -154,7 +154,7 @@ def run_command(command, **kwargs):
         line = process.stdout.readline()
         if not line and process.poll() is not None:
             break
-        print(line.decode(), end='')
+        print(line.decode("utf-8", "backslashreplace"), end='')
 
 # ---------------------------- AUXILIARY CLEANER -------------------------------
 # Tired of cleaning all compilation and distribution by hand.
