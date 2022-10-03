@@ -1671,15 +1671,13 @@ cdef class Pyfhel:
         """
         return (<Afseal*>self.afseal).maxBitCount(poly_modulus_degree, sec_level)
 
-    cpdef np.ndarray[np.uint64_t, ndim=1] get_qi_values(self):
-        """Returns the qi values used in the current context.
+    cpdef vector[uint64_t] get_qi_values(self):
+        """Returns the qi values (coeff. modulus values) used in the current context.
 
         Return:
-            np.ndarray[np.uint64_t, ndim=1]: qi values.
-        """
-        cdef vector[uint64_t] qi_values = (<Afseal*>self.afseal).get_qi_values()
-        
-        return vec_to_array_u(qi_values)
+            vector[uint64_t]: qi values.
+        """        
+        return (<Afseal*>self.afseal).get_qi_values()
 
     def multDepth(self, max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False):
         """Empirically determines the multiplicative depth of a Pyfhel Object

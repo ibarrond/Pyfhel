@@ -147,6 +147,7 @@ cdef class Pyfhel:
     # GETTERS
     cpdef bool batchEnabled(self) 
     cpdef size_t get_nSlots(self) 
+    cpdef vector[uint64_t] get_qi_values(self)
     cpdef uint64_t get_plain_modulus(self) 
     cpdef size_t get_poly_modulus_degree(self) 
     cpdef scheme_t get_scheme(self) 
