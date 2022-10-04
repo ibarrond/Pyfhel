@@ -27,8 +27,8 @@ cdef class PyCtxt:
     cpdef int size(self)
     cpdef void set_scale(self, double scale)
     cpdef void round_scale(self)
-    cpdef void save(self, str fileName, str compr_mode=*)
-    cpdef void load(self, str fileName, object scheme=*)
+    cpdef size_t save(self, str fileName, str compr_mode=*)
+    cpdef size_t load(self, str fileName, object scheme=*)
     cpdef bytes to_bytes(self, str compr_mode=*)
     cpdef void from_bytes(self, bytes content, object scheme=*)
 

@@ -195,7 +195,7 @@ cdef class PyCtxt:
         """
         return (PyCtxt, (None, self._pyfhel, None, self.to_bytes(), self.scheme.name))
 
-    cpdef void save(self, str fileName, str compr_mode="zstd"):
+    cpdef size_t save(self, str fileName, str compr_mode="zstd"):
         """save(str fileName)
         
         Save the ciphertext into a file. The file can new one or
@@ -206,18 +206,21 @@ cdef class PyCtxt:
             compr_mode: (str) Compression mode. One of "none", "zlib", "zstd".
 
         Return:
-            None            
+            size_t: Number of bytes written.            
         """
         if self._pyfhel is None:
             raise ValueError("<Pyfhel ERROR> ciphertext saving requires a Pyfhel instance")
         cdef ofstream* outputter
+        cdef size_t size
         cdef string bFileName = _to_valid_file_str(fileName).encode('utf8')
         cdef string bcompr_mode = compr_mode.lower().encode('utf8')
         outputter = new ofstream(bFileName, binary)
         try:
-            self._pyfhel.afseal.save_ciphertext(deref(outputter), bcompr_mode, deref(self._ptr_ctxt))
+            size = self._pyfhel.afseal.save_ciphertext(
+                deref(outputter), bcompr_mode, deref(self._ptr_ctxt))
         finally:
             del outputter
+        return size
 
     cpdef bytes to_bytes(self, str compr_mode="none"):
         """to_bytes()
@@ -237,7 +240,7 @@ cdef class PyCtxt:
         self._pyfhel.afseal.save_ciphertext(outputter, bcompr_mode, deref(self._ptr_ctxt))
         return outputter.str()
 
-    cpdef void load(self, str fileName, object scheme=None):
+    cpdef size_t load(self, str fileName, object scheme=None):
         """load(self, str fileName, scheme)
         
         Load the ciphertext from a file.
@@ -250,7 +253,7 @@ cdef class PyCtxt:
                 * ('float', 'FRACTIONAL', float, 2, Scheme_t.ckks) -> fractional scheme.
               
         Return:
-            None
+            size_t: number of loaded bytes.
 
         See Also:
             :func:`~Pyfhel.utils.to_Scheme_t`
@@ -258,14 +261,17 @@ cdef class PyCtxt:
         if self._pyfhel is None:
             raise ValueError("<Pyfhel ERROR> ciphertext loading requires a Pyfhel instance")
         cdef ifstream* inputter
+        cdef size_t size
         cdef string bFileName = _to_valid_file_str(fileName, check=True).encode('utf8')
         inputter = new ifstream(bFileName, binary)
         try:
-            self._pyfhel.afseal.load_ciphertext(deref(inputter), deref(self._ptr_ctxt))
+            size = self._pyfhel.afseal.load_ciphertext(
+                deref(inputter), deref(self._ptr_ctxt))
         finally:
             del inputter
         if scheme is not None:
             self._scheme = to_Scheme_t(scheme).value
+        return size
 
     cpdef void from_bytes(self, bytes content, object scheme=None):
         """from_bytes(bytes content, scheme)

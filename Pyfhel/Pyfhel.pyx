@@ -1399,7 +1399,7 @@ cdef class Pyfhel:
             compr_mode (str): Compression. One of "none", "zlib", "zstd" 
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
         cdef ofstream ostr = ofstream(f_name, binary)
@@ -1413,7 +1413,7 @@ cdef class Pyfhel:
             fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
@@ -1428,7 +1428,7 @@ cdef class Pyfhel:
             compr_mode (str): Compression. One of "none", "zlib", "zstd" 
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
         cdef ofstream ostr = ofstream(f_name, binary)
@@ -1441,7 +1441,7 @@ cdef class Pyfhel:
             fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
@@ -1455,7 +1455,7 @@ cdef class Pyfhel:
             compr_mode (str): Compression. One of "none", "zlib", "zstd"
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
         cdef ofstream ostr = ofstream(f_name, binary)
@@ -1468,7 +1468,7 @@ cdef class Pyfhel:
             fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
@@ -1482,7 +1482,7 @@ cdef class Pyfhel:
             compr_mode (str): Compression. One of "none", "zlib", "zstd"
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
         cdef ofstream ostr = ofstream(f_name, binary)
@@ -1495,7 +1495,7 @@ cdef class Pyfhel:
             fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
@@ -1509,7 +1509,7 @@ cdef class Pyfhel:
             compr_mode (str): Compression. One of "none", "zlib", "zstd"
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=False).encode()
         cdef ofstream ostr = ofstream(f_name, binary)
@@ -1522,7 +1522,7 @@ cdef class Pyfhel:
             fileName (str, pathlib.Path): Name of the file.   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
@@ -1552,7 +1552,7 @@ cdef class Pyfhel:
             content (bytes): bytes object obtained from to_bytes_context   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef stringstream istr
         istr.write(content,len(content))
@@ -1579,7 +1579,7 @@ cdef class Pyfhel:
             content (bytes): bytes object obtained from to_bytes_public_key   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef stringstream istr
         istr.write(content,len(content))
@@ -1605,7 +1605,7 @@ cdef class Pyfhel:
             content (bytes): bytes object obtained from to_bytes_secret_key   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef stringstream istr
         istr.write(content,len(content))
@@ -1631,7 +1631,7 @@ cdef class Pyfhel:
             content (bytes): bytes object obtained from to_bytes_relin_key   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef stringstream istr
         istr.write(content,len(content))
@@ -1657,7 +1657,7 @@ cdef class Pyfhel:
             content (bytes): bytes object obtained from to_bytes_rotateKey   
             
         Return:
-            bool: Result, True if OK, False otherwise.
+            size_t: number of bytes saved/loaded
         """
         cdef stringstream istr
         istr.write(content,len(content))
