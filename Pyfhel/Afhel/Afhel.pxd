@@ -84,7 +84,7 @@ cdef extern from "Afhel.h" nogil:
         # CONTEXT & KEY GENERATION
         string ContextGen(scheme_t scheme, size_t poly_modulus_degree, 
                         uint64_t plain_modulus_bit_size, uint64_t plain_modulus,
-                        int sec, vector[int] qs) except +
+                        int sec, vector[int] qi_sizes, vector[uint64_t] qi) except +
         void KeyGen() except +
         void relinKeyGen() except +
         void rotateKeyGen() except +
@@ -134,7 +134,6 @@ cdef extern from "Afhel.h" nogil:
         void add_plain(AfCtxt& ctxtInOut, AfPtxt& plain2) except +
         void add_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
         void add_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except +
-        void cumsum_v(vector[AfCtxt]& ctxtV, AfCtxt& ctxtOut) except +
 
         # Subtract
         void sub(AfCtxt& ctxtInOut, AfCtxt& ctxt) except +
@@ -206,7 +205,6 @@ cdef extern from "Afhel.h" nogil:
         # GETTERS
         bool batchEnabled() except +
         size_t get_nSlots() except +
-        int get_nRots() except +
         uint64_t get_plain_modulus() except +
         size_t get_poly_modulus_degree() except +
         scheme_t get_scheme() except +

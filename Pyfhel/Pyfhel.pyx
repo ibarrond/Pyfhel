@@ -60,7 +60,7 @@ cdef class Pyfhel:
                   pub_key_file=None,
                   sec_key_file=None):
         self.afseal = new Afseal()
-        self._qi = []
+        self._qi_sizes = []
         self._scale = 1
         self._sec = 128   # Default security: 128 bits
     
@@ -78,7 +78,8 @@ cdef class Pyfhel:
 
         Attributes:
             context_params (dict|str|pathlib.Path, optional): dictionary of context
-                    parameters to run contextGen(), or alternatively a string with the name of a saved context, to ve loaded with load_context().    
+                    parameters to run contextGen(), or alternatively a string
+                    with the name of a saved context, to read with load_context().    
             key_gen (bool, optional): generate a new public/secret key pair
             pub_key_file (str|pathlib.Path, optional): Load public key from this file.
             sec_key_file (str|pathlib.Path, optional): Load secret key from this file.
@@ -148,14 +149,12 @@ cdef class Pyfhel:
 
     @property
     def n(self):
-        """n, Polynomial coefficient modulus. (1*x^m+1). 
-                
-        Directly linked to the multiplication depth and the number of slots (bfv)."""
+        """n, Polynomial coefficient modulus. (1*x^n+1)."""
         return self.get_poly_modulus_degree()
     
     @property
     def sec(self):
-        """Security (bits). Sets an appropriate coefficient modulus (q)."""
+        """Security of the context parameters (bits)."""
         return (<Afseal*>self.afseal).get_sec()
 
     @property
@@ -175,7 +174,7 @@ cdef class Pyfhel:
     @scale.setter
     def scale(self, value):
         if not isinstance(value, Real) or value < 0:
-            raise ValueError("scale must be a positive number")
+            raise ValueError("scale must be a real number")
         self._scale = value
        
     @property
@@ -625,8 +624,8 @@ cdef class Pyfhel:
         Return:
             int: the noise budget level
         """
-        if self.scheme == Scheme_t.ckks:
-            raise RuntimeError("<Pyfhel ERROR> ckks scheme does not support noise level")
+        if self.scheme != Scheme_t.bfv:
+            raise RuntimeError("<Pyfhel ERROR> only bfv scheme supports noise level")
         return self.afseal.noise_level(deref(ctxt._ptr_ctxt))
 
     cpdef void relinearize(self, PyCtxt ctxt):
@@ -641,6 +640,9 @@ cdef class Pyfhel:
         Return:
             None
         """
+        if self.is_relin_key_empty():
+            warn("<Pyfhel Warning> relin_key empty, generating it for relinearization.", RuntimeWarning)
+            self.relinKeyGen()
         self.afseal.relinearize(deref(ctxt._ptr_ctxt))  
     
     # =========================================================================
@@ -927,7 +929,6 @@ cdef class Pyfhel:
         self.afseal.add(deref(ctxt._ptr_ctxt), deref(ctxt_other._ptr_ctxt))
         return ctxt
         
-        
     cpdef PyCtxt add_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=False):
         """Sum a PyCtxt ciphertext and a PyPtxt plaintext.
         
@@ -977,7 +978,7 @@ cdef class Pyfhel:
         if (n_elements == 0):
             n_elements = n_slots
         elif (n_elements > n_slots):
-            raise RuntimeError(f"<Pyfhel ERROR> n_elements ({n_elements}) > nSlots ({self.nSlots})")
+            raise RuntimeError(f"<Pyfhel ERROR> n_elements ({n_elements}) > nSlots ({n_slots})")
 
         # New or existing ciphertext
         if (in_new_ctxt):
@@ -1108,9 +1109,9 @@ cdef class Pyfhel:
     
     cpdef PyCtxt scalar_prod(self, 
         PyCtxt ctxt, PyCtxt ctxt_other,
+        bool in_new_ctxt=False,
         bool with_relin=True,
         bool with_mod_switch=True,
-        bool in_new_ctxt=False,
         size_t n_elements=0
     ):
         """Performs a scalar product between two PyCtxt ciphertexts.
@@ -1130,10 +1131,6 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, the input transformed or a new one
         """
-        if self.is_rotate_key_empty():
-            warn("<Pyfhel Warning> rot_key empty, initializing it for rotation.", RuntimeWarning)
-            self.rotateKeyGen()
-
         # Multiply ctxt with ctxt_other
         ctxt = self.multiply(ctxt, ctxt_other, in_new_ctxt=in_new_ctxt)
         if (with_relin):
@@ -1146,9 +1143,9 @@ cdef class Pyfhel:
 
     cpdef PyCtxt scalar_prod_plain(self, 
         PyCtxt ctxt, PyPtxt ptxt_other,
+        bool in_new_ctxt=False,
         bool with_relin=True,
         bool with_mod_switch=True,
-        bool in_new_ctxt=False,
         size_t n_elements=0
     ):
         """Performs a scalar product between two PyCtxt ciphertexts.
@@ -1168,12 +1165,8 @@ cdef class Pyfhel:
         Return:
             PyCtxt: resulting ciphertext, the input transformed or a new one
         """
-        if self.is_rotate_key_empty():
-            warn("<Pyfhel Warning> rot_key empty, initializing it for rotation.", RuntimeWarning)
-            self.rotateKeyGen()
-
         # Multiply ctxt with ctxt_other
-        self.multiply_plain(ctxt, ptxt_other)
+        ctxt = self.multiply_plain(ctxt, ptxt_other, in_new_ctxt=in_new_ctxt)
         if (with_relin):
             self.relinearize(ctxt)
         if (with_mod_switch and self.scheme == Scheme_t.ckks):
@@ -1250,7 +1243,7 @@ cdef class Pyfhel:
             self.relinKeyGen()
         if (in_new_ctxt):
             new_ctxt = PyCtxt(ctxt)
-            self.afseal.exponentiate(deref(new_ctxt._ptr_ctxt), expon)  
+            self.afseal.exponentiate(deref(new_ctxt._ptr_ctxt), expon)
             return new_ctxt
         else:
             self.afseal.exponentiate(deref(ctxt._ptr_ctxt), expon) 

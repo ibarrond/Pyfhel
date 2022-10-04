@@ -125,10 +125,7 @@ def get_BFV_context_scalar_prod(
     total_coeff_modulus_bit_count = 0
     while total_coeff_modulus_bit_count - 2*t_bits <= 0:
         context_status = HE.contextGen(**context_params)
-
         total_coeff_modulus_bit_count = HE.total_coeff_modulus_bit_count
-        if (context_status != "success"):
-            warnings.warn(f"   |>  n={n} Doesn't produce valid parameters. Trying 2*n")
         context_params['n'] *= 2
         if context_params['n'] > 2**15:
             raise ValueError(f"n = {context_params['n']} > 2**15. Valid parameters not found.")
@@ -319,7 +316,7 @@ print("\nB4. CKKS Scalar Product Evaluation")
 print("->\tc1@c2= ", cRes)
 print("->\tHE.decrypt(c1@c2)= ", res)
 print("->\tCorrect result: ", spRes)
-assert np.allclose(res, spRes, atol=res/1000), "Incorrect result!"
+assert np.allclose(res, spRes, rtol=1/1000), "Incorrect result!"
 print("---------------------------------------")
 
 

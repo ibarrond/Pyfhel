@@ -62,7 +62,7 @@ class TestPyfhel:
         # PROPERTIES
         # Scale
         he = Pyfhel()
-        with pytest.raises(ValueError, match=".*scale must be a positive number.*") as e_info:
+        with pytest.raises(ValueError, match=".*scale must be a real number.*") as e_info:
             he.scale = "a wrong type of object"
         he.scale = 2**30
         assert he.scale == 2**30
@@ -174,38 +174,65 @@ class TestPyfhel:
         
     @pytest.mark.filterwarnings('ignore::pytest.PytestUnraisableExceptionWarning')
     def test_Pyfhel_ops(self, HE_ckks, HE_bfv):
-        c = HE_bfv.encrypt(1)
-        c2 = HE_ckks.encrypt(1.)
-        p2 = HE_ckks.encode(1.)
-        c = -c
+        c_bfv = HE_bfv.encrypt(1)
+        c_ckks = HE_ckks.encrypt(1.)
+        p_ckks = HE_ckks.encode(1.)
+        c_bfv = -c_bfv
         # Negation
-        assert HE_bfv.decrypt(c)[0]==-1
-        HE_bfv.negate(c, False)
-        assert HE_bfv.decrypt(c)[0]==1
+        assert HE_bfv.decrypt(c_bfv)[0]==-1
+        HE_bfv.negate(c_bfv, False)
+        assert HE_bfv.decrypt(c_bfv)[0]==1
         # Addition
         with pytest.raises(RuntimeError, match=".*scheme type mistmatch.*"):
-            c+c2
+            c_bfv+c_ckks
         with pytest.raises(RuntimeError, match=".*scheme type mistmatch.*"):
-            c+p2
+            c_bfv+p_ckks
+        # Cumul add
+        with pytest.warns(match=".*rot_key empty.*"):
+            HE_bfv_nokeys = Pyfhel()
+            HE_bfv_nokeys.from_bytes_context(HE_bfv.to_bytes_context())
+            c_cumul = HE_bfv_nokeys.cumul_add(c_bfv, in_new_ctxt=True)
+            assert HE_bfv.decrypt(c_cumul)[0]!=HE_bfv.decrypt(c_bfv)[0]
+        with pytest.raises(RuntimeError, match=".*n_elements.*"):
+            HE_bfv_nokeys.cumul_add(c_bfv, n_elements=HE_bfv_nokeys.get_nSlots()+1)
         # Subtraction
         with pytest.raises(RuntimeError, match=".*scheme type mistmatch.*"):
-            c-c2
+            c_bfv-c_ckks
         with pytest.raises(RuntimeError, match=".*scheme type mistmatch.*"):
-            c-p2
+            c_bfv-p_ckks
         # Mult
         with pytest.raises(RuntimeError, match=".*scheme type mistmatch.*"):
-            c*c2
+            c_bfv*c_ckks
         with pytest.raises(RuntimeError, match=".*scheme type mistmatch.*"):
-            c*p2
+            c_bfv*p_ckks
+        # Scalar prod
+        c_sp = HE_ckks.scalar_prod(c_ckks, c_ckks,  in_new_ctxt=True)
+        assert round(HE_ckks.decrypt(c_sp)[0])==HE_ckks.get_nSlots()
+        assert round(HE_ckks.decrypt(c_ckks)[0])==1
         # rot
         with pytest.warns(match=".*rot_key empty.*"):
-            c >>= 1
-        #relin
+            c_bfv >>= 1
+        # flip
+        with pytest.warns(match=".*rot_key empty.*"):
+            HE_bfv_nokeys = Pyfhel()
+            HE_bfv_nokeys.from_bytes_context(HE_bfv.to_bytes_context())
+            HE_bfv_nokeys.flip(c_bfv, in_new_ctxt=True) # Warning
+            HE_bfv_nokeys.from_bytes_rotate_key(HE_bfv.to_bytes_rotate_key())
+            cflip = HE_bfv_nokeys.flip(c_bfv + np.array([-1]), in_new_ctxt=True)
+            assert HE_bfv.decrypt(cflip)[0]!=0
+            HE_bfv_nokeys.flip(cflip)
+            assert HE_bfv.decrypt(cflip)[0]==0
+            
+        # Relin
         with pytest.warns(match=".*relin_key empty.*"):
-            c **= 4
+            c_bfv **= 4
+        with pytest.warns(match=".*relin_key empty.*"):
+            HE_bfv_nokeys = Pyfhel()
+            HE_bfv_nokeys.from_bytes_context(HE_bfv.to_bytes_context())
+            HE_bfv_nokeys.relinearize(c_bfv)
         # rescaling --> should capture an error
         # with pytest.raises(RuntimeError, match=".*Scheme must be CKKS.*"):
-        HE_bfv.rescale_to_next(c)
+        HE_bfv.rescale_to_next(c_bfv)
         # mod switching
         with pytest.raises(TypeError, match=".*Expected PyCtxt or PyPtxt for mod switching.*"):
             HE_bfv.mod_switch_to_next(np.array([1]))

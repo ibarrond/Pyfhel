@@ -108,6 +108,9 @@ class TestPyCtxt:
         # Plaintext iadd
         c += 1
         assert np.round(HE.decrypt(c)[0])==2
+        # Cumul add
+        c_cumul = +c
+        assert np.round(HE.decrypt(c_cumul)[0])==2*HE.get_nSlots()
     
     def test_PyCtxt_sub(self, HE):
         c1 = HE.encrypt(1)
@@ -124,6 +127,7 @@ class TestPyCtxt:
     
     def test_PyCtxt_mul(self, HE):
         c = HE.encrypt(1)
+        c2 = HE.encrypt(2)
         # Wrong factor type
         with pytest.raises(TypeError, match=".*<Pyfhel ERROR>.*") as e_info:
             c *= {"1"}
@@ -133,6 +137,17 @@ class TestPyCtxt:
         c *= c
         c *= 1
         assert np.round(HE.decrypt(c)[0])==1
+    
+    def test_PyCtxt_scalar_prod(self, HE):
+        c1 = HE.encrypt(1)
+        c2 = HE.encrypt(2)
+        assert np.round(HE.decrypt(c1 @ 2)[0])==2*HE.get_nSlots()
+        c1 @= c1
+        assert np.round(HE.decrypt(c1)[0])==HE.get_nSlots()
+        c1 @= np.array([2])
+        assert np.round(HE.decrypt(c1)[0])==2*HE.get_nSlots()
+        c2 @= c2
+        assert np.round(HE.decrypt(c2)[0])==4*HE.get_nSlots()
 
     def test_PyCtxt_truediv(self, HE):
         c1 = HE.encrypt(1)

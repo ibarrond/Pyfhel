@@ -14,6 +14,7 @@ from typing import Union, Tuple
 from warnings import warn
 
 # ----------------------------- IMPLEMENTATION --------------------------------
+
 cdef class PyCtxt:
     """Ciphertext class of Pyfhel, contains a value/vector of encrypted ints/doubles.
 
@@ -414,9 +415,7 @@ cdef class PyCtxt:
         return self
                         
     def __mul__(self, other):
-        """__mul__(other)
-        
-        Multiplies this ciphertext with either another PyCtxt or a PyPtxt plaintext.
+        """Multiplies this ciphertext with either another PyCtxt or a PyPtxt plaintext.
         
         Multiplies with a PyPtxt/PyCtxt, storing the result in a new ciphertext.
 
@@ -433,12 +432,12 @@ cdef class PyCtxt:
             :func:`~Pyfhel.Pyfhel.multiply`
         """
         other_ = self.encode_operand(other)
-        _, other_ = self._pyfhel.align_mod_n_scale(self, other_,
+        this, other_ = self._pyfhel.align_mod_n_scale(self, other_, copy_this=True,
                                 copy_other=(other_ is other), only_mod=True)
         if isinstance(other_, PyCtxt):
-            return self._pyfhel.multiply(self, other_, in_new_ctxt=True)
+            return self._pyfhel.multiply(this, other_, in_new_ctxt=(this is self))
         elif isinstance(other_, PyPtxt):
-            return self._pyfhel.multiply_plain(self, other_, in_new_ctxt=True)
+            return self._pyfhel.multiply_plain(this, other_, in_new_ctxt=(this is self))
         else:
             raise TypeError("<Pyfhel ERROR> multiplicand must be either PyCtxt, PyPtxt or numerical"
                             "(is %s instead)"%(type(other)))
@@ -490,12 +489,12 @@ cdef class PyCtxt:
             :func:`~Pyfhel.Pyfhel.scalar_prod`
         """
         other_ = self.encode_operand(other)
-        _, other_ = self._pyfhel.align_mod_n_scale(self, other_,copy_this=False,
+        this, other_ = self._pyfhel.align_mod_n_scale(self, other_, copy_this=True,
                                 copy_other=(other_ is other), only_mod=True)
         if isinstance(other_, PyCtxt):
-            return self._pyfhel.scalar_prod(self, other_, in_new_ctxt=True)
+            return self._pyfhel.scalar_prod(this, other_, in_new_ctxt=(this is self))
         elif isinstance(other_, PyPtxt):
-            return self._pyfhel.scalar_prod_plain(self, other_, in_new_ctxt=True)
+            return self._pyfhel.scalar_prod_plain(this, other_, in_new_ctxt=(this is self))
     def __imatmul__(self, other):
         """Performs the in-place scalar product with another ciphertext
         
@@ -515,7 +514,7 @@ cdef class PyCtxt:
             :func:`~Pyfhel.Pyfhel.multiply`
         """
         other_ = self.encode_operand(other)
-        _, other_ = self._pyfhel.align_mod_n_scale(self, other_,copy_this=False,
+        _, other_ = self._pyfhel.align_mod_n_scale(self, other_, copy_this=False,
                                 copy_other=(other_ is other), only_mod=True)
         if isinstance(other_, PyCtxt):
             self._pyfhel.scalar_prod(self, other_, in_new_ctxt=False)

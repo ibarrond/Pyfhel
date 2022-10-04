@@ -25,7 +25,7 @@ def HE(request):
 
 
 ################################################################################
-#                               ISSUE TESTS                                    #
+#                            REGRESSION TESTS                                  #
 ################################################################################
 @pytest.mark.parametrize("HE", context_params_list, indirect=True)
 def test_issue128_ptxt_ctxt__mul__(HE):
@@ -34,5 +34,13 @@ def test_issue128_ptxt_ctxt__mul__(HE):
 
     fixed_ctxt1, fixed_ptxt1 = HE.align_mod_n_scale(ctxt1, ptxt1, only_mod=True)
 
-    print(f"This works -> {fixed_ctxt1 * fixed_ptxt1}")
-    # print(f"This DOES NOT work -> {ctxt1 * ptxt1}")
+    print(HE.decrypt(ctxt1))
+    print(HE.decrypt(fixed_ctxt1))
+    print(HE.decode(ptxt1))
+    print(HE.decode(fixed_ptxt1))
+    print(HE.decrypt(ctxt1 * ptxt1))
+    print(HE.decrypt(fixed_ctxt1 * fixed_ptxt1))
+
+    assert round(HE.decrypt(fixed_ctxt1 * fixed_ptxt1)[0]) == \
+           round(HE.decrypt(ctxt1 * ptxt1)[0])             == \
+           (42 * 42) * 42

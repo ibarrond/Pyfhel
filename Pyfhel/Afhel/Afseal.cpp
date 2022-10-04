@@ -126,7 +126,7 @@ string Afseal::ContextGen(scheme_t scheme,
   // Validate parameters by putting them inside a SEALContext
   this->context = make_shared<SEALContext>(parms, true, sec_map[sec]);
   
-  // Build codec, keygen and evaluator only if context is valid
+  // If parameters are valid, build {codec, evaluator, keygen}
   if (this->context->parameters_set())
   {
     // Codec
@@ -134,7 +134,7 @@ string Afseal::ContextGen(scheme_t scheme,
     {
       this->bfvEncoder = make_shared<BatchEncoder>(*context);
     } 
-    else
+    else // ckks
     {
       this->ckksEncoder = make_shared<CKKSEncoder>(*context);
     }
@@ -143,6 +143,9 @@ string Afseal::ContextGen(scheme_t scheme,
     // Key generator
     this->keyGenObj = make_shared<KeyGenerator>(*context);
   }
+  // Return info about parameter validity.
+  //    - 'success: valid' if everything went well
+  //    - Error name and message from list in seal/context/context.cpp otherwise
   return string(this->context->parameter_error_name())  + ": " +
                 this->context->parameter_error_message();
 }
@@ -327,18 +330,6 @@ void Afseal::add_plain(AfCtxt &cipherInOut, AfPtxt &plain2)
 {
   this->get_evaluator()->add_plain_inplace(_dyn_c(cipherInOut), _dyn_p(plain2));
 }
-void Afseal::cumsum(AfCtxt &cipherInOut)
-{
-  auto ev = this->get_evaluator();
-  AfCtxt cipherAux = cipherInOut;
-  int k = 1;
-  for (int i = 0; i < this->get_nRots(); i++)
-  {
-    rotate(cipherAux, k);
-    ev->add_inplace(_dyn_c(cipherInOut), _dyn_c(cipherAux));
-    k = k << 1;
-  }
-}
 void Afseal::add_v(vector<AfCtxt *> &ctxtVInOut, vector<AfCtxt *> &ctxtV2)
 {
   auto ev = this->get_evaluator();
@@ -352,16 +343,6 @@ void Afseal::add_plain_v(vector<AfCtxt *> &ctxtVInOut, vector<AfPtxt *> &ptxtV)
   vectorize(ctxtVInOut, ptxtV,
             [ev](AfCtxt c, AfPtxt p2)
             { ev->add_plain_inplace(_dyn_c(c), _dyn_p(p2)); });
-}
-void Afseal::cumsum_v(vector<AfCtxt *> &ctxtVIn, AfCtxt &cipherOut)
-{
-  auto ev = this->get_evaluator();
-  // TODO: omp reduce
-  // #pragma omp parallel for reduction(+ : cipherOut)
-  for (auto c1 = ctxtVIn.begin(); c1 != ctxtVIn.end(); c1++)
-  {
-    ev->add_inplace(_dyn_c(cipherOut), _dyn_c(**c1));
-  }
 }
 
 // SUBTRACTION
@@ -768,16 +749,6 @@ size_t Afseal::get_nSlots()
   }
   return -1;
 }
-int Afseal::get_nRots()
-{
-  int nSlots = (int)this->get_poly_modulus_degree() / 2, nRots = 0;
-  while (nSlots > 0)
-  {
-    nSlots = nSlots >> 1;
-    nRots++;
-  };
-  return nRots - 1;
-}
 uint64_t Afseal::get_plain_modulus()
 {
   return this->get_context()->first_context_data()->parms().plain_modulus().value();
@@ -789,7 +760,7 @@ size_t Afseal::get_poly_modulus_degree()
 
 scheme_t Afseal::get_scheme()
 {
-  return scheme_map[this->get_context()->first_context_data()->parms().scheme()];
+  return scheme_map_to_afhel[this->get_context()->first_context_data()->parms().scheme()];
 }
 
 int Afseal::total_coeff_modulus_bit_count()

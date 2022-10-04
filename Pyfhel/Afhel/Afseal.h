@@ -72,18 +72,22 @@ static std::map<std::string, seal::compr_mode_type> compr_mode_map {
     {"zstd", compr_mode_type::zstd},
 #endif
 };
-static std::map<seal::scheme_type, scheme_t> scheme_map {
+static std::map<seal::scheme_type, scheme_t> scheme_map_to_afhel {
    {seal::scheme_type::none, scheme_t::none},
    {seal::scheme_type::bfv,  scheme_t::bfv},
    {seal::scheme_type::ckks, scheme_t::ckks},
 };
-
-  std::map<int, sec_level_type> sec_map{
-      {0, seal::sec_level_type::none},
-      {128, seal::sec_level_type::tc128},
-      {192, seal::sec_level_type::tc192},
-      {256, seal::sec_level_type::tc256},
-  };
+static std::map<scheme_t, seal::scheme_type> scheme_map_to_seal {
+   {scheme_t::none, seal::scheme_type::none},
+   {scheme_t::bfv, seal::scheme_type::bfv},
+   {scheme_t::ckks, seal::scheme_type::ckks},
+};
+static  std::map<int, sec_level_type> sec_map{
+    {0, seal::sec_level_type::none},
+    {128, seal::sec_level_type::tc128},
+    {192, seal::sec_level_type::tc192},
+    {256, seal::sec_level_type::tc256},
+};
 
 // =============================================================================
 // ======================= ABSTRACTION FOR PLAINTEXTS ==========================
@@ -320,10 +324,8 @@ class Afseal: public Afhel {
   // ADDITION
   void add(AfCtxt &ctxtInOut, AfCtxt &ctxt);
   void add_plain(AfCtxt &ctxtInOut, AfPtxt &ptxt);
-  void cumsum(AfCtxt &ctxtInOut);
   void add_v(vector<AfCtxt*> &ctxtVInOut, vector<AfCtxt*> &ctxtV2);
   void add_plain_v(vector<AfCtxt*> &ctxtVInOut, vector<AfPtxt*> &ptxtV2);
-  void cumsum_v(vector<AfCtxt*> &ctxtVIn, AfCtxt &cipherOut);
 
   // SUBTRACTION
   void sub(AfCtxt &ctxtInOut, AfCtxt &ctxt);
@@ -409,7 +411,6 @@ class Afseal: public Afhel {
   bool batchEnabled();
   std::vector<uint64_t> get_qi();
   size_t get_nSlots();
-  int get_nRots();
   uint64_t get_plain_modulus();
   size_t get_poly_modulus_degree();
   scheme_t get_scheme();

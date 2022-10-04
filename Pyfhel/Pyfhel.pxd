@@ -9,7 +9,7 @@ cimport numpy as np
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.cast cimport reinterpret_cast
-from libcpp.memory cimport shared_ptr, dynamic_pointer_cast
+from libcpp.memory cimport shared_ptr, make_shared, dynamic_pointer_cast as dyn_cast
 from libcpp cimport bool
 from numpy cimport int64_t, uint64_t
 
@@ -98,16 +98,23 @@ cdef class Pyfhel:
     cpdef PyCtxt negate(self, PyCtxt ctxt, bool in_new_ctxt=*) 
     cpdef PyCtxt square(self, PyCtxt ctxt, bool in_new_ctxt=*) 
     cpdef PyCtxt add(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=*) 
-    cpdef PyCtxt add_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=*) 
+    cpdef PyCtxt add_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=*)
+    cpdef PyCtxt cumul_add(self, PyCtxt ctxt, bool in_new_ctxt=*, size_t n_elements=*) 
     cpdef PyCtxt sub(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=*) 
     cpdef PyCtxt sub_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=*) 
     cpdef PyCtxt multiply(self, PyCtxt ctxt, PyCtxt ctxt_other, bool in_new_ctxt=*) 
-    cpdef PyCtxt multiply_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=*) 
-    cpdef PyCtxt rotate(self, PyCtxt ctxt, int k, bool in_new_ctxt=*) 
+    cpdef PyCtxt multiply_plain(self, PyCtxt ctxt, PyPtxt ptxt, bool in_new_ctxt=*)
+    cpdef PyCtxt scalar_prod(self, PyCtxt ctxt, PyCtxt ctxt_other, 
+        bool in_new_ctxt=*, bool with_relin=*, bool with_mod_switch=*, size_t n_elements=*)
+    cpdef PyCtxt scalar_prod_plain(self, PyCtxt ctxt, PyPtxt ptxt_other,
+        bool in_new_ctxt=*, bool with_relin=*, bool with_mod_switch=*, size_t n_elements=*)
+    cpdef PyCtxt rotate(self, PyCtxt ctxt, int k, bool in_new_ctxt=*)
+    cpdef PyCtxt flip(self, PyCtxt ctxt, bool in_new_ctxt=*)
     cpdef PyCtxt power(self, PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=*) 
     # ckks
     cpdef void rescale_to_next(self, PyCtxt ctxt) 
-
+    cpdef PyCtxt mod_switch_to_next_ctxt(self, PyCtxt ctxt, bool in_new_ctxt=*)
+    cpdef PyPtxt mod_switch_to_next_ptxt(self, PyPtxt ptxt, bool in_new_ptxt=*)
     # ================================ I/O =====================================
     #FILES
     cpdef size_t save_context(self, fileName, str compr_mode=*) 
@@ -147,7 +154,7 @@ cdef class Pyfhel:
 
     # GETTERS
     cpdef bool batchEnabled(self) 
-    cpdef size_t get_nSlots(self) 
+    cpdef size_t get_nSlots(self)
     cpdef vector[uint64_t] get_qi(self)
     cpdef uint64_t get_plain_modulus(self) 
     cpdef size_t get_poly_modulus_degree(self) 
@@ -177,6 +184,11 @@ cdef class Pyfhel:
 # --------------------------------- UTILS --------------------------------------
 cpdef to_Scheme_t(object scheme)
 cpdef to_Backend_t(object backend)
+cdef double _get_valid_scale(int& scale_bits, double& scale, double& pyfhel_scale)
+cdef void _write_cy_attributes(Pyfhel he, ostream& ostr)
+cdef void _read_cy_attributes(Pyfhel he, istream& istr)
+
 cpdef np.ndarray[dtype=np.int64_t, ndim=1] vec_to_array_i(vector[int64_t] vec)
+cpdef np.ndarray[dtype=np.uint64_t, ndim=1] vec_to_array_u(vector[uint64_t] vec)
 cpdef np.ndarray[dtype=double, ndim=1] vec_to_array_f(vector[double] vec)
 cdef shared_ptr[AfsealCtxt] _dyn_c(shared_ptr[AfCtxt] c)
