@@ -101,7 +101,7 @@ string Afseal::ContextGen(scheme_t scheme,
     std::vector<Modulus> qi_mods;
     for (auto &qi_val: qi_values)
     {
-      qi_mods.emplace_back(Modulus::Modulus(qi_val));
+      qi_mods.emplace_back(Modulus(qi_val));
     }
     parms.set_coeff_modulus(qi_mods);
   }
