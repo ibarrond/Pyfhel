@@ -9,7 +9,7 @@
 # Pyfhel's core metadata
 [project]
 name = "Pyfhel"
-version = "3.2.1"
+version = "3.3.0"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
 requires-python = ">=3.7"
