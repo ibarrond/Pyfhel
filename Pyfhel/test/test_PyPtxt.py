@@ -9,7 +9,7 @@ from Pyfhel.utils import Scheme_t
 # The list of context parameters to be tested for each test
 context_params_list = [
     {"scheme": "bfv",  "n": 16384, "t_bits": 30,   "sec":128,},
-    {"scheme": "ckks", "n": 16384, "scale": 2**30, "qi": [60]+[30]*7+[60],},
+    {"scheme": "ckks", "n": 16384, "scale": 2**30, "qi_sizes": [60]+[30]*7+[60],},
     ]
 
 # Pyfhel object setup

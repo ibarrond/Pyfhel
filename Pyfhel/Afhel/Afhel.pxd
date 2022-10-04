@@ -197,7 +197,7 @@ cdef extern from "Afhel.h" nogil:
 
         # ----------------------------- AUXILIARY -----------------------------
         long maxBitCount(long poly_modulus_degree, int sec_level) except +
-        vector[uint64_t] get_qi_values() except +
+        vector[uint64_t] get_qi() except +
 
         # ckks
         double scale(AfCtxt &ctxt) except +

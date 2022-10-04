@@ -27,13 +27,14 @@ from Pyfhel.PyPoly cimport PyPoly
 cdef class Pyfhel:
     cdef Afhel* afseal           # The C++ methods are accessed via a pointer
     cdef int _sec
-    cdef vector[int] _qi
+    cdef vector[int] _qi_sizes
     cdef double _scale
     # =========================== CRYPTOGRAPHY =================================
     # CONTEXT & KEY GENERATION
     cpdef string contextGen(self,
-            str scheme, int n, int64_t q=*, int t_bits=*, int64_t t=*, int sec=*,
-            double scale=*, int scale_bits=*,  vector[int] qi =*) 
+            str scheme, int n, int t_bits=*, int64_t t=*,
+            int sec=*, double scale=*, int scale_bits=*,
+            vector[int] qi_sizes =*, vector[uint64_t] qi =*) 
     cpdef void keyGen(self) 
     cpdef void relinKeyGen(self) 
     cpdef void rotateKeyGen(self) 
@@ -147,7 +148,7 @@ cdef class Pyfhel:
     # GETTERS
     cpdef bool batchEnabled(self) 
     cpdef size_t get_nSlots(self) 
-    cpdef vector[uint64_t] get_qi_values(self)
+    cpdef vector[uint64_t] get_qi(self)
     cpdef uint64_t get_plain_modulus(self) 
     cpdef size_t get_poly_modulus_degree(self) 
     cpdef scheme_t get_scheme(self) 

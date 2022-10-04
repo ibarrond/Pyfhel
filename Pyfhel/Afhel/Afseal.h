@@ -253,6 +253,8 @@ class Afseal: public Afhel {
 
 
  public:
+  std::vector<uint64_t> qi;
+
   // ----------------------- CLASS MANAGEMENT ---------------------------
   Afseal();
   Afseal(const Afseal &otherAfseal);
@@ -263,9 +265,9 @@ class Afseal: public Afhel {
   // -------------------------- CRYPTOGRAPHY ---------------------------
   // CONTEXT GENERATION
   string ContextGen(
-    scheme_t scheme, uint64_t poly_modulus_degree = 2048, 
-    uint64_t plain_modulus_bit_size = 20, uint64_t plain_modulus = 0, 
-    int sec = 128, vector<int> qs = {});
+    scheme_t scheme, uint64_t poly_modulus_degree = 1024, 
+    uint64_t plain_modulus_bit_size = 0, uint64_t plain_modulus = 0, 
+    int sec = 128, vector<int> qi_sizes = {}, vector<uint64_t> qi_values = {});
 
   // KEY GENERATION
   void KeyGen();
@@ -405,7 +407,7 @@ class Afseal: public Afhel {
 
   // GETTERS
   bool batchEnabled();
-  std::vector<uint64_t> get_qi_values();
+  std::vector<uint64_t> get_qi();
   size_t get_nSlots();
   int get_nRots();
   uint64_t get_plain_modulus();

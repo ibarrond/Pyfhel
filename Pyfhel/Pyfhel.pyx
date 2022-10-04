@@ -125,7 +125,7 @@ cdef class Pyfhel:
                         f"n={self.n}, "\
                         f"t={self.t}, "\
                         f"sec={self.sec}, "\
-                        f"qi={self.qi}, "\
+                        f"qi={self.qi_sizes}, "\
                         f"scale={self.scale}, ")
 
     def __reduce__(self):
@@ -160,8 +160,13 @@ cdef class Pyfhel:
 
     @property
     def qi(self):
-        """Chain of prime sizes (bits). Sets size of each prime in the coefficient modulis (q). Only applies to CKKS scheme."""
-        return self._qi
+        """Coefficient moduli. Chain of primes that composition."""
+        return self.get_qi()
+
+    @property
+    def qi_sizes(self):
+        """Chain of prime sizes (bits). Sets sizes of coefficient moduli (qi)."""
+        return self._qi_sizes
 
     @property
     def scale(self):
@@ -188,72 +193,82 @@ cdef class Pyfhel:
     # ....................... CONTEXT & KEY GENERATION ........................
     
     cpdef string contextGen(self,
-        str scheme, int n, int64_t q=0, int t_bits=0, int64_t t=0, int sec=128,
-        double scale=1, int scale_bits=0, vector[int] qi = {}):
+        str scheme, int n, int t_bits=0, int64_t t=0,
+        int sec=128,double scale=1, int scale_bits=0,
+        vector[int] qi_sizes = {}, vector[uint64_t] qi = {}):
         """Generates Homomorphic Encryption context based on parameters.
         
         Creates a HE context based in parameters, as well as an appropriate
         encoder according to the scheme choice. The HE context contains the
         "public parameters" of the scheme, required for all operations
-        (encryption/decryption,scheme/decoding, operations).
+        (encryption/decryption, scheme/decoding, operations). Validates the 
+        choice of parameters and returns the validation status/error.
         
         *BFV scheme*: vectorized integer operations in Single Instruction Multiple
             Data (SIMD) fashion. The scheme requires a plain_modulus t prime, with
             t-1 being multiple of 2*n (n is the polynomial modulus degree). This 
-            tis generated automatically with size t_bits, and it will serve as
-            plaintext modulo, the maximum value of all freshly encrypted plaintexts.
-            The coefficient modulus (q) is chosen under the hood with the security
+            is generated automatically with bitsize t_bits, and it will serve as
+            plaintext modulo (the maximum value of plaintext/ciphetext slots).
+            The coefficient moduli (qi) is chosen under the hood with the security
             level sec, based on homomorphicencryption.org, although it can be set 
-            manually with the parameter q.
+            manually with qi_sizes|qi.
         
         *CKKS scheme*: vectorized approximate fixed point operations in SIMD. The
-            underlying coefficient modulus (q) is set with a chain of prime sizes
-            qi (bit sizes), which is an integer vector of moduli.
+            underlying coefficient modulus (q) is set with a list of prime sizes
+            qi_sizes (bit sizes) or directly with a chain of primes (qi).
 
         Args:
             scheme (str): HE scheme ("bfv" or "ckks", for integer or float ops).
             n (int): Polynomial coefficient modulus m. (Poly: 1*x^n+1), directly
                      linked to the multiplication depth, (SEAL's poly_modulus_degree)
                      and equal to the number of slots (nSlots) in bfv.
-            q (int, optional): Coefficient modulus. (SEAL's poly_modulus). 
+            qi (int, optional): Chain of primes composing the coefficient moduli.
                      Overriden by qi if scheme is "ckks" and sec if scheme is "bfv". 
-            sec (int, optional): Security level equivalent in AES. 128, 192 or 256.
-                More means more security but also more costly. Sets q if scheme is "bfv".
+            qi_sizes (list of ints, optional): Chain of prime sizes (#bits), to set q.
+            sec (int, optional): Security level equivalent in AES. 
+                One of {0 (unset)128, 192, 256}. There is little reason to go 
+                beyond 128 bits. Sets q if scheme is "bfv" (overriding qi|qi_sizes),
+                and adds compliance checks for "ckks".
             
             -- Only for BFV scheme --
-            t(int, optional):  Only for bfv. Plaintext modulus. (SEAL's plain_modulus) 
-            t_bits (int, optional):  Only for bfv. Plaintext modulus bit size. Overrides t.
+            t_bits (int, optional): Plaintext modulus bit size. Overrides t.
+            t (int, optional): Plaintext modulus. (SEAL's plain_modulus)
+            
             -- Only for CKKS scheme --
             scale (int, optional): Upscale factor for fixed-point values. 
-            qi (list of ints, optional): Chain of prime sizes (#bits), to set q.
+            scale_bits (int, optional): overrides scale, sets it to 2**scale_bits. 
                       
         Return:
-            None
+            str: The result of validating the chosen parameters. Contains:
+               'success: valid' if the parameters are valid.
+               An informing error name and message otherwise.
         """
         s = to_Scheme_t(scheme)
-        assert sec in {0, 128, 192, 256}, "Pyfhel schemes require `sec` to be 0 (unset), 128, 192 or 256"
-        self._sec = sec
+        assert sec in {0, 128, 192, 256}, \
+                "Pyfhel schemes require `sec` to be 0 (unset), 128, 192 or 256"
         if s==Scheme_t.bfv:
-            assert (t_bits>0 or t>0), "BFV scheme requires `t_bits` or `t` to be set"
-            if not qi.empty():  # Compress all moduli into one
-                q = np.prod(np.array(qi))
-                self._qi = qi
-            else:
-                self._qi = {}
-            assert (sec>0 or q>0), "BFV scheme requires `sec` or `q` to be set."
-            self._scale = 1
+            assert (t_bits>0 or t>0),\
+                "BFV scheme requires plain_modulus (`t_bits` or `t`) to be set"
+            assert (sec>0) or (not qi_sizes.empty()) or (not qi.empty()),\
+                "BFV scheme requires `sec` or `qi` to be set."
+            if (sec>0):       # Override `qi_sizes`
+                qi_sizes.clear()
+            self._scale = 1   # Default scale
         elif s==Scheme_t.ckks:
-            assert not qi.empty(), "CKKS scheme requires a list of prime sizes (qi) to be set"
+            assert (not qi_sizes.empty()) or (not qi.empty()),\
+                "CKKS scheme requires a list of prime sizes (qi_sizes) or primes (qi) to be set"
             if not scale>1 and not scale_bits>0:
                 warn("<Pyfhel Warning> initializing CKKS context without default scale."
                      "You will have to provide a scale for each encoding", RuntimeWarning)
             self._scale = 2**scale_bits if scale_bits>0 else scale
-            self._qi = qi
-            # Check if scale matches at least one available rescaling
-            available_rescalings = np.cumsum(np.triu(np.tile(qi, (len(qi), 1)), k=1), axis=1)
-            if <int>np.log2(self._scale) not in available_rescalings:
-                warn("<Pyfhel Warning> qi {} do not support rescaling for scale {}.".format(qi, self._scale))
-        return self.afseal.ContextGen(<scheme_t>s.value, n, t_bits, t, sec, qi)
+            if not qi_sizes.empty():  # Check if scale matches available rescalings
+                available_rescalings = np.cumsum(np.triu(np.tile(qi_sizes, (len(qi_sizes), 1)), k=1), axis=1)
+                if <int>np.log2(self._scale) not in available_rescalings:
+                    warn("<Pyfhel Warning> qi_sizes {} do not support rescaling for scale {}.".format(qi_sizes, self._scale))
+        self._sec = sec
+        self._qi_sizes = qi_sizes if not qi_sizes.empty() else \
+                         [<int>round(np.log2(_qi)) for _qi in qi] if not qi.empty() else {}
+        return self.afseal.ContextGen(<scheme_t>s.value, n, t_bits, t, sec, qi_sizes, qi)
         
     cpdef void keyGen(self):
         """Generates a pair of secret/Public Keys.
@@ -1355,7 +1370,7 @@ cdef class Pyfhel:
                     scale_bits_diff = c_rescale.scale_bits - c_mod_switch.scale_bits
                     # But can we do it?
                     available_rescalings =\
-                        np.cumsum(self.qi[1+c_mod_switch.mod_level:
+                        np.cumsum(self.qi_sizes[1+c_mod_switch.mod_level:
                                           1+c_rescale.mod_level])
                     if (scale_bits_diff) not in available_rescalings:
                         warn("Cannot align scales {} and {} (available rescalings: {})".format(this_.scale_bits, other_.scale_bits, available_rescalings))
@@ -1671,13 +1686,13 @@ cdef class Pyfhel:
         """
         return (<Afseal*>self.afseal).maxBitCount(poly_modulus_degree, sec_level)
 
-    cpdef vector[uint64_t] get_qi_values(self):
+    cpdef vector[uint64_t] get_qi(self):
         """Returns the qi values (coeff. modulus values) used in the current context.
 
         Return:
             vector[uint64_t]: qi values.
         """        
-        return (<Afseal*>self.afseal).get_qi_values()
+        return (<Afseal*>self.afseal).get_qi()
 
     def multDepth(self, max_depth=64, delta=0.1, x_y_z=(1, 10, 0.1), verbose=False):
         """Empirically determines the multiplicative depth of a Pyfhel Object

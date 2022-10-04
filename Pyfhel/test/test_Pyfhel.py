@@ -13,7 +13,7 @@ context_params_list_bfv = [
     {"scheme": "bfv",  "n": 16384, "t_bits": 30,   "sec":128,},
 ]
 context_params_list_ckks = [
-    {"scheme": "ckks", "n": 16384, "scale": 2**30, "qi": [60]+[30]*7+[60],},
+    {"scheme": "ckks", "n": 16384, "scale": 2**30, "qi_sizes": [60]+[30]*7+[60],},
     ]
 
 # Pyfhel object setup
@@ -75,13 +75,13 @@ class TestPyfhel:
 
     @pytest.mark.filterwarnings('ignore::pytest.PytestUnraisableExceptionWarning')
     def test_Pyfhel_contextGen(self):
-        # qi
+        # qi_sizes
         he = Pyfhel()
         he.contextGen(scheme="bfv", n=2**12, t=65537, sec=128, qi =[65537, 65543])
         with pytest.warns(match=".*without default scale.*"): # no default scale
-            he.contextGen(scheme="ckks", n=2**12, qi=[60]+[30]*7+[60],)
+            he.contextGen(scheme="ckks", n=2**12, qi_sizes=[60]+[30]*7+[60],)
         with pytest.warns(match=".*do not support rescaling.*"):
-            he.contextGen(scheme="ckks", n=2**12, qi=[60]+[30]*7+[60], scale=2**31)
+            he.contextGen(scheme="ckks", n=2**12, qi_sizes=[60]+[30]*7+[60], scale=2**31)
 
     def test_Pyfhel_encrypt(self, HE_ckks):
         # encryptComplex

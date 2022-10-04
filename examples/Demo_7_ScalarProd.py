@@ -131,7 +131,14 @@ def get_BFV_context_scalar_prod(
             warnings.warn(f"   |>  n={n} Doesn't produce valid parameters. Trying 2*n")
         context_params['n'] *= 2
         if context_params['n'] > 2**15:
-            raise ValueError(f"n = {context_params['n']} > 2**15. Parameters are not valid.")
+            raise ValueError(f"n = {context_params['n']} > 2**15. Valid parameters not found.")
+    
+    # Increasing t_bits to maintain coprimality between t and q
+    while context_status != 'success: valid':
+        context_params['t_bits'] += 1
+        if context_params['t_bits'] > 60:
+            raise ValueError(f"t_bits= {context_params['t_bits']} > 60. Valid parameters not valid.")
+        context_status = HE.contextGen(**context_params)
     return HE
 
 # Setup parameters for HE context
@@ -265,7 +272,7 @@ def get_CKKS_context_scalar_prod(
         'n': n,          # Poly modulus degree. BFV ptxt is a n//2 by 2 matrix.
         'sec': sec,      # Security level.
         'scale': 2**20, 
-        'qi': [60, 20, 60],   # Max number of multiplications = 1
+        'qi_sizes': [60, 20, 60],   # Max number of multiplications = 1
     }
     HE = Pyfhel(context_params)
     return HE

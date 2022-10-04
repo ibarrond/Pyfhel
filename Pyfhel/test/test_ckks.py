@@ -6,7 +6,7 @@ from Pyfhel import Pyfhel
 ################################################################################
 # The list of context parameters to be tested for each test
 context_params_list = [
-    {"scheme": "ckks", "n": 16384, "scale": 2**30, "qi": [60]+[30]*7+[60]}
+    {"scheme": "ckks", "n": 16384, "scale": 2**53, "qi_sizes": [60]+[53]*6+[60]}
     ]
 
 # Pyfhel object setup

@@ -123,7 +123,7 @@ for f in ["mypk.pk", "mycontext.con", "ctxt_a.ctxt", "ctxt_b.ctxt", "cr.ctxt"]:
 print("-----------------------------------------------------")
 from Pyfhel import PyCtxt, Pyfhel, PyPtxt
 HE = Pyfhel()
-HE.contextGen(scheme='CKKS', n=16384, qi=[30,30,30,30,30], scale=2 ** 30)
+HE.contextGen(scheme='CKKS', n=16384, qi_sizes=[30,30,30,30,30], scale=2 ** 30)
 HE.keyGen()
 ctxt_x = HE.encrypt(3.1, scale=2 ** 30) # implicit encode
 ctxt_y = HE.encrypt(4.1, scale=2 ** 30)

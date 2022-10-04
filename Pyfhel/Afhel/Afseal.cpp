@@ -76,47 +76,55 @@ string Afseal::ContextGen(scheme_t scheme,
                         uint64_t plain_modulus_bit_size,
                         uint64_t plain_modulus,
                         int sec,
-                        std::vector<int> qs)
+                        std::vector<int> qi_sizes,
+                        std::vector<uint64_t> qi_values)
 {
-  // BFV
-  if (scheme == scheme_t::bfv)
-  {
-    EncryptionParameters parms(scheme_type::bfv);
-    // Context generation
-    parms.set_poly_modulus_degree(poly_modulus_degree);
-    if (sec > 0)
-    {
-      parms.set_coeff_modulus(
-          CoeffModulus::BFVDefault(poly_modulus_degree, static_cast<sec_level_type>(sec)));
-    }
-    else
-    {
-      parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, qs));
-    }
-    // parms.set_plain_modulus(plain_modulus); -> done automatically
-    if (plain_modulus_bit_size > 0)
-    {
-      parms.set_plain_modulus(PlainModulus::Batching((size_t)poly_modulus_degree, (int)plain_modulus_bit_size));
-    }
-    else
-    {
-      parms.set_plain_modulus(plain_modulus);
-    }
-    this->context = make_shared<SEALContext>(parms, true, sec_map[sec]);
-  }
-  // CKKS
-  else if (scheme == scheme_t::ckks)
-  {
-    EncryptionParameters parms(scheme_type::ckks);
-    // Context generation
-    parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, qs));
-    this->context = make_shared<SEALContext>(parms, true, sec_map[sec]);
-  }
-  else
+  if (scheme != scheme_t::bfv && scheme != scheme_t::ckks)
   {
     throw invalid_argument("scheme must be bfv or ckks");
   }
+  EncryptionParameters parms(scheme_map_to_seal[scheme]);
+  // Setting n
+  parms.set_poly_modulus_degree(poly_modulus_degree);   
+  // Setting q & qi
+  if ((scheme == scheme_t::bfv) && (sec > 0))  // BFV: Choice from seal/utils/globals.cpp
+  {
+    parms.set_coeff_modulus(
+        CoeffModulus::BFVDefault(poly_modulus_degree, sec_map[sec]));
+  }
+  else if (!qi_sizes.empty()) // Generate primes qi with given sizes
+  {
+    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, qi_sizes));
+  }
+  else
+  {
+    std::vector<Modulus> qi_mods;
+    for (auto &qi_val: qi_values)
+    {
+      qi_mods.emplace_back(Modulus::Modulus(qi_val));
+    }
+    parms.set_coeff_modulus(qi_mods);
+  }
+  this->qi.clear();                          // Remove previously stored qi
+  for (auto &modulus: parms.coeff_modulus()) // Store chosen qi
+  {
+    this->qi.emplace_back(modulus.value());
+  }
+  // Setting t --> BFV only
+  if (scheme == scheme_t::bfv)
+  {
+    if(plain_modulus_bit_size > 0) // Auto sel.
+    {
+      parms.set_plain_modulus(PlainModulus::Batching(
+        (size_t)poly_modulus_degree, (int)plain_modulus_bit_size));
+    }
+    else // Does not ensure batching!
+    {
+      parms.set_plain_modulus(plain_modulus);
+    }
+  }
+  // Validate parameters by putting them inside a SEALContext
+  this->context = make_shared<SEALContext>(parms, true, sec_map[sec]);
   
   // Build codec, keygen and evaluator only if context is valid
   if (this->context->parameters_set())
@@ -654,12 +662,9 @@ int Afseal::get_sec()
   return static_cast<std::underlying_type<sec_level_type>::type>(
       this->get_context()->first_context_data()->qualifiers().sec_level);
 }
-std::vector<uint64_t> Afseal::get_qi_values()
+std::vector<uint64_t> Afseal::get_qi()
 { 
-  std::vector<uint64_t> qi;
-  for (auto &modulus : this->get_context()->first_context_data()->parms().coeff_modulus()){
-    qi.push_back(modulus.value());
-  }
+  return this->qi;
 }
 // GETTERS
 shared_ptr<SEALContext> inline Afseal::get_context()

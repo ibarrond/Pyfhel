@@ -10,8 +10,8 @@ the CKKS scheme (https://eprint.iacr.org/2016/421.pdf)
 # 1. CKKS context and key setup
 # -------------------------------
 # We take a look at the different parameters that can be set for the CKKS scheme.
-# A generally good strategy to choose `qi` (bitsize for each prime moduli) for
-# the CKKS scheme is as follows:
+# A generally good strategy to choose `qi_sizes` (bitsize for each prime moduli) 
+# for the CKKS scheme is as follows:
 #
 # 1. Choose a 60-bit prime as the first prime in coeff_modulus. This will
 #    give the highest precision when decrypting;
@@ -33,7 +33,7 @@ ckks_params = {
                         #  conversion: x_fix = round(x_float * scale)
                         #  You can use this as default scale or use a different
                         #  scale on each operation (set in HE.encryptFrac)
-    'qi': [60, 30, 30, 30, 60] # Number of bits of each prime in the chain. 
+    'qi_sizes': [60, 30, 30, 30, 60] # Number of bits of each prime in the chain. 
                         # Intermediate values should be  close to log2(scale)
                         # for each operation, to have small rounding errors.
 }
@@ -144,7 +144,7 @@ print(f"ccMul after relinearization (size {ccMul.size()}): {ccMul}")
 #  function is used, which switches the modulus to the next one in the qi chain
 #  and divides the ciphertext by the previous modulus.#  Since this is the only
 #  scale-down operation, it is advised to use `scale_bits` with the same size as 
-#  the intermediate moduli in HE.qi. 
+#  the intermediate moduli sizes in HE.qi_sizes. 
 # -> Mod Switching: Switches to the next modulus in the qi chain, but without
 #  rescaling. This is achieved by the HE.mod_switch_to_next(ctxt) function.
 #

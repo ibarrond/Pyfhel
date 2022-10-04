@@ -72,8 +72,9 @@ class Afhel {
   // ----------------------------- CRYPTOGRAPHY --------------------------------
   // CONTEXT GENERATION
   virtual std::string ContextGen(
-    scheme_t scheme, uint64_t poly_modulus_degree, uint64_t plain_modulus_bit_size, uint64_t plain_modulus, 
-    int sec, std::vector<int> qs = {}) = 0;
+    scheme_t scheme, uint64_t poly_modulus_degree, 
+    uint64_t plain_modulus_bit_size, uint64_t plain_modulus, int sec,
+    std::vector<int> qi_sizes = {}, std::vector<uint64_t> qi_values = {}) = 0;
 
   // KEY GENERATION
   virtual void KeyGen() = 0;
@@ -184,7 +185,7 @@ class Afhel {
 
   // ----------------------------- AUXILIARY ----------------------------
   // GETTERS
-  virtual std::vector<uint64_t> get_qi_values() = 0;
+  virtual std::vector<uint64_t> get_qi() = 0;
   virtual uint64_t get_plain_modulus() = 0;
   virtual size_t get_poly_modulus_degree() = 0;
   virtual scheme_t get_scheme() = 0;
