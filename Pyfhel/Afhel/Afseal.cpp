@@ -81,22 +81,13 @@ string Afseal::ContextGen(scheme_t scheme,
 {
   if (scheme != scheme_t::bfv && scheme != scheme_t::ckks)
   {
-    throw invalid_argument("scheme must be bfv or ckks");
+    throw invalid_argument("<Afseal>: scheme must be bfv or ckks");
   }
   EncryptionParameters parms(scheme_map_to_seal[scheme]);
   // Setting n
   parms.set_poly_modulus_degree(poly_modulus_degree);   
-  // Setting q & qi
-  if ((scheme == scheme_t::bfv) && (sec > 0))  // BFV: Choice from seal/utils/globals.cpp
-  {
-    parms.set_coeff_modulus(
-        CoeffModulus::BFVDefault(poly_modulus_degree, sec_map[sec]));
-  }
-  else if (!qi_sizes.empty()) // Generate primes qi with given sizes
-  {
-    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, qi_sizes));
-  }
-  else
+  // Setting q & qi.
+  if (!qi_values.empty())
   {
     std::vector<Modulus> qi_mods;
     for (auto &qi_val: qi_values)
@@ -104,6 +95,20 @@ string Afseal::ContextGen(scheme_t scheme,
       qi_mods.emplace_back(Modulus(qi_val));
     }
     parms.set_coeff_modulus(qi_mods);
+  }
+  else if (!qi_sizes.empty()) // Generate primes qi with given sizes
+  {
+    parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, qi_sizes));
+  }
+  else if ((scheme == scheme_t::bfv) && (sec > 0))  
+  {         
+    parms.set_coeff_modulus(     // BFV: Select from seal/utils/globals.cpp
+        CoeffModulus::BFVDefault(poly_modulus_degree, sec_map[sec]));
+  }
+  else
+  {
+    throw invalid_argument(
+      "<Afseal>: Non-empty `qi_sizes`, `qi_values` or `sec` (BFV only) required");
   }
   this->qi.clear();                          // Remove previously stored qi
   for (auto &modulus: parms.coeff_modulus()) // Store chosen qi

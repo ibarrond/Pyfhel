@@ -216,6 +216,22 @@ cdef class Pyfhel:
             underlying coefficient modulus (q) is set with a list of prime sizes
             qi_sizes (bit sizes) or directly with a chain of primes (qi).
 
+        A larger coeff_modulus (q = prod(qi)) implies a larger noise budget, 
+        hence more encrypted computation capabilities. However, an upper bound
+        for the total bit-length (total_coeff_modulus_bit_count) of the 
+        coeff_modulus is determined by the poly_modulus_degree (n), as follows:
+
+        +----------------------------------------------------+
+        | poly_modulus_degree | max coeff_modulus bit-length |
+        +---------------------+------------------------------+
+        | 1024                | 27                           |
+        | 2048                | 54                           |
+        | 4096                | 109                          |
+        | 8192                | 218                          |
+        | 16384               | 438                          |
+        | 32768               | 881                          |
+        +---------------------+------------------------------+
+
         Args:
             scheme (str): HE scheme ("bfv" or "ckks", for integer or float ops).
             n (int): Polynomial coefficient modulus m. (Poly: 1*x^n+1), directly
