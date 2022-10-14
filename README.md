@@ -17,9 +17,9 @@
 * **_Language_**: Python (3.7+) & Cython on top of C++17.
 * **_OS_**: Windows (tested with `MSVC2017`, `MSVC2019`, and `gcc6` for WSL) and Linux (tested on `gcc6`). MacOS not supported.
 
-	:warning: _REQUIRED: Python must have been compiled with C++17: `g++>=6` | `MSVC 2017+`_ :warning:
+	:warning: _REQUIRED: An available [compiler supporting C++17](https://en.cppreference.com/w/cpp/compiler_support) ([`g++>=6`] | [`MSVC 2017+`](https://stackoverflow.com/questions/40504552))_ :warning:
 
-* **_Docs_**: For now, only the API is documented [[link](https://pyfhel.readthedocs.io/en/latest/)]. Examples are heavily commented.
+* **_Docs_**: Check out our [[documentation in readthedocs](https://pyfhel.readthedocs.io/en/latest/)]. Examples are heavily commented. More examples can be added upon demand!
 * **_Dependencies_**: There are two possible backends (both shipped alongside Pyfhel), HE libraries in C++:
 
    1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies, default).
@@ -28,9 +28,7 @@
 ## Summary
 **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
 
-**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**omomorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all backends. Additionally, this project contains a large series of Demos & Tests for **SEAL**, **Afhel** & **Pyfhel**.
-
-Last but not least, we a `CMakeLists.txt` to compile and install **SEAL** and **Afhel** as shared libraries in Ubuntu, which can then be linked to other C++ programs using the tags `-lseal` and `-lafhel`.
+**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**omomorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all backends. Additionally, this project contains a large series of Demos & Tests for **Pyfhel**.
 
 ## Install & Uninstall
 This project has been uploaded to [PyPI](https://pypi.org/project/Pyfhel/). In order to install it from source (*WARNING! it takes several minutes to compile, be patient!*), run:
@@ -47,46 +45,20 @@ To uninstall, just run:
 	   > pip uninstall Pyfhel
 
 ### Contribute/Development notice
-This is the process to develop/contribute to Pyfhel:
-1. _Code a new feature/fix a bug_. Since this project is built using Cython, please refer to [cython documentation](https://cython.readthedocs.io/en/latest/) if you want to help develop it.
-2. _Recompile the cython extensions_. After modifying any of the `.pyx`|`pxd` cython files (or the _Afhel_ `.cpp` files) you must recompile the cython files. To do so, run the following command:
-```bash
-# This will turn `Pyfhel/*.pyx` into the corresponding `Pyfhel/*.cpp` file.
-#  Do not edit the `Pyfhel/*.cpp` files directly!
-> python3 setup.py --CYTHONIZE --fullname
-	Compiling Pyfhel/Pyfhel.pyx because it changed.
-	Compiling Pyfhel/PyPtxt.pyx because it depends on ./Pyfhel/iostream.pxd.
-	[1/2] Cythonizing Pyfhel/Pyfhel.pyx
-	[2/2] Cythonizing Pyfhel/PyPtxt.pyx
-	Pyfhel-2.0.2
-```
+This is the process to develop/contribute:
+1. _Code a new feature/fix a bug_. Using [Cython](https://cython.readthedocs.io/en/latest/) for the `.pyx` and `.pxd` extensions, C++ for `Afhel` or Python for examples/tests/other.
 
-3. _Reinstall Pyfhel locally_. Use either `pip install .` or `python3 setup.py build` (for verbose output and fine control. Run `python3 setup.py --help` for further options).
+2. _Build/Install Pyfhel locally_. Use either `pip install .` or `python3 setup.py build` (for verbose output and fine control. Run `python3 setup.py --help` for further options).
 
-4. _Test changes locally_. Run the `test.py` file in your environment and make sure all tests are OK:
-
-```bash
-python3 Pyfhel/test.py
-	test_PyCtxt_creation_deletion (__main__.PyfhelTestCase) ... (0.0s) ...ok
-	test_PyPtxt_PyCtxt (__main__.PyfhelTestCase) ... (0.0s) ...ok
-	[...]
-	test_Pyfhel_5d_save_restore_int (__main__.PyfhelTestCase) ... (1.239s) ...ok
-
-	----------------------------------------------------------------------
-	Ran 29 tests in 11.907s
-
-	OK
-```
-
-5. _Update the version_. To update it, just change the version number on the `pyproject.toml` file. Bugfixes and minor corrections should increase _C_. New features should increase _B_. Backwards incompatible changes should increase _A_.
-
-6. _Optional: Update the docs_. WIP (automatic generation with sphinx).
+3. _Test changes (requires installing `pytest`)_. Run the tests  locally by executing `pytest .`  in the root directory, and make sure all tests are OK. 
+	
+   - _Code coverage (requires installing `pytest-cov`)_. Add an empty `.cov` file in the root directory, and build/install the project locally (`pip install .`). To run coverage tests, execute `pytest --cov .` in the root directory, and then `coverage html` to obtain a report.
 
 You're ready to go! Just create a pull request to the original repo.
 
 ## Project contents
 - `docs/` Documentation, generated automatically using sphinx and pushed to [readthedocs](https://pyfhel.readthedocs.io)
-- `examples/` Demos and small programs to showcase multiple functionalities. Check `Pyfhel/test.py` for further cases!
+- `examples/` Demos and small programs to showcase multiple functionalities.
 - `Pyfhel/` contains the source code for Pyfhel and Afhel.
 - `Pyfhel/backend`, underlying C++ libraries SEAL & PALISADE.
 
