@@ -150,16 +150,16 @@ def shutil_copy_same_ok(src_list: List[Union[str, Path]], dst: Union[str, Path])
 def run_command(command, **kwargs):
     """Run a command while printing the live output"""
     process = subprocess.Popen(
-                               command,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT,
-                               **kwargs,
-                               )
-                                   while True:   # Could be more pythonic with := in Python3.8+
-                               line = process.stdout.readline()
-                               if not line and process.poll() is not None:
-    break
-print(line.decode("utf-8", "backslashreplace"), end='')
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        **kwargs,
+    )
+    while True:   # Could be more pythonic with := in Python3.8+
+        line = process.stdout.readline()
+        if not line and process.poll() is not None:
+            break
+        print(line.decode("utf-8", "backslashreplace"), end='')
 
 # ---------------------------- AUXILIARY CLEANER -------------------------------
 # Tired of cleaning all compilation and distribution by hand.
@@ -291,8 +291,8 @@ def build_libraries(self, libraries):
         # Split libraries according to compilation mode
         self.cmake_libs =   [(l_name, b_info) for (l_name, b_info) in libraries\
                              if b_info.get('mode') == 'cmake']
-                             self.standard_libs =[(l_name, b_info) for (l_name, b_info) in libraries\
-                                                  if b_info.get('mode') in ('standard', None)]
+            self.standard_libs =[(l_name, b_info) for (l_name, b_info) in libraries\
+                                 if b_info.get('mode') in ('standard', None)]
 
 # CMAKE LIBS BUILD
     for (lib_name, build_info) in self.cmake_libs:
@@ -470,8 +470,8 @@ global built_libs
             if build_info['libraries']:
                 lib_cmake_var_names = [cmake_varify_lib_name(l)
                                        for l in build_info['libraries']]
-                for l, lib_cmake_var in zip(build_info['libraries'], lib_cmake_var_names):
-                f.write(f"find_library({lib_cmake_var} {l} PATHS {lib_paths})\n")
+                                       for l, lib_cmake_var in zip(build_info['libraries'], lib_cmake_var_names):
+            f.write(f"find_library({lib_cmake_var} {l} PATHS {lib_paths})\n")
             lib_cmake_vars = ' '.join([f"${{{var}}}" for var in lib_cmake_var_names])
             f.write(f"target_link_libraries({lib_name} {lib_cmake_vars})\n")
                 # TODO: add args from standard compilation (self.compiler)
@@ -491,8 +491,8 @@ def run_cmake_cli(self, source_dir, build_dir, cmake_opts={}, n_jobs=4):
         # Check cmake version
         cmake_ver_str = subprocess.run(['cmake', '--version'],
                                        check=True, capture_output=True, text=True).stdout
-        cmake_ver = v_parse(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
-            
+                                       cmake_ver = v_parse(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
+                                       
             cmake_cli_opts = []
 # Parse CMake options
     cmake_config = cmake_opts.pop('CMAKE_BUILD_TYPE', 'Release')
