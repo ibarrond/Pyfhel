@@ -13,6 +13,14 @@ from Pyfhel import Pyfhel
 # 1. BFV context and key setup
 # ------------------------------------------------------------------------------
 # We take a look at the different parameters that can be set for the BFV scheme.
+# Ideally, one should use as little `n` and `t` as possible while keeping the
+# correctness in the operations.
+# The noise budget in a freshly encrypted ciphertext is
+#       ~ log2(coeff_modulus/plain_modulus) (bits)
+# By far the most demanding operation is the homomorphic (ciphertext-ciphertext)
+# multiplication, consuming a noise budget of around:
+#       log2(plain_modulus) + (other terms).
+
 HE = Pyfhel()           # Creating empty Pyfhel object
 bfv_params = {
     'scheme': 'BFV',    # can also be 'bfv'

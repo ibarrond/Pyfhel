@@ -26,7 +26,7 @@ if USE_REAL_SERVER:
 
 # Generate Pyfhel session
 print(f"[Client] Initializing Pyfhel session and data...")
-HE_client = Pyfhel(context_params={'scheme':'ckks', 'n':2**13, 'scale':2**30, 'qi':[30]*5})
+HE_client = Pyfhel(context_params={'scheme':'ckks', 'n':2**13, 'scale':2**30, 'qi_sizes':[30]*5})
 HE_client.keyGen()             # Generates both a public and a private key
 HE_client.relinKeyGen()
 HE_client.rotateKeyGen()

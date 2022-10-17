@@ -86,9 +86,9 @@ cdef extern from "Afhel.h" nogil:
 
         # -------------------------- CRYPTOGRAPHY ------------------------------
         # CONTEXT & KEY GENERATION
-        void ContextGen(scheme_t scheme, size_t poly_modulus_degree,
+        string ContextGen(scheme_t scheme, size_t poly_modulus_degree,
                         uint64_t plain_modulus_bit_size, uint64_t plain_modulus,
-                        int sec, vector[int] qs) except +
+                        int sec, vector[int] qi_sizes, vector[uint64_t] qi) except +
         void KeyGen() except +
         void relinKeyGen() except +
         void rotateKeyGen() except +
@@ -142,7 +142,6 @@ cdef extern from "Afhel.h" nogil:
         void add_plain(AfCtxt& ctxtInOut, AfPtxt& plain2) except +
         void add_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
         void add_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except +
-        void cumsum_v(vector[AfCtxt]& ctxtV, AfCtxt& ctxtOut) except +
 
         # Subtract
         void sub(AfCtxt& ctxtInOut, AfCtxt& ctxt) except +
@@ -156,9 +155,11 @@ cdef extern from "Afhel.h" nogil:
         void multiply_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
         void multiply_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except +
 
-        # Rotate
-        void rotate(AfCtxt& ctxtInOut, int& k) except +
-        void rotate_v(vector[AfCtxt]& ctxtV, int& k) except +
+        # Rotate & flip
+        void rotate(AfCtxt& ctxtInOut, int k) except +
+        void rotate_v(vector[AfCtxt]& ctxtV, int k) except +
+        void flip(AfCtxt& ctxtInOut) except +
+        void flip_v(vector[AfCtxt]& ctxtV) except +
 
         # Power
         void exponentiate(AfCtxt& ctxtInOut, uint64_t& expon) except +
@@ -175,7 +176,7 @@ cdef extern from "Afhel.h" nogil:
         # -------------------------------- I/O --------------------------------
         # SAVE/LOAD CONTEXT
         size_t save_context(ostream &out_stream, string &compr_mode) except +
-        size_t load_context(istream &in_stream) except +
+        size_t load_context(istream &in_stream, int sec) except +
 
         # SAVE/LOAD PUBLICKEY
         size_t save_public_key(ostream &out_stream, string &compr_mode) except +
@@ -203,6 +204,7 @@ cdef extern from "Afhel.h" nogil:
 
         # ----------------------------- AUXILIARY -----------------------------
         long maxBitCount(long poly_modulus_degree, int sec_level) except +
+        vector[uint64_t] get_qi() except +
 
         # ckks
         double scale(AfCtxt &ctxt) except +
@@ -211,7 +213,7 @@ cdef extern from "Afhel.h" nogil:
         # GETTERS
         bool batchEnabled() except +
         size_t get_nSlots() except +
-        int get_nRots() except +
+        
         uint64_t get_plain_modulus() except +
         size_t get_poly_modulus_degree() except +
         scheme_t get_scheme() except +

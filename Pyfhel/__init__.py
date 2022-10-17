@@ -7,4 +7,4 @@ __all__    = ["Pyfhel", "PyCtxt", "PyPtxt", "PyPoly"]
 __name__   = "Pyfhel"
 __author__ = "Alberto Ibarrondo"
 
-__version__ = "3.2.1"
+__version__ = "3.3.0"

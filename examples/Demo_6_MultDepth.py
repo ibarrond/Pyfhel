@@ -83,7 +83,8 @@ print("---------------------------------------")
 # In this case we don't have a noise_level operation to check the current noise,
 # since the noise is considered as part of the encoding and adds up to a loss in
 # precision of the encoded values.
-# However, we can precisely control the maximum # of multiplications by setting qi.
+# However, we can precisely control the maximum # of multiplications by setting 
+# qi_sizes (or even manually selecting primes qi).
 #
 # B1. Context and key setup
 # ---------------------------
@@ -97,9 +98,9 @@ HE = Pyfhel(key_gen=True, context_params={
     'scheme': 'CKKS',
     'n': 2**14,         # For CKKS, n/2 values can be encoded in a single ciphertext. 
     'scale': 2**30,     # Each multiplication grows the final scale
-    'qi': [60]+ [30]*n_mults +[60] # Number of bits of each prime in the chain. 
+    'qi_sizes': [60]+ [30]*n_mults +[60] # Number of bits of each prime in the chain. 
                         # Intermediate prime sizes should be close to log2(scale).
-                        # One per multiplication! More/higher qi means bigger 
+                        # One per multiplication! More/higher qi_sizes means bigger 
                         #  ciphertexts and slower ops.
 })
 HE.relinKeyGen()
