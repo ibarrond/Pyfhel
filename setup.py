@@ -37,7 +37,7 @@ if platform_system == 'Darwin': # MacOS
     if "gcc" in os.environ and "gxx" in os.environ:
         os.environ["CC"] = os.environ["gcc"]
         os.environ["CXX"] = os.environ["gxx"]
-        os.environ["LDSHARED"] = os.environ["gxx"] + " -Wl,-x -dynamiclib -undefined dynamic_lookup"
+        os.environ["LDSHARED"] = os.environ["gxx"] + " -Wl,-no_fixup_chains,-x -dynamiclib -undefined dynamic_lookup"
     else:
         print("Please setup your enviroment variables gcc/gxx with your GCC/CLANG path")
         exit(1)
