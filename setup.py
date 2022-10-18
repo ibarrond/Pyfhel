@@ -268,9 +268,9 @@ def _resolve_built_deps(lib_name: str, lib_conf: Dict) -> Tuple[str, Dict]:
                                                      [Path(l).parent.absolute().as_posix() \
                                                       for l in built_libs[lib]['built_lib_files']])))
 
-elif built_libs.get(lib,{}).get('mode') == 'standard':
-    # INCLUDE the compilation headers
-        lib_conf['include_dirs'].extend(built_libs[lib]['include_dirs'])
+        elif built_libs.get(lib,{}).get('mode') == 'standard':
+            # INCLUDE the compilation headers
+            lib_conf['include_dirs'].extend(built_libs[lib]['include_dirs'])
     
     return lib_name, lib_conf
 
@@ -284,19 +284,19 @@ class SuperBuildClib(build_clib):
         self.final_lib_folder = os.path.join(
                                              self.build_temp.replace("temp.", "lib."), project_name)
 
-def build_libraries(self, libraries):
-    """Overriding setuptools/distutils to include cmake libs and shared libs"""
+    def build_libraries(self, libraries):
+        """Overriding setuptools/distutils to include cmake libs and shared libs"""
         global built_libs
         
         # Split libraries according to compilation mode
         self.cmake_libs =   [(l_name, b_info) for (l_name, b_info) in libraries\
                              if b_info.get('mode') == 'cmake']
-            self.standard_libs =[(l_name, b_info) for (l_name, b_info) in libraries\
+        self.standard_libs =[(l_name, b_info) for (l_name, b_info) in libraries\
                                  if b_info.get('mode') in ('standard', None)]
 
-# CMAKE LIBS BUILD
-    for (lib_name, build_info) in self.cmake_libs:
-        self.build_cmake_lib(lib_name, build_info)
+        # CMAKE LIBS BUILD
+        for (lib_name, build_info) in self.cmake_libs:
+            self.build_cmake_lib(lib_name, build_info)
         
         # STANDARD LIBS BUILD
         for (lib_name, build_info) in self.standard_libs:
@@ -312,14 +312,14 @@ def build_libraries(self, libraries):
             else:
                 raise ValueError(f"Wrong {lib_name} library type {build_info.get('lib_type')}")
     
-    # FINALIZE BUILD
+        # FINALIZE BUILD
         # Copy all static & shared libs (if any) to the extensions build folder
         for lib in built_libs:
             shutil_copy_same_ok(built_libs[lib]['built_lib_files'], self.final_lib_folder)
             shutil_copy_same_ok(built_libs[lib]['built_lib_files'], self.build_temp)
         
         
-        def build_cmake_lib(self, lib_name, build_info, n_jobs=4):
+    def build_cmake_lib(self, lib_name, build_info, n_jobs=4):
         """Standard CMake build, triggered inside python. Using n_jobs to build"""
         global built_libs
         
@@ -347,7 +347,7 @@ def build_libraries(self, libraries):
         built_libs.update({lib_name: build_info})
 
 
-def build_static_lib(self, lib_name, build_info):
+    def build_static_lib(self, lib_name, build_info):
         """Based on the setuptools build_clib:
         https://github.com/pypa/setuptools/blob/main/setuptools/command/build_clib.py
         """
@@ -368,7 +368,7 @@ def build_static_lib(self, lib_name, build_info):
                               )
                                   
                                   # Now "link" the object files together into a static library.
-self.compiler.create_static_lib(
+        self.compiler.create_static_lib(
                                 expected_objects,
                                 lib_name,
                                 output_dir          = self.build_clib,
@@ -377,12 +377,12 @@ self.compiler.create_static_lib(
                                 extra_postargs      = build_info['extra_link_args'],
                                 debug               = self.debug,
                                 )
-                                    # Post build -> register by adding to built_libs
-                                    lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('static')}"
-build_info.update({
+        # Post build -> register by adding to built_libs
+        lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('static')}"
+        build_info.update({
                   'built_lib_files': [str(Path(self.build_clib).absolute() / lib_file)]
                   })
-built_libs.update({lib_name: build_info})
+        built_libs.update({lib_name: build_info})
     
     def build_shared_lib(self, lib_name, build_info):
         """Based on https://github.com/realead/commonso/blob/master/setup.py"""
@@ -403,9 +403,9 @@ built_libs.update({lib_name: build_info})
                                         debug               = self.debug
                                         )
                                             
-                                            # Now link shared object
-language = self.compiler.detect_language(sources)
-    lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('shared')}"
+        # Now link shared object
+        language = self.compiler.detect_language(sources)
+        lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('shared')}"
         
         self.compiler.link_shared_object(
                                          objects,
@@ -417,22 +417,22 @@ language = self.compiler.detect_language(sources)
                                          extra_postargs      = build_info['extra_link_args'],
                                          build_temp          = self.build_temp,
                                          )
-                                             # Post build
-build_info.update({
+        # Post build
+        build_info.update({
                   'built_lib_files': [str(Path(self.build_clib).absolute() / lib_file)]
                   })
-    built_libs.update({lib_name: build_info})
+        built_libs.update({lib_name: build_info})
         
-        def build_mocked_cmake_lib(self, lib_name, build_info):
+    def build_mocked_cmake_lib(self, lib_name, build_info):
         '''Replicate the "build_shared_lib" function using CMake.
         
         Populate a mock CMakeLists.txt to perform the exact same compilation and
         linking, then execute it. Only necessary when creating a dynamic library
         in Windows, to automatically export all the symbols exposed in it.
         '''
-global built_libs
+        global built_libs
     
-    # Create cmake project and CMakeLists.txt
+        # Create cmake project and CMakeLists.txt
         # Build configuration
         build_dir = Path(self.build_temp).absolute() / project_name / f"cmake_{lib_name}"
         build_dir.mkdir(parents=True, exist_ok=True)
@@ -468,34 +468,32 @@ global built_libs
             f.write(f"add_library({lib_name} {lib_type} {sources})\n")
             lib_paths = ' '.join([str(p) for p in build_info['library_dirs']])
             if build_info['libraries']:
-                lib_cmake_var_names = [cmake_varify_lib_name(l)
-                                       for l in build_info['libraries']]
-                                       for l, lib_cmake_var in zip(build_info['libraries'], lib_cmake_var_names):
-            f.write(f"find_library({lib_cmake_var} {l} PATHS {lib_paths})\n")
-            lib_cmake_vars = ' '.join([f"${{{var}}}" for var in lib_cmake_var_names])
-            f.write(f"target_link_libraries({lib_name} {lib_cmake_vars})\n")
-                # TODO: add args from standard compilation (self.compiler)
+                lib_cmake_var_names = [cmake_varify_lib_name(l) for l in build_info['libraries']]
+                for l, lib_cmake_var in zip(build_info['libraries'], lib_cmake_var_names):
+                    f.write(f"find_library({lib_cmake_var} {l} PATHS {lib_paths})\n")
+                lib_cmake_vars = ' '.join([f"${{{var}}}" for var in lib_cmake_var_names])
+                f.write(f"target_link_libraries({lib_name} {lib_cmake_vars})\n")
+            # TODO: add args from standard compilation (self.compiler)
 
-# Build cmake project
-    self.run_cmake_cli(source_dir, build_dir)
+        # Build cmake project
+        self.run_cmake_cli(source_dir, build_dir)
         
         # Post build
         lib_files = [lf.absolute() for lf in
                      Path(output_dir).glob(f'{get_lib_prefix()}{lib_name}*')]
-build_info.update({'built_lib_files': lib_files})
-    built_libs.update({lib_name: build_info})
+        build_info.update({'built_lib_files': lib_files})
+        built_libs.update({lib_name: build_info})
 
-def run_cmake_cli(self, source_dir, build_dir, cmake_opts={}, n_jobs=4):
-    """Runs `cmake` and `cmake --build` on selected directories."""
+    def run_cmake_cli(self, source_dir, build_dir, cmake_opts={}, n_jobs=4):
+        """Runs `cmake` and `cmake --build` on selected directories."""
         #TODO: change n_jobs to max number of processors
         # Check cmake version
-        cmake_ver_str = subprocess.run(['cmake', '--version'],
-                                       check=True, capture_output=True, text=True).stdout
-                                       cmake_ver = v_parse(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
+        cmake_ver_str = subprocess.run(['cmake', '--version'], check=True, capture_output=True, text=True).stdout
+        cmake_ver = v_parse(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
                                        
-            cmake_cli_opts = []
-# Parse CMake options
-    cmake_config = cmake_opts.pop('CMAKE_BUILD_TYPE', 'Release')
+        cmake_cli_opts = []
+        # Parse CMake options
+        cmake_config = cmake_opts.pop('CMAKE_BUILD_TYPE', 'Release')
         for k, v in cmake_opts.items():
             cmake_cli_opts.append(f"-D{k}={v}")
         
@@ -577,8 +575,8 @@ class SuperBuildExt(build_ext):
              for d in conf['include_dirs']+conf.get('built_include_dirs',[]) \
              if d is not None]
 
-def build_extensions(self):
-    # Windows: substituting list of compiler libraries with 'built_lib_files',
+    def build_extensions(self):
+        # Windows: substituting list of compiler libraries with 'built_lib_files',
         #  to add the folder containing them (otherwise all libraries are treated
         #  as static and searched with '.lib' extension)
         # Linux: substituting cmake-based lib names with the actual built lib files.
@@ -587,13 +585,13 @@ def build_extensions(self):
         if platform_system == 'Windows':
             self.compiler.libraries = [os.path.splitext(l)[0] for (_, b_info) \
                                        in built_libs.items() for l in b_info.get('built_lib_files',[])]
-    else:
-        cmake_built_lib_names = set([l for (_, b_info) in built_libs.items() \
-                                     for l in b_info.get('built_libraries',[]) if b_info.get('mode') == 'cmake'])
+        else:
+            cmake_built_lib_names = set([l for (_, b_info) in built_libs.items() \
+                for l in b_info.get('built_libraries',[]) if b_info.get('mode') == 'cmake'])
             cmake_lib_names = set([l_name for (l_name, b_info) in built_libs.items()\
-                                   if b_info.get('mode') == 'cmake'])
-self.compiler.libraries = list(libs ^ cmake_lib_names | cmake_built_lib_names)
-    build_ext.build_extensions(self)
+                if b_info.get('mode') == 'cmake'])
+            self.compiler.libraries = list(libs ^ cmake_lib_names | cmake_built_lib_names)
+        build_ext.build_extensions(self)
     
     def copy_extensions_to_source(self):
         ## modified to also copy built libs to package dir

@@ -62,6 +62,7 @@ cdef class Pyfhel:
         self.afseal = new Afseal()
         self._qi_sizes = []
         self._scale = 1
+        self._sec = 128   # Default security: 128 bits
 
     def __init__(self,
                   context_params=None,
@@ -147,9 +148,7 @@ cdef class Pyfhel:
 
     @property
     def n(self):
-        """n, Polynomial coefficient modulus. (1*x^n+1).
-
-        Directly linked to the multiplication depth and the number of slots (bfv)."""
+        """n, Polynomial coefficient modulus. (1*x^n+1)."""
         return self.get_poly_modulus_degree()
 
     @property
@@ -1549,7 +1548,7 @@ cdef class Pyfhel:
         cdef string f_name = _to_valid_file_str(fileName, check=True).encode()
         cdef ifstream istr = ifstream(f_name, binary)
         _read_cy_attributes(self, istr)
-        return self.afseal.load_context(istr)
+        return self.afseal.load_context(istr, self._sec)
 
     cpdef size_t save_public_key(self, fileName, str compr_mode="zstd"):
         """Saves current public key in a file

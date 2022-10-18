@@ -124,6 +124,8 @@ cdef class Pyfhel:
     cpdef PyCtxt power(self, PyCtxt ctxt, uint64_t expon, bool in_new_ctxt=*)
     # ckks
     cpdef void rescale_to_next(self, PyCtxt ctxt)
+    cpdef PyCtxt mod_switch_to_next_ctxt(self, PyCtxt ctxt, bool in_new_ctxt=*)
+    cpdef PyPtxt mod_switch_to_next_ptxt(self, PyPtxt ptxt, bool in_new_ptxt=*)
 
     # ================================ I/O =====================================
     #FILES
