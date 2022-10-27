@@ -442,16 +442,16 @@ class SuperBuildClib(build_clib):
 
             # Output files to a fixed directory
             output_dir = Path(self.build_temp).absolute().as_posix()
-            f.write(f"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY $<1:{output_dir}>)\n") # Linux
-            f.write(f"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:{output_dir}>)\n") # Windows
-            f.write(f"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $<1:{output_dir}>)\n") # Windows
+            f.write(f"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY \"$<1:{output_dir}>\")\n") # Linux
+            f.write(f"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"$<1:{output_dir}>\")\n") # Windows
+            f.write(f"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"$<1:{output_dir}>\")\n") # Windows
  
             # Add all compile/link options sequentially
             extra_c_args = ' '.join(build_info['extra_compile_args'])
             if extra_c_args:
                 f.write(f"add_compile_options({extra_c_args})\n")
             for d in build_info['include_dirs']:
-                f.write(f"include_directories({d})\n")
+                f.write(f"include_directories(\"{d}\")\n")
             macros = [f"-d{m[0]}={m[1]}" for m in build_info['macros']]
             if macros:
                 f.write(f"add_compile_options({' '.join(macros)})\n")
@@ -459,9 +459,9 @@ class SuperBuildClib(build_clib):
             if extra_l_args:
                 f.write(f"add_link_options({extra_l_args})\n")
             lib_type = build_info['lib_type'].upper()
-            sources = ' '.join(build_info['sources'])
+            sources = ' '.join([f'\"{s}\"' for s in build_info['sources']])
             f.write(f"add_library({lib_name} {lib_type} {sources})\n")
-            lib_paths = ' '.join([str(p) for p in build_info['library_dirs']])
+            lib_paths = ' '.join([f'\"{str(p)}\"' for p in build_info['library_dirs']])
             if build_info['libraries']:
                 lib_cmake_var_names = [cmake_varify_lib_name(l)
                                   for l in build_info['libraries']]
@@ -578,14 +578,14 @@ class SuperBuildExt(build_ext):
         global built_libs
         libs = set(self.compiler.libraries)
         if platform_system == 'Windows':    
-            self.compiler.libraries = [os.path.splitext(l)[0] for (_, b_info) \
-                in built_libs.items() for l in b_info.get('built_lib_files',[])]
+            cmake_built_lib_names = set([os.path.splitext(l)[0] for (_, b_info) \
+                in built_libs.items() for l in b_info.get('built_lib_files',[])])
         else:
             cmake_built_lib_names = set([l for (_, b_info) in built_libs.items() \
                 for l in b_info.get('built_libraries',[]) if b_info.get('mode') == 'cmake'])
-            cmake_lib_names = set([l_name for (l_name, b_info) in built_libs.items()\
-                if b_info.get('mode') == 'cmake'])
-            self.compiler.libraries = list(libs ^ cmake_lib_names | cmake_built_lib_names)
+        cmake_lib_names = set([l_name for (l_name, b_info) in built_libs.items()\
+            if b_info.get('mode') == 'cmake'])
+        self.compiler.libraries = list(libs ^ cmake_lib_names | cmake_built_lib_names)
         build_ext.build_extensions(self)
 
     def copy_extensions_to_source(self):
