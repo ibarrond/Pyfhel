@@ -37,7 +37,7 @@ cdef class Pyfhel:
             vector[int] qi_sizes =*, vector[uint64_t] qi =*) 
     cpdef void keyGen(self) 
     cpdef void relinKeyGen(self) 
-    cpdef void rotateKeyGen(self) 
+    cpdef void rotateKeyGen(self, vector[int] rot_steps =*) 
     
     # ENCRYPTION
     cpdef PyCtxt encryptInt(self, int64_t[:] arr, PyCtxt ctxt=*)

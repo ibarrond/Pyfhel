@@ -298,7 +298,7 @@ cdef class Pyfhel:
         """
         self.afseal.KeyGen()
         
-    cpdef void rotateKeyGen(self):
+    cpdef void rotateKeyGen(self, vector[int] rot_steps ={}):
         """Generates a rotation Key.
         
         Generates a rotation Key, used to rotate cyclically 
@@ -307,12 +307,16 @@ cdef class Pyfhel:
         Based on the current context, initializes one rotation key. 
         
         Args:
-            None
+            rot_steps (vector of ints): Number of positions to rotate. If non-empty,
+                only these steps can be used as `k` in `Pyfhel.rotate(ctxt, k)`,
+                but they will yield faster rotations for non-power-of-two steps. 
+                If empty, generates a binary decompositon of rotations over `n`
+                {1,2,4...,n/2}, and uses them to compose any rotation step `k`.
                       
         Return:
             None
         """
-        self.afseal.rotateKeyGen()
+        self.afseal.rotateKeyGen(rot_steps)
         
     cpdef void relinKeyGen(self):
         """Generates a relinearization Key.

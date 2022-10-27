@@ -179,14 +179,21 @@ void Afseal::relinKeyGen()
   keyGenObj->create_relin_keys(*relinKeys);
 }
 
-void Afseal::rotateKeyGen()
+void Afseal::rotateKeyGen(vector<int> rot_steps)
 {
   if (keyGenObj == NULL)
   {
     throw std::logic_error("<Afseal>: Context not initialized");
   }
   rotateKeys = make_shared<GaloisKeys>();
-  keyGenObj->create_galois_keys(*rotateKeys);
+  if (!rot_steps.empty())
+  {
+    keyGenObj->create_galois_keys(rot_steps, *rotateKeys);
+  }
+  else
+  {
+    keyGenObj->create_galois_keys(*rotateKeys);
+  }
 }
 
 // ENCRYPTION

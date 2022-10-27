@@ -87,7 +87,7 @@ cdef extern from "Afhel.h" nogil:
                         int sec, vector[int] qi_sizes, vector[uint64_t] qi) except +
         void KeyGen() except +
         void relinKeyGen() except +
-        void rotateKeyGen() except +
+        void rotateKeyGen(vector[int] rot_steps) except +
 
         # ENCRYPTION
         void encrypt(AfPtxt& ptxt, AfCtxt& ctxtOut) except +
@@ -195,21 +195,15 @@ cdef extern from "Afhel.h" nogil:
         size_t load_ciphertext(istream &in_stream, AfCtxt &plain) except +
 
         # ----------------------------- AUXILIARY -----------------------------
-        long maxBitCount(long poly_modulus_degree, int sec_level) except +
-        vector[uint64_t] get_qi() except +
-
         # ckks
         double scale(AfCtxt &ctxt) except +
         void override_scale(AfCtxt &ctxt, double scale) except +
 
         # GETTERS
-        bool batchEnabled() except +
-        size_t get_nSlots() except +
+        vector[uint64_t] get_qi() except +
         uint64_t get_plain_modulus() except +
         size_t get_poly_modulus_degree() except +
         scheme_t get_scheme() except +
-        int get_sec() except +
-        int total_coeff_modulus_bit_count() except +
 
         bool is_secretKey_empty() except+
         bool is_publicKey_empty() except+
@@ -249,6 +243,11 @@ cdef extern from "Afseal.h" nogil:
         Afseal(const Afseal &other) except +
         AfsealPoly get_publicKey_poly(size_t index) except +
         AfsealPoly get_secretKey_poly() except +
+        long maxBitCount(long poly_modulus_degree, int sec_level) except +
+        bool batchEnabled() except +
+        size_t get_nSlots() except +
+        int get_sec() except +
+        int total_coeff_modulus_bit_count() except +
 
     cdef cppclass AfsealPoly(AfPoly):
         AfsealPoly(Afseal &afseal, const AfsealCtxt &ref) except+

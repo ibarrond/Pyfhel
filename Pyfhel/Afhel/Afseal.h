@@ -276,7 +276,7 @@ class Afseal: public Afhel {
   // KEY GENERATION
   void KeyGen();
   void relinKeyGen();
-  void rotateKeyGen();
+  void rotateKeyGen(vector<int> rot_steps = {});
 
   // ENCRYPTION
   void encrypt(AfPtxt &ptxt, AfCtxt &cipherOut);

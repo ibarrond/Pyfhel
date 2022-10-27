@@ -79,7 +79,7 @@ class Afhel {
   // KEY GENERATION
   virtual void KeyGen() = 0;
   virtual void relinKeyGen() = 0;
-  virtual void rotateKeyGen() = 0;
+  virtual void rotateKeyGen(std::vector<int> rot_steps) = 0;
 
   // ENCRYPTION
   virtual void encrypt(AfPtxt &plain1, AfCtxt &cipherOut) = 0;
