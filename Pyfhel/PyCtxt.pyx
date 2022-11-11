@@ -84,6 +84,13 @@ cdef class PyCtxt:
         """
         pass
 
+    cpdef PyCtxt copy(self):
+        """copy() -> PyCtxt
+
+        Returns a deep copy of the PyCtxt.
+        """
+        return PyCtxt(copy_ctxt=self)
+
     @property
     def scheme(self):
         """scheme: returns the scheme type.

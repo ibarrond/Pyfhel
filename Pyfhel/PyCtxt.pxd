@@ -24,6 +24,7 @@ cdef class PyCtxt:
     cdef scheme_t _scheme
     cdef backend_t _backend
     cdef int _mod_level
+    cpdef PyCtxt copy(self)
     cpdef int size(self)
     cpdef void set_scale(self, double scale)
     cpdef void round_scale(self)
