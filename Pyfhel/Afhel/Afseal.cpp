@@ -612,24 +612,48 @@ size_t Afseal::load_rotate_keys(istream &in_stream)
 }
 
 // SAVE/LOAD PLAINTEXT --> Could be achieved outside of Afseal
-size_t Afseal::save_plaintext(ostream &out_stream, string &compr_mode, AfPtxt &plain)
+size_t Afseal::save_plaintext(ostream &out_stream, string &compr_mode, AfPtxt &pt)
 {
-  return (size_t)_dyn_p(plain).save(out_stream, compr_mode_map[compr_mode]);
+  return (size_t)_dyn_p(pt).save(out_stream, compr_mode_map[compr_mode]);
 }
-size_t Afseal::load_plaintext(istream &in_stream, AfPtxt &plain)
+size_t Afseal::load_plaintext(istream &in_stream, AfPtxt &pt)
 {
-  return (size_t)_dyn_p(plain).load(*context, in_stream);
+  return (size_t)_dyn_p(pt).load(*context, in_stream);
 }
 
 // SAVE/LOAD CIPHERTEXT --> Could be achieved outside of Afseal
-size_t Afseal::save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ciphert)
+size_t Afseal::save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ct)
 {
-  return (size_t)_dyn_c(ciphert).save(out_stream, compr_mode_map[compr_mode]);
+  return (size_t)_dyn_c(ct).save(out_stream, compr_mode_map[compr_mode]);
 }
-size_t Afseal::load_ciphertext(istream &in_stream, AfCtxt &plain)
+size_t Afseal::load_ciphertext(istream &in_stream, AfCtxt &ct)
 {
-  return (size_t)_dyn_c(plain).load(*context, in_stream);
+  return (size_t)_dyn_c(ct).load(*context, in_stream);
 }
+
+// SIZES
+size_t Afseal::sizeof_context(string &compr_mode){
+  return (size_t)this->get_context()->key_context_data()->parms().save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_public_key(string &compr_mode){
+  return (size_t)this->get_publicKey()->save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_secret_key(string &compr_mode){
+  return (size_t)this->get_secretKey()->save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_relin_keys(string &compr_mode){
+  return (size_t)this->get_relinKeys()->save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_rotate_keys(string &compr_mode){
+  return (size_t)this->get_rotateKeys()->save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_plaintext(string &compr_mode, AfPtxt &pt){
+  return (size_t)_dyn_p(pt).save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_ciphertext(string &compr_mode, AfCtxt &ct){
+  return (size_t)_dyn_c(ct).save_size(compr_mode_map[compr_mode]);
+}
+
 
 // -----------------------------------------------------------------------------
 // -------------------------------- AUXILIARY ----------------------------------

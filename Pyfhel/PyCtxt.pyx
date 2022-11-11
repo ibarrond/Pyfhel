@@ -306,7 +306,21 @@ cdef class PyCtxt:
         if scheme is not None:
             self._scheme = to_Scheme_t(scheme).value
 
-            
+    cpdef size_t sizeof_ciphertext(self, str compr_mode="none"):
+        """Returns the number of bytes that will be written when saving the ciphertext.
+
+        Args:
+            compr_mode: (str) Compression mode. One of "none", "zlib", "zstd".
+
+        Return:
+            size_t: Number of bytes that will be written.
+        """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> ciphertext saving requires a Pyfhel instance")
+        cdef string bcompr_mode = compr_mode.lower().encode('utf8')
+        return self._pyfhel.afseal.sizeof_ciphertext(bcompr_mode, deref(self._ptr_ctxt))
+
+
     # =========================================================================
     # ============================= OPERATIONS ================================
     # =========================================================================          
@@ -708,6 +722,12 @@ cdef class PyCtxt:
         
         Serialize current ciphertext to bytes"""
         return self.to_bytes(compr_mode="none")
+
+    def __sizeof__(self):
+        """__sizeof__()
+        
+        Return the size of the ciphertext in bytes"""
+        return self.save_size()
 
     def encrypt(self, value):
         """encrypt(value)

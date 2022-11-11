@@ -397,8 +397,14 @@ class Afseal: public Afhel {
   size_t load_plaintext(istream &in_stream, AfPtxt &plain);
 
   // SAVE/LOAD CIPHERTEXT --> Could be achieved outside of Afseal
-  size_t save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ciphert);
-  size_t load_ciphertext(istream &in_stream, AfCtxt &plain);
+  // SIZES
+  size_t sizeof_context(string &compr_mode);
+  size_t sizeof_public_key(string &compr_mode);
+  size_t sizeof_secret_key(string &compr_mode);
+  size_t sizeof_relin_keys(string &compr_mode);
+  size_t sizeof_rotate_keys(string &compr_mode);
+  size_t sizeof_plaintext(string &compr_mode, AfPtxt &pt);
+  size_t sizeof_ciphertext(string &compr_mode, AfCtxt &ct);
 
   // ----------------------------- AUXILIARY ----------------------------
   long maxBitCount(long poly_modulus_degree, int sec_level);

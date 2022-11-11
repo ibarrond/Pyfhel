@@ -1682,7 +1682,47 @@ cdef class Pyfhel:
         cdef stringstream istr
         istr.write(content,len(content))
         return self.afseal.load_rotate_keys(istr)
-         
+
+    # SIZES
+    cpdef size_t sizeof_context(self, str compr_mode="none"):
+        """Returns an upper bound on the size of the current context in bytes
+        
+        Return:
+            size_t: size of the current context in bytes
+        """
+        return self.afseal.sizeof_context()
+    
+    cpdef size_t sizeof_public_key(self, str compr_mode="none"):
+        """Returns an upper bound on the size of the current public key in bytes
+        
+        Return:
+            size_t: size of the current public key in bytes
+        """
+        return self.afseal.sizeof_public_key()
+
+    cpdef size_t sizeof_secret_key(self, str compr_mode="none"):
+        """Returns an upper bound on the size of the current secret key in bytes
+        
+        Return:
+            size_t: size of the current secret key in bytes
+        """
+        return self.afseal.sizeof_secret_key()
+    
+    cpdef size_t sizeof_relin_key(self, str compr_mode="none"):
+        """Returns an upper bound on the size of the current relinearization key in bytes
+        
+        Return:
+            size_t: size of the current relinearization key in bytes
+        """
+        return self.afseal.sizeof_relin_keys()
+
+    cpdef size_t sizeof_rotate_key(self, str compr_mode="none"):
+        """Returns an upper bound on the size of the current rotation key in bytes
+        
+        Return:
+            size_t: size of the current rotation key in bytes
+        """
+        return self.afseal.sizeof_rotate_keys()
     
     # =========================================================================
     # ============================== AUXILIARY ================================

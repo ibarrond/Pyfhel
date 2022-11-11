@@ -194,6 +194,15 @@ cdef extern from "Afhel.h" nogil:
         size_t save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ciphert) except +
         size_t load_ciphertext(istream &in_stream, AfCtxt &plain) except +
 
+        # SIZES
+        size_t sizeof_context(string &compr_mode) except +
+        size_t sizeof_public_key(string &compr_mode) except +
+        size_t sizeof_secret_key(string &compr_mode) except +
+        size_t sizeof_relin_keys(string &compr_mode) except +
+        size_t sizeof_rotate_keys(string &compr_mode) except +
+        size_t sizeof_plaintext(string &compr_mode, AfPtxt &pt) except +
+        size_t sizeof_ciphertext(string &compr_mode, AfCtxt &ct) except +
+
         # ----------------------------- AUXILIARY -----------------------------
         # ckks
         double scale(AfCtxt &ctxt) except +
