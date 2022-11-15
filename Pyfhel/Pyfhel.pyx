@@ -788,7 +788,7 @@ cdef class Pyfhel:
         ptxt._pyfhel = self
         return ptxt 
 
-   cpdef PyPtxt encodeBGV(self, int64_t[::1] arr, PyPtxt ptxt=None):
+    cpdef PyPtxt encodeBGV(self, int64_t[::1] arr, PyPtxt ptxt=None):
         """Encodes an integer vector into a PyPtxt plaintext.
         Encodes a vector of integer values based on the current context.
         If provided a plaintext, encodes the values inside it.
