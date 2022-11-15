@@ -10,3 +10,6 @@ class Scheme_t(Enum):
 
     ckks=0x2
     """Fractional encoding, used with encryptFrac/decryptFrac and encodeFrac/decodeFrac."""
+
+    bgv=0x3
+    """Integer encoding, used with encryptBGV/decryptBGV and encodeBGV/decodeBGV."""

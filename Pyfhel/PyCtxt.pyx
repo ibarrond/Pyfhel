@@ -87,8 +87,8 @@ cdef class PyCtxt:
     @property
     def scheme(self):
         """scheme: returns the scheme type.
-        
-        Can be set to: none, bfv (INTEGER) or ckks (FRACTIONAL).
+
+        Can be set to: none, bfv, bgv (INTEGER) or ckks (FRACTIONAL).
 
         See Also:
             :func:`~Pyfhel.utils.to_Scheme_t`
@@ -251,7 +251,8 @@ cdef class PyCtxt:
 
                 * ('int', 'INTEGER', int, 1, Scheme_t.bfv) -> integer scheme.
                 * ('float', 'FRACTIONAL', float, 2, Scheme_t.ckks) -> fractional scheme.
-              
+                * (3, Scheme_t.bgv) -> integer scheme.
+                
         Return:
             size_t: number of loaded bytes.
 
@@ -545,7 +546,7 @@ cdef class PyCtxt:
         """
         if not isinstance(divisor, (int, float, list, np.ndarray, PyPtxt)):
             raise TypeError("<Pyfhel ERROR> divisor must be float, int, array|list "
-                            "or PyPtxt with bfv/ckks scheme (is %s instead)"
+                            "or PyPtxt with bfv/bgv/ckks scheme (is %s instead)"
                             %(type(divisor)))
         if isinstance(divisor, PyPtxt):  # If ptxt, decode to get inverse
             divisor = divisor.decode()
@@ -571,7 +572,7 @@ cdef class PyCtxt:
         """
         if not isinstance(divisor, (int, float, list, np.ndarray, PyPtxt)):
             raise TypeError("<Pyfhel ERROR> divisor must be float, int, array|list "
-                            "or PyPtxt with bfv/ckks scheme (is %s instead)"
+                            "or PyPtxt with bfv/bgv/ckks scheme (is %s instead)"
                             %(type(divisor)))
         if isinstance(divisor, PyPtxt): # If ptxt, decode to get inverse
             divisor = divisor.decode()
@@ -680,7 +681,7 @@ cdef class PyCtxt:
         """__repr__()
         
         Prints information about the current ciphertext"""
-        if self.scheme==Scheme_t.bfv:
+        if self.scheme==Scheme_t.bfv or self.scheme==Scheme_t.bgv:
             scheme_dep_info = 'noiseBudget=' + str(self.noiseBudget) \
                                             if self.noiseBudget!=-1 else "?"
         elif self.scheme==Scheme_t.ckks:
@@ -781,7 +782,7 @@ cdef class PyCtxt:
         if other.ndim == 0:           # If scalar, replicate
             other = other.reshape([1])
         # Compute inverse. Int: https://stackoverflow.com/questions/4798654
-        if self.scheme == Scheme_t.bfv:
+        if self.scheme == Scheme_t.bfv or self.scheme == Scheme_t.bgv:
             other = other.astype(np.int64)
             t = self._pyfhel.t
             inverse = np.array([pow(int(other[i]), t-2, t)for i in range(other.shape[0])])

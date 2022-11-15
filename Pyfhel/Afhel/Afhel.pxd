@@ -10,11 +10,13 @@ from libcpp.memory cimport shared_ptr, dynamic_pointer_cast
 from libcpp.map cimport map as cpp_map
 from libcpp.complex cimport complex as c_complex
 from libcpp cimport bool
-from numpy cimport int64_t, uint64_t, uint8_t
         
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.utils.iostream cimport istream, ostream, ifstream, ofstream       
 
+ctypedef long long int64_t
+ctypedef unsigned long long uint64_t
+ctypedef unsigned char uint8_t
 ctypedef c_complex[double] cy_complex
 
 #===============================================================================
@@ -49,6 +51,7 @@ cdef extern from "Afhel.h" nogil:
         none,
         bfv
         ckks
+        bgv
     cdef cpp_map scheme_t_str[scheme_t, string]
 
     # FHE backend
@@ -107,13 +110,17 @@ cdef extern from "Afhel.h" nogil:
         # ckks
         void encode_f(vector[double] &values, double scale, AfPtxt &plainVOut) except +
         void encode_c(vector[cy_complex] &values, double scale, AfPtxt &plainVOut) except +
-        
+        # bgv
+        void encode_g(vector[int64_t] &values, AfPtxt &plainOut) except +
+
         # DECODE
         # bfv
         void decode_i(AfPtxt &ptxt, vector[int64_t] &valueVOut) except +
         # ckks
         void decode_f(AfPtxt &ptxt, vector[double] &valueVOut) except +
         void decode_c(AfPtxt &ptxt, vector[cy_complex] &valueVOut) except +
+        # bgv
+        void decode_g(AfPtxt &ptxt, vector[int64_t] &valueVOut) except +
 
         # AUXILIARY
         void data(AfPtxt &ptxt, uint64_t *dest) except +

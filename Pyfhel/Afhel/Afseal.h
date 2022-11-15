@@ -76,11 +76,13 @@ static std::map<seal::scheme_type, scheme_t> scheme_map_to_afhel {
    {seal::scheme_type::none, scheme_t::none},
    {seal::scheme_type::bfv,  scheme_t::bfv},
    {seal::scheme_type::ckks, scheme_t::ckks},
+   {seal::scheme_type::bgv,  scheme_t::bgv},
 };
 static std::map<scheme_t, seal::scheme_type> scheme_map_to_seal {
    {scheme_t::none, seal::scheme_type::none},
    {scheme_t::bfv, seal::scheme_type::bfv},
    {scheme_t::ckks, seal::scheme_type::ckks},
+   {scheme_t::bgv, seal::scheme_type::bgv},
 };
 static  std::map<int, sec_level_type> sec_map{
     {0, seal::sec_level_type::none},
@@ -238,8 +240,9 @@ class Afseal: public Afhel {
   // --------------------------- ATTRIBUTES -----------------------------
 
   std::shared_ptr<seal::SEALContext> context = NULL;     /**< Context. Used for init*/
-  std::shared_ptr<seal::BatchEncoder> bfvEncoder = NULL; /**< Rotation in Batching. */
-  std::shared_ptr<seal::CKKSEncoder> ckksEncoder = NULL; /**< Rotation in Batching. */
+  std::shared_ptr<seal::BatchEncoder> bfvEncoder = NULL; 
+  std::shared_ptr<seal::CKKSEncoder> ckksEncoder = NULL; 
+  std::shared_ptr<seal::BatchEncoder> bgvEncoder = NULL;  
   
   std::shared_ptr<seal::KeyGenerator> keyGenObj = NULL;  /**< Key Generator Object.*/
   std::shared_ptr<seal::SecretKey> secretKey = NULL;     /**< Secret key.*/
@@ -296,6 +299,8 @@ class Afseal: public Afhel {
   // ckks
   void encode_f(vector<double> &values, double scale, AfPtxt &ptxtVOut);
   void encode_c(vector<std::complex<double>> &values, double scale, AfPtxt &ptxtVOut);
+  // bgv
+  void encode_g(vector<int64_t> &values, AfPtxt &plainOut);
 
   // DECODE
   // bfv
@@ -303,6 +308,8 @@ class Afseal: public Afhel {
   // ckks
   void decode_f(AfPtxt &ptxt, vector<double> &valueVOut);
   void decode_c(AfPtxt &ptxt, vector<std::complex<double>> &valueVOut);
+  // bgv
+  void decode_g(AfPtxt &ptxt, vector<int64_t> &valueVOut);
 
   // AUXILIARY
   void data(AfPtxt &ptxt, uint64_t *dest);
@@ -430,6 +437,7 @@ class Afseal: public Afhel {
   inline shared_ptr<Decryptor>  get_decryptor();
   inline shared_ptr<BatchEncoder>  get_bfv_encoder();
   inline shared_ptr<CKKSEncoder>  get_ckks_encoder();
+  inline shared_ptr<BatchEncoder>  get_bgv_encoder();
   inline shared_ptr<SecretKey>  get_secretKey();
   inline shared_ptr<PublicKey>  get_publicKey();
   inline shared_ptr<RelinKeys>  get_relinKeys();

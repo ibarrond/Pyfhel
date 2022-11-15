@@ -63,6 +63,7 @@ Afseal::Afseal(const Afseal &otherAfseal)
 
   this->bfvEncoder = make_shared<BatchEncoder>(*context);
   this->ckksEncoder = make_shared<CKKSEncoder>(*context);
+  this->bgvEncoder = make_shared<BatchEncoder>(*context);
 };
 
 Afseal::~Afseal(){};
@@ -79,9 +80,9 @@ string Afseal::ContextGen(scheme_t scheme,
                         std::vector<int> qi_sizes,
                         std::vector<uint64_t> qi_values)
 {
-  if (scheme != scheme_t::bfv && scheme != scheme_t::ckks)
+  if (scheme != scheme_t::bfv && scheme != scheme_t::bgv && scheme != scheme_t::ckks)
   {
-    throw invalid_argument("<Afseal>: scheme must be bfv or ckks");
+    throw invalid_argument("<Afseal>: scheme must be bfv, bgv or ckks");
   }
   EncryptionParameters parms(scheme_map_to_seal[scheme]);
   // Setting n
@@ -138,7 +139,11 @@ string Afseal::ContextGen(scheme_t scheme,
     if (scheme == scheme_t::bfv)
     {
       this->bfvEncoder = make_shared<BatchEncoder>(*context);
-    } 
+    }         
+    else if (scheme == scheme_t::bgv)
+    {
+      this->bgvEncoder = make_shared<BatchEncoder>(*context);
+    }
     else // ckks
     {
       this->ckksEncoder = make_shared<CKKSEncoder>(*context);
@@ -263,6 +268,16 @@ void Afseal::encode_c(std::vector<complex<double>> &values, double scale, AfPtxt
   }
   ckks_encoder->encode(values, scale, _dyn_p(ptxtOut));
 }
+// bgv
+void Afseal::encode_g(vector<int64_t> &values, AfPtxt &ptxtOut)
+{
+    auto bgv_encoder = this->get_bgv_encoder();
+    if (values.size() > bgv_encoder->slot_count())
+        {
+        throw range_error("<Afseal>: Data vector size is bigger than bgv nSlots");
+        }
+    bgvEncoder->encode(values, _dyn_p(ptxtOut));
+}
 
 // DECODE
 // bfv
@@ -278,6 +293,11 @@ void Afseal::decode_f(AfPtxt &plain1, vector<double> &valueVOut)
 void Afseal::decode_c(AfPtxt &plain1, vector<std::complex<double>> &valueVOut)
 {
   this->get_ckks_encoder()->decode(_dyn_p(plain1), valueVOut);
+}
+// bgv
+void Afseal::decode_g(AfPtxt &plain1, std::vector<int64_t> &valueVOut)
+{
+  this->get_bgv_encoder()->decode(_dyn_p(plain1), valueVOut);
 }
 
 // AUXILIARY
@@ -408,7 +428,7 @@ void Afseal::multiply_plain_v(vector<AfCtxt *> &ctxtVInOut, vector<AfPtxt *> &pt
 // ROTATION
 void Afseal::rotate(AfCtxt &ctxt, int k)
 {
-  if (this->get_scheme() == scheme_t::bfv)
+  if (this->get_scheme() == scheme_t::bfv || this->get_scheme() == scheme_t::bgv)
   {
     this->get_evaluator()->rotate_rows_inplace(_dyn_c(ctxt), k, *(this->get_rotateKeys()));
   }
@@ -425,7 +445,7 @@ void Afseal::rotate_v(vector<AfCtxt *> &ctxtV, int k)
 {
   auto ev = this->get_evaluator();
   auto &rtk = *(this->get_rotateKeys());
-  if (this->get_scheme() == scheme_t::bfv)
+  if (this->get_scheme() == scheme_t::bfv || this->get_scheme() == scheme_t::bgv)
   {
     vectorize(ctxtV,
               [ev, k, rtk](AfCtxt c)
@@ -551,10 +571,18 @@ size_t Afseal::load_context(istream &in_stream, int sec)
   if (parms.scheme() == scheme_type::bfv)
   {
     this->bfvEncoder = make_shared<BatchEncoder>(*context);
+  }    
+  else if (parms.scheme() == scheme_type::bgv)
+  {
+  this->bgvEncoder = make_shared<BatchEncoder>(*context);
   }
   else if (parms.scheme() == scheme_type::ckks)
   {
     this->ckksEncoder = make_shared<CKKSEncoder>(*context);
+  }
+  else
+  {
+    throw std::logic_error("<Afseal>: Loaded context has invalid scheme");
   }
   this->evaluator = make_shared<Evaluator>(*context);
   this->keyGenObj = make_shared<KeyGenerator>(*context);
@@ -708,6 +736,14 @@ shared_ptr<CKKSEncoder> inline Afseal::get_ckks_encoder()
   }
   return (this->ckksEncoder);
 }
+shared_ptr<BatchEncoder> inline Afseal::get_bgv_encoder()
+{
+    if (this->encryptor == NULL)
+        {
+        throw std::logic_error("<Afseal>: BGV context not initialized");
+        }
+    return (this->bgvEncoder);
+}
 shared_ptr<SecretKey> inline Afseal::get_secretKey()
 {
   if (this->secretKey == NULL)
@@ -745,19 +781,15 @@ size_t Afseal::get_nSlots()
   scheme_t scheme = this->get_scheme();
   if (scheme == scheme_t::bfv)
   {
-    if (this->bfvEncoder == NULL)
-    {
-      throw std::logic_error("<Afseal>: Context not initialized with BFV scheme");
-    }
-    return this->bfvEncoder->slot_count();
+    return this->get_bfv_encoder()->slot_count();
   }
   else if (scheme == scheme_t::ckks)
   {
-    if (this->ckksEncoder == NULL)
-    {
-      throw std::logic_error("<Afseal>: Context not initialized with CKKS scheme");
-    }
-    return this->ckksEncoder->slot_count();
+    return this->get_ckks_encoder()->slot_count();
+  }
+  else if (scheme == scheme_t::bgv)
+  {
+    return this->get_bgv_encoder()->slot_count();
   }
   return -1;
 }

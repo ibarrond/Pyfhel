@@ -11,7 +11,9 @@ from libcpp.string cimport string
 from libcpp.cast cimport reinterpret_cast
 from libcpp.memory cimport shared_ptr, make_shared, dynamic_pointer_cast as dyn_cast
 from libcpp cimport bool
-from numpy cimport int64_t, uint64_t
+
+ctypedef long long int64_t
+ctypedef unsigned long long uint64_t
 
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.utils.iostream cimport istream, ostream, ifstream, ofstream, ostringstream, stringstream, binary
@@ -46,24 +48,28 @@ cdef class Pyfhel:
     cpdef PyCtxt encryptComplex(self, complex[:] arr, PyCtxt ctxt=*, 
                                         double scale=*, int scale_bits=*) 
     cpdef PyCtxt encryptPtxt(self, PyPtxt ptxt, PyCtxt ctxt=*) 
+    cpdef PyCtxt encryptBGV(self, int64_t[:] arr, PyCtxt ctxt=*)
     # vectorized
     cpdef np.ndarray[object, ndim=1] encryptAInt(self, int64_t[:,::1] arr) 
     cpdef np.ndarray[object, ndim=1] encryptAFrac(self, double[:,::1] arr,
                                         double scale=*, int scale_bits=*) 
     cpdef np.ndarray[object, ndim=1] encryptAComplex(self, complex[:,::1] arr,
                                         double scale=*, int scale_bits=*) 
-    cpdef np.ndarray[object, ndim=1] encryptAPtxt(self, PyPtxt[:] ptxt)  
+    cpdef np.ndarray[object, ndim=1] encryptAPtxt(self, PyPtxt[:] ptxt)
+    cpdef np.ndarray[object, ndim=1] encryptABGV(self, int64_t[:,::1] arr)
 
     # DECRYPTION
     cpdef np.ndarray[int64_t, ndim=1] decryptInt(self, PyCtxt ctxt) 
     cpdef np.ndarray[double, ndim=1] decryptFrac(self, PyCtxt ctxt) 
     cpdef np.ndarray[complex, ndim=1] decryptComplex(self, PyCtxt ctxt) 
     cpdef PyPtxt decryptPtxt(self, PyCtxt ctxt, PyPtxt ptxt=*) 
+    cpdef np.ndarray[int64_t, ndim=1] decryptBGV(self, PyCtxt ctxt)
     # vectorized
     cpdef np.ndarray[int64_t, ndim=2] decryptAInt(self, PyCtxt ctxt) 
     cpdef np.ndarray[double, ndim=2] decryptAFrac(self, PyCtxt ctxt) 
     cpdef np.ndarray[double, ndim=2] decryptAComplex(self, PyCtxt ctxt) 
     cpdef np.ndarray[object, ndim=1] decryptAPtxt(self, PyCtxt ctxt) 
+    cpdef np.ndarray[int64_t, ndim=2] decryptABGV(self, PyCtxt ctxt)
     
     # NOISE LEVEL    
     cpdef int noise_level(self, PyCtxt ctxt)
@@ -75,21 +81,25 @@ cdef class Pyfhel:
                                 double scale=*, int scale_bits=*, ) 
     cpdef PyPtxt encodeComplex(self, complex[::1] arr, PyPtxt ptxt=*,
                                 double scale=*, int scale_bits=*) 
+    cpdef PyPtxt encodeBGV(self, int64_t[::1] arr, PyPtxt ptxt=*)
     # vectorized
     cpdef np.ndarray[object, ndim=1] encodeAInt(self, int64_t[:,::1] arr) 
     cpdef np.ndarray[object, ndim=1] encodeAFrac(self, double[:,::1] arr, 
                                     double scale=*, int scale_bits=*) 
     cpdef np.ndarray[object, ndim=1] encodeAComplex(self, complex[:,::1] arr,
                                     double scale=*, int scale_bits=*) 
+    cpdef np.ndarray[object, ndim=1] encodeABGV(self, int64_t[:,::1] arr)
 
     # DECODE
     cpdef np.ndarray[int64_t, ndim=1] decodeInt(self, PyPtxt ptxt) 
     cpdef np.ndarray[double, ndim=1] decodeFrac(self, PyPtxt ptxt) 
     cpdef np.ndarray[complex, ndim=1] decodeComplex(self, PyPtxt ptxt) 
+    cpdef np.ndarray[int64_t, ndim=1] decodeBGV(self, PyPtxt ptxt)
     # vectorized
     cpdef np.ndarray[int64_t, ndim=2] decodeAInt(self, PyPtxt[:] ptxt) 
     cpdef np.ndarray[double, ndim=2] decodeAFrac(self, PyPtxt[:] ptxt) 
     cpdef np.ndarray[complex, ndim=2] decodeAComplex(self, PyPtxt[:] ptxt) 
+    cpdef np.ndarray[int64_t, ndim=2] decodeABGV(self, PyPtxt[:] ptxt)
     
     # RELINEARIZE
     cpdef void relinearize(self, PyCtxt ctxt) 
