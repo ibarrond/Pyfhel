@@ -33,9 +33,6 @@ from setuptools import setup, Extension, find_packages
 
 # Get platform system
 platform_system = platform.system()
-if platform_system == 'Darwin': # MacOS
-    raise SystemError("Pyfhel is not supported in MacOS (see issue #59)."
-                      "Please use a Linux VM or Docker.")
 
 # Read config file
 config = toml.load("pyproject.toml")
@@ -515,6 +512,8 @@ def get_lib_suffix(lib_type: str) -> str:
     else:  # shared
         if platform_system == 'Windows':
             return '.dll'
+        elif platform_system == 'Darwin':
+            return '.dylib'
         else:
             return '.so'
 
