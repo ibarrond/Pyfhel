@@ -4,6 +4,7 @@
 
 # Compiled Dynamic libraries
 **.so*
+**.dylib*
 
 # Compiled Static libraries
 **.a
@@ -59,3 +60,6 @@ docs/_autoexamples
 **.pickle
 docs/html
 docs/doctrees
+
+# macOS
+**/.DS_Store
