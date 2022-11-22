@@ -99,7 +99,7 @@ else: # Mocking server code (from Demo_5bis_CS_Server.py)
     c_mean += (c_mean >> 2)   # element [3] contains the result
     print(f"[Server] Average computed! Responding: c_mean={c_mean}")
 
-    c_res = PyCtxt(copy_ctxt=c_mean)
+    c_res = c_mean.copy() # Copying with a single command
 
 # %%
 # 4. Process Response

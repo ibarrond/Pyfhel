@@ -30,9 +30,27 @@ print(f"  PyCtxt c=HE.encrypt([42]): {c}")
 print(f"  PyPtxt p=HE.encode([-1]): {p}")
 
 
+# %%
+# 2. Checking size of objects before serializing
+# ------------------------------------------------------
+con_size, con_size_zstd   = HE.sizeof_context(),    HE.sizeof_context(compr_mode="zstd")
+pk_size,  pk_size_zstd    = HE.sizeof_public_key(), HE.sizeof_public_key(compr_mode="zstd")
+sk_size,  sk_size_zstd    = HE.sizeof_secret_key(), HE.sizeof_secret_key(compr_mode="zstd")
+rotk_size,rotk_size_zstd  = HE.sizeof_rotate_key(), HE.sizeof_rotate_key(compr_mode="zstd")
+rlk_size, rlk_size_zstd   = HE.sizeof_relin_key(),  HE.sizeof_relin_key(compr_mode="zstd")
+c_size,   c_size_zstd     = c.sizeof_ciphertext(),  c.sizeof_ciphertext(compr_mode="zstd")
+# alternatively, for ciphertext sizes you can use sys.getsizeof(c)
+
+print("2. Checking size of serializable objects (with and without compression)")
+print(f"   - context:    [ \"zstd\"  --> {con_size_zstd} | No compression --> {con_size}]")
+print(f"   - public_key: [ \"zstd\"  --> {pk_size_zstd} | No compression --> {pk_size}]")
+print(f"   - secret_key: [ \"zstd\"  --> {sk_size_zstd} | No compression --> {sk_size}]")
+print(f"   - relin_key:  [ \"zstd\"  --> {rotk_size_zstd} | No compression --> {rotk_size}]")
+print(f"   - rotate_key: [ \"zstd\"  --> {rlk_size_zstd} | No compression --> {rlk_size}]")
+print(f"   - c:          [ \"zstd\"  --> {c_size_zstd} | No compression --> {c_size}]")
 
 # %%
-# 2. Save & restore everything into/from files
+# 3. Save & restore everything into/from files
 # ------------------------------------------------
 # We will be using a temporary directory for this
 import tempfile
@@ -77,7 +95,7 @@ tmp_dir.cleanup()
 
 
 # %%
-# 3. Save everything into byte-strings
+# 4. Save everything into byte-strings
 # ----------------------------------------
 # Now we save all objects into bytestrings
 #  This is useful to send objects over the network as payload (See Client/Server demo)
@@ -89,7 +107,7 @@ s_rotate_key= HE.to_bytes_rotate_key()
 s_c         = c.to_bytes()
 s_p         = p.to_bytes()
 
-print("3a. Save all objects into byte-strings")
+print("4a. Save all objects into byte-strings")
 print(f"   - s_context: {s_context[:10]}...")
 print(f"   - s_public_key: {s_public_key[:10]}...")
 print(f"   - s_secret_key: {s_secret_key[:10]}...")
@@ -110,7 +128,7 @@ c_b = PyCtxt(pyfhel=HE_b, bytestring=s_c)
 p_b = PyPtxt(pyfhel=HE_b, bytestring=s_p)
     
 
-print("3b. Loading everything from bytestrings.")
+print("4b. Loading everything from bytestrings.")
 # Some checks
 assert HE_b.decryptInt(HE_b.encryptInt(np.array([42], dtype=np.int64)))[0]==42, "Incorrect encryption"
 assert HE_b.decryptInt(c_b)[0]==42, "Incorrect decryption/ciphertext"
@@ -123,7 +141,7 @@ print("  All checks passed! Loaded from bytestrings correctly")
 
 
 # %%
-# 4. Pickling Python objects
+# 5. Pickling Python objects
 # -------------------------------
 # A last alternative is to pickle the python objects and then unpickle them.
 #  > WARNING! when pickling a Pyfhel object only the context is picked inside <
@@ -135,14 +153,14 @@ import pickle
 pkls_pyfhel = pickle.dumps(HE)   # pickle.dump(HE, file) to dump in a file
 pkls_ctxt   = pickle.dumps(c)
 
-print("4a. Pickling Pyfhel & PyCtxt objects.")
+print("5a. Pickling Pyfhel & PyCtxt objects.")
 print(f"  - pkls_pyfhel: {pkls_pyfhel[:10]}...")
 print(f"  - pkls_ctxt: {pkls_ctxt[:10]}...")
 
 # To load the objects, just call `pickle.loads`
 HE_pkl = pickle.loads(pkls_pyfhel) # pickle.load(file) to load from file
 c_pkl = pickle.loads(pkls_ctxt)
-print("4b. Loaded pickled objects")
+print("5b. Loaded pickled objects")
 print(f"   - HE_pkl: {HE_pkl}")
 print(f"   - c_pkl: {c_pkl}")
 

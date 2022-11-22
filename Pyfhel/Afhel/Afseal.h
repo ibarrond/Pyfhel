@@ -279,11 +279,11 @@ class Afseal: public Afhel {
 
   // ENCRYPTION
   void encrypt(AfPtxt &ptxt, AfCtxt &cipherOut);
-  void encrypt_v(vector<shared_ptr<AfPtxt*>> &ptxtV, vector<shared_ptr<AfCtxt*>> &ctxtVOut);
+  void encrypt_v(vector<shared_ptr<AfPtxt>> &ptxtV, vector<shared_ptr<AfCtxt>> &ctxtVOut);
 
   // DECRYPTION
   void decrypt(AfCtxt &ctxt, AfPtxt &plainOut);
-  void decrypt_v(vector<shared_ptr<AfCtxt*>> &ctxtV, vector<shared_ptr<AfPtxt*>> &ptxtVOut);
+  void decrypt_v(vector<shared_ptr<AfCtxt>> &ctxtV, vector<shared_ptr<AfPtxt>> &ptxtVOut);
 
   // NOISE MEASUREMENT
   int noise_level(AfCtxt &ctxt);
@@ -309,61 +309,61 @@ class Afseal: public Afhel {
   
   // -------------------------- RELINEARIZATION -------------------------
   void relinearize(AfCtxt &ctxt);
-  void relinearize_v(vector<shared_ptr<AfCtxt*>> ctxtV);
+  void relinearize_v(vector<shared_ptr<AfCtxt>> ctxtV);
 
   // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
   // NEGATE
   void negate(AfCtxt &ctxt);
-  void negate_v(vector<shared_ptr<AfCtxt*>> &ctxtV);
+  void negate_v(vector<shared_ptr<AfCtxt>> &ctxtV);
 
   // SQUARE
   void square(AfCtxt &ctxt);
-  void square_v(vector<shared_ptr<AfCtxt*>> &ctxtV);
+  void square_v(vector<shared_ptr<AfCtxt>> &ctxtV);
 
   // ADDITION
   void add(AfCtxt &ctxtInOut, AfCtxt &ctxt);
   void add_plain(AfCtxt &ctxtInOut, AfPtxt &ptxt);
-  void add_v(vector<shared_ptr<AfCtxt*>> &ctxtVInOut, vector<shared_ptr<AfCtxt*>> &ctxtV2);
-  void add_plain_v(vector<shared_ptr<AfCtxt*>> &ctxtVInOut, vector<shared_ptr<AfPtxt*>> &ptxtV2);
+  void add_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfCtxt>> &ctxtV2);
+  void add_plain_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfPtxt>> &ptxtV2);
 
   // SUBTRACTION
   void sub(AfCtxt &ctxtInOut, AfCtxt &ctxt);
   void sub_plain(AfCtxt &ctxtInOut, AfPtxt &ptxt);
-  void sub_v(vector<shared_ptr<AfCtxt*>> &ctxtVInOut, vector<shared_ptr<AfCtxt*>> &ctxtV2);
-  void sub_plain_v(vector<shared_ptr<AfCtxt*>> &ctxtVInOut, vector<shared_ptr<AfPtxt*>> &ptxtV2);
+  void sub_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfCtxt>> &ctxtV2);
+  void sub_plain_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfPtxt>> &ptxtV2);
 
   // MULTIPLICATION
   void multiply(AfCtxt &ctxtVInOut, AfCtxt &ctxt);
   void multiply_plain(AfCtxt &ctxtVInOut, AfPtxt &ptxt);
-  void multiply_v(vector<shared_ptr<AfCtxt*>> &ctxtVInOut, vector<shared_ptr<AfCtxt*>> &ctxtV2);
-  void multiply_plain_v(vector<shared_ptr<AfCtxt*>> &ctxtVInOut, vector<shared_ptr<AfPtxt*>> &ptxtV2);
+  void multiply_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfCtxt>> &ctxtV2);
+  void multiply_plain_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfPtxt>> &ptxtV2);
 
   // ROTATE
   void rotate(AfCtxt &ctxt, int k);
-  void rotate_v(vector<shared_ptr<AfCtxt*>> &ctxtV, int k);
+  void rotate_v(vector<shared_ptr<AfCtxt>> &ctxtV, int k);
   void flip(AfCtxt &ctxt);
-  void flip_v(vector<shared_ptr<AfCtxt*>> &ctxtV);
+  void flip_v(vector<shared_ptr<AfCtxt>> &ctxtV);
 
   // POWER
   void exponentiate(AfCtxt &ctxt, uint64_t &expon);
-  void exponentiate_v(vector<shared_ptr<AfCtxt*>> &cipherV, uint64_t &expon);
+  void exponentiate_v(vector<shared_ptr<AfCtxt>> &cipherV, uint64_t &expon);
 
   // CKKS -> Rescaling and mod switching
   void rescale_to_next(AfCtxt &ctxt);
-  void rescale_to_next_v(vector<shared_ptr<AfCtxt*>> &ctxtV);
+  void rescale_to_next_v(vector<shared_ptr<AfCtxt>> &ctxtV);
   void mod_switch_to_next(AfCtxt &ctxt);
-  void mod_switch_to_next_v(vector<shared_ptr<AfCtxt*>> &ctxtV);
+  void mod_switch_to_next_v(vector<shared_ptr<AfCtxt>> &ctxtV);
   void mod_switch_to_next_plain(AfPtxt &ptxt);
-  void mod_switch_to_next_plain_v(vector<shared_ptr<AfPtxt*>> &ptxtV);
+  void mod_switch_to_next_plain_v(vector<shared_ptr<AfPtxt>> &ptxtV);
   
   // --------------------------- VECTORIZATION --------------------------
-  void vectorize(vector<shared_ptr<AfCtxt*>> &ctxtVInOut,
+  void vectorize(vector<shared_ptr<AfCtxt>> &ctxtVInOut,
                     function<void(AfCtxt)> f);
-  void vectorize(vector<shared_ptr<AfPtxt*>> &ptxtVInOut,
+  void vectorize(vector<shared_ptr<AfPtxt>> &ptxtVInOut,
                     function<void(AfPtxt)> f);
-  void vectorize(vector<shared_ptr<AfCtxt*>> &ctxtVInOut,vector<shared_ptr<AfCtxt*>> &ctxtV2,
+  void vectorize(vector<shared_ptr<AfCtxt>> &ctxtVInOut,vector<shared_ptr<AfCtxt>> &ctxtV2,
                     function<void(AfCtxt, AfCtxt)> f);
-  void vectorize(vector<shared_ptr<AfCtxt*>> &ctxtVInOut,vector<shared_ptr<AfPtxt*>> &ptxtV2,
+  void vectorize(vector<shared_ptr<AfCtxt>> &ctxtVInOut,vector<shared_ptr<AfPtxt>> &ptxtV2,
                     function<void(AfCtxt, AfPtxt)> f);
 
   // -------------------------------- I/O -------------------------------

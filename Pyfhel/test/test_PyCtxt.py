@@ -1,7 +1,7 @@
 import pytest
+from sys import getsizeof
 import numpy as np
 from Pyfhel import Pyfhel, PyCtxt
-from Pyfhel.PyCtxt import cumsum
 from Pyfhel.utils import Scheme_t
 
 ################################################################################
@@ -34,6 +34,7 @@ class TestPyCtxt:
         # Copy constructor
         c1 = HE.encrypt(1)
         c2 = PyCtxt(copy_ctxt=c1)
+        c3 = c1.copy()
         del c1
         assert np.round(HE.decrypt(c2)[0])==1
         # Empty constructor
@@ -69,6 +70,10 @@ class TestPyCtxt:
         assert id(c._pyfhel)==id(HE)
         # Size
         assert c.size() == 2
+        # memory size
+        # with pytest.warns(UnraisableExceptionWarning):
+        PyCtxt().sizeof_ciphertext() # TODO: capture warning as error??
+        assert getsizeof(c) >= 2000000 # 2MB each
         # Scale
         c.scale = 1
         assert c.scale == 1
@@ -220,7 +225,3 @@ class TestPyCtxt:
             res = HE.decryptComplex(c)
             assert np.round(np.real(res[0]))==2
             assert np.round(np.imag(res[1]))==1
-            
-    def test_PyCtxt_cumsum(self, HE):
-        cs = cumsum(np.array([HE.encrypt(1), HE.encrypt(2), HE.encrypt(3)]))
-        assert np.round(HE.decrypt(cs)[0])==6
