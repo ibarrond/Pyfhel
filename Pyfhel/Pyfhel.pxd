@@ -126,7 +126,7 @@ cdef class Pyfhel:
     cpdef PyCtxt mod_switch_to_next_ctxt(self, PyCtxt ctxt, bool in_new_ctxt=*)
     cpdef PyPtxt mod_switch_to_next_ptxt(self, PyPtxt ptxt, bool in_new_ptxt=*)
     # ================================ I/O =====================================
-    #FILES
+    # FILES
     cpdef size_t save_context(self, fileName, str compr_mode=*) 
     cpdef size_t load_context(self, fileName) 
 
@@ -142,8 +142,7 @@ cdef class Pyfhel:
     cpdef size_t save_rotate_key(self, fileName, str compr_mode=*) 
     cpdef size_t load_rotate_key(self, fileName) 
 
-
-    #BYTES
+    # BYTES
     cpdef bytes to_bytes_context(self, str compr_mode=*) 
     cpdef size_t from_bytes_context(self, bytes content) 
 
@@ -158,6 +157,14 @@ cdef class Pyfhel:
 
     cpdef bytes to_bytes_rotate_key(self, str compr_mode=*) 
     cpdef size_t from_bytes_rotate_key(self, bytes content) 
+
+    # SIZES
+    cpdef size_t sizeof_context(self, str compr_mode=*)
+    cpdef size_t sizeof_public_key(self, str compr_mode=*)
+    cpdef size_t sizeof_secret_key(self, str compr_mode=*)
+    cpdef size_t sizeof_relin_key(self, str compr_mode=*)
+    cpdef size_t sizeof_rotate_key(self, str compr_mode=*)
+
     
     # ============================== AUXILIARY =================================
     cpdef long maxBitCount(self, long poly_modulus_degree, int sec_level) 

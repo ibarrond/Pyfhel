@@ -24,6 +24,7 @@ cdef class PyCtxt:
     cdef scheme_t _scheme
     cdef backend_t _backend
     cdef int _mod_level
+    cpdef PyCtxt copy(self)
     cpdef int size(self)
     cpdef void set_scale(self, double scale)
     cpdef void round_scale(self)
@@ -31,6 +32,7 @@ cdef class PyCtxt:
     cpdef size_t load(self, str fileName, object scheme=*)
     cpdef bytes to_bytes(self, str compr_mode=*)
     cpdef void from_bytes(self, bytes content, object scheme=*)
+    cpdef size_t sizeof_ciphertext(self, str compr_mode=*)
 
 # ---------------------------- VECTOR/ARRAY CLASS ------------------------------
 cdef extern from "<utility>" namespace "std" nogil:

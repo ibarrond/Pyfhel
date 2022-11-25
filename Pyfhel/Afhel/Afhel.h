@@ -87,11 +87,11 @@ class Afhel {
 
   // ENCRYPTION
   virtual void encrypt(AfPtxt &plain1, AfCtxt &cipherOut) = 0;
-  virtual void encrypt_v(std::vector<AfPtxt*> &plainV, std::vector<AfCtxt*> &cipherVOut) = 0;
+  virtual void encrypt_v(std::vector<std::shared_ptr<AfPtxt>> &plainV, std::vector<std::shared_ptr<AfCtxt>> &cipherVOut) = 0;
 
   // DECRYPTION
   virtual void decrypt(AfCtxt &cipher1, AfPtxt &plainOut) = 0;
-  virtual void decrypt_v(std::vector<AfCtxt*> &cipherV, std::vector<AfPtxt*> &plainVOut) = 0;
+  virtual void decrypt_v(std::vector<std::shared_ptr<AfCtxt>> &cipherV, std::vector<std::shared_ptr<AfPtxt>> &plainVOut) = 0;
 
   // NOISE MEASUREMENT
   virtual int noise_level(AfCtxt &cipher1) = 0;
@@ -121,40 +121,40 @@ class Afhel {
   // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
   // NEGATE
   virtual void negate(AfCtxt &cipher1) = 0;
-  virtual void negate_v(std::vector<AfCtxt*> &cipherV) = 0;
+  virtual void negate_v(std::vector<std::shared_ptr<AfCtxt>> &cipherV) = 0;
 
   // SQUARE
   virtual void square(AfCtxt &cipher1) = 0;
-  virtual void square_v(std::vector<AfCtxt*> &cipherV) = 0;
+  virtual void square_v(std::vector<std::shared_ptr<AfCtxt>> &cipherV) = 0;
 
   // ADDITION
   virtual void add(AfCtxt &cipherInOut, AfCtxt &cipher2) = 0;
   virtual void add_plain(AfCtxt &cipherInOut, AfPtxt &plain2) = 0;
-  virtual void add_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2) = 0;
-  virtual void add_plain_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
+  virtual void add_v(std::vector<std::shared_ptr<AfCtxt>> &cipherVInOut, std::vector<std::shared_ptr<AfCtxt>> &cipherV2) = 0;
+  virtual void add_plain_v(std::vector<std::shared_ptr<AfCtxt>> &cipherVInOut, std::vector<std::shared_ptr<AfPtxt>> &plainV2) = 0;
 
   // SUBTRACTION
   virtual void sub(AfCtxt &cipherInOut, AfCtxt &cipher2) = 0;
   virtual void sub_plain(AfCtxt &cipherInOut, AfPtxt &plain2) = 0;
-  virtual void sub_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2) = 0;
-  virtual void sub_plain_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
+  virtual void sub_v(std::vector<std::shared_ptr<AfCtxt>> &cipherVInOut, std::vector<std::shared_ptr<AfCtxt>> &cipherV2) = 0;
+  virtual void sub_plain_v(std::vector<std::shared_ptr<AfCtxt>> &cipherVInOut, std::vector<std::shared_ptr<AfPtxt>> &plainV2) = 0;
 
 
   // MULTIPLICATION
   virtual void multiply(AfCtxt &cipherVInOut, AfCtxt &cipher2) = 0;
   virtual void multiply_plain(AfCtxt &cipherVInOut, AfPtxt &plain1) = 0;
-  virtual void multiply_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfCtxt*> &cipherV2) = 0;
-  virtual void multiply_plain_v(std::vector<AfCtxt*> &cipherVInOut, std::vector<AfPtxt*> &plainV2) = 0;
+  virtual void multiply_v(std::vector<std::shared_ptr<AfCtxt>> &cipherVInOut, std::vector<std::shared_ptr<AfCtxt>> &cipherV2) = 0;
+  virtual void multiply_plain_v(std::vector<std::shared_ptr<AfCtxt>> &cipherVInOut, std::vector<std::shared_ptr<AfPtxt>> &plainV2) = 0;
 
   // ROTATE
   virtual void rotate(AfCtxt &cipher1, int k) = 0;
-  virtual void rotate_v(std::vector<AfCtxt*> &cipherV, int k) = 0;
+  virtual void rotate_v(std::vector<std::shared_ptr<AfCtxt>> &cipherV, int k) = 0;
   virtual void flip(AfCtxt &ctxt) = 0;
-  virtual void flip_v(std::vector<AfCtxt*> &ctxtV) = 0;
+  virtual void flip_v(std::vector<std::shared_ptr<AfCtxt>> &ctxtV) = 0;
 
   // POWER
   virtual void exponentiate(AfCtxt &cipher1, uint64_t &expon) = 0;
-  virtual void exponentiate_v(std::vector<AfCtxt*> &cipherV, uint64_t &expon) = 0;
+  virtual void exponentiate_v(std::vector<std::shared_ptr<AfCtxt>> &cipherV, uint64_t &expon) = 0;
 
   // CKKS -> Rescaling and mod switching
   virtual void rescale_to_next(AfCtxt &cipher1) = 0;
@@ -198,6 +198,15 @@ class Afhel {
   virtual size_t get_poly_modulus_degree() = 0;
   virtual scheme_t get_scheme() = 0;
 
+
+  // SIZES
+  virtual size_t sizeof_context(std::string &compr_mode) = 0;
+  virtual size_t sizeof_public_key(std::string &compr_mode) = 0;
+  virtual size_t sizeof_secret_key(std::string &compr_mode) = 0;
+  virtual size_t sizeof_relin_keys(std::string &compr_mode) = 0;
+  virtual size_t sizeof_rotate_keys(std::string &compr_mode) = 0;
+  virtual size_t sizeof_plaintext(std::string &compr_mode, AfPtxt &pt) = 0;
+  virtual size_t sizeof_ciphertext(std::string &compr_mode, AfCtxt &ct) = 0;
 
   // ------------------------------- AFPOLY -----------------------------
   friend class AfPoly;

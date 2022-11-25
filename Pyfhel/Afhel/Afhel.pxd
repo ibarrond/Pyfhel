@@ -94,11 +94,11 @@ cdef extern from "Afhel.h" nogil:
 
         # ENCRYPTION
         void encrypt(AfPtxt& ptxt, AfCtxt& ctxtOut) except +
-        void encrypt_v(vector[AfPtxt]& plainV, vector[AfCtxt]& ctxtVOut) except +
+        void encrypt_v(vector[shared_ptr[AfPtxt]]& plainV, vector[shared_ptr[AfCtxt]]& ctxtVOut) except +
         
         # DECRYPTION
         void decrypt(AfCtxt &ctxtInOut, AfPtxt &plainOut) except +
-        void decrypt_v(vector[AfCtxt] &ctxtV, vector[AfPtxt] &plainVOut) except +
+        void decrypt_v(vector[shared_ptr[AfCtxt]] &ctxtV, vector[shared_ptr[AfPtxt]] &plainVOut) except +
         
         # NOISE LEVEL
         int noise_level(AfCtxt& ctxtInOut) except +
@@ -132,45 +132,45 @@ cdef extern from "Afhel.h" nogil:
         # ---------------------- HOMOMORPHIC OPERATIONS ------------------------
         # Negate
         void negate(AfCtxt& ctxtInOut) except +
-        void negate_v(vector[AfCtxt]& ctxtV) except +
+        void negate_v(vector[shared_ptr[AfCtxt]]& ctxtV) except +
         # Square
         void square(AfCtxt& ctxtInOut) except +
-        void square_v(vector[AfCtxt]& ctxtV) except +
+        void square_v(vector[shared_ptr[AfCtxt]]& ctxtV) except +
         # Add
         void add(AfCtxt& ctxtInOut, AfCtxt& ctxt) except +
         void add_plain(AfCtxt& ctxtInOut, AfPtxt& plain2) except +
-        void add_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
-        void add_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except +
+        void add_v(vector[shared_ptr[AfCtxt]]& ctxtVInOut, vector[shared_ptr[AfCtxt]]& ctxtV) except +
+        void add_plain_v(vector[shared_ptr[AfCtxt]]& ctxtVInOut, vector[shared_ptr[AfPtxt]]& ptxtV) except +
 
         # Subtract
         void sub(AfCtxt& ctxtInOut, AfCtxt& ctxt) except +
         void sub_plain(AfCtxt& ctxtInOut, AfPtxt& plain2) except +
-        void sub_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
-        void sub_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except +
+        void sub_v(vector[shared_ptr[AfCtxt]]& ctxtVInOut, vector[shared_ptr[AfCtxt]]& ctxtV) except +
+        void sub_plain_v(vector[shared_ptr[AfCtxt]]& ctxtVInOut, vector[shared_ptr[AfPtxt]]& ptxtV) except +
 
         # Multiply
         void multiply(AfCtxt& ctxtInOut, AfCtxt& ctxt) except +
         void multiply_plain(AfCtxt& ctxtInOut, AfPtxt& ptxt) except +
-        void multiply_v(vector[AfCtxt]& ctxtVInOut, vector[AfCtxt]& ctxtV) except +
-        void multiply_plain_v(vector[AfCtxt]& ctxtVInOut, vector[AfPtxt]& ptxtV) except + 
+        void multiply_v(vector[shared_ptr[AfCtxt]]& ctxtVInOut, vector[shared_ptr[AfCtxt]]& ctxtV) except +
+        void multiply_plain_v(vector[shared_ptr[AfCtxt]]& ctxtVInOut, vector[shared_ptr[AfPtxt]]& ptxtV) except + 
 
         # Rotate & flip
         void rotate(AfCtxt& ctxtInOut, int k) except +
-        void rotate_v(vector[AfCtxt]& ctxtV, int k) except +
+        void rotate_v(vector[shared_ptr[AfCtxt]]& ctxtV, int k) except +
         void flip(AfCtxt& ctxtInOut) except +
-        void flip_v(vector[AfCtxt]& ctxtV) except +
+        void flip_v(vector[shared_ptr[AfCtxt]]& ctxtV) except +
 
         # Power
         void exponentiate(AfCtxt& ctxtInOut, uint64_t& expon) except +
-        void exponentiate_v(vector[AfCtxt]& ctxtV, uint64_t& expon) except +
+        void exponentiate_v(vector[shared_ptr[AfCtxt]]& ctxtV, uint64_t& expon) except +
 
         # ckks -> rescale and mod switching
         void rescale_to_next(AfCtxt &ctxtInOut) except +
-        void rescale_to_next_v(vector[AfCtxt]& ctxtVInOut) except +
+        void rescale_to_next_v(vector[shared_ptr[AfCtxt]]& ctxtVInOut) except +
         void mod_switch_to_next(AfCtxt &ctxtInOut) except +
-        void mod_switch_to_next_v(vector[AfCtxt]& ctxtVInOut) except +
+        void mod_switch_to_next_v(vector[shared_ptr[AfCtxt]]& ctxtVInOut) except +
         void mod_switch_to_next_plain(AfPtxt &ptxtInOut) except +
-        void mod_switch_to_next_plain_v(vector[AfPtxt]& ptxtVInOut) except +
+        void mod_switch_to_next_plain_v(vector[shared_ptr[AfPtxt]]& ptxtVInOut) except +
 
         # -------------------------------- I/O --------------------------------
         # SAVE/LOAD CONTEXT
@@ -200,6 +200,15 @@ cdef extern from "Afhel.h" nogil:
         # SAVE/LOAD CIPHERTEXT --> Could be achieved outside of Afseal
         size_t save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ciphert) except +
         size_t load_ciphertext(istream &in_stream, AfCtxt &plain) except +
+
+        # SIZES
+        size_t sizeof_context(string &compr_mode) except +
+        size_t sizeof_public_key(string &compr_mode) except +
+        size_t sizeof_secret_key(string &compr_mode) except +
+        size_t sizeof_relin_keys(string &compr_mode) except +
+        size_t sizeof_rotate_keys(string &compr_mode) except +
+        size_t sizeof_plaintext(string &compr_mode, AfPtxt &pt) except +
+        size_t sizeof_ciphertext(string &compr_mode, AfCtxt &ct) except +
 
         # ----------------------------- AUXILIARY -----------------------------
         # ckks

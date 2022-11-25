@@ -84,6 +84,13 @@ cdef class PyCtxt:
         """
         pass
 
+    cpdef PyCtxt copy(self):
+        """copy() -> PyCtxt
+
+        Returns a deep copy of the PyCtxt.
+        """
+        return PyCtxt(copy_ctxt=self)
+
     @property
     def scheme(self):
         """scheme: returns the scheme type.
@@ -300,7 +307,21 @@ cdef class PyCtxt:
         if scheme is not None:
             self._scheme = to_Scheme_t(scheme).value
 
-            
+    cpdef size_t sizeof_ciphertext(self, str compr_mode="none"):
+        """Returns the number of bytes that will be written when saving the ciphertext.
+
+        Args:
+            compr_mode: (str) Compression mode. One of "none", "zlib", "zstd".
+
+        Return:
+            size_t: Number of bytes that will be written.
+        """
+        if self._pyfhel is None:
+            raise ValueError("<Pyfhel ERROR> ciphertext sizing requires a Pyfhel instance")
+        cdef string bcompr_mode = compr_mode.lower().encode('utf8')
+        return self._pyfhel.afseal.sizeof_ciphertext(bcompr_mode, deref(self._ptr_ctxt))
+
+
     # =========================================================================
     # ============================= OPERATIONS ================================
     # =========================================================================          
@@ -703,13 +724,19 @@ cdef class PyCtxt:
         Serialize current ciphertext to bytes"""
         return self.to_bytes(compr_mode="none")
 
+    def __sizeof__(self):
+        """__sizeof__()
+        
+        Return the size of the ciphertext in bytes"""
+        return self.sizeof_ciphertext()
+
     def encrypt(self, value):
         """encrypt(value)
         
         Encrypts the given value using _pyfhel.
         
         Arguments:
-            value (int, float, np.array): Encrypts accordingly to the tipe
+            value (int, float, np.array): Encrypts accordingly to the type
             
         Return:
             None
@@ -793,52 +820,48 @@ cdef class PyCtxt:
                             " inversion (%s)"%(self.scheme))
         return self.encode_operand(inverse)
 
-def cumsum(PyCtxt[:] c_arr):
-    """cumsum(PyCtxt[:] c_arr)
-    
-    Returns the cumulative sum of the given ciphertext array.
-    
-    Arguments:
-        c_arr (PyCtxt[:] c_arr): Ciphertext array to sum
-        
-    Return:
-        PyCtxt[:] c_arr: Cumulative sum of the given ciphertext array
-    """
-    res = PyCtxt(copy_ctxt=c_arr[0])
-    for i in range(1, len(c_arr)):
-        res += c_arr[i]
-    return res
 
 
-# cdef class PyArrayCtxt:
-#     cdef vector[int] vec
-#     cdef Py_ssize_t shape[1]
-#     cdef Py_ssize_t strides[1]
+# cdef class PyArrCtxt:
+#     cdef Py_ssize_t ncols
+#     cdef Py_ssize_t shape[2]
+#     cdef Py_ssize_t strides[2]
+#     cdef vector[shared_ptr[AfCtxt]] _ptr_actxt
 
-#     # constructor and destructor are fairly unimportant now since
-#     # vec will be destroyed automatically.
+#     def __cinit__(self, Py_ssize_t ncols):
+#         self.ncols = ncols
 
-#     cdef set_data(self, vector[int]& data):
-#        self.vec = move(data)
-#        # @ead suggests `self.vec.swap(data)` instead
-#        # to avoid having to wrap move
+#     def add_row(self):
+#         """Adds a row, initially zero-filled."""
+#         self.v.resize(self.v.size() + self.ncols)
 
-#     # now implement the buffer protocol for the class
-#     # which makes it generally useful to anything that expects an array
 #     def __getbuffer__(self, Py_buffer *buffer, int flags):
-#         # relevant documentation http://cython.readthedocs.io/en/latest/src/userguide/buffer.html#a-matrix-class
-#         cdef Py_ssize_t itemsize = sizeof(self.vec[0])
+#         cdef Py_ssize_t itemsize = sizeof(self.v[0])
 
-#         self.shape[0] = self.vec.size()
-#         self.strides[0] = sizeof(int)
-#         buffer.buf = <char *>&(self.vec[0])
-#         buffer.format = 'i'
-#         buffer.internal = NULL
+#         self.shape[0] = self.v.size() // self.ncols
+#         self.shape[1] = self.ncols
+
+#         # Stride 1 is the distance, in bytes, between two items in a row;
+#         # this is the distance between two adjacent items in the vector.
+#         # Stride 0 is the distance between the first elements of adjacent rows.
+#         self.strides[1] = <Py_ssize_t>(  <char *>&(self.v[1])
+#                                        - <char *>&(self.v[0]))
+
+
+
+#         self.strides[0] = self.ncols * self.strides[1]
+
+#         buffer.buf = <char *>&(self.v[0])
+#         buffer.format = 'f'                     # float
+#         buffer.internal = NULL                  # see References
 #         buffer.itemsize = itemsize
 #         buffer.len = self.v.size() * itemsize   # product(shape) * itemsize
-#         buffer.ndim = 1
+#         buffer.ndim = 2
 #         buffer.obj = self
 #         buffer.readonly = 0
 #         buffer.shape = self.shape
 #         buffer.strides = self.strides
-#         buffer.suboffsets = NULL
+#         buffer.suboffsets = NULL                # for pointer arrays only
+
+#     def __releasebuffer__(self, Py_buffer *buffer):
+#         pass

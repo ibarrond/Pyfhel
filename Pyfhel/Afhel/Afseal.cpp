@@ -206,7 +206,7 @@ void Afseal::encrypt(AfPtxt &plain1, AfCtxt &ctxt)
 {
   this->get_encryptor()->encrypt(_dyn_p(plain1), _dyn_c(ctxt));
 }
-void Afseal::encrypt_v(std::vector<AfPtxt *> &plainV, std::vector<AfCtxt *> &ctxtVOut)
+void Afseal::encrypt_v(vector<std::shared_ptr<AfPtxt>> &plainV, std::vector<std::shared_ptr<AfCtxt>> &ctxtVOut)
 {
   auto encryptor = this->get_encryptor();
   vectorize(
@@ -220,7 +220,7 @@ void Afseal::decrypt(AfCtxt &ctxt, AfPtxt &ptxtOut)
 {
   this->get_decryptor()->decrypt(_dyn_c(ctxt), _dyn_p(ptxtOut));
 }
-void Afseal::decrypt_v(std::vector<AfCtxt *> &ctxtV, std::vector<AfPtxt *> &plainVOut)
+void Afseal::decrypt_v(std::vector<std::shared_ptr<AfCtxt>> &ctxtV, vector<std::shared_ptr<AfPtxt>> &plainVOut)
 {
   auto decryptor = this->get_decryptor();
   vectorize(
@@ -315,7 +315,7 @@ void Afseal::relinearize(AfCtxt &ctxt)
 {
   this->get_evaluator()->relinearize_inplace(_dyn_c(ctxt), *(this->get_relinKeys()));
 }
-void Afseal::relinearize_v(vector<AfCtxt *> ctxtV)
+void Afseal::relinearize_v(vector<std::shared_ptr<AfCtxt>> ctxtV)
 {
   auto ev = this->get_evaluator();
   seal::RelinKeys &rlk = *(this->get_relinKeys());
@@ -332,7 +332,7 @@ void Afseal::negate(AfCtxt &ctxt)
 {
   this->get_evaluator()->negate_inplace(_dyn_c(ctxt));
 }
-void Afseal::negate_v(vector<AfCtxt *> &ctxtV)
+void Afseal::negate_v(vector<std::shared_ptr<AfCtxt>> &ctxtV)
 {
   auto ev = this->get_evaluator();
   vectorize(ctxtV,
@@ -345,7 +345,7 @@ void Afseal::square(AfCtxt &ctxt)
 {
   this->get_evaluator()->square_inplace(_dyn_c(ctxt));
 }
-void Afseal::square_v(vector<AfCtxt *> &ctxtV)
+void Afseal::square_v(vector<std::shared_ptr<AfCtxt>> &ctxtV)
 {
   auto ev = this->get_evaluator();
   vectorize(ctxtV,
@@ -362,14 +362,14 @@ void Afseal::add_plain(AfCtxt &cipherInOut, AfPtxt &plain2)
 {
   this->get_evaluator()->add_plain_inplace(_dyn_c(cipherInOut), _dyn_p(plain2));
 }
-void Afseal::add_v(vector<AfCtxt *> &ctxtVInOut, vector<AfCtxt *> &ctxtV2)
+void Afseal::add_v(vector<std::shared_ptr<AfCtxt>> &ctxtVInOut, vector<std::shared_ptr<AfCtxt>> &ctxtV2)
 {
   auto ev = this->get_evaluator();
   vectorize(ctxtVInOut, ctxtV2,
             [ev](AfCtxt c, AfCtxt c2)
             { ev->add_inplace(_dyn_c(c), _dyn_c(c2)); });
 }
-void Afseal::add_plain_v(vector<AfCtxt *> &ctxtVInOut, vector<AfPtxt *> &ptxtV)
+void Afseal::add_plain_v(vector<std::shared_ptr<AfCtxt>> &ctxtVInOut, vector<std::shared_ptr<AfPtxt>> &ptxtV)
 {
   auto ev = this->get_evaluator();
   vectorize(ctxtVInOut, ptxtV,
@@ -386,14 +386,14 @@ void Afseal::sub_plain(AfCtxt &cipherInOut, AfPtxt &plain2)
 {
   this->get_evaluator()->sub_plain_inplace(_dyn_c(cipherInOut), _dyn_p(plain2));
 }
-void Afseal::sub_v(vector<AfCtxt *> &ctxtVInOut, vector<AfCtxt *> &ctxtV2)
+void Afseal::sub_v(vector<std::shared_ptr<AfCtxt>> &ctxtVInOut, vector<std::shared_ptr<AfCtxt>> &ctxtV2)
 {
   auto ev = this->get_evaluator();
   vectorize(ctxtVInOut, ctxtV2,
             [ev](AfCtxt c, AfCtxt c2)
             { ev->sub_inplace(_dyn_c(c), _dyn_c(c2)); });
 }
-void Afseal::sub_plain_v(vector<AfCtxt *> &ctxtVInOut, vector<AfPtxt *> &ptxtV)
+void Afseal::sub_plain_v(vector<std::shared_ptr<AfCtxt>> &ctxtVInOut, vector<std::shared_ptr<AfPtxt>> &ptxtV)
 {
   auto ev = this->get_evaluator();
   vectorize(ctxtVInOut, ptxtV,
@@ -410,14 +410,14 @@ void Afseal::multiply_plain(AfCtxt &cipherInOut, AfPtxt &plain1)
 {
   this->get_evaluator()->multiply_plain_inplace(_dyn_c(cipherInOut), _dyn_p(plain1));
 }
-void Afseal::multiply_v(vector<AfCtxt *> &ctxtVInOut, vector<AfCtxt *> &ctxtV2)
+void Afseal::multiply_v(vector<std::shared_ptr<AfCtxt>> &ctxtVInOut, vector<std::shared_ptr<AfCtxt>> &ctxtV2)
 {
   auto ev = this->get_evaluator();
   vectorize(ctxtVInOut, ctxtV2,
             [ev](AfCtxt c, AfCtxt c2)
             { ev->multiply_inplace(_dyn_c(c), _dyn_c(c2)); });
 }
-void Afseal::multiply_plain_v(vector<AfCtxt *> &ctxtVInOut, vector<AfPtxt *> &ptxtV)
+void Afseal::multiply_plain_v(vector<std::shared_ptr<AfCtxt>> &ctxtVInOut, vector<std::shared_ptr<AfPtxt>> &ptxtV)
 {
   auto ev = this->get_evaluator();
   vectorize(ctxtVInOut, ptxtV,
@@ -441,7 +441,7 @@ void Afseal::rotate(AfCtxt &ctxt, int k)
     throw std::logic_error("<Afseal>: Scheme not supported for rotation");
   }
 }
-void Afseal::rotate_v(vector<AfCtxt *> &ctxtV, int k)
+void Afseal::rotate_v(vector<std::shared_ptr<AfCtxt>> &ctxtV, int k)
 {
   auto ev = this->get_evaluator();
   auto &rtk = *(this->get_rotateKeys());
@@ -473,7 +473,7 @@ void Afseal::flip(AfCtxt &ctxt)
     throw std::logic_error("<Afseal>: Only bfv scheme supports column rotation");
   }
 }
-void Afseal::flip_v(vector<AfCtxt *> &ctxtV)
+void Afseal::flip_v(vector<std::shared_ptr<AfCtxt>> &ctxtV)
 {
   auto ev = this->get_evaluator();
   auto &rtk = *(this->get_rotateKeys());
@@ -494,7 +494,7 @@ void Afseal::exponentiate(AfCtxt &ctxt, uint64_t &expon)
 {
   this->get_evaluator()->exponentiate_inplace(_dyn_c(ctxt), expon, *relinKeys);
 }
-void Afseal::exponentiate_v(vector<AfCtxt *> &ctxtV, uint64_t &expon)
+void Afseal::exponentiate_v(vector<std::shared_ptr<AfCtxt>> &ctxtV, uint64_t &expon)
 {
   auto ev = this->get_evaluator();
   auto &rlk = *(this->get_relinKeys());
@@ -515,7 +515,7 @@ void Afseal::rescale_to_next(AfCtxt &ctxt)
     throw std::logic_error("<Afseal>: Scheme must be ckks");
   }
 }
-void Afseal::rescale_to_next_v(vector<AfCtxt *> &ctxtV)
+void Afseal::rescale_to_next_v(vector<std::shared_ptr<AfCtxt>> &ctxtV)
 {
   auto ev = this->get_evaluator();
   if (this->get_scheme() == scheme_t::ckks)
@@ -534,7 +534,7 @@ void Afseal::mod_switch_to_next(AfCtxt &ctxt)
 {
   this->get_evaluator()->mod_switch_to_next_inplace(_dyn_c(ctxt));
 }
-void Afseal::mod_switch_to_next_v(vector<AfCtxt *> &ctxtV)
+void Afseal::mod_switch_to_next_v(vector<std::shared_ptr<AfCtxt>> &ctxtV)
 {
   auto ev = this->get_evaluator();
   vectorize(ctxtV,
@@ -546,7 +546,7 @@ void Afseal::mod_switch_to_next_plain(AfPtxt &ptxt)
 {
   this->get_evaluator()->mod_switch_to_next_inplace(_dyn_p(ptxt));
 }
-void Afseal::mod_switch_to_next_plain_v(vector<AfPtxt *> &plainV)
+void Afseal::mod_switch_to_next_plain_v(vector<std::shared_ptr<AfPtxt>> &plainV)
 {
   auto ev = this->get_evaluator();
   vectorize(plainV,
@@ -640,24 +640,48 @@ size_t Afseal::load_rotate_keys(istream &in_stream)
 }
 
 // SAVE/LOAD PLAINTEXT --> Could be achieved outside of Afseal
-size_t Afseal::save_plaintext(ostream &out_stream, string &compr_mode, AfPtxt &plain)
+size_t Afseal::save_plaintext(ostream &out_stream, string &compr_mode, AfPtxt &pt)
 {
-  return (size_t)_dyn_p(plain).save(out_stream, compr_mode_map[compr_mode]);
+  return (size_t)_dyn_p(pt).save(out_stream, compr_mode_map[compr_mode]);
 }
-size_t Afseal::load_plaintext(istream &in_stream, AfPtxt &plain)
+size_t Afseal::load_plaintext(istream &in_stream, AfPtxt &pt)
 {
-  return (size_t)_dyn_p(plain).load(*context, in_stream);
+  return (size_t)_dyn_p(pt).load(*context, in_stream);
 }
 
 // SAVE/LOAD CIPHERTEXT --> Could be achieved outside of Afseal
-size_t Afseal::save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ciphert)
+size_t Afseal::save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ct)
 {
-  return (size_t)_dyn_c(ciphert).save(out_stream, compr_mode_map[compr_mode]);
+  return (size_t)_dyn_c(ct).save(out_stream, compr_mode_map[compr_mode]);
 }
-size_t Afseal::load_ciphertext(istream &in_stream, AfCtxt &plain)
+size_t Afseal::load_ciphertext(istream &in_stream, AfCtxt &ct)
 {
-  return (size_t)_dyn_c(plain).load(*context, in_stream);
+  return (size_t)_dyn_c(ct).load(*context, in_stream);
 }
+
+// SIZES
+size_t Afseal::sizeof_context(string &compr_mode){
+  return (size_t)this->get_context()->key_context_data()->parms().save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_public_key(string &compr_mode){
+  return (size_t)this->get_publicKey()->save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_secret_key(string &compr_mode){
+  return (size_t)this->get_secretKey()->save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_relin_keys(string &compr_mode){
+  return (size_t)this->get_relinKeys()->save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_rotate_keys(string &compr_mode){
+  return (size_t)this->get_rotateKeys()->save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_plaintext(string &compr_mode, AfPtxt &pt){
+  return (size_t)_dyn_p(pt).save_size(compr_mode_map[compr_mode]);
+}
+size_t Afseal::sizeof_ciphertext(string &compr_mode, AfCtxt &ct){
+  return (size_t)_dyn_c(ct).save_size(compr_mode_map[compr_mode]);
+}
+
 
 // -----------------------------------------------------------------------------
 // -------------------------------- AUXILIARY ----------------------------------
@@ -817,8 +841,8 @@ int Afseal::total_coeff_modulus_bit_count()
 // ----------------------------- VECTORIZATION ---------------------------------
 // -----------------------------------------------------------------------------
 void Afseal::vectorize(
-    vector<AfCtxt *> &ctxtVInOut,
-    vector<AfCtxt *> &ctxtV2,
+    vector<std::shared_ptr<AfCtxt>> &ctxtVInOut,
+    vector<std::shared_ptr<AfCtxt>> &ctxtV2,
     function<void(AfCtxt, AfCtxt)> f)
 {
   if (ctxtVInOut.size() != ctxtV2.size())
@@ -832,8 +856,8 @@ void Afseal::vectorize(
   }
 }
 void Afseal::vectorize(
-    vector<AfCtxt *> &ctxtVInOut,
-    vector<AfPtxt *> &ptxtV,
+    vector<std::shared_ptr<AfCtxt>> &ctxtVInOut,
+    vector<std::shared_ptr<AfPtxt>> &ptxtV,
     function<void(AfCtxt, AfPtxt)> f)
 {
   if (ctxtVInOut.size() != ptxtV.size())
@@ -848,7 +872,7 @@ void Afseal::vectorize(
 }
 
 void Afseal::vectorize(
-    vector<AfCtxt *> &ctxtVInOut,
+    vector<std::shared_ptr<AfCtxt>> &ctxtVInOut,
     function<void(AfCtxt)> f)
 {
 #pragma omp parallel for
@@ -859,7 +883,7 @@ void Afseal::vectorize(
 }
 
 void Afseal::vectorize(
-    vector<AfPtxt *> &plainVInOut,
+    vector<std::shared_ptr<AfPtxt>> &plainVInOut,
     function<void(AfPtxt)> f)
 {
 #pragma omp parallel for

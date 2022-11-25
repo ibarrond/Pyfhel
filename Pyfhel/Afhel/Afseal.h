@@ -32,8 +32,8 @@
 #ifndef AFSEAL_H
 #define AFSEAL_H
 
-#include <iostream>  /* Print in std::cout */
-#include <string>    /* std::string class */
+#include <iostream>  /* Print in cout */
+#include <string>    /* string class */
 #include <vector>    /* Vectorizing all operations */
 #include <thread>    /* memory pools, multithread*/
 #include <memory>    /* Smart Pointers*/
@@ -48,7 +48,6 @@
 #include "seal/seal.h"
 #include "seal/util/polyarithsmallmod.h"
 
-
 using namespace std;
 using namespace seal;
 
@@ -61,7 +60,7 @@ class AfsealPoly;
 
 
 // Enum converters
-static std::map<std::string, seal::compr_mode_type> compr_mode_map {
+static map<string, seal::compr_mode_type> compr_mode_map {
     {"none", compr_mode_type::none},
 #ifdef SEAL_USE_ZLIB
     // Use ZLIB compression
@@ -72,19 +71,19 @@ static std::map<std::string, seal::compr_mode_type> compr_mode_map {
     {"zstd", compr_mode_type::zstd},
 #endif
 };
-static std::map<seal::scheme_type, scheme_t> scheme_map_to_afhel {
+static map<seal::scheme_type, scheme_t> scheme_map_to_afhel {
    {seal::scheme_type::none, scheme_t::none},
    {seal::scheme_type::bfv,  scheme_t::bfv},
    {seal::scheme_type::ckks, scheme_t::ckks},
    {seal::scheme_type::bgv,  scheme_t::bgv},
 };
-static std::map<scheme_t, seal::scheme_type> scheme_map_to_seal {
+static map<scheme_t, seal::scheme_type> scheme_map_to_seal {
    {scheme_t::none, seal::scheme_type::none},
    {scheme_t::bfv, seal::scheme_type::bfv},
    {scheme_t::ckks, seal::scheme_type::ckks},
    {scheme_t::bgv, seal::scheme_type::bgv},
 };
-static  std::map<int, sec_level_type> sec_map{
+static map<int, sec_level_type> sec_map{
     {0, seal::sec_level_type::none},
     {128, seal::sec_level_type::tc128},
     {192, seal::sec_level_type::tc192},
@@ -132,10 +131,10 @@ class AfsealPoly: public AfPoly {
   seal::MemoryPoolHandle mempool;
 
   /// The last generated coeff_representation
-  seal::DynArray<std::uint64_t> coeff_repr;
+  seal::DynArray<uint64_t> coeff_repr;
 
   /// The underlying ponomial
-  seal::DynArray<std::uint64_t> eval_repr;
+  seal::DynArray<uint64_t> eval_repr;
 
   /// True iff the last generated coeff_representaton is still valid
   /// (no operations were performed since the last generation)
@@ -187,7 +186,7 @@ class AfsealPoly: public AfPoly {
   /// \param ref Ciphertext used as a reference to get get, e.g., coeff_modulus_count
   AfsealPoly(Afseal &afseal, AfsealPtxt &ptxt, const AfsealCtxt &ref) {
     // TODO: Remove this, as it makes no sense! Can just get all info from ptxt and afseal.context!
-    throw std::runtime_error("FUNCTION REMOVED.");
+    throw runtime_error("FUNCTION REMOVED.");
   }
 
   /// Creates a copy of polynomial in the Plaintext
@@ -199,16 +198,16 @@ class AfsealPoly: public AfPoly {
 
   /// Export polynomial to a vector of complex values
   /// \return vector of the (complex) coefficients of the polynomial
-  vector<std::complex<double>> to_coeff_list(Afhel &afseal);
+  vector<complex<double>> to_coeff_list(Afhel &afseal);
 
   /// get individual coefficient
   /// \param i index of the coefficient
   /// \return the i-th coefficient
-  std::complex<double> get_coeff(Afhel &afseal, size_t i);
+  complex<double> get_coeff(Afhel &afseal, size_t i);
 
   /// set individual coefficient
   /// \param i index of the coefficient
-  void set_coeff(Afhel &afseal, std::complex<double> &val, size_t i);
+  void set_coeff(Afhel &afseal, complex<double> &val, size_t i);
 
   // ----------- OPERATIONS -------------
   //inplace ops -> result in first operand
@@ -239,28 +238,28 @@ class Afseal: public Afhel {
  private:
   // --------------------------- ATTRIBUTES -----------------------------
 
-  std::shared_ptr<seal::SEALContext> context = NULL;     /**< Context. Used for init*/
-  std::shared_ptr<seal::BatchEncoder> bfvEncoder = NULL; 
-  std::shared_ptr<seal::CKKSEncoder> ckksEncoder = NULL; 
-  std::shared_ptr<seal::BatchEncoder> bgvEncoder = NULL;  
+  shared_ptr<seal::SEALContext> context = NULL;     /**< Context. Used for init*/
+  shared_ptr<seal::BatchEncoder> bfvEncoder = NULL; /**< Rotation in Batching. */
+  shared_ptr<seal::CKKSEncoder> ckksEncoder = NULL; /**< Rotation in Batching. */
+  shared_ptr<seal::BatchEncoder> bgvEncoder = NULL;  
   
-  std::shared_ptr<seal::KeyGenerator> keyGenObj = NULL;  /**< Key Generator Object.*/
-  std::shared_ptr<seal::SecretKey> secretKey = NULL;     /**< Secret key.*/
-  std::shared_ptr<seal::PublicKey> publicKey = NULL;     /**< Public key.*/
-  std::shared_ptr<seal::RelinKeys> relinKeys = NULL;     /**< Relinearization object*/
-  std::shared_ptr<seal::GaloisKeys> rotateKeys = NULL;   /**< Galois key for batching*/
+  shared_ptr<seal::KeyGenerator> keyGenObj = NULL;  /**< Key Generator Object.*/
+  shared_ptr<seal::SecretKey> secretKey = NULL;     /**< Secret key.*/
+  shared_ptr<seal::PublicKey> publicKey = NULL;     /**< Public key.*/
+  shared_ptr<seal::RelinKeys> relinKeys = NULL;     /**< Relinearization object*/
+  shared_ptr<seal::GaloisKeys> rotateKeys = NULL;   /**< Galois key for batching*/
 
-  std::shared_ptr<seal::Encryptor> encryptor = NULL;     /**< Requires a Public Key.*/
-  std::shared_ptr<seal::Evaluator> evaluator = NULL;     /**< Requires a context.*/
-  std::shared_ptr<seal::Decryptor> decryptor = NULL;     /**< Requires a Secret Key.*/
+  shared_ptr<seal::Encryptor> encryptor = NULL;     /**< Requires a Public Key.*/
+  shared_ptr<seal::Evaluator> evaluator = NULL;     /**< Requires a context.*/
+  shared_ptr<seal::Decryptor> decryptor = NULL;     /**< Requires a Secret Key.*/
 
   // ------------------ STREAM OPERATORS OVERLOAD -----------------------
-  friend std::ostream &operator<<(std::ostream &outs, Afseal const &af);
-  friend std::istream &operator>>(std::istream &ins, Afseal const &af);
+  friend ostream &operator<<(ostream &outs, Afseal const &af);
+  friend istream &operator>>(istream &ins, Afseal const &af);
 
 
  public:
-  std::vector<uint64_t> qi;
+  vector<uint64_t> qi;
 
   // ----------------------- CLASS MANAGEMENT ---------------------------
   Afseal();
@@ -283,11 +282,11 @@ class Afseal: public Afhel {
 
   // ENCRYPTION
   void encrypt(AfPtxt &ptxt, AfCtxt &cipherOut);
-  void encrypt_v(vector<AfPtxt*> &ptxtV, vector<AfCtxt*> &ctxtVOut);
+  void encrypt_v(vector<shared_ptr<AfPtxt>> &ptxtV, vector<shared_ptr<AfCtxt>> &ctxtVOut);
 
   // DECRYPTION
   void decrypt(AfCtxt &ctxt, AfPtxt &plainOut);
-  void decrypt_v(vector<AfCtxt*> &ctxtV, vector<AfPtxt*> &ptxtVOut);
+  void decrypt_v(vector<shared_ptr<AfCtxt>> &ctxtV, vector<shared_ptr<AfPtxt>> &ptxtVOut);
 
   // NOISE MEASUREMENT
   int noise_level(AfCtxt &ctxt);
@@ -317,67 +316,67 @@ class Afseal: public Afhel {
   
   // -------------------------- RELINEARIZATION -------------------------
   void relinearize(AfCtxt &ctxt);
-  void relinearize_v(vector<AfCtxt*> ctxtV);
+  void relinearize_v(vector<shared_ptr<AfCtxt>> ctxtV);
 
   // ---------------------- HOMOMORPHIC OPERATIONS ----------------------
   // NEGATE
   void negate(AfCtxt &ctxt);
-  void negate_v(vector<AfCtxt*> &ctxtV);
+  void negate_v(vector<shared_ptr<AfCtxt>> &ctxtV);
 
   // SQUARE
   void square(AfCtxt &ctxt);
-  void square_v(vector<AfCtxt*> &ctxtV);
+  void square_v(vector<shared_ptr<AfCtxt>> &ctxtV);
 
   // ADDITION
   void add(AfCtxt &ctxtInOut, AfCtxt &ctxt);
   void add_plain(AfCtxt &ctxtInOut, AfPtxt &ptxt);
-  void add_v(vector<AfCtxt*> &ctxtVInOut, vector<AfCtxt*> &ctxtV2);
-  void add_plain_v(vector<AfCtxt*> &ctxtVInOut, vector<AfPtxt*> &ptxtV2);
+  void add_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfCtxt>> &ctxtV2);
+  void add_plain_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfPtxt>> &ptxtV2);
 
   // SUBTRACTION
   void sub(AfCtxt &ctxtInOut, AfCtxt &ctxt);
   void sub_plain(AfCtxt &ctxtInOut, AfPtxt &ptxt);
-  void sub_v(vector<AfCtxt*> &ctxtVInOut, vector<AfCtxt*> &ctxtV2);
-  void sub_plain_v(vector<AfCtxt*> &ctxtVInOut, vector<AfPtxt*> &ptxtV2);
+  void sub_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfCtxt>> &ctxtV2);
+  void sub_plain_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfPtxt>> &ptxtV2);
 
   // MULTIPLICATION
   void multiply(AfCtxt &ctxtVInOut, AfCtxt &ctxt);
   void multiply_plain(AfCtxt &ctxtVInOut, AfPtxt &ptxt);
-  void multiply_v(vector<AfCtxt*> &ctxtVInOut, vector<AfCtxt*> &ctxtV2);
-  void multiply_plain_v(vector<AfCtxt*> &ctxtVInOut, vector<AfPtxt*> &ptxtV2);
+  void multiply_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfCtxt>> &ctxtV2);
+  void multiply_plain_v(vector<shared_ptr<AfCtxt>> &ctxtVInOut, vector<shared_ptr<AfPtxt>> &ptxtV2);
 
   // ROTATE
   void rotate(AfCtxt &ctxt, int k);
-  void rotate_v(vector<AfCtxt*> &ctxtV, int k);
+  void rotate_v(vector<shared_ptr<AfCtxt>> &ctxtV, int k);
   void flip(AfCtxt &ctxt);
-  void flip_v(vector<AfCtxt*> &ctxtV);
+  void flip_v(vector<shared_ptr<AfCtxt>> &ctxtV);
 
   // POWER
   void exponentiate(AfCtxt &ctxt, uint64_t &expon);
-  void exponentiate_v(vector<AfCtxt*> &cipherV, uint64_t &expon);
+  void exponentiate_v(vector<shared_ptr<AfCtxt>> &cipherV, uint64_t &expon);
 
   // CKKS -> Rescaling and mod switching
   void rescale_to_next(AfCtxt &ctxt);
-  void rescale_to_next_v(vector<AfCtxt*> &ctxtV);
+  void rescale_to_next_v(vector<shared_ptr<AfCtxt>> &ctxtV);
   void mod_switch_to_next(AfCtxt &ctxt);
-  void mod_switch_to_next_v(vector<AfCtxt*> &ctxtV);
+  void mod_switch_to_next_v(vector<shared_ptr<AfCtxt>> &ctxtV);
   void mod_switch_to_next_plain(AfPtxt &ptxt);
-  void mod_switch_to_next_plain_v(vector<AfPtxt*> &ptxtV);
+  void mod_switch_to_next_plain_v(vector<shared_ptr<AfPtxt>> &ptxtV);
   
   // --------------------------- VECTORIZATION --------------------------
-  void vectorize(vector<AfCtxt*> &ctxtVInOut,
+  void vectorize(vector<shared_ptr<AfCtxt>> &ctxtVInOut,
                     function<void(AfCtxt)> f);
-  void vectorize(vector<AfPtxt*> &ptxtVInOut,
+  void vectorize(vector<shared_ptr<AfPtxt>> &ptxtVInOut,
                     function<void(AfPtxt)> f);
-  void vectorize(vector<AfCtxt*> &ctxtVInOut,vector<AfCtxt*> &ctxtV2,
+  void vectorize(vector<shared_ptr<AfCtxt>> &ctxtVInOut,vector<shared_ptr<AfCtxt>> &ctxtV2,
                     function<void(AfCtxt, AfCtxt)> f);
-  void vectorize(vector<AfCtxt*> &ctxtVInOut,vector<AfPtxt*> &ptxtV2,
+  void vectorize(vector<shared_ptr<AfCtxt>> &ctxtVInOut,vector<shared_ptr<AfPtxt>> &ptxtV2,
                     function<void(AfCtxt, AfPtxt)> f);
 
   // -------------------------------- I/O -------------------------------
   // AUX
   seal::compr_mode_type get_compr_mode(string &mode);
-  std::string get_compr_mode(seal::compr_mode_type &mode);
+  string get_compr_mode(seal::compr_mode_type &mode);
 
   // SAVE/LOAD CONTEXT
   size_t save_context(ostream &out_stream, string &compr_mode);
@@ -400,12 +399,21 @@ class Afseal: public Afhel {
   size_t load_rotate_keys(istream &in_stream);
 
   // SAVE/LOAD PLAINTEXT --> Could be achieved outside of Afseal
-  size_t save_plaintext(ostream &out_stream, string &compr_mode, AfPtxt &plain);
-  size_t load_plaintext(istream &in_stream, AfPtxt &plain);
+  size_t save_plaintext(ostream &out_stream, string &compr_mode, AfPtxt &pt);
+  size_t load_plaintext(istream &in_stream, AfPtxt &pt);
 
   // SAVE/LOAD CIPHERTEXT --> Could be achieved outside of Afseal
-  size_t save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ciphert);
-  size_t load_ciphertext(istream &in_stream, AfCtxt &plain);
+  size_t save_ciphertext(ostream &out_stream, string &compr_mode, AfCtxt &ct);
+  size_t load_ciphertext(istream &in_stream, AfCtxt &pt);
+
+  // SIZES
+  size_t sizeof_context(string &compr_mode);
+  size_t sizeof_public_key(string &compr_mode);
+  size_t sizeof_secret_key(string &compr_mode);
+  size_t sizeof_relin_keys(string &compr_mode);
+  size_t sizeof_rotate_keys(string &compr_mode);
+  size_t sizeof_plaintext(string &compr_mode, AfPtxt &pt);
+  size_t sizeof_ciphertext(string &compr_mode, AfCtxt &ct);
 
   // ----------------------------- AUXILIARY ----------------------------
   long maxBitCount(long poly_modulus_degree, int sec_level);
@@ -416,7 +424,7 @@ class Afseal: public Afhel {
 
   // GETTERS
   bool batchEnabled();
-  std::vector<uint64_t> get_qi();
+  vector<uint64_t> get_qi();
   size_t get_nSlots();
   uint64_t get_plain_modulus();
   size_t get_poly_modulus_degree();
@@ -442,15 +450,15 @@ class Afseal: public Afhel {
   inline shared_ptr<PublicKey>  get_publicKey();
   inline shared_ptr<RelinKeys>  get_relinKeys();
   inline shared_ptr<GaloisKeys>  get_rotateKeys();
-  void setpublicKey(seal::PublicKey &pubKey) { this->publicKey = std::make_shared<seal::PublicKey>(pubKey); }
-  void setsecretKey(seal::SecretKey &secKey) { this->secretKey = std::make_shared<seal::SecretKey>(secKey); }
-  void setrelinKeys(seal::RelinKeys &relKey) { this->relinKeys = std::make_shared<seal::RelinKeys>(relKey); }
+  void setpublicKey(seal::PublicKey &pubKey) { this->publicKey = make_shared<seal::PublicKey>(pubKey); }
+  void setsecretKey(seal::SecretKey &secKey) { this->secretKey = make_shared<seal::SecretKey>(secKey); }
+  void setrelinKeys(seal::RelinKeys &relKey) { this->relinKeys = make_shared<seal::RelinKeys>(relKey); }
 
   // ----------------------------- POLYNOMIALS ----------------------------
   friend class AfPoly;
   friend class AfsealPoly;
 
-  // POLY OPS --> result in first operand
+  // POLY OPS --> result in first operandshared_ptr
   void add_inplace(AfPoly &polyInOut, AfPoly &polyOther);
   void subtract_inplace(AfPoly &polyInOut, AfPoly &polyOther);
   void multiply_inplace(AfPoly &polyInOut, AfPoly &polyOther);
@@ -463,8 +471,8 @@ class Afseal: public Afhel {
   AfsealPoly get_secretKey_poly();
   
   // Coefficient Access
-  std::complex<double> get_coeff(AfPoly& poly, size_t i);
-  void set_coeff(AfPoly& poly, std::complex<double> &val, size_t i);
-  vector<std::complex<double>> to_coeff_list(AfPoly& poly);
+  complex<double> get_coeff(AfPoly& poly, size_t i);
+  void set_coeff(AfPoly& poly, complex<double> &val, size_t i);
+  vector<complex<double>> to_coeff_list(AfPoly& poly);
 };
 #endif
