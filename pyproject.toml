@@ -113,7 +113,7 @@ platforms = ["Linux", "Windows", "Darwin"]
   # built_library_dir: output dir containing the cmake-built libs
   built_library_dir='lib' 
   # built_include_dirs: dirs with cmake-built headers.
-  built_include_dirs=['native/src']
+  built_include_dirs=['native/src', 'thirdparty/msgsl-src/include']
 
   ## CMake options: https://github.com/microsoft/SEAL/#basic-cmake-options
     [cpplibraries.SEAL.cmake_opts]
