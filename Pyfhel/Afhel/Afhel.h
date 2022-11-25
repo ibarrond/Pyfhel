@@ -23,7 +23,7 @@ enum class scheme_t : std::uint8_t{
   // Brakerski/Fan-Vercauteren scheme
   bfv = 0x1,
   // Cheon-Kim-Kim-Song scheme
-  ckks = 0x2
+  ckks = 0x2,
   // Brakerski-Gentry-Vaikunthanathan scheme
   bgv = 0x3
 };
