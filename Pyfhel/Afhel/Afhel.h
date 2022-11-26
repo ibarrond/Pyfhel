@@ -9,6 +9,7 @@
 #include <memory>    /* Smart Pointers*/
 #include <complex>   /* Complex Numbers */
 #include <map>          /* map */
+#include <cstdint>      /* std::uint64_t */
 
 // Forward Declarations
 class AfPoly;
@@ -76,9 +77,9 @@ class Afhel {
   // ----------------------------- CRYPTOGRAPHY --------------------------------
   // CONTEXT GENERATION
   virtual std::string ContextGen(
-    scheme_t scheme, uint64_t poly_modulus_degree, 
-    uint64_t plain_modulus_bit_size, uint64_t plain_modulus, int sec,
-    std::vector<int> qi_sizes = {}, std::vector<uint64_t> qi_values = {}) = 0;
+    scheme_t scheme, std::uint64_t poly_modulus_degree, 
+    std::uint64_t plain_modulus_bit_size, std::uint64_t plain_modulus, int sec,
+    std::vector<int> qi_sizes = {}, std::vector<std::uint64_t> qi_values = {}) = 0;
 
   // KEY GENERATION
   virtual void KeyGen() = 0;
@@ -153,8 +154,8 @@ class Afhel {
   virtual void flip_v(std::vector<std::shared_ptr<AfCtxt>> &ctxtV) = 0;
 
   // POWER
-  virtual void exponentiate(AfCtxt &cipher1, uint64_t &expon) = 0;
-  virtual void exponentiate_v(std::vector<std::shared_ptr<AfCtxt>> &cipherV, uint64_t &expon) = 0;
+  virtual void exponentiate(AfCtxt &cipher1, std::uint64_t &expon) = 0;
+  virtual void exponentiate_v(std::vector<std::shared_ptr<AfCtxt>> &cipherV, std::uint64_t &expon) = 0;
 
   // CKKS -> Rescaling and mod switching
   virtual void rescale_to_next(AfCtxt &cipher1) = 0;
@@ -193,8 +194,8 @@ class Afhel {
 
   // ----------------------------- AUXILIARY ----------------------------
   // GETTERS
-  virtual std::vector<uint64_t> get_qi() = 0;
-  virtual uint64_t get_plain_modulus() = 0;
+  virtual std::vector<std::uint64_t> get_qi() = 0;
+  virtual std::uint64_t get_plain_modulus() = 0;
   virtual size_t get_poly_modulus_degree() = 0;
   virtual scheme_t get_scheme() = 0;
 

@@ -746,7 +746,7 @@ shared_ptr<Decryptor> inline Afseal::get_decryptor()
 }
 shared_ptr<BatchEncoder> inline Afseal::get_bfv_encoder()
 {
-  if (this->encryptor == NULL)
+  if (this->bfvEncoder == NULL)
   {
     throw std::logic_error("<Afseal>: BFV context not initialized");
   }
@@ -754,7 +754,7 @@ shared_ptr<BatchEncoder> inline Afseal::get_bfv_encoder()
 }
 shared_ptr<CKKSEncoder> inline Afseal::get_ckks_encoder()
 {
-  if (this->encryptor == NULL)
+  if (this->ckksEncoder == NULL)
   {
     throw std::logic_error("<Afseal>: CKKS context not initialized");
   }
@@ -762,7 +762,7 @@ shared_ptr<CKKSEncoder> inline Afseal::get_ckks_encoder()
 }
 shared_ptr<BatchEncoder> inline Afseal::get_bgv_encoder()
 {
-    if (this->encryptor == NULL)
+    if (this->bgvEncoder == NULL)
         {
         throw std::logic_error("<Afseal>: BGV context not initialized");
         }

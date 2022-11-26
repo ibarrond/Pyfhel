@@ -856,15 +856,14 @@ cdef class Pyfhel:
                 else: # all other numeric types
                     return self.encodeFrac(val_vec.astype(np.float64), ptxt, scale)
         elif val_vec.ndim == 2:
-            if np.issubdtype(val_vec.dtype, np.integer):
-                if self.scheme == Scheme_t.bfv:
-                    return self.encryptAInt(val_vec.astype(np.int64))
-                elif self.scheme == Scheme_t.bgv:
-                    return self.encryptABGV(val_vec.astype(np.int64))
-            elif np.issubdtype(val_vec.dtype, np.floating):
-                return self.encryptAFrac(val_vec.astype(np.float64), scale)
-            elif np.issubdtype(val_vec.dtype, np.complexfloating):
-                return self.encryptAComplex(val_vec.astype(complex), scale)
+            if self.scheme == Scheme_t.bfv:
+                return self.encryptAInt(val_vec.astype(np.int64))
+            elif self.scheme == Scheme_t.ckks:
+                scale = _get_valid_scale(scale_bits, scale, self._scale)
+                if np.issubdtype(val_vec.dtype, np.complexfloating):
+                    return self.encryptComplex(val_vec.astype(complex), scale)
+                else: # all other numeric types
+                    return self.encryptFrac(val_vec.astype(np.float64), scale)
         raise TypeError('<Pyfhel ERROR> Plaintext could not be encoded')
 
     # ................................ DECODE .................................
@@ -1101,7 +1100,7 @@ cdef class Pyfhel:
 
         # New or existing ciphertext
         if (in_new_ctxt):
-            ctxt = PyCtxt(ctxt)
+            ctxt = PyCtxt(copy_ctxt=ctxt)
         
         # Auxiliary ciphertext
         aux = PyCtxt(copy_ctxt=ctxt)
@@ -1891,10 +1890,10 @@ cdef class Pyfhel:
     cpdef size_t get_nSlots(self):
         """Maximum number of slots fitting in a ciphertext.
         
-        Generally it matches with `m`.
+        Equivalent to `n` for BFV/BGV, and `n/2` for CKKS.
 
         Return:
-            int: Maximum umber of slots.
+            int: Maximum number of slots.
         """
         return (<Afseal*>self.afseal).get_nSlots()
     

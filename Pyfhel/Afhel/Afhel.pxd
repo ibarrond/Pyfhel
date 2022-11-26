@@ -14,9 +14,8 @@ from libcpp cimport bool
 # Import our own wrapper for iostream classes, used for I/O ops
 from Pyfhel.utils.iostream cimport istream, ostream, ifstream, ofstream       
 
-ctypedef long long int64_t
-ctypedef unsigned long long uint64_t
-ctypedef unsigned char uint8_t
+from libc.stdint cimport int64_t, uint64_t, uint8_t
+
 ctypedef c_complex[double] cy_complex
 
 #===============================================================================

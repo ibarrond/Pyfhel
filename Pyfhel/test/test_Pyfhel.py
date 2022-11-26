@@ -142,11 +142,11 @@ class TestPyfhel:
         # non-numeric array not supported
         with pytest.raises(TypeError, match=".*cannot encrypt.*"):
             HE_ckks.encode(np.array([['hi', 'you']]))
-        with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
+        with pytest.raises(NotImplementedError, match=".*encryptAInt not implemented.*"):
             HE_ckks.encode(np.array([[1]],dtype=np.int64))
-        with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
+        with pytest.raises(NotImplementedError, match=".*encryptAFrac not implemented.*"):
             HE_ckks.encode(np.array([[1.]],dtype=np.float64))
-        with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
+        with pytest.raises(NotImplementedError, match=".*encryptAComplex not implemented.*"):
             HE_ckks.encode(np.array([[1+1j]]))
 
     def test_Pyfhel_decode(self, HE_ckks, HE_bfv):
