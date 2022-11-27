@@ -861,9 +861,9 @@ cdef class Pyfhel:
             elif self.scheme == Scheme_t.ckks:
                 scale = _get_valid_scale(scale_bits, scale, self._scale)
                 if np.issubdtype(val_vec.dtype, np.complexfloating):
-                    return self.encryptComplex(val_vec.astype(complex), scale)
+                    return self.encryptAComplex(val_vec.astype(complex), scale)
                 else: # all other numeric types
-                    return self.encryptFrac(val_vec.astype(np.float64), scale)
+                    return self.encryptAFrac(val_vec.astype(np.float64), scale)
         raise TypeError('<Pyfhel ERROR> Plaintext could not be encoded')
 
     # ................................ DECODE .................................

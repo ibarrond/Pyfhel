@@ -22,11 +22,14 @@ jobs:
       uses: actions/checkout@v3
       with:
         submodules: recursive
-    - name: Install CLANG
+    - name: Install Clang (MAcOs only)
       if: matrix.os == 'macos-latest'
       run: |
         brew install llvm libomp
         export CPP=/usr/local/opt/llvm/bin/clang
+        export CPPFLAGS="-I/usr/local/opt/llvm/include"
+        export LDFLAGS="-L/usr/local/opt/llvm/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++"
+        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> /Users/runner/.bash_profile
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
