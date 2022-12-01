@@ -127,10 +127,10 @@ class TestPyfhel:
             c3 = PyCtxt()
             HE_ckks.decrypt(c3) # none scheme
     
-    def test_Pyfhel_encode(self, HE_ckks):
+    def test_Pyfhel_encode(self, HE_ckks, HE_bfv):
         # vectorized 
         with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
-            HE_ckks.encodeAInt(np.array([[1]],dtype=np.int64))
+            HE_bfv.encodeAInt(np.array([[1]],dtype=np.int64))
         with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
             HE_ckks.encodeAFrac(np.array([[1.]],dtype=np.float64))
         with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
@@ -143,7 +143,7 @@ class TestPyfhel:
         with pytest.raises(TypeError, match=".*cannot encrypt.*"):
             HE_ckks.encode(np.array([['hi', 'you']]))
         with pytest.raises(NotImplementedError, match=".*encryptAInt not implemented.*"):
-            HE_ckks.encode(np.array([[1]],dtype=np.int64))
+            HE_bfv.encode(np.array([[1]],dtype=np.int64))
         with pytest.raises(NotImplementedError, match=".*encryptAFrac not implemented.*"):
             HE_ckks.encode(np.array([[1.]],dtype=np.float64))
         with pytest.raises(NotImplementedError, match=".*encryptAComplex not implemented.*"):
