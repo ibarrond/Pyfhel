@@ -38,7 +38,7 @@ if platform_system == 'Darwin':
     os.environ["CXX"] = "/usr/local/opt/llvm/bin/clang++"
     os.environ["CPP"] = "/usr/local/opt/llvm/bin/clang++"
     os.environ["CPPFLAGS"] = "-I/usr/local/opt/llvm/include"
-    os.environ["LDSHARED"] = "-L/usr/local/opt/llvm/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++ -Wl,-no_fixup_chains,-x -dynamiclib -undefined dynamic_lookup"
+    os.environ["LDSHARED"] = "-L/usr/local/opt/llvm/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++ -Wl,-no_fixup_chains,-x -dynamiclib" #  -undefined dynamic_lookup
 
     
 # Read config file
