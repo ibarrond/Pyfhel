@@ -33,7 +33,14 @@ from setuptools import setup, Extension, find_packages
 
 # Get platform system
 platform_system = platform.system()
+if platform_system == 'Darwin':
+    os.environ["CC"] = "/usr/local/opt/llvm/bin/clang"
+    os.environ["CXX"] = "/usr/local/opt/llvm/bin/clang++"
+    os.environ["CPP"] = "/usr/local/opt/llvm/bin/clang++"
+    os.environ["CPPFLAGS"] = "-I/usr/local/opt/llvm/include"
+    os.environ["LDSHARED"] = "-L/usr/local/opt/llvm/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++ -Wl,-no_fixup_chains,-x -dynamiclib -undefined dynamic_lookup"
 
+    
 # Read config file
 config = toml.load("pyproject.toml")
 project_config = config['project']
