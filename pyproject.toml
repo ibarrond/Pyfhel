@@ -156,10 +156,12 @@ define_macros = [
 ]
 extra_compile_args = [
   {Windows = ["/O2","/openmp","/std:c++17"]},
+  {Darwin = ["-std=c++17","-O3","-fopenmp"]},
   {Linux = ["-std=c++17","-O3","-fopenmp"]},
 ]
 extra_link_args = [
   {Windows = []},
+  {Darwin = ["-Wl,-rpath=$ORIGIN/.","-fopenmp","-dynamiclib","-Wl,-no_fixup_chains,-x","-undefined dynamic_lookup"]},
   {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
 ]
 libraries = []  # libraries to link with, cpplibraries above are added by default
