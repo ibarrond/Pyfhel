@@ -806,7 +806,7 @@ cdef class PyCtxt:
         """
         other = np.array(other)
         if other.ndim == 0:           # If scalar, replicate
-            other = other.reshape([1])
+            other = np.repeat(other, self._pyfhel.get_nSlots())
         # Compute inverse. Int: https://stackoverflow.com/questions/4798654
         if self.scheme == Scheme_t.bfv:
             other = other.astype(np.int64)
