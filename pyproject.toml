@@ -142,7 +142,7 @@ platforms = ["Linux", "Windows", "Darwin"]
     {Linux = ["-std=c++17","-O3","-fopenmp"]} ]
   extra_link_args = [
     {Windows = []},
-    {Darwin = ["-fopenmp","-dynamiclib","-Wl,-no_fixup_chains,-x","-undefined dynamic_lookup"]},
+    {Darwin = ["-fopenmp","-dynamiclib","-Wl,-no_fixup_chains,-x"]},
     {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]} ]
   libraries = ['SEAL']
 
