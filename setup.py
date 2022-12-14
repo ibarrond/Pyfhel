@@ -39,7 +39,8 @@ if platform_system == 'Darwin':
     print("  Old CPP:", os.environ.get("CPP", "None"))
     print("  Old CPPFLAGS:", os.environ.get("CPPFLAGS", "None"))
     print("  Old LDSHARED:", os.environ.get("LDSHARED", "None"))
-    os.environ["CXX"] = "/usr/local/opt/llvm/bin/clang++"
+    os.environ["CXX"] = "/usr/local/opt/llvm/bin/clang++" 
+    os.environ["CC"] = "/usr/local/opt/llvm/bin/clang"
     os.environ["CPP"] = "/usr/local/opt/llvm/bin/clang++"
     os.environ["CPPFLAGS"] = "-I/usr/local/opt/llvm/include"
     os.environ["LDSHARED"] = "-L/usr/local/opt/llvm/lib -L/usr/local/opt/llvm/lib/c++ -Wl,-rpath,/usr/local/opt/llvm/lib/c++" #  -undefined dynamic_lookup
