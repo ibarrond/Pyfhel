@@ -86,7 +86,7 @@ omit =[
 ]
 
 [platforms]
-platforms = ["Linux", "Windows", "Darwin"]
+platforms = ["Darwin"] # "Linux", "Windows", 
 
 #===============================================================================
 #========================= COMPILATION CONFIGURATION ===========================
