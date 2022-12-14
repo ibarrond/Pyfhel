@@ -35,10 +35,12 @@ from setuptools import setup, Extension, find_packages
 platform_system = platform.system()
 if platform_system == 'Darwin':
     print("  [PLATFORM=macOS] Detected macOS. Setting up compiler flags.")
+    print("  Old CC:",  os.environ.get("CC", "None"))
     print("  Old CXX:", os.environ.get("CXX", "None"))
     print("  Old CPP:", os.environ.get("CPP", "None"))
     print("  Old CPPFLAGS:", os.environ.get("CPPFLAGS", "None"))
     print("  Old LDSHARED:", os.environ.get("LDSHARED", "None"))
+    os.environ["CC"] =  "/usr/local/opt/llvm/bin/clang"
     os.environ["CXX"] = "/usr/local/opt/llvm/bin/clang++"
     os.environ["CPP"] = "/usr/local/opt/llvm/bin/clang++"
     os.environ["CPPFLAGS"] = "-I/usr/local/opt/llvm/include"
