@@ -40,7 +40,7 @@ if platform_system == 'Darwin':
     print("  Old CPP:", os.environ.get("CPP", "None"))
     print("  Old CPPFLAGS:", os.environ.get("CPPFLAGS", "None"))
     print("  Old LDSHARED:", os.environ.get("LDSHARED", "None"))
-    os.environ["CC"] =  "/usr/local/opt/llvm/bin/clang++"
+    os.environ["CC"] =  "/usr/local/opt/llvm/bin/clang"
     os.environ["CXX"] = "/usr/local/opt/llvm/bin/clang++"
     os.environ["CPP"] = "/usr/local/opt/llvm/bin/clang++"
     os.environ["CFLAGS"] = "-I/usr/local/opt/llvm/include"
