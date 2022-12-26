@@ -38,7 +38,7 @@ classifiers = [
 ]
 
 dependencies = [
-  "numpy==1.21"
+  "numpy>=1.21"
 ]
 
 [project.optional-dependencies]
@@ -60,7 +60,7 @@ requires = [
   "setuptools<=60.9",
   "wheel",
   "cython==3.0.0a10",
-  "numpy==1.21",
+  "numpy>=1.21",
   "cmake>=3.15",
   "toml>=0.10"
 ]
