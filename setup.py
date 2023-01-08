@@ -368,7 +368,7 @@ class SuperBuildClib(build_clib):
             macros              = build_info['macros'],
             include_dirs        = build_info['include_dirs'],
             extra_postargs      = build_info['extra_compile_args'],
-            debug               = self.debug
+            debug               = True   # self.debug
         )
 
         # Now "link" the object files together into a static library.
@@ -379,7 +379,7 @@ class SuperBuildClib(build_clib):
             libraries           = build_info['libraries'],
             library_dirs        = build_info['library_dirs'],
             extra_postargs      = build_info['extra_link_args'],
-            debug               = self.debug,
+            debug               = True   # self.debug,
         )
         # Post build -> register by adding to built_libs
         lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('static')}"
@@ -404,7 +404,7 @@ class SuperBuildClib(build_clib):
             macros              = build_info['macros'],
             include_dirs        = build_info['include_dirs'],
             extra_postargs      = build_info['extra_compile_args'],
-            debug               = self.debug
+            debug               = True   # self.debug
             )
 
         # Now link shared object
