@@ -86,7 +86,7 @@ omit =[
 ]
 
 [platforms]
-platforms = ["Linux", "Windows", "Darwin"]
+platforms = ["Darwin"] # "Linux", "Windows", 
 
 #===============================================================================
 #========================= COMPILATION CONFIGURATION ===========================
@@ -161,7 +161,7 @@ extra_compile_args = [
 ]
 extra_link_args = [
   {Windows = []},
-  {Darwin = ["-Wl,-rpath=$ORIGIN/.","-fopenmp","-dynamiclib","-Wl,-no_fixup_chains,-x","-undefined dynamic_lookup"]},
+  {Darwin = ["-fopenmp","-dynamiclib","-Wl,-no_fixup_chains,-x"]},
   {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
 ]
 libraries = []  # libraries to link with, cpplibraries above are added by default
