@@ -23,10 +23,10 @@ jobs:
       with:
         submodules: recursive
     # brew install --with-toolchain llvm libomp ?
-    - name: Install LLVM Clang (MAcOs only)
+    - name: Install GCC (MAcOs only)
       if: matrix.os == 'macos-latest'
       run: |
-        brew install llvm libomp
+        brew install gcc libomp
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
