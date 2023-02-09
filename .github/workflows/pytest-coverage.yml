@@ -30,12 +30,15 @@ jobs:
       with:
         submodules: recursive
     # brew install --with-toolchain llvm libomp ?
-    - name: Install GNU GCC (MAcOs only) and set gcc/gxx environment variables
+    - name: (MAcOs only) Install GNU GCC
       if: matrix.os == 'macos-latest'
       run: |
         brew install gcc libomp
-        export gcc=/usr/local/bin/$(ls /usr/local/bin | grep ^gcc-[0-9] | sort -V -r | head -n 1)
-        export gxx=/usr/local/bin/$(ls /usr/local/bin | grep ^g++-[0-9] | sort -V -r | head -n 1)
+    - name: (MacOs only) Set gcc/gxx environment variables 
+      if: matrix.os == 'macos-latest'
+      run: |
+        echo "gcc=/usr/local/bin/$(ls /usr/local/bin | grep ^gcc-[0-9] | sort -V -r | head -n 1)"  >> $GITHUB_ENV
+        echo "gxx=/usr/local/bin/$(ls /usr/local/bin | grep ^g++-[0-9] | sort -V -r | head -n 1)"  >> $GITHUB_ENV
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
