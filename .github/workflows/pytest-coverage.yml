@@ -27,6 +27,8 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         brew install gcc libomp
+        export gcc=/usr/local/bin/gcc
+        export gxx=/usr/local/bin/gxx
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
