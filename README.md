@@ -13,9 +13,9 @@
 
 * **_Version_**: 3.3.1
 * **_Status_**: STABLE
-* **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT over encrypted vectors|scalars of integers|binaries. This library acts as optimized Python API for the most advanced C++ HE libraries.
+* **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT over encrypted integers (BFV) and approximated floating point values (CKKS . This library acts as optimized Python API for the most advanced C++ HE libraries.
 * **_Language_**: Python (3.7+) & Cython on top of C++17.
-* **_OS_**: Windows (tested with `MSVC2017`, `MSVC2019`, and `gcc6` for WSL) and Linux (tested on `gcc6`). MacOS not supported.
+* **_OS_**: Windows (tested with `MSVC2017`|`MSVC2019` and `gcc6`|`gcc12` for WSL) and Linux/MacOS (tested on `gcc6`|`gcc12`).
 
 	:warning: _REQUIRED: An available [compiler supporting C++17](https://en.cppreference.com/w/cpp/compiler_support) ([`g++>=6`] | [`MSVC 2017+`](https://stackoverflow.com/questions/40504552))_ :warning:
 
@@ -31,11 +31,12 @@
 **Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**omomorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all backends. Additionally, this project contains a large series of Demos & Tests for **Pyfhel**.
 
 ## Install & Uninstall
-This project has been uploaded to [PyPI](https://pypi.org/project/Pyfhel/). In order to install it from source (*WARNING! it takes several minutes to compile, be patient!*), run:
+### How to install/uninstall
+This project has been uploaded to [PyPI](https://pypi.org/project/Pyfhel/). In order to install `Pyfhel` from source, run:
 
 	   > pip install Pyfhel
 
-Locally, you can clone this repository (use [`--recursive`](https://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) to download all submodules) and install it by running:
+*WARNING! it takes several minutes to compile, be patient!*. Locally, you can clone this repository (use [`--recursive`](https://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) to download all submodules) and install it by running:
 
 	   > git clone --recursive https://github.com/ibarrond/Pyfhel.git
 	   > pip install .
@@ -43,6 +44,17 @@ Locally, you can clone this repository (use [`--recursive`](https://stackoverflo
 To uninstall, just run:
 
 	   > pip uninstall Pyfhel
+### Installing a Compiler
+`Pyfhel` requires a C/C++ compiler with C++17 support. We have installed and tested it with:
+- *gcc6* to *gcc12* in Linux/MacOS/Windows WSL. To install:
+   - Ubuntu: `sudo apt install gcc g++`
+   - MacOS: `brew install gcc`. MacOS users must set the environment variables `gcc` and `gxx` to the installed compilers, e.g.:
+```bash
+      > export gcc=/usr/local/bin/gcc-12
+      > export gxx=/usr/local/bin/g++-12
+```
+- *MSVC2017* and *MSVC2019* in Windows. To install:
+   - Install Visual C++ Build tools (Download [here](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170), guide in [here](https://stackoverflow.com/questions/40504552))
 
 ### Contribute/Development notice
 This is the process to develop/contribute:

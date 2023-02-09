@@ -8,6 +8,13 @@ on:
     branches: [ "master", "dev" ]
   pull_request:
     branches: [ "master", "dev" ]
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
 
 jobs:
   build:
@@ -23,12 +30,12 @@ jobs:
       with:
         submodules: recursive
     # brew install --with-toolchain llvm libomp ?
-    - name: Install GCC (MAcOs only)
+    - name: Install GNU GCC (MAcOs only) and set gcc/gxx environment variables
       if: matrix.os == 'macos-latest'
       run: |
         brew install gcc libomp
-        export gcc=/usr/local/bin/gcc
-        export gxx=/usr/local/bin/gxx
+        export gcc=/usr/local/bin/$(ls /usr/local/bin | grep ^gcc-[0-9] | sort -V -r | head -n 1)
+        export gxx=/usr/local/bin/$(ls /usr/local/bin | grep ^g++-[0-9] | sort -V -r | head -n 1)
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
@@ -36,8 +43,10 @@ jobs:
     - name: Update pip
       run: |
         python -m pip install --upgrade pip
+    # Run interactive debugging session for debug_enabled manually
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
     - name: Install package in test mode
       run: |
         touch .cov
