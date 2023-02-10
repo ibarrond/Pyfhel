@@ -108,6 +108,11 @@ def _path(args: List[str], base_dir=None) -> List[Path]:
     base_dir = Path('') if base_dir is None else base_dir
     return  [(base_dir/arg).absolute().as_posix() if isinstance(arg, (str, Path)) else arg for arg in args]
 
+def _npath(args: List[str], base_dir=None) -> List[Path]:
+    """_npath: Normalizes path separations with is.path.normpath. Does not generate absolute paths"""
+    base_dir = Path('') if base_dir is None else base_dir
+    return [os.path.normpath((base_dir/arg).as_posix()) if isinstance(arg, (str, Path)) else arg for arg in args]
+    
 def _tupl(args: List[List[str]]) -> List[Tuple[str, str]]:
     """_tupl: Picks elements and turns them into tuples"""
     return  [tuple(arg) for arg in args]
@@ -628,7 +633,7 @@ ext_modules = []
 for ext_name, ext_conf in extensions.items():
     ext_modules.append(Extension(
         name            = ext_conf.pop('fullname', f"{project_name}.{ext_name}"),
-        sources         =      (_pl(ext_conf.pop('sources', []))),
+        sources         =_npath(_pl(ext_conf.pop('sources', []))),
         include_dirs    = _path(_pl(ext_conf.pop('include_dirs', [])))      + include_dirs,
         define_macros   = _tupl(_pl(ext_conf.pop('include_dirs', [])))      + define_macros,
         language        = "c++",

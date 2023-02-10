@@ -1,18 +1,27 @@
-include Pyfhel/*.pxd
-include Pyfhel/*.pyx
+# Include all cython source files
+global-include *.pyx *.pxd
+
+# Include python packages
 include Pyfhel/*.py
 include Pyfhel/utils/**
+
+# Exclude the cython generated cpp files, as they depend on the numpy version
+exclude Pyfhel/*.cpp
+
+# Include all Afhel source files and headers
 include Pyfhel/Afhel/*.cpp
 include Pyfhel/Afhel/*.h
 include Pyfhel/Afhel/*.pxd
+
+# Include backend sources
 global-include Pyfhel/backend/SEAL/**
 global-exclude Pyfhel/backend/palisade/**
-global-include *.pyx *.pxd *.h
 
-include docs/static/*
-
+# Include examples
 include examples/*.py
 
+# Include standard project files
+include docs/static/*
 include README.md
 include LICENSE.txt
 include setup.py

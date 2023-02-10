@@ -17,7 +17,7 @@ decrypt the result.
 # %%
 # A1. Vector Generation
 # ---------------------------
-# We will define a pair of 1D integer vectors of size l and elementsize <= |v_max|.
+# We will define a pair of 1D integer vectors of size l and elementsize <= ``|v_max|``.
 #  For the purpose of this demo, we can study three cases:
 #  #1: small l (l <= n) and high v_max.    --> encoding with trailing zeros
 #  #2: fitting l (l = n) and medium v_max. --> fits the encoding perfectly

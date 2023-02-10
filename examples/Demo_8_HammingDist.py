@@ -6,6 +6,7 @@ This demo shows how to compute the Hamming Distance between two vectors {0,1}*.
 
 We will translate the hamming distance into a scalar product by translating the
 XOR op. to the arithmetic domain:
+
     xor(x,y) = (x-y)^2 =  x + y - 2*(x*y)
     HD(x,y) = sum (x[i] xor y[i]) = sum(x[i]) + sum(y[i]) - 2*sum(x[i]*y[i])
 
@@ -51,7 +52,7 @@ print(f"\tvRes = {hdRes}")
 
 
 # %%
-# 2. Context and key setup
+# 2. Hamming Distance setup
 # ---------------------------
 # Parameter selection goes according to vector length and max element size.
 from Pyfhel import Pyfhel

@@ -101,6 +101,8 @@ class TestPyfhel:
             HE_ckks.encryptAComplex(np.array([[1+1j,1j],[1-1j,1]]))
         with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
             HE_ckks.encryptAPtxt(np.array([PyPtxt(), PyPtxt()], dtype=object))
+        with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
+            HE_ckks.encryptABGV(np.array([[1,1],[1,1]],dtype=np.int64))
         with pytest.raises(TypeError, match=".*<Pyfhel ERROR>.*"):
             HE_ckks.encrypt("wrong type")
         
@@ -113,6 +115,8 @@ class TestPyfhel:
             HE_ckks.decryptFrac(c2)
         with pytest.raises(RuntimeError, match=".*wrong scheme.*"):
             HE_ckks.decryptComplex(c2)
+        with pytest.raises(RuntimeError, match=".*wrong scheme.*"):
+            HE_ckks.decryptBGV(c2)
         # vectorized 
         with pytest.raises(NotImplementedError, match=".*not implemented.*"):
             HE_ckks.decryptAInt(c)
@@ -122,6 +126,8 @@ class TestPyfhel:
             HE_ckks.decryptAComplex(c)
         with pytest.raises(NotImplementedError, match=".*not implemented.*"):
             HE_ckks.decryptAPtxt(c)
+        with pytest.raises(NotImplementedError, match=".*not implemented.*"):
+            HE_ckks.decryptABGV(c)
         # full decode
         with pytest.raises(RuntimeError, match=".*wrong scheme.*"):
             c3 = PyCtxt()
@@ -135,6 +141,8 @@ class TestPyfhel:
             HE_ckks.encodeAFrac(np.array([[1.]],dtype=np.float64))
         with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
             HE_ckks.encodeAComplex(np.array([[1+1j]]))
+        with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
+            HE_bfv.encodeABGV(np.array([[1]],dtype=np.int64))
 
         # 3d arrays not supported
         with pytest.raises(TypeError, match=".*<Pyfhel ERROR>.*"):
@@ -148,6 +156,9 @@ class TestPyfhel:
             HE_ckks.encode(np.array([[1.]],dtype=np.float64))
         with pytest.raises(NotImplementedError, match=".*encryptAComplex not implemented.*"):
             HE_ckks.encode(np.array([[1+1j]]))
+        with pytest.raises(TypeError, match=".*Plaintext could not be encoded.*"):
+            HE_bgv = Pyfhel(context_params={'scheme':'BGV', 'n': 2**13, 't': 65537, 't_bits': 20, 'sec': 128,})
+            HE_bgv.encode(np.array([[1,2]]))
 
     def test_Pyfhel_decode(self, HE_ckks, HE_bfv):
         p = HE_ckks.encode(1)
@@ -158,12 +169,16 @@ class TestPyfhel:
             HE_bfv.decodeFrac(p)
         with pytest.raises(RuntimeError, match=".*scheme must be ckks.*"):
             HE_bfv.decodeComplex(p)
+        with pytest.raises(RuntimeError, match=".*scheme must be bgv.*"):
+            HE_bfv.decodeBGV(p)
         # Vectorized
         p_v = np.array([p],dtype=object)
         with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
             HE_ckks.decodeAInt(p_v)
         with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
             HE_ckks.decodeAFrac(p_v)
+        with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
+            HE_ckks.decodeAComplex(p_v)
         with pytest.raises(NotImplementedError, match=".*<Pyfhel ERROR>.*"):
             HE_ckks.decodeAComplex(p_v)
 
