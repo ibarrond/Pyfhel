@@ -82,7 +82,8 @@ print(f"Mult:{ctxtMul}")
 # the Pyfhel instance to decrypt the results using `decryptBGV`:
 resSum = HE.decryptBGV(ctxtSum) # Decryption must use the corresponding function
                                 #  decryptBGV.
-resSub = HE.decryptBGV(ctxtSub)
+resSub = HE.decrypt(ctxtSub)    # `decrypt` function detects the scheme and
+                                #  calls the corresponding decryption function.
 resMul = HE.decryptBGV(ctxtMul)
 print("\n5. Decrypting result:")
 print("     addition:       decrypt(ctxt1 + ctxt2) =  ", resSum)
@@ -101,7 +102,12 @@ arr1 = np.arange(bgv_params['n'], dtype=np.int64)    # Max possible value is t/2
 arr2 = np.array([-bgv_params['t']//2, -1, 1], dtype=np.int64)  # Min possible value is -t/2.
 
 ptxt1 = HE.encodeBGV(arr1)   # Creates a PyPtxt plaintext with the encoded arr1
-ptxt2 = HE.encodeBGV(arr2)   # plaintexts created from arrays shorter than 'n' are filled with zeros.
+                             # plaintexts created from arrays shorter than 'n' are filled with zeros.
+ptxt2 = HE.encode(arr2)      # `encode` function detects the scheme and calls the
+                             #  corresponding encoding function.
+
+assert np.allclose(HE.decodeBGV(ptxt1), arr1)  # Decoding the encoded array should return the original array
+assert np.allclose(HE.decode(ptxt2)[:3], arr2)     # `decode` function detects the scheme
 
 ctxt1 = HE.encryptPtxt(ptxt1) # Encrypts the plaintext ptxt1 and returns a PyCtxt
 ctxt2 = HE.encryptPtxt(ptxt2) #  Alternatively you can use HE.encryptInt(arr2)

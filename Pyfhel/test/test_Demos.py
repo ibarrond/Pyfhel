@@ -58,5 +58,8 @@ def test_Demo_7_ScalarProd():
 def test_Demo_8_HammingDist():
     execfile(EXAMPLES_FOLDER / 'Demo_8_HammingDist.py')
 
+def test_Demo_9_Integer_BGV():
+    execfile(EXAMPLES_FOLDER / 'Demo_9_Integer_BGV.py')
+
 def test_Demo_WAHC21():
     execfile(EXAMPLES_FOLDER / 'Demo_WAHC21.py')

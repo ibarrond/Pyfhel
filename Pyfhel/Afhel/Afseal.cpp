@@ -101,9 +101,9 @@ string Afseal::ContextGen(scheme_t scheme,
   {
     parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, qi_sizes));
   }
-  else if ((scheme == scheme_t::bfv) && (sec > 0))  
+  else if (((scheme == scheme_t::bfv) || (scheme == scheme_t::bgv)) && (sec > 0))  
   {         
-    parms.set_coeff_modulus(     // BFV: Select from seal/utils/globals.cpp
+    parms.set_coeff_modulus(     // BFV/BGV: Select from seal/utils/globals.cpp
         CoeffModulus::BFVDefault(poly_modulus_degree, sec_map[sec]));
   }
   else
@@ -116,8 +116,8 @@ string Afseal::ContextGen(scheme_t scheme,
   {
     this->qi.emplace_back(modulus.value());
   }
-  // Setting t --> BFV only
-  if (scheme == scheme_t::bfv)
+  // Setting t --> BFV and BGV only
+  if ((scheme == scheme_t::bfv) || (scheme == scheme_t::bgv))
   {
     if(plain_modulus_bit_size > 0) // Auto sel.
     {
