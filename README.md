@@ -8,79 +8,22 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 
+Python library for ADDITION, SUBSTRACTION, MULTIPLICATION and SCALAR PRODUCT over encrypted integers (BFV) and approximated floating point values (CKKS). This library acts as optimized Python API for optimized C++ Homomorphic Encryption libraries.
 
-**Pyfhel**: **PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries.
-
-* **_Version_**: 3.4.1
-* **_Status_**: STABLE
-* **_Description_**: Allows ADDITION, SUBSTRACTION, MULTIPLICATION, SCALAR PRODUCT over encrypted integers (BFV) and approximated floating point values (CKKS . This library acts as optimized Python API for the most advanced C++ HE libraries.
-* **_Language_**: Python (3.7+) & Cython on top of C++17.
-* **_OS_**: Windows (tested with `MSVC2017`|`MSVC2019` and `gcc6`|`gcc12` for WSL) and Linux/MacOS (tested on `gcc6`|`gcc12`).
-
-	:warning: _REQUIRED: An available [compiler supporting C++17](https://en.cppreference.com/w/cpp/compiler_support) ([`g++>=6`] | [`MSVC 2017+`](https://stackoverflow.com/questions/40504552))_ :warning:
-
-* **_Docs_**: Check out our [[documentation in readthedocs](https://pyfhel.readthedocs.io/en/latest/)]. Examples are heavily commented. More examples can be added upon demand!
-* **_Dependencies_**: There are two possible backends (both shipped alongside Pyfhel), HE libraries in C++:
-
-   1. [SEAL](https://www.microsoft.com/en-us/research/project/simple-encrypted-arithmetic-library/) (no external dependencies, default).
-   2. [PALISADE](https://git.njit.edu/palisade/PALISADE.git) (no external dependencies) __WIP__
-
-## Summary
-**PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
-
-**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**omomorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all backends. Additionally, this project contains a large series of Demos & Tests for **Pyfhel**.
-
-## Install & Uninstall
-### How to install/uninstall
-This project has been uploaded to [PyPI](https://pypi.org/project/Pyfhel/). In order to install `Pyfhel` from source, run:
-
-	   > pip install Pyfhel
-
-*WARNING! it takes several minutes to compile, be patient!*. Locally, you can clone this repository (use [`--recursive`](https://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) to download all submodules) and install it by running:
-
-	   > git clone --recursive https://github.com/ibarrond/Pyfhel.git
-	   > pip install .
-
-To uninstall, just run:
-
-	   > pip uninstall Pyfhel
-### Installing a Compiler
-`Pyfhel` requires a C/C++ compiler with C++17 support. We have installed and tested it with:
-- *gcc6* to *gcc12* in Linux/MacOS/Windows WSL. To install:
-   - Ubuntu: `sudo apt install gcc g++`
-   - MacOS: `brew install gcc`. MacOS users must set the environment variables `gcc` and `gxx` to the installed compilers, e.g.:
-```bash
-      > export gcc=/usr/local/bin/gcc-12
-      > export gxx=/usr/local/bin/g++-12
-```
-- *MSVC2017* and *MSVC2019* in Windows. To install:
-   - Install Visual C++ Build tools (Download [here](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170), guide in [here](https://stackoverflow.com/questions/40504552))
-
-### Contribute/Development notice
-This is the process to develop/contribute:
-1. _Code a new feature/fix a bug_. Using [Cython](https://cython.readthedocs.io/en/latest/) for the `.pyx` and `.pxd` extensions, C++ for `Afhel` or Python for examples/tests/other.
-
-2. _Build/Install Pyfhel locally_. Use either `pip install .` or `python3 setup.py build` (for verbose output and fine control. Run `python3 setup.py --help` for further options).
-
-3. _Test changes (requires installing `pytest`)_. Run the tests  locally by executing `pytest .`  in the root directory, and make sure all tests are OK. 
-	
-   - _Code coverage (requires installing `pytest-cov`)_. Add an empty `.cov` file in the root directory, and build/install the project locally (`pip install .`). To run coverage tests, execute `pytest --cov .` in the root directory, and then `coverage html` to obtain a report.
-
-You're ready to go! Just create a pull request to the original repo.
-
-## Project contents
-- `docs/` Documentation, generated automatically using sphinx and pushed to [readthedocs](https://pyfhel.readthedocs.io)
-- `examples/` Demos and small programs to showcase multiple functionalities.
-- `Pyfhel/` contains the source code for Pyfhel and Afhel.
-- `Pyfhel/backend`, underlying C++ libraries SEAL & PALISADE.
-
-## Authors, Citing & Acknowledgements
+|                            |                                                                                            |
+|----------------------------|--------------------------------------------------------------------------------------------|
+| **Language**               | Python (3.7+), with Cython and C++ (:warning: _requires a [C++17 compiler][3]_ :warning:.) |
+| **OS**                     | Linux, Windows & MacOS.                                                                    |
+| **Version**                | 3.4.1 (stable)                                                                             |
+| **Docs**                   | In [readthedocs][1]!                                                                       |
+| **Demos/Examples**         | [In the docs][4] with the outputs, sources in the [`examples`][2] folder.                  |
+| **Backends**               | [SEAL][5], [OpenFHE (WIP)][6]. Shipped alongside Pyfhel.                                   |
+| **Authors**                | [Alberto Ibarrondo][7] (IDEMIA & EURECOM) and [Alexander Viand][8] (ETH Zurich).           |
+| **Original Collaborators** | [Melek Onen][9] (EURECOM), [Laurent Gomez][10] (SAP Labs).                                 |
+|                            |                                                                                            |
 
 
-- **Authors**: [Alberto Ibarrondo](https://scholar.google.com/citations?hl=en&user=hl-5WRQAAAAJ) (IDEMIA & EURECOM) \& [Alexander Viand](https://pps-lab.com/people/alexanderviand/) (ETH Zurich).
-- **Original Collaborators**: [Melek Onen](http://www.eurecom.fr/~onen/) (EURECOM) [Laurent Gomez](https://scholar.google.com/citations?user=QJv4B9EAAAAJ) (SAP Labs).
-
-If you wish to cite this work, please use the following BibTeX entry:
+If you wish to cite Pyfhel in your derived work, please use the following BibTeX entry:
 ```bibtex
   @inproceedings{ibarrondo2021pyfhel,
   title={Pyfhel: Python for homomorphic encryption libraries},
@@ -91,11 +34,85 @@ If you wish to cite this work, please use the following BibTeX entry:
 }
 ```
 
-This library was created originally for the project "Privacy for Big Data Analytics" in EURECOM. For any legal disclaimer, please contact the owner of this repository.
+[1]:https://pyfhel.readthedocs.io/en/latest/
+[2]:https://github.com/ibarrond/Pyfhel/tree/master/examples
+[3]:https://en.cppreference.com/w/cpp/compiler_support
+[4]:https://pyfhel.readthedocs.io/en/latest/_autoexamples/index.html
+[5]:https://github.com/microsoft/SEAL/
+[6]:https://github.com/openfheorg/openfhe-development
+[7]:https://scholar.google.com/citations?hl=en&user=hl-5WRQAAAAJ
+[8]:https://pps-lab.com/people/alexanderviand/
+[9]:http://www.eurecom.fr/~onen/
+[10]:https://scholar.google.com/citations?user=QJv4B9EAAAAJ
+
+  <br />
+
+-------------
+[`Install & Uninstall`](#install--uninstall)&ensp; [`Summary`](#summary)&ensp; [`Contributing`](#contributing)&ensp; [`Bugs & Feature Requests`](#bugs--feature-requests)&ensp; [`Legal Disclaimer`](#legal-disclaimer)
+
+-------------
+<br />
+
+## Install & Uninstall
+To install `Pyfhel` from [PyPI](https://pypi.org/project/Pyfhel/), run (*WARNING! it takes several minutes to compile and install, be patient!*):
+```bash
+> pip install Pyfhel
+```
+
+To install the latest version, you can clone this repository with [all the submodules](https://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) and install it by running:
+```bash
+> git clone --recursive https://github.com/ibarrond/Pyfhel.git
+> pip install .
+```
+
+To uninstall, just run:
+```bash
+> pip uninstall Pyfhel
+```
+
+### Installing a C/C++ Compiler
+`Pyfhel` requires a C/C++ compiler with C++17 support. We have tested:
+- *gcc6* to *gcc12* in Linux/MacOS/Windows WSL. To install:
+   - Ubuntu: `sudo apt install gcc g++`
+   - MacOS: `brew install gcc`. MacOS users must set the environment variables `gcc` and `gxx` to the installed compilers, e.g.:
+```bash
+      > export gcc=/usr/local/bin/gcc-12
+      > export gxx=/usr/local/bin/g++-12
+```
+- *MSVC2017* and *MSVC2019* in Windows. To install:
+   - Install Visual C++ Build tools (Download [here](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170), guide in [here](https://stackoverflow.com/questions/40504552))
+
+## Summary
+**PY**thon **F**or **H**omomorphic **E**ncryption **L**ibraries, **Pyfhel** implements functionalities of multiple Homomorphic Encryption libraries such as addition, multiplication, exponentiation or scalar product in Python. **Pyfhel** uses a syntax similar to normal arithmetics (+,-,\*). This library is useful both for simple Homomorphic Encryption Demos as well as for complex problems such as Machine Learning algorithms.
+
+**Pyfhel** is built on top of **Afhel**, an **A**bstraction **H**omomorphic **E**ncryption **L**ibraries in C++. **Afhel** serves as common API for all backends. Additionally, this project contains a large series of Demos & Tests for **Pyfhel**.
+
+This repository contains:
+- `docs/` Documentation, generated automatically using sphinx and pushed to [readthedocs](https://pyfhel.readthedocs.io).
+- `examples/` Demos and small programs to showcase multiple functionalities.
+- `Pyfhel/` contains the source code for Pyfhel and Afhel.
+- `Pyfhel/backend`, underlying C++ libraries SEAL & PALISADE.
+
+
+## Contributing
+This is the standard process to develop/contribute:
+1. _Code a new feature/fix a bug_. Using [Cython](https://cython.readthedocs.io/en/latest/) for the `.pyx` and `.pxd` extensions, C++ for `Afhel` or Python for examples/tests/other.
+
+2. _Build/Install Pyfhel locally_. Use either `pip install .` or `python3 setup.py build` (for verbose output and fine control. Run `python3 setup.py --help` for further options).
+
+3. _Test changes (requires installing `pytest`)_. Run the tests locally by executing `pytest .`  in the root directory, and make sure all tests pass. 
+	
+   - _Code coverage (requires installing `pytest-cov`)_. Add an empty `.cov` file in the root directory, and build/install the project locally (`pip install .`). To run coverage tests, execute `pytest --cov .` in the root directory, and then `coverage html` to obtain a report.
+
+You're ready to go! Just create a pull request to the original repo.
+
+## Bugs & Feature Requests
+Please fill the [**Bug Report**](https://github.com/ibarrond/Pyfhel/issues/new/choose) template to provide all the essential info to reproduce your issue and solve the problem.
+
+If you wish to have new functionality added to Pyfhel, you are more than welcome to request it via the [**Feature**](https://github.com/ibarrond/Pyfhel/issues/new/choose) template.
 
 ## Legal disclaimer
-
-Pyfhel can be used, modified, copied in any way you see fit. This project is Open Source under the GNU GPLv3 License (LICENSE file), therefore developers that use Pyfhel MUST comply with the following:
+This project is Open Source under the GNU GPLv3 License (LICENSE file). Hence, Pyfhel can be used, modified, and copied freely provided that developers:
 
    1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Alberto Ibarrondo (IDEMIA & EURECOM) and Alexander Viand (ETH Zurich)` (maybe even cite the paper!).
 
