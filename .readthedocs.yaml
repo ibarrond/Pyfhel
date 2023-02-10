@@ -1,0 +1,25 @@
+# .readthedocs.yaml --> https://docs.readthedocs.io/en/stable/config-file/v2.html
+
+version: 2
+
+submodules:
+   include: all
+   recursive: true
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.9"
+
+
+python:
+   install:
+      - requirements: docs/requirements.txt
+      - method: pip
+        path: .
+        
+
+sphinx:
+  builder: html
+  configuration: docs/conf.py
+  fail_on_warning: false
