@@ -10,17 +10,17 @@
 
 Python library for ADDITION, SUBSTRACTION, MULTIPLICATION and SCALAR PRODUCT over encrypted integers (BFV) and approximated floating point values (CKKS). This library acts as optimized Python API for optimized C++ Homomorphic Encryption libraries.
 
-|                            |                                                                                            |
-|----------------------------|--------------------------------------------------------------------------------------------|
-| **Language**               | Python (3.7+), with Cython and C++ (:warning: _requires a [C++17 compiler][3]_ :warning:.) |
-| **OS**                     | Linux, Windows & MacOS.                                                                    |
-| **Version**                | 3.4.1 (stable)                                                                             |
-| **Docs**                   | In [readthedocs][1]!                                                                       |
-| **Demos/Examples**         | [In the docs][4] with the outputs, sources in the [`examples`][2] folder.                  |
-| **Backends**               | [SEAL][5], [OpenFHE (WIP)][6]. Shipped alongside Pyfhel.                                   |
-| **Authors**                | [Alberto Ibarrondo][7] (IDEMIA & EURECOM) and [Alexander Viand][8] (ETH Zurich).           |
-| **Original Collaborators** | [Melek Onen][9] (EURECOM), [Laurent Gomez][10] (SAP Labs).                                 |
-|                            |                                                                                            |
+|                                            |                                                                                            |
+|--------------------------------------------|--------------------------------------------------------------------------------------------|
+| :flags: **Language**                       | Python (3.7+), with Cython and C++ (:warning: _requires a [C++17 compiler][3]_ :warning:.) |
+| :computer: **OS**                          | Linux, Windows & MacOS.                                                                    |
+| :1234: **Version**                         | 3.4.1 (stable)                                                                             |
+| :books: **Docs**                           | In [readthedocs][1]!                                                                       |
+| :pencil2: **Demos/Examples**               | [In the docs][4] with the outputs, sources in the [`examples`][2] folder.                  |
+| :electric_plug: **Backends**               | [SEAL][5], [OpenFHE (WIP)][6]. Shipped alongside Pyfhel.                                   |
+| :construction_worker: **Authors**          | [Alberto Ibarrondo][7] (IDEMIA & EURECOM) and [Alexander Viand][8] (ETH Zurich).           |
+| :mortar_board: **Original Collaborators**  | [Melek Onen][9] (EURECOM), [Laurent Gomez][10] (SAP Labs).                                 |
+|                                            |                                                                                            |
 
 
 If you wish to cite Pyfhel in your derived work, please use the following BibTeX entry:
