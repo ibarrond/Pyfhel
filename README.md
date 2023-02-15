@@ -8,7 +8,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 
-Python library for ADDITION, SUBSTRACTION, MULTIPLICATION and SCALAR PRODUCT over encrypted integers (BFV) and approximated floating point values (CKKS). This library acts as optimized Python API for optimized C++ Homomorphic Encryption libraries.
+Python library for ADDITION, SUBSTRACTION, MULTIPLICATION and SCALAR PRODUCT over encrypted integers (BFV) and approximated floating point values (CKKS). This library acts as an optimized Python API for C++ Homomorphic Encryption libraries.
 
 |                                            |                                                                                            |
 |--------------------------------------------|--------------------------------------------------------------------------------------------|
