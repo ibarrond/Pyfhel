@@ -59,7 +59,7 @@ repository = "https://github.com/ibarrond/github"
 requires = [
   "setuptools<=60.9",
   "wheel",
-  "cython==3.0.0a10",
+  "cython==3.0.0b1",
   "numpy>=1.21",
   "cmake>=3.15",
   "toml>=0.10"
