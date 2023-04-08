@@ -44,8 +44,8 @@ HE.rotateKeyGen()
 # %%
 # 2. Float Array Encoding & Encryption
 # ----------------------------------------
-# we will define two integer arrays, encode and encrypt them:
-# arr_x = [1, 2, -3] (length 3)
+# we will define two floating-point arrays, encode and encrypt them:
+# arr_x = [0.1, 0.2, -0.3] (length 3)
 # arr_y = [-1.5, 2.3, 4.7] (length 3)
 
 arr_x = np.array([0.1, 0.2, -0.3], dtype=np.float64)    # Always use type float64!
