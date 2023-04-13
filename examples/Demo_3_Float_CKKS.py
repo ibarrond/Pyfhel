@@ -37,7 +37,7 @@ ckks_params = {
                         # Intermediate values should be  close to log2(scale)
                         # for each operation, to have small rounding errors.
 }
-HE.contextGen(**ckks_params)  # Generate context for bfv scheme
+HE.contextGen(**ckks_params)  # Generate context for ckks scheme
 HE.keyGen()             # Key Generation: generates a pair of public/secret keys
 HE.rotateKeyGen()
 
