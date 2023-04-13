@@ -28,7 +28,7 @@ ckks_params = {
     'scheme': 'CKKS',   # can also be 'ckks'
     'n': 2**14,         # Polynomial modulus degree. For CKKS, n/2 values can be
                         #  encoded in a single ciphertext. 
-                        #  Typ. 2^D for D in [10, 16]
+                        #  Typ. 2^D for D in [10, 15]
     'scale': 2**30,     # All the encodings will use it for float->fixed point
                         #  conversion: x_fix = round(x_float * scale)
                         #  You can use this as default scale or use a different
