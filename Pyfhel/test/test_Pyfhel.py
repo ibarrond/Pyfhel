@@ -44,10 +44,11 @@ class TestPyfhel:
         # CONSTRUCTORS
         # context gen --> should accept string as filename, but won't find it
         with pytest.raises(FileNotFoundError,  match=".*File.*not found.*") as e_info:
-            he = Pyfhel(
-                context_params = "fake_file.zip",
-                pub_key_file = "fake_pubk_file.zip",
-                sec_key_file = "fake_seck_file.zip")
+            he = Pyfhel(context_params = "fake_file.zip")
+        with pytest.raises(FileNotFoundError,  match=".*File.*not found.*") as e_info:
+            he = Pyfhel(pub_key_file = "fake_pubk_file.zip")
+        with pytest.raises(FileNotFoundError,  match=".*File.*not found.*") as e_info:
+            he = Pyfhel(sec_key_file = "fake_seck_file.zip")
         with pytest.raises(TypeError, match=".*must be a dictionary or a string.*"): # not 
             he = Pyfhel(context_params = 2)
         with pytest.raises(FileNotFoundError, match=".*<Pyfhel ERROR>.*") as e_info:
