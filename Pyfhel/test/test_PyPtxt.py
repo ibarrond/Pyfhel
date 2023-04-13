@@ -86,8 +86,8 @@ class TestPyPtxt:
         p = PyPtxt()
         with pytest.raises(ValueError, match=".*<Pyfhel ERROR>.*") as e_info:
             bts = p.to_bytes()
-        # with pytest.warns(UnraisableExceptionWarning):
-        p.save("dummy.file") # Cannot capture warning??
+        with pytest.raises(ValueError, match=".*plaintext saving requires a Pyfhel instance.*"):
+            p.save("dummy.file")
         # File loading with custom scheme should override HE's scheme
         p = HE.encode(input_one)
         p.save(str(tmp_path / "p1"))
@@ -100,10 +100,10 @@ class TestPyPtxt:
         assert p.scheme == Scheme_t.none
         # Loading without pyfhel should raise an error
         p = PyPtxt()
-        # with pytest.warns(UnraisableExceptionWarning):
-        p.from_bytes(b"dummy")  # TODO: capture warning as error??
-        # with pytest.warns(UnraisableExceptionWarning):
-        p.load("dummy.file")    # TODO: capture warning as error??
+        with pytest.raises(ValueError, match=".*plaintext loading requires a Pyfhel instance.*"):
+            p.from_bytes(b"dummy")
+        with pytest.raises(ValueError, match=".*plaintext loading requires a Pyfhel instance.*"):
+            p.load("dummy.file")
     
     def test_PyPtxt_encode(self, HE, input_one, input_zero):
         p = HE.encode(input_one)

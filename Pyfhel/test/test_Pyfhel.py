@@ -43,11 +43,11 @@ class TestPyfhel:
     def test_Pyfhel_creation(self):
         # CONSTRUCTORS
         # context gen --> should accept string as filename, but won't find it
-        # with pytest.raises(BaseException,  match=".*<Pyfhel ERROR>.*") as e_info:
-        he = Pyfhel(
-            context_params = "fake_file.zip",
-            pub_key_file = "fake_pubk_file.zip",
-            sec_key_file = "fake_seck_file.zip")
+        with pytest.raises(FileNotFoundError,  match=".*File.*not found.*") as e_info:
+            he = Pyfhel(
+                context_params = "fake_file.zip",
+                pub_key_file = "fake_pubk_file.zip",
+                sec_key_file = "fake_seck_file.zip")
         with pytest.raises(TypeError, match=".*must be a dictionary or a string.*"): # not 
             he = Pyfhel(context_params = 2)
         with pytest.raises(FileNotFoundError, match=".*<Pyfhel ERROR>.*") as e_info:
@@ -70,8 +70,8 @@ class TestPyfhel:
         he.contextGen(scheme="bfv", n=16384, t_bits=30, sec=128)
         assert he.total_coeff_modulus_bit_count == 389   # checked in seal directly
         # noise level --> should capture raised error
-        #with pytest.raises(ValueError, match=".*does not support noise level.*") as e_info:
-        HE_ckks.noise_level(HE_ckks.encrypt(1.))
+        with pytest.raises(RuntimeError, match=".*only bfv scheme supports noise level.*"):
+            HE_ckks.noise_level(HE_ckks.encrypt(1.))
 
     @pytest.mark.filterwarnings('ignore::pytest.PytestUnraisableExceptionWarning')
     def test_Pyfhel_contextGen(self):
@@ -246,8 +246,8 @@ class TestPyfhel:
             HE_bfv_nokeys.from_bytes_context(HE_bfv.to_bytes_context())
             HE_bfv_nokeys.relinearize(c_bfv)
         # rescaling --> should capture an error
-        # with pytest.raises(RuntimeError, match=".*Scheme must be CKKS.*"):
-        HE_bfv.rescale_to_next(c_bfv)
+        with pytest.raises(RuntimeError, match=".*Scheme must be CKKS for rescaling.*"):
+            HE_bfv.rescale_to_next(c_bfv)
         # mod switching
         with pytest.raises(TypeError, match=".*Expected PyCtxt or PyPtxt for mod switching.*"):
             HE_bfv.mod_switch_to_next(np.array([1]))

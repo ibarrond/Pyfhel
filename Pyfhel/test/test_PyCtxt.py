@@ -71,8 +71,8 @@ class TestPyCtxt:
         # Size
         assert c.size() == 2
         # memory size
-        # with pytest.warns(UnraisableExceptionWarning):
-        PyCtxt().sizeof_ciphertext() # TODO: capture warning as error??
+        with pytest.raises(ValueError, match=".*ciphertext sizing requires a Pyfhel instance.*"):
+            PyCtxt().sizeof_ciphertext()
         assert getsizeof(c) >= 2000000 # 2MB each
         # Scale
         c.scale = 1
@@ -84,8 +84,8 @@ class TestPyCtxt:
         c = PyCtxt()
         with pytest.raises(ValueError, match=".*<Pyfhel ERROR>.*") as e_info:
             bts = c.to_bytes()
-        # with pytest.warns(UnraisableExceptionWarning):
-        c.save("dummy.file") # Cannot capture warning??
+        with pytest.raises(ValueError, match=".*ciphertext saving requires a Pyfhel instance.*"):
+            c.save("dummy.file")
         # File loading with custom scheme should override HE's scheme
         c = HE.encrypt(1)
         c.save(str(tmp_path / "c1"))
@@ -98,10 +98,10 @@ class TestPyCtxt:
         assert c.scheme == Scheme_t.none
         # Loading without pyfhel should raise an error
         c = PyCtxt()
-        # with pytest.warns(UnraisableExceptionWarning):
-        c.from_bytes(b"dummy")  # TODO: capture warning as error??
-        # with pytest.warns(UnraisableExceptionWarning):
-        c.load("dummy.file")    # TODO: capture warning as error??
+        with pytest.raises(ValueError, match=".*ciphertext loading requires a Pyfhel instance.*"):
+            c.from_bytes(b"dummy")
+        with pytest.raises(ValueError, match=".*ciphertext loading requires a Pyfhel instance.*"):
+            c.load("dummy.file")
     
     def test_PyCtxt_add(self, HE):
         c = HE.encrypt(1)
