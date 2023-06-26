@@ -786,7 +786,7 @@ cdef class PyCtxt:
                 (np.issubdtype(other.dtype, np.number)):
                 if self.scheme == Scheme_t.bfv:
                     return self._pyfhel.encodeInt(other.astype(np.int64)[:nslots])
-                elig self.scheme == Scheme_t.bgv:
+                elif self.scheme == Scheme_t.bgv:
                     return self._pyfhel.encodeBGV(other.astype(np.int64)[:nslots])
                 elif self.scheme == Scheme_t.ckks:
                     if np.issubdtype(other.dtype, np.complexfloating):
