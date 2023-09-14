@@ -683,6 +683,34 @@ cdef class PyCtxt:
         """
         self._pyfhel.relinearize(self)
         return self
+    def __xor__(self, k):
+        """__xor__(k)
+        
+        Swaps the ciphertext top and bottom half-arrays in BFV. A No-op otherwise.
+
+        `k` is not used.
+
+        See Also:
+            :func:`~Pyfhel.Pyfhel.flip`
+        """
+        if self.scheme == Scheme_t.bfv:
+            return self._pyfhel.flip(self, in_new_ctxt=True)
+        else:
+            return self
+    def __ixor__(self, k):
+        """__xor__(k)
+        
+        Swaps the ciphertext top and bottom half-arrays in BFV, in-place. A No-op otherwise.
+
+        `k` is not used.
+
+        See Also:
+            :func:`~Pyfhel.Pyfhel.flip`
+        """
+        if self.scheme == Scheme_t.bfv:
+            return self._pyfhel.flip(self, in_new_ctxt=False)
+        else:
+            return self
 
     # =========================================================================
     # ============================ ENCR/DECR/CMP ==============================

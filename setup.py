@@ -26,22 +26,11 @@ from pkg_resources import parse_version as v_parse
 # Create Extension modules written in C for Python
 from setuptools import setup, Extension, find_packages
 
-# # Check that Python version is 3.7+
-# v_maj, v_min = sys.version_info[:2]
-# assert (v_maj, v_min) >= (3,7),\
-#     "Pyfhel requires Python 3.7+ (your version is {}.{}).".format(v_maj, v_min)
-
 # Get platform system
 platform_system = platform.system()
 if platform_system == 'Darwin':
-    if "gcc" in os.environ and "gxx" in os.environ:
-        os.environ["CC"] = os.environ["gcc"]
-        os.environ["CXX"] = os.environ["gxx"]
-        os.environ["LDSHARED"] = os.environ["gxx"] + " -Wl,-no_fixup_chains,-x -dynamiclib -undefined dynamic_lookup"
-    else:
-        print("Please setup your enviroment variables gcc/gxx with your GCC/CLANG path")
-        exit(1)
-
+        vars = sysconfig.get_config_vars()
+        vars["LDSHARED"] = (vars["LDSHARED"]+" -Wl,-no_fixup_chains,-x -undefined dynamic_lookup ").replace('-bundle', '-dynamiclib')
     
 # Read config file
 config = toml.load("pyproject.toml")
@@ -413,6 +402,8 @@ class SuperBuildClib(build_clib):
         language = self.compiler.detect_language(sources)
         lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('shared')}"
 
+        if platform_system == 'Darwin':
+            build_info['extra_link_args'].append(f"-Wl,-install_name,@loader_path/{lib_file}")
         self.compiler.link_shared_object(
             objects,                     
             lib_file,
@@ -604,7 +595,7 @@ class SuperBuildExt(build_ext):
     def copy_extensions_to_source(self):
         ## modified to also copy built libs to package dir
         # Copy extensions (default behavior)
-        build_ext.build_extensions(self)
+        build_ext.copy_extensions_to_source(self)
         # Copy built libraries
         global built_libs
         package = '.'.join(self.get_ext_fullname(self.extensions[0].name).split('.')[:-1])

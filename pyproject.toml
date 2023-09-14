@@ -9,7 +9,7 @@
 # Pyfhel's core metadata
 [project]
 name = "Pyfhel"
-version = "3.4.1"
+version = "3.4.2"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -59,7 +59,7 @@ repository = "https://github.com/ibarrond/github"
 requires = [
   "setuptools<=60.9",
   "wheel",
-  "cython==3.0.0b1",
+  "cython==3.0.0b3",
   "numpy>=1.21",
   "cmake>=3.15",
   "toml>=0.10"
@@ -86,7 +86,7 @@ omit =[
 ]
 
 [platforms]
-platforms = ["Darwin"] # "Linux", "Windows", 
+platforms = ["Linux", "Windows", "Darwin"]
 
 #===============================================================================
 #========================= COMPILATION CONFIGURATION ===========================
@@ -142,7 +142,7 @@ platforms = ["Darwin"] # "Linux", "Windows",
     {Linux = ["-std=c++17","-O3","-fopenmp"]} ]
   extra_link_args = [
     {Windows = []},
-    {Darwin = ["-fopenmp","-dynamiclib"]},
+    {Darwin = ["-Wl,-rpath,@loader_path/.",  "-Wl,-no_compact_unwind", "-fopenmp"]},
     {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]} ]
   libraries = ['SEAL']
 
@@ -161,7 +161,7 @@ extra_compile_args = [
 ]
 extra_link_args = [
   {Windows = []},
-  {Darwin = ["-fopenmp","-dynamiclib"]},
+  {Darwin = ["-Wl,-rpath,@loader_path/.", "-Wl,-no_compact_unwind", "-fopenmp"]},
   {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
 ]
 libraries = []  # libraries to link with, cpplibraries above are added by default

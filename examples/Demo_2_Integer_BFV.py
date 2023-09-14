@@ -98,6 +98,11 @@ cRotR = ctxt1 >> 2          # Calls HE.rotate(ctxt1, k=2, in_new_ctxt=True)
                             #  to each of the rows!
 cRotL = ctxt1 << 2          # Calls HE.rotate(ctxt1, k=-2, in_new_ctxt=True)
                             #  `ctxt1 <<= 2` for inplace operation
+cFlip = ctxt1 | 1           # Calls HE.flip(ctxt1, k=1, in_new_ctxt=True)
+                            #  `ctxt1 |= 1` for inplace operation
+cCuAdd = (+ctxt1)        # Calls HE.cumul_add(ctxt1, in_new_ctxt=True)
+                            #  There is no equivalent for in-place operator, use
+                            #  the above call with `in_new_ctxt=False` if required.
 
 # Ciphetext-plaintext ops
 cpSum = ctxt1 + ptxt2       # Calls HE.add_plain(ctxt1, ptxt2, in_new_ctxt=True)
@@ -110,19 +115,21 @@ cpMul = ctxt1 * ptxt2       # Calls HE.multiply_plain(ctxt1, ptxt2, in_new_ctxt=
 
 print("3. Secure operations")
 print(" Ciphertext-ciphertext: ")
-print("->\tctxt1 + ctxt2 = ccSum: ", ccSum)
-print("->\tctxt1 - ctxt2 = ccSub: ", ccSub)
-print("->\tctxt1 * ctxt2 = ccMul: ", ccMul)
+print("->\tctxt1 + ctxt2 = ccSum: ",  ccSum)
+print("->\tctxt1 - ctxt2 = ccSub: ",  ccSub)
+print("->\tctxt1 * ctxt2 = ccMul: ",  ccMul)
 print(" Single ciphertext: ")
-print("->\tctxt1**2      = cSq  : ", cSq  )
-print("->\t- ctxt1       = cNeg : ", cNeg )
-print("->\tctxt1**3      = cPow : ", cPow )
-print("->\tctxt1 >> 2    = cRotR: ", cRotR)
-print("->\tctxt1 << 2    = cRotL: ", cRotL)
+print("->\tctxt1**2      = cSq  : ",  cSq  )
+print("->\t- ctxt1       = cNeg : ",  cNeg )
+print("->\tctxt1**3      = cPow : ",  cPow )
+print("->\tctxt1 >> 2    = cRotR: ",  cRotR)
+print("->\tctxt1 << 2    = cRotL: ",  cRotL)
+print("->\tctxt1 | 1     = cFlip: ",  cFlip)
+print("->\t(+ctxt1)      = cCuAdd: ", cCuAdd)
 print(" Ciphertext-plaintext: ")
-print("->\tctxt1 + ptxt2 = cpSum: ", cpSum)
-print("->\tctxt1 - ptxt2 = cpSub: ", cpSub)
-print("->\tctxt1 * ptxt2 = cpMul: ", cpMul)
+print("->\tctxt1 + ptxt2 = cpSum: ",  cpSum)
+print("->\tctxt1 - ptxt2 = cpSub: ",  cpSub)
+print("->\tctxt1 * ptxt2 = cpMul: ",  cpMul)
 
           
 # %%
@@ -161,6 +168,8 @@ rcNeg  = HE.decryptInt(cNeg )
 rcPow  = HE.decryptInt(cPow )
 rcRotR = HE.decryptInt(cRotR)
 rcRotL = HE.decryptInt(cRotL)
+rcFlip = HE.decryptInt(cFlip)
+rcCuAdd = HE.decryptInt(cCuAdd)
 rcpSum = HE.decryptInt(cpSum)
 rcpSub = HE.decryptInt(cpSub)
 rcpMul = HE.decryptInt(cpMul)
@@ -179,6 +188,8 @@ print("   ->\t- ctxt1       = cNeg  --(decr)--> ", rcNeg )
 print("   ->\tctxt1**3      = cPow  --(decr)--> ", rcPow )
 print("   ->\tctxt1 >> 2    = cRotR --(decr)--> ", rcRotR)
 print("   ->\tctxt1 << 2    = cRotL --(decr)--> ", rcRotL)
+print("   ->\tctxt1 | 1     = cFlip --(decr)--> ", rcFlip)
+print("   ->\t(+cCuAdd)     = cCuAdd --(decr)--> ", cCuAdd)
 print(" Ciphertext-plaintext ops: ")
 print("   ->\tctxt1 + ptxt2 = cpSum --(decr)--> ", rcpSum)
 print("   ->\tctxt1 - ptxt2 = cpSub --(decr)--> ", rcpSub)

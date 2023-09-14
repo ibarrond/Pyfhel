@@ -196,6 +196,11 @@ class TestPyCtxt:
         c1 >>= 1
         c1 <<= 1
         assert np.round(HE.decrypt(c1)[0])==1
+        # flip
+        if c1._pyfhel.scheme == Scheme_t.bfv:
+            c1 |= 1
+            c1 |= 1
+            assert np.round(HE.decrypt(c1)[0])==1
     
     def test_PyCtxt_io(self, HE):
         c = HE.encrypt(1)
