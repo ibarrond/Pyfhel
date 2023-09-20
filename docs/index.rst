@@ -30,8 +30,8 @@
 
 * :bolditalic:`Version`: |release|.
 * :bolditalic:`Status`: STABLE.
-* :bolditalic:`Language`: Python (3.5+) & Cython on top of C++17.
-* :bolditalic:`OS`: Windows (tested with ``MSVC2017``, ``MSVC2019``) and Linux / WSL (tested on ``gcc6``, ``gcc8``). MacOS not supported.
+* :bolditalic:`Language`: Python (3.7+) & Cython on top of C++17.
+* :bolditalic:`OS`: Windows (tested with ``MSVC2017``, ``MSVC2019``), Linux / WSL (tested on ``gcc6`` upwards) and MacOS (``gcc6`` upwards, NO CLANG).
 
 .. warning::	|warning| *REQUIRED: Python must have been compiled with C++17:* ``g++>=6`` *|* ``MSVC 2017+`` |warning|
 	
