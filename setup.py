@@ -28,9 +28,6 @@ from setuptools import setup, Extension, find_packages
 
 # Get platform system
 platform_system = platform.system()
-if platform_system == 'Darwin':
-        vars = sysconfig.get_config_vars()
-        vars["LDSHARED"] = (vars["LDSHARED"]+" -Wl,-no_fixup_chains,-x -undefined dynamic_lookup ").replace('-bundle', '-dynamiclib')
     
 # Read config file
 config = toml.load("pyproject.toml")
@@ -55,7 +52,7 @@ def re_sub_file(regex: str, replace: str, filename: str):
         sub_file.write(re.sub(regex, '{}'.format(replace), file_string))
 
 # Writing version in __init__.py and README.md
-V_README_REGEX = r'(?<=\* \*\*_Version_\*\*: )[0-9]+\.[0-9]+\.[0-9a-z]+'
+V_README_REGEX = r'(?<=\*\*Version\*\* \| )[0-9]+\.[0-9]+\.[0-9a-z]+'
 V_INIT_REGEX = r'(?<=__version__ = \")[0-9]+\.[0-9]+\.[0-9a-z]+(?=\")'
 re_sub_file(regex=V_README_REGEX, replace=VERSION, filename='README.md')
 re_sub_file(regex=V_INIT_REGEX, replace=VERSION, filename='Pyfhel/__init__.py')
@@ -404,6 +401,7 @@ class SuperBuildClib(build_clib):
 
         if platform_system == 'Darwin':
             build_info['extra_link_args'].append(f"-Wl,-install_name,@loader_path/{lib_file}")
+            self.compiler.linker_so = ['-dynamiclib' if val=='-bundle' else val for val in self.compiler.linker_so]
         self.compiler.link_shared_object(
             objects,                     
             lib_file,

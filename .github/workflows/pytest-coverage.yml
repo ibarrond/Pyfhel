@@ -1,4 +1,6 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For MacOs builds, GNU GCC is installed via Homebrew, and the CC/CXX environment variables are set to use it.
+# The echo "CC=..." >> $GITHUB_ENV syntax is used to set environment variables for the next steps in the workflow.
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: CI
@@ -25,40 +27,60 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+
     - name: Checkout repo
       uses: actions/checkout@v3
       with:
         submodules: recursive
-    # brew install --with-toolchain llvm libomp ?
-    - name: (MAcOs only) Install GNU GCC
+
+    - name: (MacOs only) Install GNU GCC.
       if: matrix.os == 'macos-latest'
       run: |
         brew install gcc libomp
-    - name: (MacOs only) Set gcc/gxx environment variables 
+
+    - name: (MacOs only) Set CC/CXX environment variables to GNU GCC 
       if: matrix.os == 'macos-latest'
       run: |
-        echo "gcc=/usr/local/bin/$(ls /usr/local/bin | grep ^gcc-[0-9] | sort -V -r | head -n 1)"  >> $GITHUB_ENV
-        echo "gxx=/usr/local/bin/$(ls /usr/local/bin | grep ^g++-[0-9] | sort -V -r | head -n 1)"  >> $GITHUB_ENV
+
+        # Check GCC installation path. Brew installs GCC in /opt/homebrew/bin on Apple Silicon and /usr/local/bin on Intel.
+        if [[ $(uname -m) = "arm64" ]]; then BREW_GCC_PATH="/opt/homebrew/bin"; else BREW_GCC_PATH="/usr/local/bin"; fi
+        echo "GCC installed at $BREW_GCC_PATH"
+
+        # Set CC/CXX environment variables to GNU GCC
+        echo "CC=$BREW_GCC_PATH/$(ls $BREW_GCC_PATH | grep ^gcc-[0-9] | sort -V -r | head -n 1)" >> $GITHUB_ENV
+        echo "CXX=$BREW_GCC_PATH/$(ls $BREW_GCC_PATH | grep ^g++-[0-9] | sort -V -r | head -n 1)" >> $GITHUB_ENV
+        echo "CC=${{ env.CC }}"
+        echo "CXX=${{ env.CXX }}"
+        
+        # Set MACOSX_DEPLOYMENT_TARGET to avoid version mismatch warnings
+        echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV
+        echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOSX_DEPLOYMENT_TARGET }}"
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Update pip
-      run: |
-        python -m pip install --upgrade pip
-    # Run interactive debugging session for debug_enabled manually
-    - name: Setup tmate session
+        cache: 'pip' # caching pip dependencies
+
+    - name: (Manual) Setup tmate session for interactive debugging via SSH
       uses: mxschmitt/action-tmate@v3
       if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
-    - name: Install package in test mode
+
+    - name: Update pip
+      run: python -m pip install --upgrade pip
+
+    - name: Install package verbosely
       run: |
-        touch .cov
+
+        touch .cov # Create a .cov file to trigger Cython compilation with coverage support 
         ls
-        python -m pip install .[test]
+        python -m pip install -v -v -v .
+
     - name: Test with pytest
       run: |
-        python -m pip install cython==3.0.0a11 pytest-cov
+        python -m pip install cython==3.0.2 pytest-cov
         pytest --cov .
+
     - name: Upload report to Codecov
       uses: codecov/codecov-action@v3.1.0
       with:

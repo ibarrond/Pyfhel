@@ -1,6 +1,6 @@
 <img width="70%" align="left"  src="/docs/static/logo_title.png"><img width="17%" height="17%" align="right"  src="/docs/static/logo.png">
 
-[![iCodecov](https://codecov.io/gh/ibarrond/Pyfhel/branch/dev/graph/badge.svg?token=S8J8Jlp1Fc)](https://codecov.io/gh/ibarrond/Pyfhel)
+[![iCodecov](https://codecov.io/gh/ibarrond/Pyfhel/branch/master/graph/badge.svg?token=S8J8Jlp1Fc)](https://codecov.io/gh/ibarrond/Pyfhel)
 [![Documentation Status](https://readthedocs.org/projects/pyfhel/badge/?version=latest)](https://pyfhel.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/Pyfhel.svg)](https://badge.fury.io/py/Pyfhel)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://GitHub.com/ibarrond/Pyfhel/graphs/commit-activity)
@@ -8,13 +8,13 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 
-Python library for ADDITION, SUBSTRACTION, MULTIPLICATION and SCALAR PRODUCT over encrypted integers (BFV) and approximated floating point values (CKKS). This library acts as an optimized Python API for C++ Homomorphic Encryption libraries.
+Python library for Addition, Subtraction, Multiplication and Scalar Product over *encrypted* integers (BFV/BGV schemes) and approximated floating point values (CKKS scheme). This library acts as an optimized Python API for C++ Homomorphic Encryption libraries.
 
 |                                            |                                                                                            |
 |--------------------------------------------|--------------------------------------------------------------------------------------------|
 | :flags: **Language**                       | Python (3.7+), with Cython and C++ (:warning: _requires a [C++17 compiler][3]_ :warning:.) |
 | :computer: **OS**                          | Linux, Windows & MacOS.                                                                    |
-| :1234: **Version**                         | 3.4.1 (stable)                                                                             |
+| :1234: **Version** | 3.4.2 (stable)                                                                                                     |
 | :books: **Docs**                           | In [readthedocs][1]!                                                                       |
 | :pencil2: **Demos/Examples**               | [In the docs][4] with the outputs, sources in the [`examples`][2] folder.                  |
 | :electric_plug: **Backends**               | [SEAL][5], [OpenFHE (WIP)][6]. Shipped alongside Pyfhel.                                   |
@@ -56,28 +56,36 @@ If you wish to cite Pyfhel in your derived work, please use the following BibTeX
 ## Install & Uninstall
 To install `Pyfhel` from [PyPI](https://pypi.org/project/Pyfhel/), run (*WARNING! it takes several minutes to compile and install, be patient!*):
 ```bash
-> pip install Pyfhel
+pip install Pyfhel
 ```
 
 To install the latest version, you can clone this repository with [all the submodules](https://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) and install it by running:
 ```bash
-> git clone --recursive https://github.com/ibarrond/Pyfhel.git
-> pip install .
+git clone --recursive https://github.com/ibarrond/Pyfhel.git
+pip install .
 ```
 
 To uninstall, just run:
 ```bash
-> pip uninstall Pyfhel
+pip uninstall Pyfhel
 ```
 
 ### Installing a C/C++ Compiler
 `Pyfhel` requires a C/C++ compiler with C++17 support. We have tested:
 - *gcc6* to *gcc12* in Linux/MacOS/Windows WSL. To install:
    - Ubuntu: `sudo apt install gcc g++`
-   - MacOS: `brew install gcc`. MacOS users must set the environment variables `gcc` and `gxx` to the installed compilers, e.g.:
+   - MacOS: `brew install gcc`. MacOS users must also set several environment variables by running:
 ```bash
-      > export gcc=/usr/local/bin/gcc-12
-      > export gxx=/usr/local/bin/g++-12
+        # Brew installs GCC in /opt/homebrew/bin on Apple Silicon and /usr/local/bin on Intel.
+        if [[ $(uname -m) = "arm64" ]]; then BREW_GCC_PATH="/opt/homebrew/bin"; else BREW_GCC_PATH="/usr/local/bin"; fi
+
+        # Set CC/CXX environment variables to the most recent GNU GCC
+        export CC="$BREW_GCC_PATH/$(ls $BREW_GCC_PATH | grep ^gcc-[0-9] | sort -V -r | head -n 1)"
+        export CXX="$BREW_GCC_PATH/$(ls $BREW_GCC_PATH | grep ^g++-[0-9] | sort -V -r | head -n 1)"
+        
+        # Set MACOSX_DEPLOYMENT_TARGET to avoid version mismatch warnings
+        echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion)" >> $GITHUB_ENV
+        echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOSX_DEPLOYMENT_TARGET }}"
 ```
 - *MSVC2017* and *MSVC2019* in Windows. To install:
    - Install Visual C++ Build tools (Download [here](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170), guide in [here](https://stackoverflow.com/questions/40504552))
@@ -98,7 +106,7 @@ This repository contains:
 This is the standard process to develop/contribute:
 1. _Code a new feature/fix a bug_. Using [Cython](https://cython.readthedocs.io/en/latest/) for the `.pyx` and `.pxd` extensions, C++ for `Afhel` or Python for examples/tests/other.
 
-2. _Build/Install Pyfhel locally_. Use either `pip install .` or `python3 setup.py build` (for verbose output and fine control. Run `python3 setup.py --help` for further options).
+2. _Build/Install Pyfhel locally_. Use `pip install -v -v -v .` for a verbose installation.
 
 3. _Test changes (requires installing `pytest`)_. Run the tests locally by executing `pytest .`  in the root directory, and make sure all tests pass. 
 	

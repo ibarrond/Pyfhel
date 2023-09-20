@@ -59,7 +59,7 @@ repository = "https://github.com/ibarrond/github"
 requires = [
   "setuptools<=60.9",
   "wheel",
-  "cython==3.0.0b3",
+  "cython>=3.0.0",
   "numpy>=1.21",
   "cmake>=3.15",
   "toml>=0.10"
@@ -138,30 +138,32 @@ platforms = ["Linux", "Windows", "Darwin"]
   ]
   extra_compile_args = [
     {Windows = ["/O2","/std:c++17","/openmp"]},
-    {Darwin = ["-std=c++17","-O3","-fopenmp"]},
+    {Darwin = ["-std=c++17","-O3","-Xpreprocessor","-fopenmp"]},
     {Linux = ["-std=c++17","-O3","-fopenmp"]} ]
   extra_link_args = [
     {Windows = []},
-    {Darwin = ["-Wl,-rpath,@loader_path/.",  "-Wl,-no_compact_unwind", "-fopenmp"]},
+    {Darwin = ["-Wl,-rpath,@loader_path/.", "-fopenmp","-Wl,-no_compact_unwind"]},
     {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]} ]
   libraries = ['SEAL']
 
 
 #----------------------------- CYTHON EXTENSIONS -------------------------------
 [extensions.config]   # Common compilation config for all extensions
-include_dirs = []
+include_dirs = [
+    {Darwin = ["/usr/local/include"]},
+]
 define_macros = [
   ["NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"],
   ["__PYX_ENUM_CLASS_DECL", "enum"], # Support enums in cython
 ]
 extra_compile_args = [
   {Windows = ["/O2","/openmp","/std:c++17"]},
-  {Darwin = ["-std=c++17","-O3","-fopenmp"]},
+  {Darwin = ["-std=c++17","-O3","-Xpreprocessor","-fopenmp","-Wno-unreachable-code","-Wno-unqualified-std-cast-call"]},
   {Linux = ["-std=c++17","-O3","-fopenmp"]},
 ]
 extra_link_args = [
   {Windows = []},
-  {Darwin = ["-Wl,-rpath,@loader_path/.", "-Wl,-no_compact_unwind", "-fopenmp"]},
+  {Darwin = ["-Wl,-rpath,@loader_path/.", "-fopenmp","-Wl,-no_compact_unwind"]},
   {Linux = ["-Wl,-rpath=$ORIGIN/.", "-fopenmp"]},
 ]
 libraries = []  # libraries to link with, cpplibraries above are added by default

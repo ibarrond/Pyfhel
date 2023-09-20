@@ -98,9 +98,9 @@ cRotR = ctxt1 >> 2          # Calls HE.rotate(ctxt1, k=2, in_new_ctxt=True)
                             #  to each of the rows!
 cRotL = ctxt1 << 2          # Calls HE.rotate(ctxt1, k=-2, in_new_ctxt=True)
                             #  `ctxt1 <<= 2` for inplace operation
-cFlip = ctxt1 | 1           # Calls HE.flip(ctxt1, k=1, in_new_ctxt=True)
+cFlip = ctxt1 ^ 1           # Calls HE.flip(ctxt1, k=1, in_new_ctxt=True)
                             #  `ctxt1 |= 1` for inplace operation
-cCuAdd = (+ctxt1)        # Calls HE.cumul_add(ctxt1, in_new_ctxt=True)
+cCuAdd = (+ctxt1)           # Calls HE.cumul_add(ctxt1, in_new_ctxt=True)
                             #  There is no equivalent for in-place operator, use
                             #  the above call with `in_new_ctxt=False` if required.
 
@@ -189,7 +189,7 @@ print("   ->\tctxt1**3      = cPow  --(decr)--> ", rcPow )
 print("   ->\tctxt1 >> 2    = cRotR --(decr)--> ", rcRotR)
 print("   ->\tctxt1 << 2    = cRotL --(decr)--> ", rcRotL)
 print("   ->\tctxt1 | 1     = cFlip --(decr)--> ", rcFlip)
-print("   ->\t(+cCuAdd)     = cCuAdd --(decr)--> ", cCuAdd)
+print("   ->\t(+tctxt1)     = cCuAdd -(decr)--> ", rcCuAdd)
 print(" Ciphertext-plaintext ops: ")
 print("   ->\tctxt1 + ptxt2 = cpSum --(decr)--> ", rcpSum)
 print("   ->\tctxt1 - ptxt2 = cpSub --(decr)--> ", rcpSub)
