@@ -106,7 +106,7 @@ This repository contains:
 This is the standard process to develop/contribute:
 1. _Code a new feature/fix a bug_. Using [Cython](https://cython.readthedocs.io/en/latest/) for the `.pyx` and `.pxd` extensions, C++ for `Afhel` or Python for examples/tests/other.
 
-2. _Build/Install Pyfhel locally_. Use `pip install -v -v -v .` for a verbose installation.
+2. _Build/Install Pyfhel locally_. Use `pip install -v -v .` for a verbose installation.
 
 3. _Test changes (requires installing `pytest`)_. Run the tests locally by executing `pytest .`  in the root directory, and make sure all tests pass. 
 	

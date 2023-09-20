@@ -74,7 +74,7 @@ jobs:
 
         touch .cov # Create a .cov file to trigger Cython compilation with coverage support 
         ls
-        python -m pip install -v -v -v .
+        python -m pip install -v -v .
 
     - name: Test with pytest
       run: |
