@@ -164,14 +164,14 @@ string Afseal::ContextGen(scheme_t scheme,
 // KEY GENERATION
 void Afseal::KeyGen()
 {
-  auto &context = *(this->get_context());
+  auto &afhel_context = *(this->get_context());
   // Key generator
-  this->keyGenObj = make_shared<KeyGenerator>(context); // Refresh KeyGen obj
+  this->keyGenObj = make_shared<KeyGenerator>(afhel_context); // Refresh KeyGen obj
   this->publicKey = make_shared<PublicKey>();
   keyGenObj->create_public_key(*publicKey); // Extract keys
   this->secretKey = make_shared<SecretKey>(keyGenObj->secret_key());
-  this->encryptor = make_shared<Encryptor>(context, *publicKey);
-  this->decryptor = make_shared<Decryptor>(context, *secretKey);
+  this->encryptor = make_shared<Encryptor>(afhel_context, *publicKey);
+  this->decryptor = make_shared<Decryptor>(afhel_context, *secretKey);
 }
 
 void Afseal::relinKeyGen()

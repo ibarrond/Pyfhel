@@ -47,7 +47,7 @@ Index
 
 .. toctree::
     :glob:
-    :maxdepth: 4
+    :maxdepth: 2
     
     source/getting_started
     _autoexamples/index
