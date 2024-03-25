@@ -120,8 +120,10 @@ Please fill the [**Bug Report**](https://github.com/ibarrond/Pyfhel/issues/new/c
 If you wish to have new functionality added to Pyfhel, you are more than welcome to request it via the [**Feature**](https://github.com/ibarrond/Pyfhel/issues/new/choose) template.
 
 ## Legal disclaimer
-This project is Open Source under the GNU GPLv3 License (LICENSE file). Hence, Pyfhel can be used, modified, and copied freely provided that developers:
+This project is Open Source under the Apache V2 License (LICENSE file). Hence, Pyfhel can be used, modified, and copied freely provided that developers:
 
    1. Acknowledge and mention the original authors of Pyfhel in any derived development, that is, `Alberto Ibarrondo (IDEMIA & EURECOM) and Alexander Viand (ETH Zurich)` (maybe even cite the paper!).
 
-   2. Offer the exact same License, allowing legal permission to copy, distribute and/or modify any SW using Pyfhel. Hence, **any software using Pyfhel must remain Open Source**.
+   2. Maintain the same License, and provide a statement of changes.
+      
+We encourage **any software using Pyfhel to be Open Source**, for the benefit of everyone using it.
