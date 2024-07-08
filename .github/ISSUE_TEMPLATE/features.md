@@ -1,6 +1,6 @@
 ---
 name: Features
-about: How can I do this or that with Pyfhel?
+about: How can I do this or that with Pyfhel? DO NOT USE FOR ERRORS
 title: How to [feature]?
 labels: Functionality
 assignees: ''
