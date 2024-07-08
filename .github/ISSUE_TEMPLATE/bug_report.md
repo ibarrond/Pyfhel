@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Time to debug! Let's do it so that this bug never appears again.
+about: I have a bug / error in the installation or execution of Pyfhel
 title: "[up to 10 words short bug description]: [one-line error message]"
 labels: bug
 assignees: ''
