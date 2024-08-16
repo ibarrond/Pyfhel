@@ -152,16 +152,20 @@ print("  All checks passed! Loaded from bytestrings correctly")
 import pickle
 pkls_pyfhel = pickle.dumps(HE)   # pickle.dump(HE, file) to dump in a file
 pkls_ctxt   = pickle.dumps(c)
+pkls_ptxt   = pickle.dumps(p) 
 
-print("5a. Pickling Pyfhel & PyCtxt objects.")
+print("5a. Pickling Pyfhel, PyCtxt & PyPtxt objects.")
 print(f"  - pkls_pyfhel: {pkls_pyfhel[:10]}...")
 print(f"  - pkls_ctxt: {pkls_ctxt[:10]}...")
+print(f"  - pkls_ptxt: {pkls_ptxt[:10]}...")
 
 # To load the objects, just call `pickle.loads`
 HE_pkl = pickle.loads(pkls_pyfhel) # pickle.load(file) to load from file
 c_pkl = pickle.loads(pkls_ctxt)
+p_pkl = pickle.loads(pkls_ptxt)
 print("5b. Loaded pickled objects")
 print(f"   - HE_pkl: {HE_pkl}")
 print(f"   - c_pkl: {c_pkl}")
+print(f"   - p_pkl: {p_pkl}")
 
 # sphinx_gallery_thumbnail_path = 'static/thumbnails/saveRestore.png'
