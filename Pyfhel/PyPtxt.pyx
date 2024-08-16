@@ -151,6 +151,17 @@ cdef class PyPtxt:
     # =========================================================================
     # ================================== I/O ==================================
     # =========================================================================
+    def __reduce__(self):
+        """__reduce__()
+
+        Required for pickling purposes. Returns a tuple with:
+            - A callable object that will be called to create the initial version of the object.
+            - A tuple of arguments for the callable object.
+        """
+        return (PyPtxt, (None, self._pyfhel, None, self.to_bytes(), self.scheme.name))
+    
+    
+    
     cpdef void save(self, str fileName, str compr_mode="zstd"):
         """save(str fileName)
         
