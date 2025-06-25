@@ -27,6 +27,8 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -38,7 +40,7 @@ classifiers = [
 ]
 
 dependencies = [
-  "numpy>=1.21"
+  "numpy>=1.26"
 ]
 
 [project.optional-dependencies]
@@ -57,10 +59,10 @@ repository = "https://github.com/ibarrond/github"
 # Minimum requirements for the build system to execute.
 [build-system]
 requires = [
-  "setuptools<=60.9",
+  "setuptools>=64",
   "wheel",
   "cython>=3.0.0",
-  "numpy>=1.21",
+  "numpy>=1.26",
   "cmake>=3.15",
   "toml>=0.10"
 ]
