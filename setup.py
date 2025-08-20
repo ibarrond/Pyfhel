@@ -677,7 +677,7 @@ setup(
     classifiers     = project_config['classifiers'],
     platforms       = config['platforms']['platforms'],
     keywords        = ', '.join(project_config['description']),
-    license         = project_config['license']['text'],
+    license         = project_config['license'],
     # Options
     install_requires=project_config['dependencies'],
     python_requires =project_config['requires-python'],

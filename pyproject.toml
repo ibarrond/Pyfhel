@@ -13,7 +13,7 @@ version = "3.4.3"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
 requires-python = ">=3.7"
-license = {text = "GNU GPLv3"}
+license = "GPL-3.0-or-later"
 keywords = ["homomorphic" , "encryption", "cython", "cryptography"]
 authors = [
   {name = "Alberto Ibarrondo", email = "ibarrond@eurecom.fr"},
@@ -31,7 +31,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: Unix",
     "Operating System :: POSIX",
     "Operating System :: Microsoft :: Windows",
