@@ -14,7 +14,7 @@ Python library for Addition, Subtraction, Multiplication and Scalar Product over
 |--------------------------------------------|--------------------------------------------------------------------------------------------|
 | :flags: **Language**                       | Python (3.7+), with Cython and C++ (:warning: _requires a [C++17 compiler][3]_ :warning:.) |
 | :computer: **OS**                          | Linux, Windows & MacOS.                                                                    |
-| :1234: **Version** | 3.4.2 (stable)                                                                                                     |
+| :1234: **Version** | 3.4.3 (stable)                                                                                                     |
 | :books: **Docs**                           | In [readthedocs][1]!                                                                       |
 | :pencil2: **Demos/Examples**               | [In the docs][4] with the outputs, sources in the [`examples`][2] folder.                  |
 | :electric_plug: **Backends**               | [SEAL][5], [OpenFHE (WIP)][6]. Shipped alongside Pyfhel.                                   |

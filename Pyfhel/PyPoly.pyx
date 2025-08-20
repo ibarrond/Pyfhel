@@ -83,7 +83,7 @@ cdef class PyPoly:
     
     @_scheme.setter
     def _scheme(self, new_scheme):
-        if not isinstance(new_scheme, scheme_t):
+        if not isinstance(new_scheme, Scheme_t):
             raise TypeError("<Pyfhel ERROR> Scheme type of PyPoly must be scheme_t")        
         self._scheme = new_scheme
         
