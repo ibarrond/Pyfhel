@@ -4,6 +4,8 @@
 # Dereferencing pointers in Cython in a secure way
 from cython.operator cimport dereference as deref
 
+from .Pyfhel import Pyfhel
+from Pyfhel.Pyfhel cimport to_Scheme_t
 from .utils.Scheme_t import Scheme_t
 from .utils.Backend_t import Backend_t
 
@@ -76,20 +78,19 @@ cdef class PyPoly:
 
         See Also:
             :func:`~Pyfhel.utils.to_scheme_t`
-
+        
         :meta public:
         """
-        return Scheme_t(self._scheme)
+        return to_Scheme_t(self._scheme)
     
     @_scheme.setter
     def _scheme(self, new_scheme):
-        if not isinstance(new_scheme, scheme_t):
-            raise TypeError("<Pyfhel ERROR> Scheme type of PyPoly must be scheme_t")        
-        self._scheme = new_scheme
+        new_scheme = to_Scheme_t(new_scheme)
+        self._scheme = new_scheme.value
         
     @_scheme.deleter
     def _scheme(self):
-        self._scheme = Scheme_t.none
+        self._scheme = Scheme_t.none.value
               
         
     @property
