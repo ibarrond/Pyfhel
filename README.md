@@ -1,4 +1,4 @@
-<img width="70%" align="left"  src="/docs/static/logo_title.png"><img width="17%" height="17%" align="right"  src="/docs/static/logo.png">
+<img width="70%" align="left"  src="https://github.com/ibarrond/Pyfhel/raw/master/docs/static/logo_title.png"><img width="17%" height="17%" align="right"  src="https://github.com/ibarrond/Pyfhel/raw/v3.5.0/docs/static/logo.png">
 
 [![iCodecov](https://codecov.io/gh/ibarrond/Pyfhel/branch/master/graph/badge.svg?token=S8J8Jlp1Fc)](https://codecov.io/gh/ibarrond/Pyfhel)
 [![Documentation Status](https://readthedocs.org/projects/pyfhel/badge/?version=latest)](https://pyfhel.readthedocs.io/en/latest/?badge=latest)
