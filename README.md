@@ -12,9 +12,9 @@ Python library for Addition, Subtraction, Multiplication and Scalar Product over
 
 |                                            |                                                                                            |
 |--------------------------------------------|--------------------------------------------------------------------------------------------|
-| :flags: **Language**                       | Python (3.7+), with Cython and C++ (:warning: _requires a [C++17 compiler][3]_ :warning:.) |
+| :flags: **Language**                       | Python (3.10+), with Cython and C++ ( :warning: _requires a [C++17 compiler][3]_ :warning: ) |
 | :computer: **OS**                          | Linux, Windows & MacOS.                                                                    |
-| :1234: **Version** | 3.4.3 (stable)                                                                                                     |
+| :1234: **Version** | 3.5.0 (stable)                                                                                                     |
 | :books: **Docs**                           | In [readthedocs][1]!                                                                       |
 | :pencil2: **Demos/Examples**               | [In the docs][4] with the outputs, sources in the [`examples`][2] folder.                  |
 | :electric_plug: **Backends**               | [SEAL][5], [OpenFHE (WIP)][6]. Shipped alongside Pyfhel.                                   |
@@ -25,7 +25,7 @@ Python library for Addition, Subtraction, Multiplication and Scalar Product over
 
 If you wish to cite Pyfhel in your derived work, please use the following BibTeX entry:
 ```bibtex
-  @inproceedings{ibarrondo2021pyfhel,
+@inproceedings{ibarrondo2021pyfhel,
   title={Pyfhel: Python for homomorphic encryption libraries},
   author={Ibarrondo, Alberto and Viand, Alexander},
   booktitle={Proceedings of the 9th on Workshop on Encrypted Computing \& Applied Homomorphic Cryptography},
@@ -70,9 +70,20 @@ To uninstall, just run:
 pip uninstall Pyfhel
 ```
 
+### With Docker
+You can also use Docker to build and run `Pyfhel`. A Dockerfile is provided in the repository, which sets up the necessary environment. Check it up to configure python versions (default 3.12) and virtual environment location (default `/home/venv`). To build the image, just run:
+```bash
+docker build --tag 'pyfhel-docker' .
+```
+
+To run the container interactively, you can use:
+```bash
+docker run -it pyfhel-docker
+```
+
 ### Installing a C/C++ Compiler
 `Pyfhel` requires a C/C++ compiler with C++17 support. We have tested:
-- *gcc6* to *gcc12* in Linux/MacOS/Windows WSL. To install:
+- *gcc6* to *gcc14* in Linux/MacOS/Windows WSL. To install:
    - Ubuntu: `sudo apt install gcc g++`
    - MacOS: `brew install gcc`. MacOS users must also set several environment variables by running:
 ```bash

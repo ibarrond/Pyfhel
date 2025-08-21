@@ -1,13 +1,20 @@
-FROM ubuntu:bionic
-RUN apt-get update && apt-get install lzip git make sudo -y
-RUN sudo apt-get install software-properties-common -y
-RUN sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-RUN sudo apt-get update
-RUN sudo apt-get install gcc-6 g++-6 python3.8 python3.8-dev python3.8-distutils build-essential libssl-dev libffi-dev curl -y
-# RUN sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
-# RUN sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 90
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.8 get-pip.py
-RUN echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
-RUN . ~/.bashrc
-RUN git clone --recursive https://github.com/ibarrond/Pyfhel
-RUN cd Pyfhel && pip3 install .
+ARG PY_VERSION="3.12"
+ARG VENV_PATH="home/venv"
+ARG REPO_PATH="home/Pyfhel"
+
+FROM ubuntu:latest
+# Prepare system
+RUN apt-get update
+RUN apt-get install git -y
+# Install Python
+ARG PY_VERSION
+RUN apt-get install python${PY_VERSION} -y
+RUN apt-get install python3-pip -y
+RUN apt-get install python3-venv -y
+# Create virtual environment
+ARG VENV_PATH
+RUN python${PY_VERSION} -m venv ${VENV_PATH}
+# Clone latest version and install repo
+ARG REPO_PATH
+RUN git clone --recursive https://github.com/ibarrond/Pyfhel ${REPO_PATH}
+RUN . ${VENV_PATH}/bin/activate && cd ${REPO_PATH} && pip install . -v
