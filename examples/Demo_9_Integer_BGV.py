@@ -1,24 +1,17 @@
 """
 Integer FHE with BGV scheme
 ========================================
-//TODO
+
+This demo showcases the use of the BGV scheme for integer FHE operations.
 """
 
-# %%
-# 1. Imports
-# ---------------------------
-# We start by importing the library
-
-import numpy as np
-from Pyfhel import Pyfhel
-
-print("\n1. Pyfhel Import")
-
 
 # %%
-# 2. BGV context and key setup
+# 1. BGV context and key setup
 # ------------------------------------------------------------------------------
 # We take a look at the different parameters that can be set for the BGV scheme.
+import numpy as np
+from Pyfhel import Pyfhel
 HE = Pyfhel()           # Creating empty Pyfhel object
 
 # HE.contextGen(scheme='bgv', n=2**14, t_bits=20)  # Generate context for 'bfv'/'bgv'/'ckks' scheme
@@ -42,12 +35,12 @@ HE.keyGen()             # Key Generation: generates a pair of public/secret keys
 HE.rotateKeyGen()       # Rotate key generation --> Allows rotation/shifting
 HE.relinKeyGen()        # Relinearization key generation
 
-print("\n2. Pyfhel FHE context generation")
+print("\n1. Pyfhel FHE context generation")
 print(f"\t{HE}")
 
 
 # %%
-# 3. BGV Integer Encryption
+# 2. BGV Integer Encryption
 # ---------------------------
 # we will define two integers and encrypt them using `encryptBGV`:
 integer1 = np.array([127], dtype=np.int64)
@@ -63,20 +56,20 @@ print(ctxt1)
 print(ctxt2)
 
 # %%
-# 4. Operating with encrypted integers in BGV
+# 3. Operating with encrypted integers in BGV
 # ---------------------------------------------
 # Relying on the context defined before, we will now operate
 # (addition, substaction, multiplication) the two ciphertexts:
 ctxtSum = ctxt1 + ctxt2         # `ctxt1 += ctxt2` for inplace operation
 ctxtSub = ctxt1 - ctxt2         # `ctxt1 -= ctxt2` for inplace operation
 ctxtMul = ctxt1 * ctxt2         # `ctxt1 *= ctxt2` for inplace operation
-print("\n4. Operating with encrypted integers")
+print("\n3. Operating with encrypted integers")
 print(f"Sum: {ctxtSum}")
 print(f"Sub: {ctxtSub}")
 print(f"Mult:{ctxtMul}")
 
 # %%
-# 5.  Decrypting BGV integers
+# 4.  Decrypting BGV integers
 # ------------------------------
 # Once we're finished with the encrypted operations, we can use
 # the Pyfhel instance to decrypt the results using `decryptBGV`:
@@ -85,14 +78,14 @@ resSum = HE.decryptBGV(ctxtSum) # Decryption must use the corresponding function
 resSub = HE.decrypt(ctxtSub)    # `decrypt` function detects the scheme and
                                 #  calls the corresponding decryption function.
 resMul = HE.decryptBGV(ctxtMul)
-print("\n5. Decrypting result:")
+print("\n4. Decrypting BGV result:")
 print("     addition:       decrypt(ctxt1 + ctxt2) =  ", resSum)
 print("     substraction:   decrypt(ctxt1 - ctxt2) =  ", resSub)
 print("     multiplication: decrypt(ctxt1 + ctxt2) =  ", resMul)
 
 
 # %%
-# 6. Integer Array Encoding & Encryption
+# 5. BGV Integer Array Encoding & Encryption
 # ------------------------------------------------------------------------------
 # we will define two 1D integer arrays, encode and encrypt them:
 # arr1 = [0, 1, ... n-1] (length n)
@@ -121,7 +114,7 @@ print("->\tarr1 ", arr1,'\n\t==> ptxt1 ', ptxt1,'\n\t==> ctxt1 ', ctxt1)
 print("->\tarr2 ", arr2,'\n\t==> ptxt2 ', ptxt2,'\n\t==> ctxt2 ', ctxt2)
 
 # %%
-# 7. Securely operating on encrypted ingeger arrays
+# 6. BGV Integer Array Encoding & Encryption
 # ------------------------------------------------------------------------------
 # We try all the operations supported by Pyfhel.
 #  Note that, to operate, the ciphertexts/plaintexts must be built with the same
@@ -157,7 +150,7 @@ cpMul = ctxt1 * ptxt2       # Calls HE.multiply_plain(ctxt1, ptxt2, in_new_ctxt=
                             # `ctxt1 *= ctxt2` for inplace operation
 
 
-print("\n7. Secure operations")
+print("\n6. Secure BGV operations")
 print(" Ciphertext-ciphertext: ")
 print("->\tctxt1 + ctxt2 = ccSum: ", ccSum)
 print("->\tctxt1 - ctxt2 = ccSub: ", ccSub)
@@ -175,7 +168,7 @@ print("->\tctxt1 * ptxt2 = cpMul: ", cpMul)
 
 
 # %%
-# 8. BGV Relinearization: What, why, when
+# 7. BGV Relinearization: What, why, when
 # ------------------------------------------------------------------------------
 # Ciphertext-ciphertext multiplications increase the size of the polynoms
 #  representing the resulting ciphertext. To prevent this growth, the
@@ -188,14 +181,14 @@ print("->\tctxt1 * ptxt2 = cpMul: ", cpMul)
 #
 # Note that HE.power performs relinearization after every multiplication.
 
-print("\n8. Relinearization-> Right after each multiplication.")
+print("\n7. Relinearization-> Right after each multiplication.")
 print(f"ccMul before relinearization (size {ccMul.size()}): {ccMul}")
 ~ccMul    # Equivalent to HE.relinearize(ccMul). Relin always happens in-place.
 print(f"ccMul after relinearization (size {ccMul.size()}): {ccMul}")
 print(f"cPow after 2 mult&relin rounds:  (size {cPow.size()}): {cPow}")
 
 # %%
-# 9. Decrypt & Decode results
+# 8. Decrypt & Decode results
 # ------------------------------------------------------------------------------
 # Time to decrypt results! We use HE.decryptBGV for this.
 #  HE.decrypt() could also be used, in which case the decryption type would be
@@ -214,7 +207,7 @@ rcpSum = HE.decryptBGV(cpSum)
 rcpSub = HE.decryptBGV(cpSub)
 rcpMul = HE.decryptBGV(cpMul)
 
-print("\n9. Decrypting results")
+print("\n8. Decrypting results")
 print(" Original ciphertexts: ")
 print("   ->\tctxt1 --(decr)--> ", r1)
 print("   ->\tctxt2 --(decr)--> ", r2)

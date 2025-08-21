@@ -93,7 +93,7 @@ cdef class PyCtxt:
 
     @property
     def scheme(self):
-        """scheme: returns the scheme type.
+        """scheme: returns the FHE scheme of this ciphertext.
 
         Can be set to: none, bfv, bgv (INTEGER) or ckks (FRACTIONAL).
 
