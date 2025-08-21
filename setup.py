@@ -381,7 +381,20 @@ class SuperBuildClib(build_clib):
         global built_libs
         log.info("building '%s' shared library", lib_name)
 
-        if platform_system=='Windows':
+        # On macOS, distutils uses '-bundle' by default for shared objects,
+        # which produces an MH_BUNDLE. Later, Python extension linking expects
+        # an MH_DYLIB and fails with "unsupported mach-o filetype". To ensure
+        # we produce a proper dynamic library, build via a tiny CMake project
+        # (same approach we use on Windows) so that add_library(... SHARED ...)
+        # generates an MH_DYLIB. Keep Linux using the standard path.
+        if platform_system in ('Windows', 'Darwin'):
+            if platform_system == 'Darwin':
+                # Ensure we set a proper install_name so the extension can load
+                # the dylib from @loader_path (same folder as the extension).
+                lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('shared')}"
+                install_name_flag = f"-Wl,-install_name,@loader_path/{lib_file}"
+                if install_name_flag not in build_info['extra_link_args']:
+                    build_info['extra_link_args'].append(install_name_flag)
             self.build_mocked_cmake_lib(lib_name, build_info)
             return
         # First, compile the source code to object files in the temp directory. 
@@ -400,8 +413,13 @@ class SuperBuildClib(build_clib):
         lib_file = f"{get_lib_prefix()}{lib_name}{get_lib_suffix('shared')}"
 
         if platform_system == 'Darwin':
+            # This branch is now unused for Darwin (handled above via CMake),
+            # but keep the logic as a fallback in case of refactors.
             build_info['extra_link_args'].append(f"-Wl,-install_name,@loader_path/{lib_file}")
-            self.compiler.linker_so = ['-dynamiclib' if val=='-bundle' else val for val in self.compiler.linker_so]
+            try:
+                self.compiler.linker_so = ['-dynamiclib' if val=='-bundle' else val for val in self.compiler.linker_so]
+            except Exception:
+                pass
         self.compiler.link_shared_object(
             objects,                     
             lib_file,
