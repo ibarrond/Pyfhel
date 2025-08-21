@@ -13,7 +13,7 @@ version = "3.5.0"
 description = "Python for Homomorphic Encryption Libraries"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "GPL-3.0-or-later"
+license = "Apache-2.0"
 keywords = ["homomorphic" , "encryption", "cython", "cryptography"]
 authors = [
   {name = "Alberto Ibarrondo", email = "ibarrond@eurecom.fr"},

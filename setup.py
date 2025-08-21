@@ -21,7 +21,7 @@ import sysconfig
 import platform
 import subprocess
 import toml
-from pkg_resources import parse_version as v_parse
+from packaging.version import Version
 
 # Create Extension modules written in C for Python
 from setuptools import setup, Extension, find_packages
@@ -504,7 +504,7 @@ class SuperBuildClib(build_clib):
         # Check cmake version
         cmake_ver_str = subprocess.run(['cmake', '--version'], 
                         check=True, capture_output=True, text=True).stdout
-        cmake_ver = v_parse(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
+        cmake_ver = Version(re.search(r'version (\d+\.\d+\.\d+)', cmake_ver_str).group(1))
 
         cmake_cli_opts = []
         # Parse CMake options
@@ -513,7 +513,7 @@ class SuperBuildClib(build_clib):
             cmake_cli_opts.append(f"-D{k}={v}")
 
         # Run cmake to configure build
-        if cmake_ver >= v_parse('3.14'):
+        if cmake_ver >= Version('3.14'):
             run_command(['cmake', '-S', source_dir, '-B', build_dir] + cmake_cli_opts
             , cwd=build_dir)
         else:
@@ -695,9 +695,7 @@ setup(
     classifiers     = project_config['classifiers'],
     platforms       = config['platforms']['platforms'],
     keywords        = ', '.join(project_config['description']),
-    license         = project_config['license'],
     # Options
-    install_requires=project_config['dependencies'],
     python_requires =project_config['requires-python'],
     zip_safe        =False,
     packages        =find_packages(),
