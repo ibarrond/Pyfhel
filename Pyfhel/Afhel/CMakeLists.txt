@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.9...3.17)
 
 project(Afhel)
 
-find_package(SEAL 3.7 REQUIRED)
+find_package(SEAL 4.1 REQUIRED)
 
 add_library(afseal Afseal.cpp)
 target_link_libraries(afseal SEAL::seal)
