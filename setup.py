@@ -401,7 +401,15 @@ class SuperBuildClib(build_clib):
 
         if platform_system == 'Darwin':
             build_info['extra_link_args'].append(f"-Wl,-install_name,@loader_path/{lib_file}")
-            self.compiler.linker_so = ['-dynamiclib' if val=='-bundle' else val for val in self.compiler.linker_so]
+            # On macOS, building a shared library must use '-dynamiclib' instead of '-bundle'.
+            # Depending on setuptools/distutils, linker_so can be a string or a list.
+            linker_so = getattr(self.compiler, 'linker_so', None)
+            if isinstance(linker_so, (list, tuple)):
+                self.compiler.linker_so = [('-dynamiclib' if val == '-bundle' else val) for val in linker_so]
+            elif isinstance(linker_so, str):
+                # Replace all occurrences safely in the string variant
+                self.compiler.linker_so = linker_so.replace('-bundle', '-dynamiclib')
+            # If linker_so is None or unexpected type, do nothing; default behavior will apply
         self.compiler.link_shared_object(
             objects,                     
             lib_file,
@@ -677,7 +685,7 @@ setup(
     classifiers     = project_config['classifiers'],
     platforms       = config['platforms']['platforms'],
     keywords        = ', '.join(project_config['description']),
-    license         = project_config['license'],
+    license         = project_config['license']['text'],
     # Options
     install_requires=project_config['dependencies'],
     python_requires =project_config['requires-python'],
