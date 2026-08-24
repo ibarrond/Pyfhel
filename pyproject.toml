@@ -50,7 +50,7 @@ test = [
 [project.urls]
 homepage = "https://pyfhel.readthedocs.io"
 documentation = "https://pyfhel.readthedocs.io"
-repository = "https://github.com/ibarrond/github"
+repository = "https://github.com/ibarrond/Pyfhel"
 
 
 # Minimum requirements for the build system to execute.
